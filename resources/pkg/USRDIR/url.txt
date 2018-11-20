@@ -1,0 +1,1 @@
+GET /play.ps3/dev_hdd0/PS3ISO/Marvel.Vs.Capcom.3%5BBLUS30410%5D.iso HTTP/1.0

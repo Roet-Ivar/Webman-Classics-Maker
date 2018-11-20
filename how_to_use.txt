@@ -1,0 +1,34 @@
+READ ME
+
+1) INSTRUCTIONS
+	------------------------
+	---- Edit PARAM.SFO ----
+	------------------------
+	1. Start "Edit_param_sfo.exe"
+	2. Fill in "Title ID"
+	3. Fill in the field "TITLE"
+	4. Drop down and fill in the field "FILE_PATH"
+
+	NOTE: The filepath must be exact and it is case-sensitive!
+	Bad path: /dev_HDD0/ps3ISO/Marvel.Vs.Capcom.3.iso
+	Good path: /dev_hdd0/PS3ISO/Marvel.Vs.Capcom.3.iso
+
+	5. Click "Save" to save your PARAM.SFO
+	DONE
+	------------------------------------------------------
+
+	-----------------------
+	---- Build package ----
+	-----------------------
+	1. Start "Build_Webman_PKG.exe"
+	2. Get your built package in the build-folder
+	DONE
+	
+	
+2)	TROUBLESHOOTING (WIP)
+	* If you hear three rapid beeps you probably misspelled your path to the ISO, double check it!
+	* Sometimes at first boot the game hangs on blackscreen, reboot and start it again
+	
+3) EXTRA NOTES
+	To build your own .exe of the py-scripts, use pip pyinstaller,
+	E.G: pyinstaller.exe --onefile --icon=./resources/image_resources/webman.ico ./resources/tools/util_scripts/build_all_scripts.py
