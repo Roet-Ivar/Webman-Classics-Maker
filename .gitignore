@@ -1,0 +1,4 @@
+./Build_Webman_PKG.exe
+./Edit_Param_SFO.exe
+./builds/.*
+./release/.*
