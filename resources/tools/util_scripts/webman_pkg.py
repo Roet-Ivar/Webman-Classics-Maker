@@ -592,22 +592,21 @@ class Webman_pkg:
 			json_data = json.load(f)
 
 		contentid = str(json_data['content_id'])
+		
 		titleid = str(json_data['title_id'])
-		# print(titleid)
-
 		filepath = str(json_data['iso_filepath'])
 		filepath_arr = [x for x in filepath.split('/')]
 		
 		pkg_build_script='./webman_pkg.py'
 		pkg_flag='--contentid'
-		pkg_dir='../../pkg/'
+		pkg_dir_path='../../pkg/'
 		
 		pkg_name = titleid + '_' + filepath_arr[3][:-4] + '.pkg'
 		pkg_name = pkg_name.replace(' ', '_')
 		
-		build_dir='../../../builds/'
+		build_dir_path='../../../builds/'
 		
-		arg_list = [pkg_build_script, pkg_flag, contentid, pkg_dir, pkg_name]
+		arg_list = [pkg_build_script, pkg_flag, contentid, pkg_dir_path, pkg_name]
 		try:
 			opts, args = getopt.getopt(arg_list[1:], "hx:dvl:c:", ["help", "extract=", "debug","version", "list=", "contentid="])
 		except getopt.GetoptError:
@@ -643,7 +642,7 @@ class Webman_pkg:
 			elif len(args) == 2 and contentid != None:
 				pack(args[0], contentid, args[1])
 				
-				shutil.move(pkg_name, build_dir + pkg_name)
+				shutil.move(pkg_name, build_dir_path + pkg_name)
 				print('Execution of \'create_pkg.py\': Done')
 				print('------------------------------------------------\n' + 'Package created: ' + '/Builds/' + pkg_name)
 			else:
