@@ -14,5 +14,9 @@ https://github.com/naehrwert/scetool
 ------------------------------------------------------------------------
 How to build your own executables/binaries
 
-Install python 2.7 + pyinstaller lib, run the pyinstaller-scipts located in:
+1. Install python 2.7 + pyinstaller lib
+
+2. Run the pyinstaller-scipts located in:
 /Webman-Classics-Maker/resources/tools/util_scripts/_pyinstaller_and_release_scripts/
+
+3. Voila: you now have a brand new 'Build_Webman_PKG.exe' and 'Edit_Param_SFO.exe' based on the changes you made in the scripts
