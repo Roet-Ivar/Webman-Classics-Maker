@@ -648,7 +648,6 @@ class Webman_pkg:
 				shutil.move(pkg_name, build_dir_path + pkg_name)
 				print('Execution of \'create_pkg.py\': Done')
 				print('------------------------------------------------\n' + 'Package created: ' + '/Builds/' + pkg_name)
-				os.system("pause")
 			else:
 				usage()
 				sys.exit(2)
