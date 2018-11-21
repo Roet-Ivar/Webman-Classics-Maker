@@ -14,4 +14,5 @@ https://github.com/naehrwert/scetool
 ------------------------------------------------------------------------
 How to build your own binaries
 
-Install python 2.7 + pyinstaller lib, run the pyinstaller-scipts located in: /Webman-Classics-Maker/resources/tools/util_scripts/_pyinstaller_scripts/
+Install python 2.7 + pyinstaller lib, run the pyinstaller-scipts located in:
+/Webman-Classics-Maker/resources/tools/util_scripts/_pyinstaller_and_release_scripts/
