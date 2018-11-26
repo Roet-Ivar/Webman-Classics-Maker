@@ -642,6 +642,9 @@ class Webman_pkg:
 			elif len(args) == 2 and contentid != None:
 				pack(args[0], contentid, args[1])
 				
+				if not os.path.exists(build_dir_path):
+					os.makedirs(build_dir_path)
+				
 				shutil.move(pkg_name, build_dir_path + pkg_name)
 				print('Execution of \'create_pkg.py\': Done')
 				print('------------------------------------------------\n' + 'Package created: ' + '/Builds/' + pkg_name)

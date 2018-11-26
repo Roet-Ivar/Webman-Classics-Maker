@@ -29,8 +29,11 @@ args = '--distpath=' + dist_path + ' ' + '--specpath=' + spec_path + ' ' + '--na
 p = subprocess.call(app + ' ' + args)
 
 # clean up the old archive build
-os.remove(zip_dir_path + zip_archive_name)
+if os.path.isfile(zip_dir_path + 'release'):
+	os.remove(zip_dir_path + zip_archive_name)
+	
 # clean up residuals from pyinstaller
 rmtree('./build')
 
 print('Succesfully built \"' + executable_name + '.exe\"')
+os.system("pause")
