@@ -7,6 +7,7 @@ def zipdir(path, ziph):
 	edit_param_sfo_exist = False
 	webman_exe = 'Build_Webman_PKG.exe'
 	param_exe = 'Edit_Param_SFO.exe'
+	ftp_list_exe = 'FTP_Game_List.exe'
 		
 	for root, dirs, files in os.walk(path):
 		for file in files:
@@ -16,8 +17,11 @@ def zipdir(path, ziph):
 				build_webman_pkg_exe_exist = True
 			if file ==  param_exe:
 				edit_param_sfo_exist = True
-	if((build_webman_pkg_exe_exist and edit_param_sfo_exist) == False):
-		print('Warning: Cannot find the binaries: ' + webman_exe + ' and/or ' + param_exe)
+			if file ==  ftp_list_exe:
+				ftp_game_list_exist = True	
+				
+	if((build_webman_pkg_exe_exist and edit_param_sfo_exist and ftp_game_list_exist) == False):
+		print('Warning: Cannot find all binaries: ' + webman_exe + ', ' + ftp_list_exe + ' and/or ' + param_exe)
 		print('Tip: Rebuild binaries using the pyinstaller scripts.')
 		exit()
 		
