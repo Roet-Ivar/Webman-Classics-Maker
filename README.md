@@ -10,17 +10,6 @@ https://github.com/Roet-Ivar/Webman-Classics-Maker/releases/
 Webman Classics Maker take great help from naehrwert's scetool 0.2.9:
 https://github.com/naehrwert/scetool
 
-
-------------------------------------------------------------------------
-**How to build executables/binaries**
-
-1. Install python 2.7 x86 + pyinstaller lib
-
-2. Run the pyinstaller-scipts located in:
-/Webman-Classics-Maker/resources/tools/util_scripts/_pyinstaller_and_release_scripts/
-
-3. Voila: you now have a brand new **'Build_Webman_PKG.exe'** / **'Edit_Param_SFO.exe'** / **'FTP_Game_List.exe'** based on the changes you made in the scripts
-
 ------------------------------------------------------------------------
 # How to use
 
@@ -58,3 +47,12 @@ https://github.com/naehrwert/scetool
 
 * Sometimes at first boot the game hangs on blackscreen, reboot and start it again
 	
+---------------------------------------------------------------------------------------------------
+**How to build**
+
+1. Install python 2.7 x86 + pyinstaller lib
+
+2. Run the pyinstaller-scipts located in:
+/Webman-Classics-Maker/resources/tools/util_scripts/_pyinstaller_and_release_scripts/
+
+3. Voila: you now have a brand new **'Build_Webman_PKG.exe'** / **'Edit_Param_SFO.exe'** / **'FTP_Game_List.exe'** based on the changes you made in the scripts
