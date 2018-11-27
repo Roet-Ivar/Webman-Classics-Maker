@@ -11,7 +11,7 @@ Webman Classics Maker take great help from naehrwert's scetool 0.2.9:
 https://github.com/naehrwert/scetool
 
 ------------------------------------------------------------------------
-# How to use
+# HOW TO USE
 
 
 
@@ -48,7 +48,7 @@ https://github.com/naehrwert/scetool
 * Sometimes at first boot the game hangs on blackscreen, reboot and start it again
 	
 ---------------------------------------------------------------------------------------------------
-**How to build**
+# HOW TO BUILD
 
 1. Install python 2.7 x86 + pyinstaller lib
 
