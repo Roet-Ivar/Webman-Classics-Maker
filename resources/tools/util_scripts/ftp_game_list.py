@@ -14,7 +14,7 @@ if not os.path.exists('./build'):
 
 mock = False
 mock_data_file = '../util_resources/mock_ftp_game_list_response.txt'
-user_settings_file = '../util_user_settings/user_settings.txt'
+user_settings_file = '../util_user_settings/ftp_settings.txt'
 
 psxiso_path  = '/dev_hdd0/PSISO/'
 ps2iso_path = '/dev_hdd0/PS2ISO/'
