@@ -22,7 +22,7 @@ https://github.com/naehrwert/scetool
 3. Voila: you now have a brand new **'Build_Webman_PKG.exe'** / **'Edit_Param_SFO.exe'** / **'FTP_Game_List.exe'** based on the changes you made in the scripts
 
 ------------------------------------------------------------------------
-# How to use Webman Classics Maker
+# How to use
 
 
 
