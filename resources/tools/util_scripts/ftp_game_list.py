@@ -12,7 +12,7 @@ if '\util_scripts' not in os.getcwd():
 if not os.path.exists('./build'):
 	os.makedirs('./build')
 
-mock = True
+mock = False
 mock_data_file = '../util_resources/mock_ftp_game_list_response.txt'
 user_settings_file = '../../../settings/ftp_settings.txt'
 ftp_game_list = ''
