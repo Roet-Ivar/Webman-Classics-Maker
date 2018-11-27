@@ -1,4 +1,4 @@
-# Webman-Classics-Maker
+# ABOUT
 A tool for PS3 that makes PKG shortcuts for ISO files using webman web commands, created by aldostools.
 
 Read more about webman web commands here:
@@ -40,8 +40,8 @@ https://github.com/naehrwert/scetool
 	2. Get your built package in the build-folder
 	3. Install the PKG on your PS3
 	
-	
-**TROUBLESHOOTING**
+---------------------------------------------------------------------------------------------------	
+# TROUBLESHOOTING
 	
 * If you hear three rapid beeps you probably misspelled your path to the ISO, double check it!
 
