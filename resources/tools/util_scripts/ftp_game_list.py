@@ -12,9 +12,14 @@ if '\util_scripts' not in os.getcwd():
 if not os.path.exists('./build'):
 	os.makedirs('./build')
 
-mock = False
+mock = True
 mock_data_file = '../util_resources/mock_ftp_game_list_response.txt'
+<<<<<<< Updated upstream
 user_settings_file = '../util_user_settings/ftp_settings.txt'
+=======
+user_settings_file = '../../../settings/ftp_settings.txt'
+ftp_game_list = ''
+>>>>>>> Stashed changes
 
 psxiso_path  = '/dev_hdd0/PSISO/'
 ps2iso_path = '/dev_hdd0/PS2ISO/'
@@ -77,61 +82,77 @@ def iso_filter(list_of_files):
 
 		
 if(show_psx_list):
+	psx_list = ''
+	psx_list =  psx_list + (' ______     ___ _    _ \n')
+	psx_list =  psx_list + ('  _____|   |     \__/  \n')
+	psx_list =  psx_list + (' |      ___|    _/  \_ \n')
+	psx_list =  psx_list + ('______________________ \n')
+	
 	filtered_psxlines = filter(iso_filter, psxlines)
-	print(' ______     ___ _    _  ')
-	print('  _____|   |     \__/   ')
-	print(' |      ___|    _/  \_  ')
-	print('______________________  ')
-	 
 	if len(filtered_psxlines) > 0:
 		for isoname in filtered_psxlines:
-			print(psxiso_path + isoname)
-		print('\n')
+			psx_list = psx_list + (psxiso_path + isoname) + '\n'
+		psx_list = psx_list + ('\n')
 	else:
-		print('No PSX ISOs found.\n')
+		psx_list = psx_list + ('No PSX ISOs found.\n')
+	ftp_game_list = ftp_game_list + psx_list + '\n'
 
 
 if(show_ps2_list):
+	ps2_list = ''
+	ps2_list = ps2_list + (' ______     ___ _____  \n')
+	ps2_list = ps2_list + ('  _____|   |    _____| \n')
+	ps2_list = ps2_list + (' |      ___|   |_____  \n')
+	ps2_list = ps2_list + ('_______________________\n')
+	
 	filtered_ps2lines = filter(iso_filter, ps2lines)
-	print(' ______     ___ _____   ')
-	print('  _____|   |    _____|  ')
-	print(' |      ___|   |_____   ')
-	print('_______________________ ')
-
 	if len(filtered_ps2lines) > 0:
 		for isoname in filtered_ps2lines:
-			print(ps2iso_path + isoname)
-		print('\n')
+			ps2_list = ps2_list + (ps2iso_path + isoname) + '\n'
+		ps2_list = ps2_list + ('\n')
 	else:
-		print('No PS2 ISOs found.\n')
-	
+		ps2_list = ps2_list + ('No PS2 ISOs found.\n')
+	ftp_game_list = ftp_game_list + ps2_list + '\n'
 	
 if(show_ps3_list):
+	ps3_list = ''
+	ps3_list = ps3_list + (' ______     ___ _____  \n')
+	ps3_list = ps3_list + ('  _____|   |    _____] \n')
+	ps3_list = ps3_list + (' |      ___|    _____] \n')
+	ps3_list = ps3_list + ('_______________________\n')
+	
 	filtered_ps3lines = filter(iso_filter, ps3lines)
-	print(' ______     ___ _____   ')
-	print('  _____|   |    _____]  ')
-	print(' |      ___|    _____]  ')
-	print('______________________  ')
-
 	if len(filtered_ps3lines) > 0:
 		for isoname in filtered_ps3lines:
-			print(ps3iso_path + isoname)
-		print('\n')
+			ps3_list = ps3_list + (ps2iso_path + isoname) + '\n'
+		ps3_list = ps3_list + ('\n')
 	else:
-		print('No PS3 ISOs found.\n')
+		ps3_list = ps3_list + ('No PS3 ISOs found.\n')
+	ftp_game_list = ftp_game_list + ps3_list + '\n'
 
 
 if(show_psn_list):
-	print(' ______     ___ __   _  ')
-	print('  _____|   |    | \  |  ')
-	print(' |      ___|    |  \_|  ')
-	print('______________________  ')
-
+	psn_list = ''
+	psn_list = psn_list + (' ______     ___ __   _ \n')
+	psn_list = psn_list + ('  _____|   |    | \  | \n')
+	psn_list = psn_list + (' |      ___|    |  \_| \n')
+	psn_list = psn_list + ('_______________________\n')
+	
 	if len(psnlines) > 0:
-		for games in psnlines:
-			print(psn_games_path + isoname)
-		print('\n')
+		for game_name in psnlines:
+			psn_list = psn_list + (psn_games_path + game_name) + '\n'
+		psn_list = psn_list + '\n'
 	else:
-		print('No PSN games found.\n')
-		
+		psn_list = psn_list + ('No PSN games found.\n')
+	ftp_game_list = ftp_game_list + psn_list + '\n'
+
+with open("../../../game_list.txt", "wb") as f:
+	f.write(ftp_game_list)
+	f.close()
+
+		# url_txt = open("../../pkg/USRDIR/url.txt", "wb")
+		# url_txt_byteArray = bytearray(web_url_string) + os.linesep
+		# url_txt.write(url_txt_byteArray)
+
+print(ftp_game_list)
 os.system("pause")
