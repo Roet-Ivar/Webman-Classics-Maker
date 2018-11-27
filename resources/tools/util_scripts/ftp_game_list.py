@@ -12,14 +12,10 @@ if '\util_scripts' not in os.getcwd():
 if not os.path.exists('./build'):
 	os.makedirs('./build')
 
-mock = True
+mock = False
 mock_data_file = '../util_resources/mock_ftp_game_list_response.txt'
-<<<<<<< Updated upstream
-user_settings_file = '../util_user_settings/ftp_settings.txt'
-=======
 user_settings_file = '../../../settings/ftp_settings.txt'
 ftp_game_list = ''
->>>>>>> Stashed changes
 
 psxiso_path  = '/dev_hdd0/PSISO/'
 ps2iso_path = '/dev_hdd0/PS2ISO/'
@@ -63,8 +59,6 @@ except:
 	print('\nERROR: The connecton timed out. \nCheck your PS3 FTP-IP in webMAN (hold SELECT for 2-3s), then update the /util_user_setting/user_setting.txt.\n')
 	print('Using PS2 ISO mock data.')
 	os.system("pause")
-	# mock = True	#Remove this line later
-
 
 if mock is True:
 	with open(mock_data_file, 'rb') as f:
@@ -149,10 +143,6 @@ if(show_psn_list):
 with open("../../../game_list.txt", "wb") as f:
 	f.write(ftp_game_list)
 	f.close()
-
-		# url_txt = open("../../pkg/USRDIR/url.txt", "wb")
-		# url_txt_byteArray = bytearray(web_url_string) + os.linesep
-		# url_txt.write(url_txt_byteArray)
 
 print(ftp_game_list)
 os.system("pause")
