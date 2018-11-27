@@ -12,7 +12,7 @@ if '\util_scripts' not in os.getcwd():
 if not os.path.exists('./build'):
 	os.makedirs('./build')
 
-mock = False
+mock = True
 mock_data_file = '../util_resources/mock_ftp_game_list_response.txt'
 user_settings_file = '../../../settings/ftp_settings.txt'
 ftp_game_list = ''
@@ -33,6 +33,7 @@ if os.path.isfile(mock_data_file) or os.path.isfile(user_settings_file):
 		json_data = json.load(f)
 		
 		ps3_lan_ip = json_data['ps3_lan_ip']
+		ftp_timeout = json_data['ftp_timeout']
 		show_psx_list = json_data['show_psx_list']
 		show_ps2_list = json_data['show_ps2_list']
 		show_ps3_list = json_data['show_ps3_list']
@@ -42,12 +43,9 @@ else:
 	os.system("pause")
 	sys.exit()
 	
-
-
-print('Connecting to PS3 at: ' + ps3_lan_ip)
-
 try:
-	ftp = FTP(ps3_lan_ip, timeout=5)
+	print('Connecting to PS3 at: ' + ps3_lan_ip)
+	ftp = FTP(ps3_lan_ip, timeout=ftp_timeout)
 	ftp.login(user='', passwd = '')
 
 	ftp.retrlines('NLST ' + psxiso_path, psxlines.append)
@@ -55,17 +53,27 @@ try:
 	ftp.retrlines('NLST ' + ps3iso_path, ps3lines.append)
 	ftp.retrlines('NLST ' + psn_games_path, psnlines.append)
 	
-except:
-	print('\nERROR: The connecton timed out. \nCheck your PS3 FTP-IP in webMAN (hold SELECT for 2-3s), then update the /util_user_setting/user_setting.txt.\n')
-	print('Using PS2 ISO mock data.')
-	os.system("pause")
+except Exception, e:
+	error_message = str(e)
+	if 'Errno 10061' in error_message:
+		print('ERROR: ' + error_message)
+		
+	else:
+		print('ERROR: ' + error_message)
+		print('Check your PS3 FTP-IP in webMAN (hold SELECT for 2-3s), then update the /setting/ftp_settings.txt.\n')
 
-if mock is True:
-	with open(mock_data_file, 'rb') as f:
-		file = f.read()
-		f.close()
+	if mock is True:
+		print('\nUsing PS2 ISO mock data.')
+		os.system("pause")
 
-		ps2lines = file.split(', ')
+		with open(mock_data_file, 'rb') as f:
+			file = f.read()
+			f.close()
+
+			ps2lines = file.split(', ')
+	else:
+		os.system("pause")
+		sys.exit()
 
 
 def iso_filter(list_of_files):
