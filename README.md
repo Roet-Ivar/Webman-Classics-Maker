@@ -45,7 +45,7 @@ https://github.com/naehrwert/scetool
 	
 * If you hear three rapid beeps you probably misspelled your path to the ISO, double check it!
 
-* Sometimes at first boot the game hangs on blackscreen, reboot and start it again
+* Sometimes at first boot the game hangs on blackscreen, reboot and start it again. This is mostly due to modifications of the same game w/o reboots.
 	
 ---------------------------------------------------------------------------------------------------
 # HOW TO BUILD
