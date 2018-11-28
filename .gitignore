@@ -5,4 +5,5 @@
 /builds
 /release
 /resources/pkg/USRDIR/
-/resources/tools/resigner_tool/
+/resources/tools/resigner_tool/*
+*.pyc

@@ -20,7 +20,7 @@ def zipdir(path, ziph):
 			files.remove('game_list.txt')
 		
 		for file in files:
-			if file.endswith(".zip") is not True:
+			if file.endswith(['.zip', '.pyc']) is not True:
 				ziph.write(os.path.join(root, file))
 			if file ==  webman_exe:
 				build_webman_pkg_exe_exist = True

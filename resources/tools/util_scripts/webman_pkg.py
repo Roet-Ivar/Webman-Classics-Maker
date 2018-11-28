@@ -646,8 +646,14 @@ class Webman_pkg:
 					os.makedirs(build_dir_path)
 				
 				shutil.move(pkg_name, build_dir_path + pkg_name)
+				
+				for root, dirs, files in os.walk('..'):
+					for file in files:
+						if file.endswith('.pyc') is True:
+							os.remove(file)
+				
 				print('Execution of \'create_pkg.py\': Done')
-				print('------------------------------------------------\n' + 'Package created: ' + '/Builds/' + pkg_name)
+				print('------------------------------------------------\n' + 'Package created: ' + '/builds/' + pkg_name)
 			else:
 				usage()
 				sys.exit(2)
