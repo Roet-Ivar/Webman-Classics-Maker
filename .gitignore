@@ -4,6 +4,5 @@
 /game_list.txt
 /builds
 /release
-/resources/pkg/USRDIR/
-/resources/tools/resigner_tool/*
+/resources/pkg/USRDIR/*
 *.pyc
