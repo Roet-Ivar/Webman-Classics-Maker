@@ -1,3 +1,4 @@
+*.pyc
 /Build_Webman_PKG.exe
 /Edit_Param_SFO.exe
 /FTP_Game_List.exe
@@ -5,4 +6,7 @@
 /builds
 /release
 /resources/pkg/USRDIR/*
-*.pyc
+/resources/tools/scetool/EBOOT.BIN
+/resources/tools/scetool/EBOOT.ELF
+/resources/tools/util_generated_files/params.json
+
