@@ -1,5 +1,5 @@
 # ABOUT
-A tool for PS3 that makes PKG shortcuts for ISO files using webman web commands, created by aldostools.
+A tool for PS3 that makes PKG shortcuts for ISO files using webMAN-mod through web commands.
 
 Read more about webman web commands here:
 http://www.psx-place.com/threads/webman-mod-web-commands.1508/
@@ -19,7 +19,7 @@ https://github.com/spacemanspiff/oscetool
 * PSL1GHT PS3py (pkgcrypt)
 https://github.com/HACKERCHANNEL/PSL1GHT/tree/master/tools/PS3Py
 
-* PARAM_SFO_EDITOR (Aldos PS3 tool colletcion)
+* PARAM_SFO_EDITOR (Aldos PS3 tool collection)
 https://www.aldostools.org/
 
 ------------------------------------------------------------------------
