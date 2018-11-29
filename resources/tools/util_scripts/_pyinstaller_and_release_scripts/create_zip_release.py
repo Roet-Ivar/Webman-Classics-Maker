@@ -14,8 +14,9 @@ def zipdir(path, ziph):
 	webman_exe = 'Build_Webman_PKG.exe'
 	param_exe = 'Edit_Param_SFO.exe'
 	ftp_list_exe = 'FTP_Game_List.exe'
-		
-	for root, dirs, files in os.walk(path):
+	
+	os.chdir(path)
+	for root, dirs, files in os.walk('./'):
 		if '.git' in dirs:
 			dirs.remove('.git')
 		if 'release' in dirs:
