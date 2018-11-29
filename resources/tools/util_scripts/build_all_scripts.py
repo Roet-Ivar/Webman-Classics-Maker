@@ -7,7 +7,7 @@ from edit_launch_txt import Edit_launch_txt
 from webman_pkg import Webman_pkg
 
 current_path= os.getcwd()
-print('current_path: ' + current_path)
+# print('current_path: ' + current_path)
 if 'util_scripts' not in os.getcwd():
 	os.chdir('./resources/tools/util_scripts/')
 

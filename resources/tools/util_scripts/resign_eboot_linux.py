@@ -12,18 +12,19 @@ class Resign_eboot:
 		content_id = json_data['content_id']
 
 		current_path= os.getcwd()
-		print('current_path: ' + current_path)
+		# print('current_path: ' + current_path)
 		if 'util_scripts' in os.getcwd():
 			os.chdir(os.path.pardir)
-		os.chdir('scetool')
+		os.chdir('./scetool')
 
 		args = '-v --sce-type=SELF --compress-data=TRUE --skip-sections=TRUE --key-revision=01 --self-auth-id=1010000001000003 --self-app-version=0001000000000000 --self-add-shdrs=TRUE --self-vendor-id=01000002 --self-type=NPDRM --self-fw-version=0003004000000000 --np-license-type=FREE --np-content-id=' + content_id + ' --np-app-type=EXEC --np-real-fname=EBOOT.BIN --encrypt EBOOT.ELF EBOOT.BIN'
-		p2 = subprocess.call('./scetool' + ' ' + args, shell=True)
+		p2 = subprocess.call('./oscetool' + ' ' + args, shell=True)
 
 		copyfile('./EBOOT.BIN', './../../pkg/USRDIR/EBOOT.BIN')
 		
 		if 'scetool' in os.getcwd():
 			os.chdir(os.path.pardir)
 		os.chdir('util_scripts')
-		
-		print('Execution of \'resign_eboot.py\': Done')
+
+		print('\nExecution of \'resign_eboot_linux.py\':   Done')
+		print('-----------------------------------------------')
