@@ -1,15 +1,22 @@
+import sys
 import os
 import zipfile
+import pyinstaller_Build_Webman_PKG_exe
+import pyinstaller_Edit_Param_SFO_exe
+import pyinstaller_FTP_Game_List_exe
 
 def zipdir(path, ziph):
     # ziph is zipfile handle
 	build_webman_pkg_exe_exist = False
 	edit_param_sfo_exist = False
+	ftp_game_list_exist = False
+	
 	webman_exe = 'Build_Webman_PKG.exe'
 	param_exe = 'Edit_Param_SFO.exe'
 	ftp_list_exe = 'FTP_Game_List.exe'
-		
-	for root, dirs, files in os.walk(path):
+	
+	os.chdir(path)
+	for root, dirs, files in os.walk('./'):
 		if '.git' in dirs:
 			dirs.remove('.git')
 		if 'release' in dirs:
@@ -20,7 +27,7 @@ def zipdir(path, ziph):
 			files.remove('game_list.txt')
 		
 		for file in files:
-			if file.endswith(".zip") is not True:
+			if file.endswith('.zip') is not True and file.endswith('.pyc') is not True:
 				ziph.write(os.path.join(root, file))
 			if file ==  webman_exe:
 				build_webman_pkg_exe_exist = True
@@ -32,7 +39,7 @@ def zipdir(path, ziph):
 	if((build_webman_pkg_exe_exist and edit_param_sfo_exist and ftp_game_list_exist) == False):
 		print('Warning: Cannot find all binaries: ' + webman_exe + ', ' + ftp_list_exe + ' and/or ' + param_exe)
 		print('Rebuild binaries using the pyinstaller scripts.')
-		exit()
+		sys.exit()
 		
 if __name__ == '__main__':
 	zip_dir_path = './../../../../'

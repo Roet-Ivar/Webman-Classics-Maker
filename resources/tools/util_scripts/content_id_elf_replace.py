@@ -16,7 +16,7 @@ class Elf_replace:
 			try:
 				file=file.replace('PKGLAUNCH',str(title_id))
 
-				newFile = open("../resigner_tool/EBOOT.ELF", "wb")
+				newFile = open("../scetool/EBOOT.ELF", "wb")
 				newFileByteArray = bytearray(file)
 				newFile.write(newFileByteArray)
 			

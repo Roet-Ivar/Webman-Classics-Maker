@@ -1,6 +1,6 @@
 import struct, sys
 
-class StructType(tuple):
+class SstructType(tuple):
 	def __getitem__(self, value):
 		return [self] * value
 	def __call__(self, value, endian='<'):
@@ -9,27 +9,27 @@ class StructType(tuple):
 		else:
 			return struct.pack(endian + tuple.__getitem__(self, 0), value)
 
-class StructException(Exception):
+class SstructException(Exception):
 	pass
 
-class Struct(object):
+class Sstruct(object):
 	__slots__ = ('__attrs__', '__baked__', '__defs__', '__endian__', '__next__', '__sizes__', '__values__')
-	int8 = StructType(('b', 1))
-	uint8 = StructType(('B', 1))
+	int8 = SstructType(('b', 1))
+	uint8 = SstructType(('B', 1))
 	
-	int16 = StructType(('h', 2))
-	uint16 = StructType(('H', 2))
+	int16 = SstructType(('h', 2))
+	uint16 = SstructType(('H', 2))
 	
-	int32 = StructType(('l', 4))
-	uint32 = StructType(('L', 4))
+	int32 = SstructType(('l', 4))
+	uint32 = SstructType(('L', 4))
 	
-	int64 = StructType(('q', 8))
-	uint64 = StructType(('Q', 8))
+	int64 = SstructType(('q', 8))
+	uint64 = SstructType(('Q', 8))
 	
-	float = StructType(('f', 4))
+	float = SstructType(('f', 4))
 
 	def string(cls, len, offset=0, encoding=None, stripNulls=False, value=''):
-		return StructType(('string', (len, offset, encoding, stripNulls, value)))
+		return SstructType(('string', (len, offset, encoding, stripNulls, value)))
 	string = classmethod(string)
 	
 	LE = '<'
@@ -83,16 +83,16 @@ class Struct(object):
 			self.__values__[name] = None
 			
 			for sub in value:
-				if isinstance(sub, Struct):
+				if isinstance(sub, Sstruct):
 					sub = sub.__class__
 				try:
-					if issubclass(sub, Struct):
+					if issubclass(sub, Sstruct):
 						sub = ('struct', sub)
 				except TypeError:
 					pass
 				type_, size = tuple(sub)
 				if type_ == 'string':
-					self.__defs__.append(Struct.string)
+					self.__defs__.append(Sstruct.string)
 					self.__sizes__.append(size)
 					self.__attrs__.append(attrname)
 					self.__next__ = True
@@ -102,7 +102,7 @@ class Struct(object):
 					elif self.__values__[name] == None:
 						self.__values__[name] = [size[3] for val in value]
 				elif type_ == 'struct':
-					self.__defs__.append(Struct)
+					self.__defs__.append(Sstruct)
 					self.__sizes__.append(size)
 					self.__attrs__.append(attrname)
 					self.__next__ = True
@@ -148,11 +148,11 @@ class Struct(object):
 		for i in range(len(self.__defs__)):
 			sdef, size, attrs = self.__defs__[i], self.__sizes__[i], self.__attrs__[i]
 			
-			if sdef == Struct.string:
+			if sdef == Sstruct.string:
 				size, offset, encoding, stripNulls, value = size
 				if isinstance(size, str):
 					size = self.__values__[size] + offset
-			elif sdef == Struct:
+			elif sdef == Sstruct:
 				if attrs[0] == '*':
 					if arrayname != attrs:
 						arrayname = attrs
@@ -166,10 +166,10 @@ class Struct(object):
 	
 	def unpack(self, data, pos=0):
 		for name in self.__values__:
-			if not isinstance(self.__values__[name], Struct):
+			if not isinstance(self.__values__[name], Sstruct):
 				self.__values__[name] = None
 			elif self.__values__[name].__class__ == list and len(self.__values__[name]) != 0:
-				if not isinstance(self.__values__[name][0], Struct):
+				if not isinstance(self.__values__[name][0], Sstruct):
 					self.__values__[name] = None
 		
 		arraypos, arrayname = None, None
@@ -177,14 +177,14 @@ class Struct(object):
 		for i in range(len(self.__defs__)):
 			sdef, size, attrs = self.__defs__[i], self.__sizes__[i], self.__attrs__[i]
 			
-			if sdef == Struct.string:
+			if sdef == Sstruct.string:
 				size, offset, encoding, stripNulls, value = size
 				if isinstance(size, str):
 					size = self.__values__[size] + offset
 				
 				temp = data[pos:pos+size]
 				if len(temp) != size:
-					raise StructException('Expected %i byte string, got %i' % (size, len(temp)))
+					raise SstructException('Expected %i byte string, got %i' % (size, len(temp)))
 				
 				if encoding != None:
 					temp = temp.decode(encoding)
@@ -200,7 +200,7 @@ class Struct(object):
 				else:
 					self.__values__[attrs] = temp
 				pos += size
-			elif sdef == Struct:
+			elif sdef == Sstruct:
 				if attrs[0] == '*':
 					if arrayname != attrs:
 						arrayname = attrs
@@ -235,7 +235,7 @@ class Struct(object):
 		for i in range(len(self.__defs__)):
 			sdef, size, attrs = self.__defs__[i], self.__sizes__[i], self.__attrs__[i]
 			
-			if sdef == Struct.string:
+			if sdef == Sstruct.string:
 				size, offset, encoding, stripNulls, value = size
 				if isinstance(size, str):
 					size = self.__values__[size]+offset
@@ -254,7 +254,7 @@ class Struct(object):
 				
 				temp = temp[:size]
 				ret += temp + ('\0' * (size - len(temp)))
-			elif sdef == Struct:
+			elif sdef == Sstruct:
 				if attrs[0] == '*':
 					if arrayname != attrs:
 						arraypos = 0

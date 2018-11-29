@@ -59,7 +59,7 @@ except Exception, e:
 		print('ERROR: ' + error_message)
 		print('Check your PS3 FTP-IP in webMAN (hold SELECT for 2-3s), then update the /setting/ftp_settings.txt.\n')
 
-	if user_mock_data is True:
+	if use_mock_data is True:
 		print('\nUsing PS2 ISO mock data.')
 		os.system("pause")
 
