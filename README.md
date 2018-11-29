@@ -5,7 +5,7 @@ Read more about webman web commands here:
 http://www.psx-place.com/threads/webman-mod-web-commands.1508/
 
 **BUILDS**
-Builds can be downloaded from releases:
+Get the latest build from releases:
 https://github.com/Roet-Ivar/Webman-Classics-Maker/releases/
 
 **TOOLS/BINARIES USED**
@@ -25,11 +25,15 @@ https://www.aldostools.org/
 ------------------------------------------------------------------------
 # HOW TO USE
 
-
-
+**(optional) FTP DUMP -> 'games_list.txt'**
+	
+	1. Check IP settings in webMan (holding [SELECT])
+	2. Edit your /settings/ftp_settings.txt with your IP
+	3. To get your "game_list.txt run "FTP_Game_List.exe", or "ftp_game_list.py" for linux
+n
 **EDIT PARAM.SFO**
 
-	1. Start "Edit_param_sfo.exe"
+	1. Run "Edit_param_sfo.exe" (Windows only right now, you can hex edit the "params.sfo" in linux)
 	2. Fill in "Title ID"
 	3. Fill in the field "TITLE"
 	4. Drop down and fill in the field "FILE_PATH"
@@ -40,16 +44,11 @@ https://www.aldostools.org/
 
 	5. Click "Save" to save your PARAM.SFO
 
-**FTP DUMP 'games_list.txt'**
-	
-	1. Check IP settings in webMan (holding [SELECT])
-	2. Edit your /settings/ftp_settings.txt with your IP
-	3. Use "FTP_Game_List.exe" to get your "game_list.txt"
 
-**BUILD PKG**
+**BUILD PKG -> game.pkg'**
 
-	1. Start "Build_Webman_PKG.exe"
-	2. Get your built package in the build-folder
+	1. Run "Build_Webman_PKG.exe", or "build_all_scripts_linux.py" for linux
+	2. Get your built package in the "builds"-folder
 	3. Install the PKG on your PS3
 	
 ---------------------------------------------------------------------------------------------------	
@@ -60,11 +59,14 @@ https://www.aldostools.org/
 * Sometimes at first boot the game hangs on blackscreen, reboot and start it again. This is mostly due to modifications of the same game w/o reboots.
 	
 ---------------------------------------------------------------------------------------------------
-# HOW TO BUILD
+# HOW TO BUILD THE TOOLS: Windows
 
-1. Install python 2.7 x86 + pyinstaller lib
+1. Install python 2.7.x x86 + pyinstaller lib
 
-2. Run the pyinstaller-scipts located in:
+2. Windows: Run the pyinstaller-scipts located in:
 /Webman-Classics-Maker/resources/tools/util_scripts/_pyinstaller_and_release_scripts/
 
-3. Voila: you now have a brand new **'Build_Webman_PKG.exe'** / **'Edit_Param_SFO.exe'** / **'FTP_Game_List.exe'** based on the changes you made in the scripts
+You now have a brand new **Build_Webman_PKG.exe** / **Edit_Param_SFO.exe** / **FTP_Game_List.exe** based on the changes you made in the scripts
+
+# HOW TO BUILD THE TOOLS: Linux
+1. There are nothing to build, only edit the .py scripts of your liking and run them
