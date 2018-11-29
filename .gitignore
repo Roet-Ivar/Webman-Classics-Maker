@@ -8,5 +8,5 @@
 /resources/pkg/USRDIR/*
 /resources/tools/scetool/EBOOT.BIN
 /resources/tools/scetool/EBOOT.ELF
-/resources/tools/util_generated_files/params.json
+/resources/tools/util_generated_files/*
 
