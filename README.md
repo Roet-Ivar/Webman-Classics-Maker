@@ -4,11 +4,21 @@ A tool for PS3 that makes PKG shortcuts for ISO files using webman web commands,
 Read more about webman web commands here:
 http://www.psx-place.com/threads/webman-mod-web-commands.1508/
 
+**BUILDS**
 Builds can be downloaded from releases:
 https://github.com/Roet-Ivar/Webman-Classics-Maker/releases/
 
-Webman Classics Maker take great help from naehrwert's scetool 0.2.9:
+**TOOLS/BINARIES USED**
+
+* SCETOOL 0.2.9:
 https://github.com/naehrwert/scetool
+
+* OSCETOOL:
+https://github.com/spacemanspiff/oscetool
+
+* PSL1GHT PS3py: pkgcrypt
+https://github.com/HACKERCHANNEL/PSL1GHT/tree/master/tools/PS3Py
+
 
 ------------------------------------------------------------------------
 # HOW TO USE
