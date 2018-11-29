@@ -35,7 +35,7 @@ https://www.aldostools.org/
 	4. Drop down and fill in the field "FILE_PATH"
 
 	NOTE: The filepath must be exact and it is case-sensitive!
-	Bad path: /dev_**HDD0**/ps3ISO/Marvel Vs Capcom 3.iso
+	Bad path: /dev_HDD0/ps3ISO/Marvel Vs Capcom 3.iso
 	Good path: /dev_hdd0/PS3ISO/Marvel Vs Capcom 3.iso
 
 	5. Click "Save" to save your PARAM.SFO
