@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from __future__ import with_statement
-from Struct import Struct
+from Sstruct import Sstruct
 import struct
 import getopt
 import sys
@@ -15,99 +15,99 @@ import sys
 					-- phiren
 """
 
-class SelfHeader(Struct):
-	__endian__ = Struct.BE
+class SelfHeader(Sstruct):
+	__endian__ = Sstruct.BE
 	def __format__(self):
-		self.magic	= Struct.uint32
-		self.headerVer  = Struct.uint32
-		self.flags	= Struct.uint16
-		self.type	= Struct.uint16
-		self.meta	= Struct.uint32
-		self.headerSize = Struct.uint64
-		self.encryptedSize = Struct.uint64
-		self.unknown	= Struct.uint64
-		self.AppInfo	= Struct.uint64
-		self.elf	= Struct.uint64
-		self.phdr	= Struct.uint64
-		self.shdr	= Struct.uint64
-		self.phdrOffsets = Struct.uint64
-		self.sceversion = Struct.uint64
-		self.digest	= Struct.uint64
-		self.digestSize = Struct.uint64
+		self.magic	= Sstruct.uint32
+		self.headerVer  = Sstruct.uint32
+		self.flags	= Sstruct.uint16
+		self.type	= Sstruct.uint16
+		self.meta	= Sstruct.uint32
+		self.headerSize = Sstruct.uint64
+		self.encryptedSize = Sstruct.uint64
+		self.unknown	= Sstruct.uint64
+		self.AppInfo	= Sstruct.uint64
+		self.elf	= Sstruct.uint64
+		self.phdr	= Sstruct.uint64
+		self.shdr	= Sstruct.uint64
+		self.phdrOffsets = Sstruct.uint64
+		self.sceversion = Sstruct.uint64
+		self.digest	= Sstruct.uint64
+		self.digestSize = Sstruct.uint64
 
-class AppInfo(Struct):
-	__endian__ = Struct.BE
+class AppInfo(Sstruct):
+	__endian__ = Sstruct.BE
 	def __format__(self):
-		self.authid	= Struct.uint64
-		self.unknown	= Struct.uint32
-		self.appType	= Struct.uint32
-		self.appVersion = Struct.uint64
+		self.authid	= Sstruct.uint64
+		self.unknown	= Sstruct.uint32
+		self.appType	= Sstruct.uint32
+		self.appVersion = Sstruct.uint64
 
-class phdrOffset(Struct):
-	__endian__ = Struct.BE
+class phdrOffset(Sstruct):
+	__endian__ = Sstruct.BE
 	def __format__(self):
-		self.offset	= Struct.uint64
-		self.size	= Struct.uint64
-		self.unk1	= Struct.uint32
-		self.unk2	= Struct.uint32
-		self.unk3	= Struct.uint32
-		self.unk4	= Struct.uint32
+		self.offset	= Sstruct.uint64
+		self.size	= Sstruct.uint64
+		self.unk1	= Sstruct.uint32
+		self.unk2	= Sstruct.uint32
+		self.unk3	= Sstruct.uint32
+		self.unk4	= Sstruct.uint32
 
-class DigestSubHeader(Struct):
-	__endian__ = Struct.BE
+class DigestSubHeader(Sstruct):
+	__endian__ = Sstruct.BE
 	def __format__(self):
-		self.type		= Struct.uint32
-		self.size		= Struct.uint32
-		self.cont		= Struct.uint64
+		self.type		= Sstruct.uint32
+		self.size		= Sstruct.uint32
+		self.cont		= Sstruct.uint64
 
-class DigestType2(Struct):
-	__endian__ = Struct.BE
+class DigestType2(Sstruct):
+	__endian__ = Sstruct.BE
 	def __format__(self):
-		self.magicBits		= Struct.uint8[0x14]
-		self.digest		= Struct.uint8[0x14]
-		self.padding		= Struct.uint8[0x08]
+		self.magicBits		= Sstruct.uint8[0x14]
+		self.digest		= Sstruct.uint8[0x14]
+		self.padding		= Sstruct.uint8[0x08]
 
-class DigestTypeNPDRM(Struct):
-	__endian__ = Struct.BE
+class DigestTypeNPDRM(Sstruct):
+	__endian__ = Sstruct.BE
 	def __format__(self):
-		self.magic 		= Struct.uint32
-		self.unk1 		= Struct.uint32
-		self.drmType 		= Struct.uint32
-		self.unk2		= Struct.uint32
-		self.contentID 		= Struct.uint8[0x30]
-		self.fileSHA1 		= Struct.uint8[0x10]
-		self.notSHA1 		= Struct.uint8[0x10]
-		self.notXORKLSHA1 	= Struct.uint8[0x10]
+		self.magic 		= Sstruct.uint32
+		self.unk1 		= Sstruct.uint32
+		self.drmType 		= Sstruct.uint32
+		self.unk2		= Sstruct.uint32
+		self.contentID 		= Sstruct.uint8[0x30]
+		self.fileSHA1 		= Sstruct.uint8[0x10]
+		self.notSHA1 		= Sstruct.uint8[0x10]
+		self.notXORKLSHA1 	= Sstruct.uint8[0x10]
 
-class Elf64_ehdr(Struct):
-	__endian__ = Struct.BE
+class Elf64_ehdr(Sstruct):
+	__endian__ = Sstruct.BE
 	def __format__(self):
-		self.ident 		= Struct.uint8[16]
-		self.type		= Struct.uint16
-		self.machine		= Struct.uint16
-		self.version		= Struct.uint32
-		self.entry		= Struct.uint64
-		self.phoff		= Struct.uint64
-		self.shoff		= Struct.uint64
-		self.flags		= Struct.uint32
-		self.ehsize		= Struct.uint16
-		self.phentsize		= Struct.uint16
-		self.phnum		= Struct.uint16
-		self.shentsize		= Struct.uint16
-		self.shnum		= Struct.uint16
-		self.shstrndx		= Struct.uint16
+		self.ident 		= Sstruct.uint8[16]
+		self.type		= Sstruct.uint16
+		self.machine		= Sstruct.uint16
+		self.version		= Sstruct.uint32
+		self.entry		= Sstruct.uint64
+		self.phoff		= Sstruct.uint64
+		self.shoff		= Sstruct.uint64
+		self.flags		= Sstruct.uint32
+		self.ehsize		= Sstruct.uint16
+		self.phentsize		= Sstruct.uint16
+		self.phnum		= Sstruct.uint16
+		self.shentsize		= Sstruct.uint16
+		self.shnum		= Sstruct.uint16
+		self.shstrndx		= Sstruct.uint16
 
-class Elf64_phdr(Struct):
-	__endian__ = Struct.BE
+class Elf64_phdr(Sstruct):
+	__endian__ = Sstruct.BE
 	def __format__(self):
-		self.type	= Struct.uint32
-		self.flags	= Struct.uint32
-		self.offset	= Struct.uint64
-		self.vaddr	= Struct.uint64
-		self.paddr	= Struct.uint64
-		self.filesz	= Struct.uint64
-		self.memsz	= Struct.uint64
-		self.align	= Struct.uint64
+		self.type	= Sstruct.uint32
+		self.flags	= Sstruct.uint32
+		self.offset	= Sstruct.uint64
+		self.vaddr	= Sstruct.uint64
+		self.paddr	= Sstruct.uint64
+		self.filesz	= Sstruct.uint64
+		self.memsz	= Sstruct.uint64
+		self.align	= Sstruct.uint64
 
 def align(address, alignment):
 	padding = alignment - (address % alignment)
