@@ -10,13 +10,13 @@ https://github.com/Roet-Ivar/Webman-Classics-Maker/releases/
 
 **TOOLS/BINARIES USED**
 
-* SCETOOL 0.2.9:
+* SCETOOL 0.2.9 (scetool.exe):
 https://github.com/naehrwert/scetool
 
-* OSCETOOL:
+* OpenSCETool (oscetool):
 https://github.com/spacemanspiff/oscetool
 
-* PSL1GHT PS3py: pkgcrypt
+* PSL1GHT PS3py (pkgcrypt)
 https://github.com/HACKERCHANNEL/PSL1GHT/tree/master/tools/PS3Py
 
 
