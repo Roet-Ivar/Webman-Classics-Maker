@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from __future__ import with_statement
-from Struct import Struct
+from Sstruct import Sstruct
 from fself import SelfHeader, AppInfo
 
 import struct
@@ -22,58 +22,58 @@ TYPE_OVERWRITE_ALLOWED = 0x80000000
 
 debug = False
 
-class EbootMeta(Struct):
-	__endian__ = Struct.BE
+class EbootMeta(Sstruct):
+	__endian__ = Sstruct.BE
 	def __format__(self):
-		self.magic 			= Struct.uint32
-		self.unk1 			= Struct.uint32
-		self.drmType 		= Struct.uint32
-		self.unk2			= Struct.uint32
-		self.contentID 		= Struct.uint8[0x30]
-		self.fileSHA1 		= Struct.uint8[0x10]
-		self.notSHA1 		= Struct.uint8[0x10]
-		self.notXORKLSHA1 	= Struct.uint8[0x10]
-		self.nulls 			= Struct.uint8[0x10]
-class MetaHeader(Struct):
-	__endian__ = Struct.BE
+		self.magic 			= Sstruct.uint32
+		self.unk1 			= Sstruct.uint32
+		self.drmType 		= Sstruct.uint32
+		self.unk2			= Sstruct.uint32
+		self.contentID 		= Sstruct.uint8[0x30]
+		self.fileSHA1 		= Sstruct.uint8[0x10]
+		self.notSHA1 		= Sstruct.uint8[0x10]
+		self.notXORKLSHA1 	= Sstruct.uint8[0x10]
+		self.nulls 			= Sstruct.uint8[0x10]
+class MetaHeader(Sstruct):
+	__endian__ = Sstruct.BE
 	def __format__(self):
-		self.unk1 	= Struct.uint32
-		self.unk2 	= Struct.uint32
-		self.drmType 	= Struct.uint32
-		self.unk4 	= Struct.uint32
+		self.unk1 	= Sstruct.uint32
+		self.unk2 	= Sstruct.uint32
+		self.drmType 	= Sstruct.uint32
+		self.unk4 	= Sstruct.uint32
 		
-		self.unk21 	= Struct.uint32
-		self.unk22 	= Struct.uint32
-		self.unk23 	= Struct.uint32
-		self.unk24 	= Struct.uint32
+		self.unk21 	= Sstruct.uint32
+		self.unk22 	= Sstruct.uint32
+		self.unk23 	= Sstruct.uint32
+		self.unk24 	= Sstruct.uint32
 		
-		self.unk31 	= Struct.uint32
-		self.unk32 	= Struct.uint32
-		self.unk33 	= Struct.uint32
-		self.secondaryVersion 	= Struct.uint16
-		self.unk34 	= Struct.uint16
+		self.unk31 	= Sstruct.uint32
+		self.unk32 	= Sstruct.uint32
+		self.unk33 	= Sstruct.uint32
+		self.secondaryVersion 	= Sstruct.uint16
+		self.unk34 	= Sstruct.uint16
 		
-		self.dataSize 	= Struct.uint32
-		self.unk42 	= Struct.uint32
-		self.unk43 	= Struct.uint32
-		self.packagedBy 	= Struct.uint16
-		self.packageVersion 	= Struct.uint16
-class DigestBlock(Struct):
-	__endian__ = Struct.BE
+		self.dataSize 	= Sstruct.uint32
+		self.unk42 	= Sstruct.uint32
+		self.unk43 	= Sstruct.uint32
+		self.packagedBy 	= Sstruct.uint16
+		self.packageVersion 	= Sstruct.uint16
+class DigestBlock(Sstruct):
+	__endian__ = Sstruct.BE
 	def __format__(self):
-		self.type 	= Struct.uint32
-		self.size 	= Struct.uint32
-		self.isNext = Struct.uint64
-class FileHeader(Struct):
-	__endian__ = Struct.BE
+		self.type 	= Sstruct.uint32
+		self.size 	= Sstruct.uint32
+		self.isNext = Sstruct.uint64
+class FileHeader(Sstruct):
+	__endian__ = Sstruct.BE
 	def __format__(self):
-		self.fileNameOff 	= Struct.uint32
-		self.fileNameLength = Struct.uint32
-		self.fileOff 		= Struct.uint64
+		self.fileNameOff 	= Sstruct.uint32
+		self.fileNameLength = Sstruct.uint32
+		self.fileOff 		= Sstruct.uint64
 		
-		self.fileSize 	= Struct.uint64
-		self.flags		= Struct.uint32
-		self.padding 		= Struct.uint32
+		self.fileSize 	= Sstruct.uint64
+		self.flags		= Sstruct.uint32
+		self.padding 		= Sstruct.uint32
 	def __str__(self):
 		out  = ""
 		out += "[X] File Name: %s [" % self.fileName
@@ -105,7 +105,7 @@ class FileHeader(Struct):
 	def __repr__(self):
 		return self.fileName + ("<FileHeader> Size: 0x%016x" % self.fileSize)
 	def __init__(self):
-		Struct.__init__(self)
+		Sstruct.__init__(self)
 		self.fileName = ""
 	def doWork(self, decrypteddata, context = None):
 		if context == None:
@@ -124,24 +124,24 @@ class FileHeader(Struct):
 			tFile.write(data[self.fileOff:self.fileOff+self.fileSize])
 			
 
-class Header(Struct):
-	__endian__ = Struct.BE
+class Header(Sstruct):
+	__endian__ = Sstruct.BE
 	def __format__(self):
-		self.magic = Struct.uint32
-		self.type = Struct.uint32
-		self.pkgInfoOff = Struct.uint32
-		self.unk1 = Struct.uint32
+		self.magic = Sstruct.uint32
+		self.type = Sstruct.uint32
+		self.pkgInfoOff = Sstruct.uint32
+		self.unk1 = Sstruct.uint32
 		
-		self.headSize = Struct.uint32
-		self.itemCount = Struct.uint32
-		self.packageSize = Struct.uint64
+		self.headSize = Sstruct.uint32
+		self.itemCount = Sstruct.uint32
+		self.packageSize = Sstruct.uint64
 		
-		self.dataOff = Struct.uint64
-		self.dataSize = Struct.uint64
+		self.dataOff = Sstruct.uint64
+		self.dataSize = Sstruct.uint64
 		
-		self.contentID = Struct.uint8[0x30]
-		self.QADigest = Struct.uint8[0x10]
-		self.KLicensee = Struct.uint8[0x10]
+		self.contentID = Sstruct.uint8[0x30]
+		self.QADigest = Sstruct.uint8[0x10]
+		self.KLicensee = Sstruct.uint8[0x10]
 		
 		
 		
@@ -228,6 +228,7 @@ def setContextNum(key, tmpnum):
 	key[0x3e] = ord(tmpchrs[6])
 	key[0x3f] = ord(tmpchrs[7])
 
+print('MY_PATH: ' + str(sys.path))
 import pkgcrypt
 
 def crypt(key, inbuf, length):
@@ -646,8 +647,14 @@ class Webman_pkg:
 					os.makedirs(build_dir_path)
 				
 				shutil.move(pkg_name, build_dir_path + pkg_name)
+				
+				for root, dirs, files in os.walk('..'):
+					for file in files:
+						if file.endswith('.pyc') is True:
+							os.remove(file)
+				
 				print('Execution of \'create_pkg.py\': Done')
-				print('------------------------------------------------\n' + 'Package created: ' + '/Builds/' + pkg_name)
+				print('------------------------------------------------\n' + 'Package created: ' + '/builds/' + pkg_name)
 			else:
 				usage()
 				sys.exit(2)

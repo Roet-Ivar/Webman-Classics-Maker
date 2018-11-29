@@ -2,7 +2,7 @@ import os
 
 from param_sfo_to_json import Param_to_json
 from content_id_elf_replace import Elf_replace
-from resign_eboot import Resign_eboot
+from resign_eboot_linux import Resign_eboot
 from edit_launch_txt import Edit_launch_txt
 from webman_pkg import Webman_pkg
 
@@ -25,5 +25,4 @@ resign_eboot.execute()
 
 webman_pkg = Webman_pkg()
 webman_pkg.execute()
-
-os.system("pause")
+os.system('pause')
