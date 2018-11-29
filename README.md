@@ -19,6 +19,8 @@ https://github.com/spacemanspiff/oscetool
 * PSL1GHT PS3py (pkgcrypt)
 https://github.com/HACKERCHANNEL/PSL1GHT/tree/master/tools/PS3Py
 
+* PARAM_SFO_EDITOR (Aldos PS3 tool colletcion)
+https://www.aldostools.org/
 
 ------------------------------------------------------------------------
 # HOW TO USE
@@ -33,14 +35,14 @@ https://github.com/HACKERCHANNEL/PSL1GHT/tree/master/tools/PS3Py
 	4. Drop down and fill in the field "FILE_PATH"
 
 	NOTE: The filepath must be exact and it is case-sensitive!
-	Bad path: /dev_HDD0/ps3ISO/Marvel.Vs.Capcom.3.iso
-	Good path: /dev_hdd0/PS3ISO/Marvel.Vs.Capcom.3.iso
+	Bad path: /dev_**HDD0**/ps3ISO/Marvel Vs Capcom 3.iso
+	Good path: /dev_hdd0/PS3ISO/Marvel Vs Capcom 3.iso
 
 	5. Click "Save" to save your PARAM.SFO
 
 **FTP DUMP 'games_list.txt'**
 	
-	1. Check IP settings in webMan (holding [SELECT]
+	1. Check IP settings in webMan (holding [SELECT])
 	2. Edit your /settings/ftp_settings.txt with your IP
 	3. Use "FTP_Game_List.exe" to get your "game_list.txt"
 
