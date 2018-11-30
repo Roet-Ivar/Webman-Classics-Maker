@@ -1,16 +1,14 @@
 # ABOUT
-Webman Classics Maker is tool for the PS3 that makes PKG shortcuts for ISO files using webMAN-mod through web commands.
+Webman Classics Maker is tool for the PS3 that makes PKG shortcuts for ISO files using webMAN-mod through web commands:
+http://www.psx-place.com/threads/webman-mod-web-commands.1508/
 
 This software is under GPLv2 license: https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html, not to be confused with the GPLv3 license.
 
-Read more about webman web commands here:
-http://www.psx-place.com/threads/webman-mod-web-commands.1508/
-
-**BUILDS**
+# BUILDS
 Get the latest build from releases:
 https://github.com/Roet-Ivar/Webman-Classics-Maker/releases/
 
-**TOOLS/BINARIES USED**
+# TOOLS/BINARIES USED
 
 * SCETOOL 0.2.9 (scetool.exe):
 https://github.com/naehrwert/scetool
@@ -23,6 +21,8 @@ https://github.com/HACKERCHANNEL/PSL1GHT/tree/master/tools/PS3Py
 
 * PARAM_SFO_EDITOR (Aldos PS3 tool collection)
 https://www.aldostools.org/
+
+Credits goes to all of you guys!
 
 ------------------------------------------------------------------------
 # HOW TO USE
