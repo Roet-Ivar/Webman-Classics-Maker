@@ -1,54 +1,42 @@
 from tkinter import *
+from tkinter import ttk
 
 root = Tk()
+root.title('Example of Tkinter module')
 
-h = Scrollbar(root, orient=HORIZONTAL)
-v = Scrollbar(root, orient=VERTICAL)
-canvas = Canvas(root, scrollregion=(0, 0, 1000, 1000), yscrollcommand=v.set, xscrollcommand=h.set)
-h['command'] = canvas.xview
-v['command'] = canvas.yview
-#ttk.Sizegrip(root).grid(column=1, row=1, sticky=(S,E))#This line Does not work ^_^ -AR
+main_window_width=1000
+main_window_height=600
+root.geometry('{}x{}'.format((main_window_width), str(main_window_height)) )
 
-canvas.grid(column=0, row=0, sticky=(N,W,E,S))
-h.grid(column=0, row=1, sticky=(W,E))
-v.grid(column=1, row=0, sticky=(N,S))
-root.grid_columnconfigure(0, weight=1)
-root.grid_rowconfigure(0, weight=1)
 
-lastx, lasty = 0, 0
+frame_top    			= Frame(root, width=main_window_width, height=50, bg="")
+frame_bottom   		= Frame(root, width=main_window_width, height=50, bg="")
 
-def xy(event):
-    global lastx, lasty
-    lastx, lasty = canvas.canvasx(event.x), canvas.canvasy(event.y)
+frame_middle_row 		= Frame(root, bg="")
+frame_middle_row_left	= Frame(frame_middle_row, width=main_window_width, height=main_window_height-50, bg="#000fff000")
+frame_middle_row_right	= Frame(frame_middle_row, width=main_window_width, height=main_window_height-50, bg="#000ffffff")
 
-def setColor(newcolor):
-    global color
-    color = newcolor
-    canvas.dtag('all', 'paletteSelected')
-    canvas.itemconfigure('palette', outline='white')
-    canvas.addtag('paletteSelected', 'withtag', 'palette%s' % color)
-    canvas.itemconfigure('paletteSelected', outline='#999999')
 
-def addLine(event):
-    global lastx, lasty
-    x, y = canvas.canvasx(event.x), canvas.canvasy(event.y)
-    canvas.create_line((lastx, lasty, x, y), fill=color, width=5, tags='currentline')
-    lastx, lasty = x, y
+root.grid_rowconfigure(1,weight=1)
+root.grid_columnconfigure(0,weight=1)
 
-def doneStroke(event):
-    canvas.itemconfigure('currentline', width=5) # What happens if you set this to another number?        
-        
-canvas.bind("<Button-1>", xy)
-canvas.bind("<B1-Motion>", addLine)
-canvas.bind("<B1-ButtonRelease>", doneStroke)
 
-id = canvas.create_rectangle((10, 10, 30, 30), fill="red", tags=('palette', 'palettered'))
-canvas.tag_bind(id, "<Button-1>", lambda x: setColor("red"))
-id = canvas.create_rectangle((10, 35, 30, 55), fill="blue", tags=('palette', 'paletteblue'))
-canvas.tag_bind(id, "<Button-1>", lambda x: setColor("blue"))
-id = canvas.create_rectangle((10, 60, 30, 80), fill="black", tags=('palette', 'paletteblack', 'paletteSelected'))
-canvas.tag_bind(id, "<Button-1>", lambda x: setColor("black"))
+frame_top.grid(row=0,sticky="ew")
+frame_bottom.grid(row=2,sticky="ew")
+frame_middle_row.grid(row=1,sticky="ew")
 
-setColor('black')
-canvas.itemconfigure('palette', width=5)
+frame_middle_row_left.grid(row=0, column=0,sticky="w", in_=frame_middle_row)
+frame_middle_row_right.grid(row=0, column=1,sticky="e", in_=frame_middle_row)
+
+
+frame_middle_row.grid_columnconfigure(0,weight=2)
+frame_middle_row.grid_columnconfigure(1,weight=1)
+frame_top.grid_columnconfigure(0,weight=1)
+
+
+# label_1 = Label(frame_top, text="text label",bg="#154e72")
+#label_1.grid(sticky="w")
+
+
+root.resizable(width=FALSE, height=FALSE)
 root.mainloop()
