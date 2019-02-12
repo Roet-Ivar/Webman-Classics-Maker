@@ -52,7 +52,7 @@ class AnimatedGif(tk.Label):
 	def start_thread(self):
 		""" This starts the thread that runs the animation, if we are using a threaded approach """
 		from threading import Thread  # We only import the module if we need it
-		# self._animation_thread = Thread()
+		self._animation_thread = Thread()
 		self._animation_thread = Thread(target=self._animate_thread).start()  # Forks a thread for the animation
 
 	def stop_thread(self):
@@ -74,7 +74,7 @@ class AnimatedGif(tk.Label):
 				
 				
 root = tk.Tk()
-aGif = AnimatedGif(root, 'redish_opt.gif')
+aGif = AnimatedGif(root, 'continues_249.gif')
 aGif.pack()
 # aGif.start_thread()
 aGif.start()
