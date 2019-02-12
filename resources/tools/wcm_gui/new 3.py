@@ -4,7 +4,6 @@ Released under the terms of the MIT license (https://opensource.org/licenses/MIT
 """
 import sys
 import time
-
 try:
 	import tkinter as tk  # for Python2
 except ImportError:
@@ -16,7 +15,7 @@ class AnimatedGif(tk.Label):
 	Class to show animated GIF file in a label
 	Use start() method to begin animation, and set the stop flag to stop it
 	"""
-	def __init__(self, root, gif_file, delay=0.01):
+	def __init__(self, root, gif_file, delay=0.04):
 		"""
 		:param root: tk.parent
 		:param gif_file: filename (and path) of animated gif
@@ -74,9 +73,8 @@ class AnimatedGif(tk.Label):
 				
 				
 root = tk.Tk()
-aGif = AnimatedGif(root, 'continues_249.gif')
+aGif = AnimatedGif(root, 'test7.gif')
 aGif.pack()
-# aGif.start_thread()
 aGif.start()
 # root.pack()
 root.mainloop()

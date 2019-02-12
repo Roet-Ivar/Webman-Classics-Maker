@@ -1,31 +1,24 @@
 import tkinter as tk
 # from PIL import Image, ImageTk
 from itertools import count, cycle
-from decimal import *
 
 class ImageLabel(tk.Label):
 
 	def load(self, im):
 		if isinstance(im, str):
 			# im = Image.open(im)
-			im = tk.PhotoImage(file='redish_opt.gif')
+			im = tk.PhotoImage(file='continues_249.gif')
 		frames = []
 
 		try:
-			i = 0
-			while i < 134:
-				percent = int(i/134*100)
-				print('Loading gif: ' + str(percent) + '%')
-				frames.append(tk.PhotoImage(file='redish_opt.gif', format='gif -index {}'.format(i)))
-				i += 1
-				
-							
+			for i in range(0,248):
+				frames.append(tk.PhotoImage(file='continues_249.gif', format='gif -index {}'.format(i)))
 		except EOFError:
 			pass
 		self.frames = cycle(frames)
 
 		try:
-			self.delay = 40
+			self.delay = 50
 		except:
 			self.delay = 100
 
@@ -42,8 +35,6 @@ class ImageLabel(tk.Label):
 		if self.frames:
 			self.config(image=next(self.frames))
 			self.after(self.delay, self.next_frame)
-		else:
-			self.unload()
 
 root = tk.Tk()
 lbl = ImageLabel(root)
