@@ -8,15 +8,16 @@ class ImageLabel(tk.Label):
 	def load(self, im):
 		if isinstance(im, str):
 			# im = Image.open(im)
-			im = tk.PhotoImage(file='redish_opt.gif')
+			im = tk.PhotoImage(file='bluish_opt.gif')
 		frames = []
 
 		try:
+			total_frames = 134
 			i = 0
-			while i < 134:
-				percent = int(i/134*100)
+			while i < total_frames:
+				percent = int(i/total_frames*100)
 				print('Loading gif: ' + str(percent) + '%')
-				frames.append(tk.PhotoImage(file='redish_opt.gif', format='gif -index {}'.format(i)))
+				frames.append(tk.PhotoImage(file='bluish_opt.gif', format='gif -index {}'.format(total_frames-i)))
 				i += 1
 				
 							

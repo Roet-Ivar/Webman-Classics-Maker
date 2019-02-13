@@ -87,7 +87,6 @@ main_window_height=715
 
 # changing the title of our master widget
 root.title('webMAN Classics Maker UI alpha 1')
-
 # icon upper left corner
 root.iconbitmap(r'../../images/webman.ico')
 
