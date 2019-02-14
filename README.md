@@ -1,14 +1,14 @@
 # ABOUT
-A tool for PS3 that makes PKG shortcuts for ISO files using webMAN-mod through web commands.
-
-Read more about webman web commands here:
+Webman Classics Maker is tool for the PS3 that makes PKG shortcuts for ISO files using webMAN-mod through web commands:
 http://www.psx-place.com/threads/webman-mod-web-commands.1508/
 
-**BUILDS**
+This software is under GPLv2 license: https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html, not to be confused with the GPLv3 license.
+
+# BUILDS
 Get the latest build from releases:
 https://github.com/Roet-Ivar/Webman-Classics-Maker/releases/
 
-**TOOLS/BINARIES USED**
+# TOOLS/BINARIES USED
 
 * SCETOOL 0.2.9 (scetool.exe):
 https://github.com/naehrwert/scetool
@@ -22,6 +22,8 @@ https://github.com/HACKERCHANNEL/PSL1GHT/tree/master/tools/PS3Py
 * PARAM_SFO_EDITOR (Aldos PS3 tool collection)
 https://www.aldostools.org/
 
+Credits goes to all of you guys!
+
 ------------------------------------------------------------------------
 # HOW TO USE
 
@@ -30,7 +32,7 @@ https://www.aldostools.org/
 	1. Check IP settings in webMan (holding [SELECT])
 	2. Edit your /settings/ftp_settings.txt with your IP
 	3. To get your "game_list.txt run "FTP_Game_List.exe", or "ftp_game_list.py" for linux
-n
+
 **EDIT PARAM.SFO**
 
 	1. Run "Edit_param_sfo.exe" (Windows only right now, you can hex edit the "params.sfo" in linux)
@@ -59,7 +61,7 @@ n
 * Sometimes at first boot the game hangs on blackscreen, reboot and start it again. This is mostly due to modifications of the same game w/o reboots.
 	
 ---------------------------------------------------------------------------------------------------
-# HOW TO BUILD THE TOOLS: Windows
+# BUILD SCRIPTS: Windows
 
 1. Install python 2.7.x x86 + pyinstaller lib
 
@@ -68,5 +70,5 @@ n
 
 You now have a brand new **Build_Webman_PKG.exe** / **Edit_Param_SFO.exe** / **FTP_Game_List.exe** based on the changes you made in the scripts
 
-# HOW TO BUILD THE TOOLS: Linux
-1. There are nothing to build, only edit the .py scripts of your liking and run them
+# BUILD SCRIPTS: Linux
+1. There are nothing to build, only edit and run the python scripts of your liking
