@@ -1,9 +1,9 @@
 {
-    "title":"Marvel vs. Capcom 3: Fate of Two Worlds",
-    "iso_filepath":"/dev_hdd0/PS3ISO/Marvel.Vs.Capcom.3[BLUS30410].iso",
-    "title_id":"SLUS30411",
+    "title":"This Is The Game Title Shown On XMB",
+    "iso_filepath":"/dev_hdd0/PS3ISO/This Is The Iso Filename.iso",
+    "title_id":"WCUS12345",
     "game_type":"",
     "iso_filename":"",
     "device_type":"",
-    "content_id":"UP0001-SLUS30411_00-0000000000000000"
+    "content_id":"UP0001-WCUS12345_00-0000000000000000"
 }

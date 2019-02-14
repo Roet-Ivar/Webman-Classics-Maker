@@ -6,13 +6,14 @@ from shutil import copyfile
 # python -c "from resign_eboot_linux import Resign_eboot; resign = Resign_eboot(); resign.execute()"
 class Resign_eboot:
 	def execute(self):
+
 		with open('../util_generated_files/params.json') as f:
 			json_data = json.load(f)
 			
 		content_id = json_data['content_id']
 
 		current_path= os.getcwd()
-		print('current_path: ' + current_path)
+		# print('current_path: ' + current_path)
 		if 'util_scripts' in os.getcwd():
 			os.chdir(os.path.pardir)
 		os.chdir('scetool')
@@ -25,5 +26,6 @@ class Resign_eboot:
 		if 'scetool' in os.getcwd():
 			os.chdir(os.path.pardir)
 		os.chdir('util_scripts')
-		
-		print('Execution of \'resign_eboot.py\': Done')
+
+		print('\nExecution of \'resign_eboot.py\':           Done')		
+		print('-----------------------------------------------')

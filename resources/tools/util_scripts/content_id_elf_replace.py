@@ -3,6 +3,7 @@ import json
 
 class Elf_replace:
 	def execute(self):
+		
 		with open('../util_generated_files/params.json') as f:
 			json_data = json.load(f)
 
@@ -19,7 +20,8 @@ class Elf_replace:
 				newFile = open("../scetool/EBOOT.ELF", "wb")
 				newFileByteArray = bytearray(file)
 				newFile.write(newFileByteArray)
-			
+
 				print('Execution of \'content_id_elf_replace.py\': Done')
+				print('-----------------------------------------------')
 			except ValueError:
 				print('File write error/PKGLAUNCH not found/titel_id not a string')

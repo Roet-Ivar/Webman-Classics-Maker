@@ -54,4 +54,7 @@ if __name__ == '__main__':
 	zipf.close()
 	
 	print('The release archive has sucessfully been package and distributed to:\n' + '/release/' + zip_archive_name)
-	os.system("pause")
+	try: 
+		input = raw_input
+	except NameError: pass
+	input('\npress ENTER to continue...')

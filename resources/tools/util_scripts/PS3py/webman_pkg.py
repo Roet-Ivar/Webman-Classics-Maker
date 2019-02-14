@@ -228,6 +228,7 @@ def setContextNum(key, tmpnum):
 	key[0x3e] = ord(tmpchrs[6])
 	key[0x3f] = ord(tmpchrs[7])
 
+print('MY_PATH: ' + str(sys.path))
 import pkgcrypt
 
 def crypt(key, inbuf, length):
@@ -651,10 +652,9 @@ class Webman_pkg:
 					for file in files:
 						if file.endswith('.pyc') is True:
 							os.remove(file)
-
-				print('Execution of \'webman_pkg.py\':             Done')
-				print('-----------------------------------------------\n')
-				print('Package created: ' + '/builds/' + pkg_name + '\n')
+				
+				print('Execution of \'create_pkg.py\': Done')
+				print('------------------------------------------------\n' + 'Package created: ' + '/builds/' + pkg_name)
 			else:
 				usage()
 				sys.exit(2)
