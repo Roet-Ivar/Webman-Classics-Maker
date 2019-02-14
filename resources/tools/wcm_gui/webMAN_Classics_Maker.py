@@ -29,7 +29,7 @@ class App(Frame):
 		weigth_ratio = round(1+(Decimal(left_side_weigth)/Decimal(right_side_weigth)), 2)
 		
 		frame_top_row    		= Frame(root, width=main_window_width, height=top_row_heigth, bg="")
-		frame_bottom_row   		= Frame(root, width=main_window_width, height=bottom_row_heigth, bg="")
+		frame_bottom_row   	= Frame(root, width=main_window_width, height=bottom_row_heigth, bg="")
 		frame_middle_row 		= Frame(root, bg="")
 		frame_middle_row_left	= Frame(frame_middle_row, width=main_window_width, height=main_window_height-top_row_heigth, bg="")
 		frame_middle_row_right	= Frame(frame_middle_row, width=main_window_width, height=main_window_height-top_row_heigth, bg="")
