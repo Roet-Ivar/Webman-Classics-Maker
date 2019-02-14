@@ -28,16 +28,18 @@ args = '--distpath=' + dist_path + ' ' + '--specpath=' + spec_path + ' ' + '--na
 
 p = subprocess.call(app + ' ' + args)
 
-# clean up the old archive build
-# if os.path.isfile(zip_dir_path + 'release'):
-	# os.remove(zip_dir_path + zip_archive_name)
-	
+
 # clean up residuals from pyinstaller
-rmtree('./build')
+if os.path.isdir('./build'):
+	rmtree('./build')
+if os.path.isdir('./__pycache__'):
+	rmtree('./__pycache__')
+	
 for root, dirs, files in os.walk('.'):
-	for file in files:
-		if 'pyc' in str(file):
-			os.remove(file)
+    for file in files:
+        if 'pyc' in str(file):
+            os.remove(file)
+
 print('\n----------------------------------------------------')
 print('Succesfully built \"' + executable_name + '.exe\"')
 print('----------------------------------------------------\n\n')
