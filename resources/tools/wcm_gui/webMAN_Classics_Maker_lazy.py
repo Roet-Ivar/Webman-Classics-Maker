@@ -1,11 +1,10 @@
 import os
 import json
+from Tkinter import *
+from tkFont import Font
 
-from tkinter import *
-from tkinter import font
 
-
-class Main_UI():
+class Main():
 
 
 	def __init__(self, main):
@@ -41,10 +40,10 @@ class Main_UI():
 		text_title		= 'TITLE'
 		text_iso_path	= 'ISO PATH'
 
-		height_of_text 			= font.Font(font='Helvetica').metrics('linespace')
-		width_of_title_id_text 	= font.Font(size=15, family='Helvetica').measure(text_title_id) +1
-		width_of_title_text 	= font.Font(size=15, family='Helvetica').measure(text_title) +1
-		width_of_iso_path_text 	= font.Font(size=15, family='Helvetica').measure(text_iso_path) +1
+		height_of_text 			= Font(font='Helvetica').metrics('linespace')
+		width_of_title_id_text 	= Font(size=15, family='Helvetica').measure(text_title_id) +1
+		width_of_title_text 	= Font(size=15, family='Helvetica').measure(text_title) +1
+		width_of_iso_path_text 	= Font(size=15, family='Helvetica').measure(text_iso_path) +1
 
 		print('DEBUG height_of_text: ' 			+ str(height_of_text))
 		print('DEBUG width_of_title_id_text: '	+ str(width_of_title_id_text))
@@ -53,20 +52,20 @@ class Main_UI():
 
 
 		# Coordinates
-		main_offset_x_pos		= 950
-		main_offset_y_pos		= 50
+		main_offset_x_pos	= 950
+		main_offset_y_pos	= 50
 
-		dark_side_padding		= 20
-		text_box_spacing		= 4*dark_side_padding
+		dark_side_padding	= 20
+		text_box_spacing	= 4*dark_side_padding
 
-		title_id_text_x_pos		= main_offset_x_pos + width_of_title_id_text/2
-		title_id_text_y_pos 	= main_offset_y_pos + height_of_text/2
+		title_id_text_x_pos	= main_offset_x_pos + width_of_title_id_text/2
+		title_id_text_y_pos = main_offset_y_pos + height_of_text/2
 
-		title_text_x_pos		= main_offset_x_pos + width_of_title_text/2
-		title_text_y_pos		= dark_side_padding + title_id_text_y_pos + height_of_text
+		title_text_x_pos	= main_offset_x_pos + width_of_title_text/2
+		title_text_y_pos	= dark_side_padding + title_id_text_y_pos + height_of_text
 
-		iso_path_text_x_pos		= main_offset_x_pos + width_of_iso_path_text/2
-		iso_path_text_y_pos		= dark_side_padding + title_text_y_pos + height_of_text
+		iso_path_text_x_pos	= main_offset_x_pos + width_of_iso_path_text/2
+		iso_path_text_y_pos	= dark_side_padding + title_text_y_pos + height_of_text
 
 
 		# Placements
@@ -87,7 +86,6 @@ class Main_UI():
 		self.save_button.place(x=text_box_spacing 	+  iso_path_text_x_pos + 200, y=720 - 30)
 
 	def init_main_window_buttons(self, main):
-
 		# button to quit
 		self.quit_button = Button(main, text="Quit", command=main.quit, bd=1, bg="#FBFCFB")
 		self.quit_button.place(x=0, y=0)
@@ -96,8 +94,6 @@ class Main_UI():
 		# button to change image
 		self.change_button = Button(main, text="Change", command=self.on_change_button, bd=1, bg="#FBFCFB")
 		self.change_button.place(x=45, y=0)
-
-
 
 	def on_change_button(self):
 		# next image
@@ -119,16 +115,20 @@ class Main_UI():
 
 		self.save_pkg_info_to_json()
 
-		# print('')
-		# print('')
-		
 	def save_pkg_info_to_json(self):
 		with open('../util_resources/params.json.BAK') as f:
 			json_data = json.load(f)
-		
+
 		try:
+			title_id = self.entry_field_title_id.get().upper()
+			if len(title_id) > self.maxlength:
+				title_id = title_id[0:self.maxlength]
+				self.entry_field_title_id.delete(0, END)
+				self.entry_field_title_id.insert(0, title_id)
+				print('new val: ' + self.entry_field_title_id.get())
+
 			json_data['title']=str(self.entry_field_title.get())
-			json_data['title_id']=str(self.entry_field_title_id.get())
+			json_data['title_id']=title_id
 			json_data['content_id']='UP0001-'+ str(self.entry_field_title_id.get()) + '_00-0000000000000000'
 			json_data['iso_filepath']=str(self.entry_field_iso_path.get())
 
@@ -141,11 +141,11 @@ class Main_UI():
 
 	def validate(self, P):
 		if len(P) > self.maxlength:
-			print('DEBUG new value too long')
+			print('DEBUG Title ID longer than 8 characters!')
 			main_window.after_idle(lambda: self.entry_field_title_id.config(validate='key'))
 			return None  # new value too long
 		else:
-			print('DEBUG value good')
+			print('DEBUG Title ID: ' + P)
 			return True
 
 
@@ -162,6 +162,6 @@ main_window.title('webMAN Classics Maker UI')
 main_window.iconbitmap(r'../../images/webman.ico')
 
 main_window.geometry(str(main_window_width) + 'x' + str(main_window_height))
-Main_UI(main_window)
+Main(main_window)
 
 main_window.mainloop()
