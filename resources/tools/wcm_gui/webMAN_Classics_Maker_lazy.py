@@ -43,9 +43,9 @@ class Main():
 
 	def init_param_sfo_labels(self, main):
 		# Constants
-		text_title_id 	= 'TITLE ID'
-		text_title		= 'TITLE'
-		text_iso_path	= 'ISO PATH'
+		text_title_id 			= 'TITLE ID'
+		text_title				= 'TITLE'
+		text_iso_path			= 'ISO PATH'
 
 		height_of_text 			= Font(font='Helvetica').metrics('linespace')
 		width_of_title_id_text 	= Font(size=15, family='Helvetica').measure(text_title_id) +1
@@ -59,20 +59,20 @@ class Main():
 
 
 		# Coordinates
-		main_offset_x_pos	= 950
-		main_offset_y_pos	= 100
+		main_offset_x_pos		= 950
+		main_offset_y_pos		= 100
 
-		dark_side_padding	= 20
-		text_box_spacing	= 4*dark_side_padding
+		dark_side_padding		= 20
+		text_box_spacing		= 4*dark_side_padding
 
-		title_id_text_x_pos	= main_offset_x_pos + width_of_title_id_text/2
-		title_id_text_y_pos = main_offset_y_pos + height_of_text/2
+		title_id_text_x_pos		= main_offset_x_pos + width_of_title_id_text/2
+		title_id_text_y_pos 	= main_offset_y_pos + height_of_text/2
 
-		title_text_x_pos	= main_offset_x_pos + width_of_title_text/2
-		title_text_y_pos	= dark_side_padding + title_id_text_y_pos + height_of_text
+		title_text_x_pos		= main_offset_x_pos + width_of_title_text/2
+		title_text_y_pos		= dark_side_padding + title_id_text_y_pos + height_of_text
 
-		iso_path_text_x_pos	= main_offset_x_pos + width_of_iso_path_text/2
-		iso_path_text_y_pos	= dark_side_padding + title_text_y_pos + height_of_text
+		iso_path_text_x_pos		= main_offset_x_pos + width_of_iso_path_text/2
+		iso_path_text_y_pos		= dark_side_padding + title_text_y_pos + height_of_text
 
 
 		# Placements
@@ -81,10 +81,11 @@ class Main():
 		self.iso_path_text_id 	= self.canvas.create_text(iso_path_text_x_pos,	iso_path_text_y_pos,	text=text_iso_path,	fill="White", font=("Helvetica", 15))
 
 
-		self.button_PSP = Button(main, image=self.logos[0], bd=1)
-		self.button_PSX = Button(main, image=self.logos[1], bd=1)
-		self.button_PS2 = Button(main, image=self.logos[2], bd=1)
-		self.button_PS3 = Button(main, image=self.logos[3], bd=1)
+		self.system_hdd_path = '/hdd0/'
+		self.button_PSP = Button(main, image=self.logos[0], bd=1, command= lambda: self.on_system_choice_button(self.system_hdd_path + 'PSP' + '/'))
+		self.button_PSX = Button(main, image=self.logos[1], bd=1, command= lambda: self.on_system_choice_button(self.system_hdd_path + 'PSX' + '/'))
+		self.button_PS2 = Button(main, image=self.logos[2], bd=1, command= lambda: self.on_system_choice_button(self.system_hdd_path + 'PS2' + '/'))
+		self.button_PS3 = Button(main, image=self.logos[3], bd=1, command= lambda: self.on_system_choice_button(self.system_hdd_path + 'PS3' + '/'))
 		self.button_PSP.place(x=main_offset_x_pos + 0 * 30, y=40)
 		self.button_PSX.place(x=main_offset_x_pos + 3 * 30, y=40)
 		self.button_PS2.place(x=main_offset_x_pos + 6 * 30, y=40)
@@ -95,15 +96,13 @@ class Main():
 		self.entry_field_title 		= Entry(main)
 		self.entry_field_iso_path 	= Entry(main)
 
-		self.entry_field_title_id.place(	x=text_box_spacing 	+  iso_path_text_x_pos, y=title_id_text_y_pos 	-height_of_text/2, width=200)
-		self.entry_field_title.place(		x=text_box_spacing 	+  iso_path_text_x_pos, y=title_text_y_pos		-height_of_text/2, width=200)
-		self.entry_field_iso_path.place(	x=text_box_spacing 	+  iso_path_text_x_pos, y=iso_path_text_y_pos 	-height_of_text/2, width=200)
+		self.entry_field_title_id.place(	x=text_box_spacing 	+ iso_path_text_x_pos, y=title_id_text_y_pos	-height_of_text/2, width=200)
+		self.entry_field_title.place(		x=text_box_spacing 	+ iso_path_text_x_pos, y=title_text_y_pos		-height_of_text/2, width=200)
+		self.entry_field_iso_path.place(	x=text_box_spacing 	+ iso_path_text_x_pos, y=iso_path_text_y_pos 	-height_of_text/2, width=200)
 
 		# dark side save-button
 		self.save_button = Button(main, text="Save", command=self.on_save_button, bd=1, bg="#FBFCFB")
 		self.save_button.place(x=text_box_spacing 	+  iso_path_text_x_pos + 200, y=720 - 30)
-
-		# self.system_buttons = self.system_choice_checkboxes(['1','2','2'])
 
 	def init_main_window_buttons(self, main):
 		# button to quit
@@ -126,12 +125,15 @@ class Main():
 		# change image
 		self.canvas.itemconfig(self.image_on_canvas, image = self.wallpapers[self.my_image_number])
 
+	def on_system_choice_button(self, system_string):
+		print('DEBUG System path ' + system_string)
+
 	def on_save_button(self):
 		# do stuff
-		print('\nDEBUG SAVE BUTTON PRESSED')
-		print('DEBUG entry_field_title_id: ' 	+ self.entry_field_title_id.get())
-		print('DEBUG entry_field_id: ' 			+ self.entry_field_title.get())
-		print('DEBUG entry_field_iso_path: ' 	+ self.entry_field_iso_path.get())
+		# print('\nDEBUG SAVE BUTTON PRESSED')
+		# print('DEBUG entry_field_title_id: ' 	+ self.entry_field_title_id.get())
+		# print('DEBUG entry_field_id: ' 			+ self.entry_field_title.get())
+		# print('DEBUG entry_field_iso_path: ' 	+ self.entry_field_iso_path.get())
 
 		self.save_pkg_info_to_json()
 
@@ -168,17 +170,6 @@ class Main():
 			print('DEBUG Title ID: ' + P)
 			return True
 
-	def system_choice_checkboxes(self, picks=[]):
-		# Frame.__init__(self, parent)
-		self.vars = []
-		for pick in picks:
-			var = IntVar()
-			chk = Checkbutton(self.canvas, text=pick, variable=var, image=PhotoImage(file='logo_PSX.gif'))
-			chk.place(x=200, y=200)
-			self.vars.append(var)
-
-	def state(self):
-		return map((lambda var: var.get()), self.vars)
 
 
 canvas_width = 1920
