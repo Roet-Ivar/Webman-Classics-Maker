@@ -11,26 +11,32 @@ class Main():
 		self.vcmd = main.register(self.validate)
 		self.maxlength = 8
 
-		self.entry_field_title_id = None
-		self.entry_field_title = None
-		self.entry_field_iso_path = None
+		self.entry_field_title_id 	= None
+		self.entry_field_title 		= None
+		self.entry_field_iso_path 	= None
 
 		# canvas for image
-		self.canvas = Canvas(main, width=canvas_width, height=canvas_height, borderwidth =0, highlightthickness=0)
+		self.canvas = Canvas(main, width=canvas_width, height=canvas_height, borderwidth=0, highlightthickness=0)
 		self.canvas.grid(row=0, column=0)
 
 		# images
-		self.my_images = []
-		self.my_images.append(PhotoImage(file='gui_background_1920_1080_merged.gif'))
-		self.my_images.append(PhotoImage(file='gui_background_1920_1080_dark.gif'))
-		self.my_images.append(PhotoImage(file='gui_background_1920_1080.gif'))
-		self.my_images.append(PhotoImage(file='ps3_blue_waves_1920_1080.gif'))
-		self.my_images.append(PhotoImage(file='ps3_blue_waves_2_1920_1080.gif'))
-		self.my_images.append(PhotoImage(file='ps3_blue_waves_3_1920_1080.gif'))
+		self.logos = []
+		self.logos.append(PhotoImage(file='logo_PSP.gif'))
+		self.logos.append(PhotoImage(file='logo_PSX.gif'))
+		self.logos.append(PhotoImage(file='logo_PS2.gif'))
+		self.logos.append(PhotoImage(file='logo_PS3.gif'))
+
+		self.wallpapers = []
+		self.wallpapers.append(PhotoImage(file='gui_background_1920_1080_merged.gif'))
+		self.wallpapers.append(PhotoImage(file='gui_background_1920_1080_dark.gif'))
+		self.wallpapers.append(PhotoImage(file='gui_background_1920_1080.gif'))
+		self.wallpapers.append(PhotoImage(file='ps3_blue_waves_1920_1080.gif'))
+		self.wallpapers.append(PhotoImage(file='ps3_blue_waves_2_1920_1080.gif'))
+		self.wallpapers.append(PhotoImage(file='ps3_blue_waves_3_1920_1080.gif'))
 		self.my_image_number = 0
 
 		# set first image on canvas
-		self.image_on_canvas = self.canvas.create_image(0, 0, anchor = NW, image = self.my_images[self.my_image_number])
+		self.image_on_canvas = self.canvas.create_image(0, 0, anchor = NW, image = self.wallpapers[self.my_image_number])
 		self.init_main_window_buttons(main)
 		self.init_param_sfo_labels(main)
 
@@ -53,7 +59,7 @@ class Main():
 
 		# Coordinates
 		main_offset_x_pos	= 950
-		main_offset_y_pos	= 50
+		main_offset_y_pos	= 100
 
 		dark_side_padding	= 20
 		text_box_spacing	= 4*dark_side_padding
@@ -70,8 +76,13 @@ class Main():
 
 		# Placements
 		self.title_id_text_id 	= self.canvas.create_text(title_id_text_x_pos,	title_id_text_y_pos, 	text=text_title_id,	fill="White", font=("Helvetica", 15))
-		self.title_text_id 		= self.canvas.create_text(title_text_x_pos,		title_text_y_pos, 		text=text_title , 	fill="White", font=("Helvetica", 15))
+		self.title_text_id 		= self.canvas.create_text(title_text_x_pos,	title_text_y_pos, 		text=text_title , 	fill="White", font=("Helvetica", 15))
 		self.iso_path_text_id 	= self.canvas.create_text(iso_path_text_x_pos,	iso_path_text_y_pos,	text=text_iso_path,	fill="White", font=("Helvetica", 15))
+
+		self.PSP_logo_image		= self.canvas.create_image(main_offset_x_pos + 1*30, 40, image=self.logos[0])
+		self.PSX_logo_image		= self.canvas.create_image(main_offset_x_pos + 4*30, 40, image=self.logos[1])
+		self.PS2_logo_image		= self.canvas.create_image(main_offset_x_pos + 7*30, 40, image=self.logos[2])
+		self.PS3_logo_image		= self.canvas.create_image(main_offset_x_pos + 10*30, 40, image=self.logos[3])
 
 		self.entry_field_title_id 	= Entry(main, validate='key', validatecommand=(self.vcmd, '%P'))
 		self.entry_field_title 		= Entry(main)
@@ -100,11 +111,11 @@ class Main():
 		self.my_image_number += 1
 
 		# return to first image
-		if self.my_image_number == len(self.my_images):
+		if self.my_image_number == len(self.wallpapers):
 			self.my_image_number = 0
 
 		# change image
-		self.canvas.itemconfig(self.image_on_canvas, image = self.my_images[self.my_image_number])
+		self.canvas.itemconfig(self.image_on_canvas, image = self.wallpapers[self.my_image_number])
 
 	def on_save_button(self):
 		# do stuff
