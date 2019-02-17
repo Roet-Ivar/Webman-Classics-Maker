@@ -26,6 +26,7 @@ class Main():
 		self.logos.append(PhotoImage(file='logo_PS2.gif'))
 		self.logos.append(PhotoImage(file='logo_PS3.gif'))
 
+
 		self.wallpapers = []
 		self.wallpapers.append(PhotoImage(file='gui_background_1920_1080_merged.gif'))
 		self.wallpapers.append(PhotoImage(file='gui_background_1920_1080_dark.gif'))
@@ -79,10 +80,16 @@ class Main():
 		self.title_text_id 		= self.canvas.create_text(title_text_x_pos,	title_text_y_pos, 		text=text_title , 	fill="White", font=("Helvetica", 15))
 		self.iso_path_text_id 	= self.canvas.create_text(iso_path_text_x_pos,	iso_path_text_y_pos,	text=text_iso_path,	fill="White", font=("Helvetica", 15))
 
-		self.PSP_logo_image		= self.canvas.create_image(main_offset_x_pos + 1*30, 40, image=self.logos[0])
-		self.PSX_logo_image		= self.canvas.create_image(main_offset_x_pos + 4*30, 40, image=self.logos[1])
-		self.PS2_logo_image		= self.canvas.create_image(main_offset_x_pos + 7*30, 40, image=self.logos[2])
-		self.PS3_logo_image		= self.canvas.create_image(main_offset_x_pos + 10*30, 40, image=self.logos[3])
+
+		self.button_PSP = Button(main, image=self.logos[0], bd=1)
+		self.button_PSX = Button(main, image=self.logos[1], bd=1)
+		self.button_PS2 = Button(main, image=self.logos[2], bd=1)
+		self.button_PS3 = Button(main, image=self.logos[3], bd=1)
+		self.button_PSP.place(x=main_offset_x_pos + 0 * 30, y=40)
+		self.button_PSX.place(x=main_offset_x_pos + 3 * 30, y=40)
+		self.button_PS2.place(x=main_offset_x_pos + 6 * 30, y=40)
+		self.button_PS3.place(x=main_offset_x_pos + 9 * 30, y=40)
+
 
 		self.entry_field_title_id 	= Entry(main, validate='key', validatecommand=(self.vcmd, '%P'))
 		self.entry_field_title 		= Entry(main)
@@ -95,6 +102,8 @@ class Main():
 		# dark side save-button
 		self.save_button = Button(main, text="Save", command=self.on_save_button, bd=1, bg="#FBFCFB")
 		self.save_button.place(x=text_box_spacing 	+  iso_path_text_x_pos + 200, y=720 - 30)
+
+		# self.system_buttons = self.system_choice_checkboxes(['1','2','2'])
 
 	def init_main_window_buttons(self, main):
 		# button to quit
@@ -158,6 +167,18 @@ class Main():
 		else:
 			print('DEBUG Title ID: ' + P)
 			return True
+
+	def system_choice_checkboxes(self, picks=[]):
+		# Frame.__init__(self, parent)
+		self.vars = []
+		for pick in picks:
+			var = IntVar()
+			chk = Checkbutton(self.canvas, text=pick, variable=var, image=PhotoImage(file='logo_PSX.gif'))
+			chk.place(x=200, y=200)
+			self.vars.append(var)
+
+	def state(self):
+		return map((lambda var: var.get()), self.vars)
 
 
 canvas_width = 1920
