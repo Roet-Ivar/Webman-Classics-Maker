@@ -1,7 +1,13 @@
-import os
 import json
-from Tkinter import *
-from tkFont import Font
+
+import sys
+if sys.version_info[0] < 3:
+	from Tkinter import *
+	from tkFont import Font
+else:
+	from tkinter import *
+	from tkinter.font import Font
+
 
 
 class Main():
