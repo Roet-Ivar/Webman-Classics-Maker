@@ -17,6 +17,10 @@ class Main():
 		self.vcmd2 = main.register(self.validate)
 		self.maxlength = 8
 
+		self.state_system_choice	= ''
+		self.state_drive_choice		= ''
+		self.state_filename_choice	= ''
+
 		self.entry_field_title_id 	= None
 		self.entry_field_title 		= None
 		self.entry_field_iso_path 	= None
@@ -98,7 +102,7 @@ class Main():
 		self.entry_field_title_id	= Entry(main, validate='key', validatecommand=(self.vcmd, '%P'))
 		self.entry_field_title		= Entry(main)
 		self.entry_field_filename 	= Entry(main)
-		self.entry_field_iso_path	= Entry(main) #, state='disabled')
+		self.entry_field_iso_path	= Entry(main, state='disabled')
 
 		self.entry_field_title_id.place(x=text_box_spacing + iso_path_text_x_pos, y=title_id_text_y_pos	-height_of_text/3, width=200)
 		self.entry_field_title.place(	x=text_box_spacing + iso_path_text_x_pos, y=title_text_y_pos	-height_of_text/3, width=200)
@@ -111,16 +115,14 @@ class Main():
 		############################################
 
 		# system choice buttons
-		self.selection_drive_list	= ['hdd0', 'dev_usb00x']			# usb port 'x' should be selected through a list
+		self.selection_drive_list	= ['dev_hdd0', 'dev_hdd1', 'dev_usb00x']	# usb port 'x' should be selected through a list
 		self.selection_system_list	= ['PSP', 'PSX', 'PS2', 'PS3']
-		self.drive_path 			= self.selection_drive_list[0] 		# drive should be toggled by buttons
+		self.drive_path 			= self.selection_drive_list[0] 				# drive should be toggled by buttons
 
-		self.button_PSP = Button(main, image=self.logos[0], bd=1, command=lambda: self.on_system_and_driver_choice_button(self.selection_system_list[0], ''))
-		# self.button_PSX = Button(main, image=self.logos[1], bd=1, command=lambda: self.on_system_and_driver_choice_button(self.selection_system_list[1], ''))
-		# self.button_PS2 = Button(main, image=self.logos[2], bd=1, command=lambda: self.on_system_and_driver_choice_button(self.selection_system_list[2],''))
-		self.button_PSX = Button(main, image=self.logos[1], bd=1, command=lambda: self.on_system_and_driver_choice_button('', 'hdd0'))
-		self.button_PS2 = Button(main, image=self.logos[2], bd=1, command=lambda: self.on_system_and_driver_choice_button('', 'hdd1'))
-		self.button_PS3 = Button(main, image=self.logos[3], bd=1, command=lambda: self.on_system_and_driver_choice_button(self.selection_system_list[3], ''))
+		self.button_PSP = Button(main, image=self.logos[0], bd=1, command=lambda: self.on_drive_system_filename_choice_button(self.state_drive_choice, self.selection_system_list[0]))
+		self.button_PSX = Button(main, image=self.logos[1], bd=1, command=lambda: self.on_drive_system_filename_choice_button(self.selection_drive_list[0], self.state_system_choice))
+		self.button_PS2 = Button(main, image=self.logos[2], bd=1, command=lambda: self.on_drive_system_filename_choice_button(self.selection_drive_list[1], self.state_system_choice))
+		self.button_PS3 = Button(main, image=self.logos[3], bd=1, command=lambda: self.on_drive_system_filename_choice_button(self.state_drive_choice, self.selection_system_list[3]))
 
 		self.button_PSP.place(x=main_offset_x_pos + 0 * 29, y=40)
 		self.button_PSX.place(x=main_offset_x_pos + 3 * 29, y=40)
@@ -153,71 +155,61 @@ class Main():
 		# change image
 		self.canvas.itemconfig(self.image_on_canvas, image=self.wallpapers[self.my_image_number])
 
-	def on_system_and_driver_choice_button(self, system_choice, drive_choice):
-		drive_is_set = False
-		system_to_set = False
+	def on_drive_system_filename_choice_button(self, drive_choice, system_choice):
+		current_iso_path 	= self.entry_field_iso_path.get()
+		print('DEBUG system_choice: ' + system_choice)
+		print('DEBUG drive_choice: ' + drive_choice)
 
-		current_iso_path = self.entry_field_iso_path.get()
+		# If path is empty -> setting default values
+		if current_iso_path is '':
+			print('DEBUG Path is empty -> setting default values')
+			self.state_drive_choice	= drive_choice
+			self.state_system_choice = system_choice
 
-		if current_iso_path == '':
-			new_system_path = '/' + drive_choice + '/' + system_choice + '/'
-			new_system_path = new_system_path.replace('//', '/')
-			print('DEBUG new system_path -> ' + new_system_path)
-			self.entry_field_iso_path.insert(0, new_system_path)
-			return
+			if drive_choice is '':
+				self.state_drive_choice = 'dev_hdd0'
+				print('DEBUG Setting default_drive -> ' + self.state_drive_choice)
+			if system_choice is '':
+				self.state_system_choice = 'PS2'
+				print('DEBUG Setting default_system -> ' + self.state_system_choice)
 
-		if drive_choice is not '':
-			if drive_choice in current_iso_path:
-				print('DEBUG Drive already -> ' + drive_choice)
+			current_iso_path = '/' + self.state_drive_choice + '/' + self.state_system_choice + '/'
+			self.entry_field_iso_path.config(state=NORMAL)
+			self.entry_field_iso_path.delete(0, END)
+			self.entry_field_iso_path.insert(0, current_iso_path)
+			self.entry_field_iso_path.config(state=DISABLED)
+			print('DEBUG Default path set -> ' + self.entry_field_iso_path.get())
 
-			for drive in self.selection_drive_list:
-				if drive in current_iso_path:
-					print('DEBUG ' + drive + ' changed -> ' + drive_choice)
-					self.entry_field_iso_path.delete(0, END)
-					self.entry_field_iso_path.insert(0, current_iso_path.replace(drive, drive_choice))
-					drive_is_set = True
-
-			if not drive_is_set:
-				new_path = '/' + drive_choice + '/' + current_iso_path
-				new_path = new_path.replace('//', '/')
-				self.entry_field_iso_path.delete(0, END)
-				self.entry_field_iso_path.insert(0, new_path)
-				drive_is_set = True
-
-
-
+		# Check if drive of choice already set
+		if drive_choice is self.state_drive_choice:
+			print('DEBUG ' + '\'' + drive_choice + '\'' + ' already set')
+		# Check if system of choice already set
+		if system_choice is self.state_system_choice:
+			print('DEBUG ' + '\'' + system_choice + '\'' + ' already set')
 
 
-		if system_choice is not '':
-			if system_choice in current_iso_path:
-				print('DEBUG System already -> ' + system_choice)
-			else:
-				for system in self.selection_system_list:
-					if system in current_iso_path:
-						print('DEBUG ' + system + ' changed -> ' + system_choice)
-						self.entry_field_iso_path.delete(0, END)
-						self.entry_field_iso_path.insert(0, current_iso_path.replace(system, system_choice))
+		# Replace current drive
+		if drive_choice not in current_iso_path:
+			print('DEBUG drive_choice not in current_iso_path')
+			print('DEBUG ' + '\'' + self.state_drive_choice + '\'' + ' changed -> ' + '\'' + drive_choice + '\'')
+			current_iso_path = current_iso_path.replace(self.state_drive_choice, drive_choice)
+			self.entry_field_iso_path.config(state=NORMAL)
+			self.entry_field_iso_path.delete(0, END)
+			self.entry_field_iso_path.insert(0, current_iso_path)
+			self.entry_field_iso_path.config(state=DISABLED)
+			self.state_drive_choice = drive_choice
 
+		# Replace current system
+		if system_choice not in current_iso_path:
+			print('DEBUG drive_choice not in current_iso_path')
+			print('DEBUG ' + '\'' + self.state_system_choice + '\'' + ' changed -> ' + '\'' + system_choice + '\'')
+			current_iso_path = current_iso_path.replace(self.state_system_choice, system_choice)
+			self.entry_field_iso_path.config(state=NORMAL)
+			self.entry_field_iso_path.delete(0, END)
+			self.entry_field_iso_path.insert(0, current_iso_path)
+			self.entry_field_iso_path.config(state=DISABLED)
+			self.state_system_choice = system_choice
 
-
-		# if nothing to change, return
-		# if system_to_set == False and drive_to_set == False:
-		# 	return
-		#
-		#
-		# if drive_to_set:
-		# 	for drive in self.selection_drive_list:
-		# 		if drive in current_iso_path:
-		# 			print('DEBUG ' + drive + ' changed -> ' + drive_choice)
-		# 			self.entry_field_iso_path.delete(0, END)
-		# 			self.entry_field_iso_path.insert(0, current_iso_path.replace(drive, drive_choice))
-		#
-		# if system_to_set:
-		# 	for system in self.selection_system_list:
-		# 		if system in current_iso_path:
-		# 			print('DEBUG ' + system + ' changed -> ' + system_choice)
-		# 			self.entry_field_iso_path.delete(0, END)
-		# 			self.entry_field_iso_path.insert(0, current_iso_path.replace(system, system_choice))
 
 
 	def on_save_button(self):
@@ -293,9 +285,13 @@ class Main():
 
 		new_filename = event.widget.get()
 		print("Filename: " + new_filename)
+		iso_path = '/' + self.state_drive_choice + '/' + self.state_system_choice + '/' + new_filename
+		print("iso_path: " + iso_path)
 
+		self.entry_field_iso_path.config(state=NORMAL)
 		self.entry_field_iso_path.delete(0, END)
-		self.entry_field_iso_path.insert(0, new_filename)
+		self.entry_field_iso_path.insert(0, iso_path)
+		self.entry_field_iso_path.config(state=DISABLED)
 
 		current_filename = self.entry_field_iso_path.get()
 		print("entry_field_iso_path: " + current_filename)
