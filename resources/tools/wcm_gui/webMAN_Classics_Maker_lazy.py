@@ -17,8 +17,9 @@ class Main():
 		self.vcmd2 = main.register(self.validate)
 		self.maxlength = 8
 
-		self.state_system_choice	= ''
-		self.state_drive_choice		= ''
+		# setting defaults
+		self.state_drive_choice		= 'dev_hdd0'
+		self.state_system_choice	= 'PS2'
 		self.state_filename_choice	= ''
 
 		self.entry_field_title_id 	= None
@@ -30,12 +31,15 @@ class Main():
 		self.canvas.grid(row=0, column=0)
 
 		# images
+		self.drives = []
+		self.drives.append(PhotoImage(file='drive_hdd0.gif'))
+		self.drives.append(PhotoImage(file='drive_usb0.gif'))
+
 		self.logos = []
 		self.logos.append(PhotoImage(file='logo_PSP.gif'))
 		self.logos.append(PhotoImage(file='logo_PSX.gif'))
 		self.logos.append(PhotoImage(file='logo_PS2.gif'))
 		self.logos.append(PhotoImage(file='logo_PS3.gif'))
-
 
 		self.wallpapers = []
 		self.wallpapers.append(PhotoImage(file='gui_background_1920_1080_merged.gif'))
@@ -65,20 +69,18 @@ class Main():
 		width_of_filename_text	= Font(size=15, family='Helvetica').measure(text_filename)
 		width_of_iso_path_text 	= Font(size=15, family='Helvetica').measure(text_iso_path)
 
-		print('DEBUG height_of_text: ' 			+ str(height_of_text))
-		print('DEBUG width_of_title_id_text: '	+ str(width_of_title_id_text))
-		print('DEBUG width_of_title_text: '		+ str(width_of_title_text))
-		print('DEBUG width_of_iso_path_text: '	+ str(width_of_iso_path_text))
+		# print('DEBUG height_of_text: ' 			+ str(height_of_text))
+		# print('DEBUG width_of_title_id_text: '	+ str(width_of_title_id_text))
+		# print('DEBUG width_of_title_text: '		+ str(width_of_title_text))
+		# print('DEBUG width_of_iso_path_text: '	+ str(width_of_iso_path_text))
 
-
-		# coordinates
-		main_offset_x_pos		= 950
-		main_offset_y_pos		= 100
-
-		# distances
+		# paddings
 		dark_side_padding		= 20
 		text_box_spacing		= 4*dark_side_padding
 
+		# coordinates
+		main_offset_x_pos		= 950
+		main_offset_y_pos		= 150
 
 		title_id_text_x_pos		= main_offset_x_pos + width_of_title_id_text/2
 		title_id_text_y_pos 	= main_offset_y_pos + height_of_text/2
@@ -93,9 +95,25 @@ class Main():
 		iso_path_text_y_pos		= dark_side_padding + filename_text_y_pos + height_of_text
 
 
+		# system choice buttons
+		self.selection_drive_list	= ['dev_hdd0', 'dev_hdd1', 'dev_usb00x']	# usb port 'x' should be selected through a list
+		self.selection_system_list	= ['PSP', 'PSX', 'PS2', 'PS3']
+		self.drive_path 			= self.selection_drive_list[0] 				# drive should be toggled by buttons
+
+		self.button_hdd0 	= Button(main, image=self.drives[0], bd=1) #, command=lambda: self.on_drive_system_filename_choice_button(self.state_drive_choice, self.selection_system_list[0]))
+		self.button_usb0 	= Button(main, image=self.drives[1], bd=1) #, command=lambda: self.on_drive_system_filename_choice_button(self.state_drive_choice, self.selection_system_list[0]))
+
+		self.button_PSP 	= Button(main, image=self.logos[0], bd=1, command=lambda: self.on_drive_system_filename_choice_button(self.state_drive_choice, self.selection_system_list[0]))
+		self.button_PSX 	= Button(main, image=self.logos[1], bd=1, command=lambda: self.on_drive_system_filename_choice_button(self.selection_drive_list[0], self.state_system_choice))
+		self.button_PS2 	= Button(main, image=self.logos[2], bd=1, command=lambda: self.on_drive_system_filename_choice_button(self.selection_drive_list[1], self.state_system_choice))
+		self.button_PS3 	= Button(main, image=self.logos[3], bd=1, command=lambda: self.on_drive_system_filename_choice_button(self.state_drive_choice, self.selection_system_list[3]))
+
+		# dark side save-button
+		self.save_button = Button(main, text="Save", command=self.on_save_button, bd=1, bg="#FBFCFB")
+
 		# Placements
 		self.title_id_text_id 	= self.canvas.create_text(title_id_text_x_pos,	title_id_text_y_pos,	text=text_title_id,	fill="White", font=("Helvetica", 15))
-		self.title_text_id 		= self.canvas.create_text(title_text_x_pos,		title_text_y_pos, 		text=text_title, 	fill="White", font=("Helvetica", 15))
+		self.title_text_id 		= self.canvas.create_text(title_text_x_pos,	title_text_y_pos, 		text=text_title, 	fill="White", font=("Helvetica", 15))
 		self.title_filename 	= self.canvas.create_text(filename_text_x_pos,	filename_text_y_pos, 	text=text_filename,	fill="White", font=("Helvetica", 15))
 		self.iso_path_text_id 	= self.canvas.create_text(iso_path_text_x_pos,	iso_path_text_y_pos,	text=text_iso_path,	fill="White", font=("Helvetica", 15))
 
@@ -104,35 +122,26 @@ class Main():
 		self.entry_field_filename 	= Entry(main)
 		self.entry_field_iso_path	= Entry(main, state='disabled')
 
-		self.entry_field_title_id.place(x=text_box_spacing + iso_path_text_x_pos, y=title_id_text_y_pos	-height_of_text/3, width=200)
-		self.entry_field_title.place(	x=text_box_spacing + iso_path_text_x_pos, y=title_text_y_pos	-height_of_text/3, width=200)
-		self.entry_field_filename.place(x=text_box_spacing + iso_path_text_x_pos, y=filename_text_y_pos -height_of_text/3, width=200)
-		self.entry_field_iso_path.place(x=text_box_spacing + iso_path_text_x_pos, y=iso_path_text_y_pos -height_of_text/3, width=200)
+		self.entry_field_title_id.place(	x=text_box_spacing + iso_path_text_x_pos, y=title_id_text_y_pos	-height_of_text/3, width=200)
+		self.entry_field_title.place(		x=text_box_spacing + iso_path_text_x_pos, y=title_text_y_pos		-height_of_text/3, width=200)
+		self.entry_field_filename.place(	x=text_box_spacing + iso_path_text_x_pos, y=filename_text_y_pos	-height_of_text/3, width=200)
+		self.entry_field_iso_path.place(	x=text_box_spacing + iso_path_text_x_pos, y=iso_path_text_y_pos	-height_of_text/3, width=200)
 
-		############################################
+		self.button_hdd0.place(x=main_offset_x_pos + 0 * 29, y=main_offset_y_pos -80)
+		self.button_usb0.place(x=main_offset_x_pos + 3 * 29, y=main_offset_y_pos -80)
+
+		self.button_PSP.place(x=main_offset_x_pos + 0 * 29, y=main_offset_y_pos -40)
+		self.button_PSX.place(x=main_offset_x_pos + 3 * 29, y=main_offset_y_pos -40)
+		self.button_PS2.place(x=main_offset_x_pos + 6 * 29, y=main_offset_y_pos -40)
+		self.button_PS3.place(x=main_offset_x_pos + 9 * 29, y=main_offset_y_pos -40)
+
+		self.save_button.place(x=text_box_spacing 	+  iso_path_text_x_pos + 168, y=iso_path_text_y_pos + 20)
+
+		####################################################################
+		# Adding an onChange -listener on 'entry_field_filename'
 		self.generateOnChange(self.entry_field_filename)
 		self.entry_field_filename.bind('<<Change>>', self.onEntryChanged)
-		############################################
-
-		# system choice buttons
-		self.selection_drive_list	= ['dev_hdd0', 'dev_hdd1', 'dev_usb00x']	# usb port 'x' should be selected through a list
-		self.selection_system_list	= ['PSP', 'PSX', 'PS2', 'PS3']
-		self.drive_path 			= self.selection_drive_list[0] 				# drive should be toggled by buttons
-
-		self.button_PSP = Button(main, image=self.logos[0], bd=1, command=lambda: self.on_drive_system_filename_choice_button(self.state_drive_choice, self.selection_system_list[0]))
-		self.button_PSX = Button(main, image=self.logos[1], bd=1, command=lambda: self.on_drive_system_filename_choice_button(self.selection_drive_list[0], self.state_system_choice))
-		self.button_PS2 = Button(main, image=self.logos[2], bd=1, command=lambda: self.on_drive_system_filename_choice_button(self.selection_drive_list[1], self.state_system_choice))
-		self.button_PS3 = Button(main, image=self.logos[3], bd=1, command=lambda: self.on_drive_system_filename_choice_button(self.state_drive_choice, self.selection_system_list[3]))
-
-		self.button_PSP.place(x=main_offset_x_pos + 0 * 29, y=40)
-		self.button_PSX.place(x=main_offset_x_pos + 3 * 29, y=40)
-		self.button_PS2.place(x=main_offset_x_pos + 6 * 29, y=40)
-		self.button_PS3.place(x=main_offset_x_pos + 9 * 29, y=40)
-
-
-		# dark side save-button
-		self.save_button = Button(main, text="Save", command=self.on_save_button, bd=1, bg="#FBFCFB")
-		self.save_button.place(x=text_box_spacing 	+  iso_path_text_x_pos + 168, y=iso_path_text_y_pos + 20)
+		####################################################################
 
 	def init_main_window_buttons(self, main):
 		# button to quit
@@ -166,14 +175,7 @@ class Main():
 			self.state_drive_choice	= drive_choice
 			self.state_system_choice = system_choice
 
-			if drive_choice is '':
-				self.state_drive_choice = 'dev_hdd0'
-				print('DEBUG Setting default_drive -> ' + self.state_drive_choice)
-			if system_choice is '':
-				self.state_system_choice = 'PS2'
-				print('DEBUG Setting default_system -> ' + self.state_system_choice)
-
-			current_iso_path = '/' + self.state_drive_choice + '/' + self.state_system_choice + '/'
+			current_iso_path = '/' + self.state_drive_choice + '/' + self.state_system_choice + '/' + self.entry_field_filename.get()
 			self.entry_field_iso_path.config(state=NORMAL)
 			self.entry_field_iso_path.delete(0, END)
 			self.entry_field_iso_path.insert(0, current_iso_path)
@@ -282,11 +284,17 @@ class Main():
 	        '''.format(widget=str(obj)))
 
 	def onEntryChanged(self, event):
+		drive = ''
+		system = ''
+		filename = event.widget.get()
 
-		new_filename = event.widget.get()
-		print("Filename: " + new_filename)
-		iso_path = '/' + self.state_drive_choice + '/' + self.state_system_choice + '/' + new_filename
-		print("iso_path: " + iso_path)
+		if self.state_drive_choice is not '':
+			drive = '/' + self.state_drive_choice + '/'
+		if self.state_drive_choice is not '':
+			system = '/' + self.state_system_choice + '/'
+
+		iso_path = drive + system + filename
+		iso_path = iso_path.replace('//', '/')
 
 		self.entry_field_iso_path.config(state=NORMAL)
 		self.entry_field_iso_path.delete(0, END)
