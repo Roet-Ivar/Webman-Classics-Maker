@@ -9,6 +9,7 @@ else:
 	from tkinter import *
 	from tkinter.font import Font
 
+import pillow_egg.pillow as Pillow
 
 class Main():
 
@@ -33,22 +34,28 @@ class Main():
 
 		# images
 		self.logo_drives = []
-		self.logo_drives.append(PhotoImage(file='drive_hdd0_4.gif'))
-		self.logo_drives.append(PhotoImage(file='drive_usb0_4.gif'))
+		# self.logo_drives.append(PhotoImage(file='drive_hdd0.gif'))
+		# im = Pillow.Image.open("photo.png")
+		# photo = Pillow.ImageTk.PhotoImage(Pillow.Image.open("drive_hdd0.gif"))
+
+
+		self.logo_drives.append(Pillow.ImageTk.PhotoImage(Pillow.Image.open("logo_drive_hdd.gif")))
+		self.logo_drives.append(PhotoImage(file='logo_drive_usb.gif'))
 
 		self.logo_systems = []
-		self.logo_systems.append(PhotoImage(file='logo_PSP_3.gif'))
-		self.logo_systems.append(PhotoImage(file='logo_PSX_3.gif'))
-		self.logo_systems.append(PhotoImage(file='logo_PS2_3.gif'))
-		self.logo_systems.append(PhotoImage(file='logo_PS3_3.gif'))
+		self.logo_systems.append(PhotoImage(file='logo_system_PSP.gif'))
+		self.logo_systems.append(PhotoImage(file='logo_system_PSX.gif'))
+		self.logo_systems.append(PhotoImage(file='logo_system_PS2.gif'))
+		self.logo_systems.append(PhotoImage(file='logo_system_PS3.gif'))
 
 		self.wallpapers = []
-		self.wallpapers.append(PhotoImage(file='gui_background_1920_1080_merged.gif'))
-		self.wallpapers.append(PhotoImage(file='gui_background_1920_1080_dark.gif'))
-		self.wallpapers.append(PhotoImage(file='gui_background_1920_1080.gif'))
-		self.wallpapers.append(PhotoImage(file='ps3_blue_waves_1920_1080.gif'))
-		self.wallpapers.append(PhotoImage(file='ps3_blue_waves_2_1920_1080.gif'))
-		self.wallpapers.append(PhotoImage(file='ps3_blue_waves_3_1920_1080.gif'))
+		self.wallpapers.append(PhotoImage(file='background_light_dark_1920_1080.gif'))
+		self.wallpapers.append(PhotoImage(file='background_dark_1920_1080.gif'))
+		self.wallpapers.append(PhotoImage(file='background_light_1920_1080.gif'))
+		self.wallpapers.append(PhotoImage(file='background_dark_blue_symbols_1920_1080.gif'))
+		self.wallpapers.append(PhotoImage(file='background_light_blue_waves_1920_1080.gif'))
+		self.wallpapers.append(PhotoImage(file='background_light_blue_symbols_1920_1080.gif'))
+
 
 
 		# set first image on canvas
@@ -219,7 +226,6 @@ class Main():
 	def on_save_button(self):
 		# do stuff
 		self.validate_title_id()
-		# self.validate_filename()
 
 		self.save_pkg_info_to_json()
 
