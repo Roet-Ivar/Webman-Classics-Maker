@@ -4,6 +4,7 @@ import sys
 if sys.version_info[0] < 3:
 	from Tkinter import *
 	from tkFont import Font
+
 else:
 	from tkinter import *
 	from tkinter.font import Font
@@ -21,7 +22,6 @@ class Main():
 		self.state_drive_choice		= 'dev_hdd0'
 		self.state_system_choice	= 'PS2'
 		self.state_filename_choice	= ''
-		self.state_filetype_choice	= '.ISO'
 
 		self.entry_field_title_id 	= None
 		self.entry_field_title 		= None
@@ -33,18 +33,14 @@ class Main():
 
 		# images
 		self.logo_drives = []
-		self.logo_drives.append(PhotoImage(file='drive_hdd0_3.gif'))
-		self.logo_drives.append(PhotoImage(file='drive_usb0_3.gif'))
+		self.logo_drives.append(PhotoImage(file='drive_hdd0_4.gif'))
+		self.logo_drives.append(PhotoImage(file='drive_usb0_4.gif'))
 
 		self.logo_systems = []
 		self.logo_systems.append(PhotoImage(file='logo_PSP_3.gif'))
 		self.logo_systems.append(PhotoImage(file='logo_PSX_3.gif'))
 		self.logo_systems.append(PhotoImage(file='logo_PS2_3.gif'))
 		self.logo_systems.append(PhotoImage(file='logo_PS3_3.gif'))
-
-		self.logo_filetype = []
-		self.logo_filetype.append(PhotoImage(file='file_type_bin.gif'))
-		self.logo_filetype.append(PhotoImage(file='file_type_iso_3.gif'))
 
 		self.wallpapers = []
 		self.wallpapers.append(PhotoImage(file='gui_background_1920_1080_merged.gif'))
@@ -119,9 +115,6 @@ class Main():
 		self.button_PS2 	= Button(main, image=self.logo_systems[2], bd=1, command=lambda: self.on_drive_system_filename_choice_button(self.state_drive_choice, self.selection_system_list[2]))
 		self.button_PS3 	= Button(main, image=self.logo_systems[3], bd=1, command=lambda: self.on_drive_system_filename_choice_button(self.state_drive_choice, self.selection_system_list[3]))
 
-		self.button_ISO = Button(main, image=self.logo_filetype[0], bd=1) #, command=lambda: self.on_drive_system_filename_choice_button(self.state_drive_choice, self.selection_system_list[0]))
-		self.button_BIN = Button(main, image=self.logo_filetype[1], bd=1) #, command=lambda: self.on_drive_system_filename_choice_button(self.state_drive_choice, self.selection_system_list[ 1]))
-
 		# dark side save-button
 		self.save_button = Button(main, text="Save", command=self.on_save_button, bd=1, bg="#FBFCFB")
 
@@ -143,9 +136,6 @@ class Main():
 		self.button_PSX.place(	x=main_offset_x_pos + 3 * 29, y=main_offset_y_pos -80)
 		self.button_PS2.place(	x=main_offset_x_pos + 6 * 29, y=main_offset_y_pos -80)
 		self.button_PS3.place(	x=main_offset_x_pos + 9 * 29, y=main_offset_y_pos -80)
-
-		self.button_BIN.place(x=main_offset_x_pos + 0 * 29, y=main_offset_y_pos - 40)
-		self.button_ISO.place(x=main_offset_x_pos + 3 * 29, y=main_offset_y_pos - 40)
 
 		self.save_button.place(x=text_box_spacing 	+  iso_path_text_x_pos + 168, y=iso_path_text_y_pos + 20)
 
@@ -228,6 +218,8 @@ class Main():
 
 	def on_save_button(self):
 		# do stuff
+		self.validate_title_id()
+		# self.validate_filename()
 
 		self.save_pkg_info_to_json()
 
@@ -236,19 +228,8 @@ class Main():
 			json_data = json.load(f)
 
 		try:
-			title_id = self.entry_field_title_id.get().upper()
-
-			if len(title_id) > self.maxlength:
-				title_id = title_id[0:self.maxlength]
-			elif len(title_id) < self.maxlength:
-				title_id = title_id + 'XXXXXXXX'
-				title_id = title_id[0:self.maxlength]
-
-			self.entry_field_title_id.delete(0, END)
-			self.entry_field_title_id.insert(0, title_id)
-
 			json_data['title']=str(self.entry_field_title.get())
-			json_data['title_id']=title_id
+			json_data['title_id']=self.entry_field_title_id.get()
 			json_data['content_id']='UP0001-'+ self.entry_field_title_id.get() + '_00-0000000000000000'
 			json_data['iso_filepath']=str(self.entry_field_iso_path.get())
 
@@ -259,42 +240,29 @@ class Main():
 		except ValueError:
 			print('File write error/PKGLAUNCH not found/titel_id not a string')
 
+	# Ensure title_id doesn't exceed 8 characters
 	def validate(self, P):
 		if len(P) > self.maxlength:
-			print('DEBUG Title ID longer than 8 characters!')
+			# re-activates listener
 			main_window.after_idle(lambda: self.entry_field_title_id.config(validate='key'))
 			return None  # new value too long
 		else:
 			print('DEBUG Title ID: ' + P)
 			return True
 
-	def generateOnChange(self, obj):
-		obj.tk.eval('''
-	            proc widget_proxy {widget widget_command args} {
+	# Ensures title id is exactly 8 characters during save
+	def validate_title_id(self):
+		title_id = self.entry_field_title_id.get().upper()
+		if len(title_id) < self.maxlength:
+			title_id = title_id + 'XXXXXXXX'
+			title_id = title_id[0:self.maxlength]
 
-	                # call the real tk widget command with the real args
-	                set result [uplevel [linsert $args 0 $widget_command]]
+		self.entry_field_title_id.delete(0, END)
+		self.entry_field_title_id.insert(0, title_id)
 
-	                # generate the event for certain types of commands
-	                if {([lindex $args 0] in {insert replace delete}) ||
-	                    ([lrange $args 0 2] == {mark set insert}) || 
-	                    ([lrange $args 0 1] == {xview moveto}) ||
-	                    ([lrange $args 0 1] == {xview scroll}) ||
-	                    ([lrange $args 0 1] == {yview moveto}) ||
-	                    ([lrange $args 0 1] == {yview scroll})} {
 
-	                    event generate  $widget <<Change>> -when tail
-	                }
 
-	                # return the result from the real widget command
-	                return $result
-	            }
-	            ''')
-		obj.tk.eval('''
-	            rename {widget} _{widget}
-	            interp alias {{}} ::{widget} {{}} widget_proxy {widget} _{widget}
-	        '''.format(widget=str(obj)))
-
+	# Dynamic update of the 'entry_field_filename' into the 'entry_field_iso_path'
 	def onEntryChanged(self, event):
 		drive = ''
 		system = ''
@@ -315,6 +283,33 @@ class Main():
 
 		current_filename = self.entry_field_iso_path.get()
 		print("entry_field_iso_path: " + current_filename)
+
+	def generateOnChange(self, obj):
+		obj.tk.eval('''
+				proc widget_proxy {widget widget_command args} {
+
+					# call the real tk widget command with the real args
+					set result [uplevel [linsert $args 0 $widget_command]]
+
+					# generate the event for certain types of commands
+					if {([lindex $args 0] in {insert replace delete}) ||
+						([lrange $args 0 2] == {mark set insert}) || 
+						([lrange $args 0 1] == {xview moveto}) ||
+						([lrange $args 0 1] == {xview scroll}) ||
+						([lrange $args 0 1] == {yview moveto}) ||
+						([lrange $args 0 1] == {yview scroll})} {
+
+						event generate  $widget <<Change>> -when tail
+					}
+
+					# return the result from the real widget command
+					return $result
+				}
+				''')
+		obj.tk.eval('''
+				rename {widget} _{widget}
+				interp alias {{}} ::{widget} {{}} widget_proxy {widget} _{widget}
+			'''.format(widget=str(obj)))
 
 canvas_width = 1920
 canvas_height = 1080
