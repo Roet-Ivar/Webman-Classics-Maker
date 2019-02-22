@@ -2,28 +2,23 @@ import json
 import sys
 
 if sys.version_info[0] < 3:
-	from Tkinter import *
-	from tkFont import Font
+	from tkinter_27_32 import *
+	from tkinter_27_32.font import Font
 	from pillow_egg_27_32.pillow import Image
 	from pillow_egg_27_32.pillow import ImageTk
-
-	# import pillow_egg_27_32.pillow as PIL
-	# from tkinter_27_32 import *
-	# import tk_27_32.tkFont as Font
+	from pillow_egg_27_32.pillow import PhotoImage
 
 else:
+	# from tkinter_37_32 import *
 	from tkinter import *
-	from tkinter.font import Font
+	from tkinter_37_32.font import Font
 	from pillow_egg_37_32.pillow import Image
 	from pillow_egg_37_32.pillow import ImageTk
+	from pillow_egg_37_32.pillow import PhotoImage
 
-
-	# import pillow_egg_37_32.pillow as PIL
-	# from tkinter_37_32 import *
-	# from tkinter_37_32.font import Font
-	# from tkinter_37_32.font import Font
 
 class Main():
+
 	def __init__(self, main):
 		self.vcmd = main.register(self.validate)
 		self.vcmd2 = main.register(self.validate)
@@ -45,8 +40,7 @@ class Main():
 		# images
 		self.logo_drives = []
 
-		self.logo_drives.append(ImageTk.PhotoImage(Image.open("logo_drive_hdd.gif")))
-		self.logo_drives.append(PhotoImage(file='logo_drive_hdd.gif'))
+		self.logo_drives.append(PhotoImage(Image.open("logo_drive_hdd.gif")))
 		self.logo_drives.append(PhotoImage(file='logo_drive_usb.gif'))
 
 		self.logo_systems = []

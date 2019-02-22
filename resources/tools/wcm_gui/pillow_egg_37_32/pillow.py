@@ -9,4 +9,5 @@ print('pillow_dir: ' + pillow_dir)
 sys.path.append(os.path.join(DIR, pillow_dir))
 
 from PIL import Image
+from PIL.ImageTk import PhotoImage
 from PIL import ImageTk
