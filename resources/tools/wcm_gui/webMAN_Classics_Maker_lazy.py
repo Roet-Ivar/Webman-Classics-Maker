@@ -4,7 +4,8 @@ import sys
 if sys.version_info[0] < 3:
 	from Tkinter import *
 	from tkFont import Font
-	import pillow_egg_27_32.pillow as PIL
+	from pillow_egg_27_32.pillow import Image
+	from pillow_egg_27_32.pillow import ImageTk
 
 	# import pillow_egg_27_32.pillow as PIL
 	# from tkinter_27_32 import *
@@ -13,10 +14,13 @@ if sys.version_info[0] < 3:
 else:
 	from tkinter import *
 	from tkinter.font import Font
-	import pillow_egg_37_32.pillow as PIL
+	from pillow_egg_37_32.pillow import Image
+	from pillow_egg_37_32.pillow import ImageTk
+
 
 	# import pillow_egg_37_32.pillow as PIL
 	# from tkinter_37_32 import *
+	# from tkinter_37_32.font import Font
 	# from tkinter_37_32.font import Font
 
 class Main():
@@ -41,11 +45,7 @@ class Main():
 		# images
 		self.logo_drives = []
 
-		# im = Pillow.Image.open("photo.png")
-		# photo = Pillow.ImageTk.PhotoImage(Pillow.Image.open("drive_hdd0.gif"))
-
-
-		# self.logo_drives.append(PIL.ImageTk.PhotoImage(PIL.Image.open("logo_drive_hdd.gif")))
+		self.logo_drives.append(ImageTk.PhotoImage(Image.open("logo_drive_hdd.gif")))
 		self.logo_drives.append(PhotoImage(file='logo_drive_hdd.gif'))
 		self.logo_drives.append(PhotoImage(file='logo_drive_usb.gif'))
 
