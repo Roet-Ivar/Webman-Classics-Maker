@@ -9,8 +9,7 @@ if sys.version_info[0] < 3:
 	from pillow_egg_27_32.pillow import PhotoImage
 
 else:
-	# from tkinter_37_32 import *
-	from tkinter import *
+	from tkinter_37_32 import *
 	from tkinter_37_32.font import Font
 	from pillow_egg_37_32.pillow import Image
 	from pillow_egg_37_32.pillow import ImageTk
@@ -72,7 +71,7 @@ class Main():
 		text_filename			= 'FILENAME'
 		text_iso_path			= 'ISO PATH'
 
-		height_of_text 			= Font(font='Helvetica').metrics('linespace')
+		height_of_text 			= 10 #Font(font='Helvetica').metrics('linespace')
 		width_of_title_id_text 	= Font(size=15, family='Helvetica').measure(text_title_id)
 		width_of_title_text 	= Font(size=15, family='Helvetica').measure(text_title)
 		width_of_filename_text	= Font(size=15, family='Helvetica').measure(text_filename)
