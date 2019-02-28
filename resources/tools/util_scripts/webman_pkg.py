@@ -1,21 +1,26 @@
 
 from __future__ import with_statement
-import struct, sys, shutil, json
+import struct, sys, os, shutil, json
 
-def import_pkgcrypt():
-	global pkgcrypt
+CURRENT_DIR = os.path.dirname(__file__)
+PKGCRYPT_DIR = 'pkgcrypt'
+pkgcrypt_ver = 'py'
+
+# check python version less than 3
+if sys.version_info[0]<3:
+	pkgcrypt_ver += '27_'
+# check if python runs as 32 or 64 bit
+if struct.calcsize('P') * 8 == 64:
+	pkgcrypt_ver += '64'
+else:
+	pkgcrypt_ver += '32'
+
+sys.path.append(os.path.join(CURRENT_DIR, PKGCRYPT_DIR, pkgcrypt_ver))
+
+try:
 	import pkgcrypt
-
-if 'pkgcrypt' not in sys.modules:
-	from time import sleep
-	while True:
-		try:
-			import_pkgcrypt()
-			print('import of \'pkgcrypt\' success')
-			break
-		except Exception, e:
-			sleep(1/2)  # Time in seconds.
-			print('import of \'pkgcrypt\' failed: \n' + str(e))
+except Exception, e:
+	print(e)
 
 class StructType(tuple):
 	def __getitem__(self, value):
