@@ -2,7 +2,7 @@ import os
 import sys
 
 DIR = os.path.dirname(__file__)
-pillow_dir = 'Pillow-5.4.1-py2.7-win32.egg'
+pillow_dir = 'Pillow-5.4.1-py2.7-win-amd64.egg'
 
 print('DIR: ' + DIR)
 print('pillow_dir: ' + pillow_dir)

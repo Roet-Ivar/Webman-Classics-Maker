@@ -1,19 +1,23 @@
 import json
 import sys
 
-if sys.version_info[0] < 3:
-	from tkinter_27_32 import *
-	from tkinter_27_32.font import Font
-	from pillow_egg_27_32.pillow import Image
-	from pillow_egg_27_32.pillow import ImageTk
-	from pillow_egg_27_32.pillow import PhotoImage
+try:
+	print('except')
+	from tkinter import *
+	from tkinter.font import Font
 
-else:
-	from tkinter_37_32 import *
-	from tkinter_37_32.font import Font
-	from pillow_egg_37_32.pillow import Image
-	from pillow_egg_37_32.pillow import ImageTk
-	from pillow_egg_37_32.pillow import PhotoImage
+	from pillow_egg_27_64.pillow import Image
+	from pillow_egg_27_64.pillow import ImageTk
+	from pillow_egg_27_64.pillow import PhotoImage
+
+except:
+	print('except')
+	from Tkinter import *
+
+	from PIL import Image
+	from PIL import ImageTk
+	from PIL.ImageTk import PhotoImage
+
 
 
 class Main():
@@ -72,15 +76,26 @@ class Main():
 		text_iso_path			= 'ISO PATH'
 
 		height_of_text 			= 10 #Font(font='Helvetica').metrics('linespace')
-		width_of_title_id_text 	= Font(size=15, family='Helvetica').measure(text_title_id)
-		width_of_title_text 	= Font(size=15, family='Helvetica').measure(text_title)
-		width_of_filename_text	= Font(size=15, family='Helvetica').measure(text_filename)
-		width_of_iso_path_text 	= Font(size=15, family='Helvetica').measure(text_iso_path)
+		try:
+			height_of_text = Font(font='Helvetica').metrics('linespace')
+			width_of_title_id_text 	= Font(size=15, family='Helvetica').measure(text_title_id)
+			width_of_title_text 	= Font(size=15, family='Helvetica').measure(text_title)
+			width_of_filename_text	= Font(size=15, family='Helvetica').measure(text_filename)
+			width_of_iso_path_text 	= Font(size=15, family='Helvetica').measure(text_iso_path)
 
-		# print('DEBUG height_of_text: ' 			+ str(height_of_text))
-		# print('DEBUG width_of_title_id_text: '	+ str(width_of_title_id_text))
-		# print('DEBUG width_of_title_text: '		+ str(width_of_title_text))
-		# print('DEBUG width_of_iso_path_text: '	+ str(width_of_iso_path_text))
+			print('height_of_text' + str(height_of_text))
+			print('width_of_title_id_text' +  str(width_of_title_id_text))
+			print('width_of_title_text' + str(width_of_title_text))
+			print('width_of_filename_text' + str(width_of_filename_text))
+			print('width_of_iso_path_text' +  str(width_of_iso_path_text))
+		except Exception, e:
+			# print(e)
+			height_of_text = 18
+			width_of_title_id_text 	= 80
+			width_of_title_text 	= 54
+			width_of_filename_text	= 98
+			width_of_iso_path_text 	= 92
+
 
 		# paddings
 		dark_side_padding		= 20
@@ -327,7 +342,10 @@ main_window = Tk()
 # changing the title of our master widget
 main_window.title('webMAN Classics Maker UI')
 # icon upper left corner
-main_window.iconbitmap(r'../../images/webman.ico')
+try:
+	main_window.iconbitmap(r'../../images/webman.ico')
+except:
+	print('error applying icon, linux problem?')
 
 main_window.geometry(str(main_window_width) + 'x' + str(main_window_height))
 Main(main_window)
