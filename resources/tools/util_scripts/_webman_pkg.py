@@ -22,6 +22,23 @@ TYPE_OVERWRITE_ALLOWED = 0x80000000
 
 debug = False
 
+# pkgcrypt = None
+
+def import_pkgcrypt():
+	global pkgcrypt
+	import pkgcrypt
+
+if 'pkgcrypt' not in sys.modules:
+	from time import sleep
+	while True:
+		try:
+			import_pkgcrypt()
+			print('import of \'pkgcrypt\' success')
+			break
+		except Exception, e:
+			sleep(0.001)  # Time in seconds.
+			print('import of \'pkgcrypt\' failed')
+
 class EbootMeta(Sstruct):
 	__endian__ = Sstruct.BE
 	def __format__(self):
@@ -64,6 +81,9 @@ class DigestBlock(Sstruct):
 		self.type 	= Sstruct.uint32
 		self.size 	= Sstruct.uint32
 		self.isNext = Sstruct.uint64
+
+
+
 class FileHeader(Sstruct):
 	__endian__ = Sstruct.BE
 	def __format__(self):
@@ -228,14 +248,16 @@ def setContextNum(key, tmpnum):
 	key[0x3e] = ord(tmpchrs[6])
 	key[0x3f] = ord(tmpchrs[7])
 
-print('MY_PATH: ' + str(sys.path))
-import pkgcrypt
+
 
 def crypt(key, inbuf, length):
 	if not isinstance(key, list):
 		return ""
 	# Call our ultra fast c implemetation
+
+
 	return pkgcrypt.pkgcrypt(listToString(key), inbuf, length);
+
 
 	# Original python (slow) implementation
 	ret = ""
@@ -257,6 +279,7 @@ def SHA1(data):
 	return m.digest()
 
 pkgcrypt.register_sha1_callback(SHA1)
+
 	
 def listPkg(filename):
 	with open(filename, 'rb') as fp:
@@ -652,9 +675,10 @@ class Webman_pkg:
 					for file in files:
 						if file.endswith('.pyc') is True:
 							os.remove(file)
-				
-				print('Execution of \'create_pkg.py\': Done')
-				print('------------------------------------------------\n' + 'Package created: ' + '/builds/' + pkg_name)
+
+				print('Execution of \'webman_pkg.py\':             Done')
+				print('-----------------------------------------------\n')
+				print('Package created: ' + '/builds/' + pkg_name + '\n')
 			else:
 				usage()
 				sys.exit(2)
