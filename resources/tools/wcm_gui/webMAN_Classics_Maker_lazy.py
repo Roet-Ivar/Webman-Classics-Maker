@@ -1,22 +1,13 @@
 import json
 import sys
 
-try:
-	print('except')
-	from tkinter import *
-	from tkinter.font import Font
+from Tkinter import *
+from tkFont import Font
 
-	from pillow_egg_27_64.pillow import Image
-	from pillow_egg_27_64.pillow import ImageTk
-	from pillow_egg_27_64.pillow import PhotoImage
+from pillow_egg_27_64.pillow import Image
+from pillow_egg_27_64.pillow import ImageTk
+from pillow_egg_27_64.pillow import PhotoImage
 
-except:
-	print('except')
-	from Tkinter import *
-
-	from PIL import Image
-	from PIL import ImageTk
-	from PIL.ImageTk import PhotoImage
 
 
 
@@ -75,26 +66,17 @@ class Main():
 		text_filename			= 'FILENAME'
 		text_iso_path			= 'ISO PATH'
 
-		height_of_text 			= 10 #Font(font='Helvetica').metrics('linespace')
-		try:
-			height_of_text = Font(font='Helvetica').metrics('linespace')
-			width_of_title_id_text 	= Font(size=15, family='Helvetica').measure(text_title_id)
-			width_of_title_text 	= Font(size=15, family='Helvetica').measure(text_title)
-			width_of_filename_text	= Font(size=15, family='Helvetica').measure(text_filename)
-			width_of_iso_path_text 	= Font(size=15, family='Helvetica').measure(text_iso_path)
+		height_of_text = Font(font='Helvetica').metrics('linespace')
+		width_of_title_id_text 	= Font(size=15, family='Helvetica').measure(text_title_id)
+		width_of_title_text 	= Font(size=15, family='Helvetica').measure(text_title)
+		width_of_filename_text	= Font(size=15, family='Helvetica').measure(text_filename)
+		width_of_iso_path_text 	= Font(size=15, family='Helvetica').measure(text_iso_path)
 
-			print('height_of_text' + str(height_of_text))
-			print('width_of_title_id_text' +  str(width_of_title_id_text))
-			print('width_of_title_text' + str(width_of_title_text))
-			print('width_of_filename_text' + str(width_of_filename_text))
-			print('width_of_iso_path_text' +  str(width_of_iso_path_text))
-		except Exception, e:
-			# print(e)
-			height_of_text = 18
-			width_of_title_id_text 	= 80
-			width_of_title_text 	= 54
-			width_of_filename_text	= 98
-			width_of_iso_path_text 	= 92
+		print('height_of_text' + str(height_of_text))
+		print('width_of_title_id_text' +  str(width_of_title_id_text))
+		print('width_of_title_text' + str(width_of_title_text))
+		print('width_of_filename_text' + str(width_of_filename_text))
+		print('width_of_iso_path_text' +  str(width_of_iso_path_text))
 
 
 		# paddings
@@ -159,7 +141,7 @@ class Main():
 		self.button_PS2.place(	x=main_offset_x_pos + 6 * 29, y=main_offset_y_pos -80)
 		self.button_PS3.place(	x=main_offset_x_pos + 9 * 29, y=main_offset_y_pos -80)
 
-		self.save_button.place(x=text_box_spacing 	+  iso_path_text_x_pos + 168, y=iso_path_text_y_pos + 20)
+		self.save_button.place(x=text_box_spacing + iso_path_text_x_pos, y=iso_path_text_y_pos + 20)
 
 		####################################################################
 		# Adding an onChange -listener on 'entry_field_filename'
