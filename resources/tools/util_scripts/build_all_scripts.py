@@ -7,12 +7,13 @@ from edit_launch_txt import Edit_launch_txt
 from webman_pkg import Webman_pkg
 
 current_path= os.getcwd()
-print('current_path: ' + current_path)
+# print('current_path: ' + current_path)
 if 'util_scripts' not in os.getcwd():
-	os.chdir(os.path.dirname(os.path.realpath(__file__)))
+    os.chdir('./resources/tools/util_scripts/')
+    os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
-print('__file__:' + __file__)
-print('real path:' + os.path.dirname(os.path.realpath(__file__)))
+# print('__file__:' + __file__)
+# print('real path:' + os.path.dirname(os.path.realpath(__file__)))
 
 param_sfo_to_json = Param_to_json()
 param_sfo_to_json.execute()
