@@ -64,9 +64,9 @@ Credits goes to all of you guys!
 
 # Windows dev environment setup 
 
-install python2.7.xx x86_64 (https://www.python.org/downloads/release/python-2715/)
-pip install pillow
-pip install pyinstaller
+* install python2.7.xx x86_64 (https://www.python.org/downloads/release/python-2715/)
+* pip install pillow
+* pip install pyinstaller
 
 **Building executables**
 Run the pyinstaller-scipts located in:
@@ -76,11 +76,11 @@ You now have a brand new **Build_Webman_PKG.exe** / **Edit_Param_SFO.exe** / **F
 
 # Linux dev environment setup
 
-sudo apt-get update
-sudo apt-get install python2.7
-sudo apt-get install python-tk
-pip install pillow
-pip install pyinstaller
+* sudo apt-get update
+* sudo apt-get install python2.7
+* sudo apt-get install python-tk
+* pip install pillow
+* pip install pyinstaller
 
 **Building executables**
 Right now you can't build any executables for linux
