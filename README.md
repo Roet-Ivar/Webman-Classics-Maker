@@ -61,14 +61,27 @@ Credits goes to all of you guys!
 * Sometimes at first boot the game hangs on blackscreen, reboot and start it again. This is mostly due to modifications of the same game w/o reboots.
 	
 ---------------------------------------------------------------------------------------------------
-# BUILD SCRIPTS: Windows
 
-1. Install python 2.7.x x86 + pyinstaller lib
+# Windows dev environment setup 
 
-2. Windows: Run the pyinstaller-scipts located in:
+install python2.7.xx x86_64 (https://www.python.org/downloads/release/python-2715/)
+pip install pillow
+pip install pyinstaller
+
+**Building executables**
+Run the pyinstaller-scipts located in:
 /Webman-Classics-Maker/resources/tools/util_scripts/_pyinstaller_and_release_scripts/
 
 You now have a brand new **Build_Webman_PKG.exe** / **Edit_Param_SFO.exe** / **FTP_Game_List.exe** based on the changes you made in the scripts
 
-# BUILD SCRIPTS: Linux
-1. There are nothing to build, only edit and run the python scripts of your liking
+# Linux dev environment setup
+
+sudo apt-get update
+sudo apt-get install python2.7
+sudo apt-get install python-tk
+pip install pillow
+pip install pyinstaller
+
+**Building executables**
+Right now you can't build any executables for linux
+
