@@ -69,6 +69,7 @@ Credits goes to all of you guys!
 * pip install pyinstaller
 
 **Building executables**
+
 Run the pyinstaller-scipts located in:
 /Webman-Classics-Maker/resources/tools/util_scripts/_pyinstaller_and_release_scripts/
 
