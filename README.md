@@ -72,7 +72,11 @@ Credits goes to all of you guys!
 Run the pyinstaller-scipts located in:
 /Webman-Classics-Maker/resources/tools/util_scripts/_pyinstaller_and_release_scripts/
 
-You now have a brand new **Build_Webman_PKG.exe** / **Edit_Param_SFO.exe** / **FTP_Game_List.exe** based on the changes you made in the scripts
+You now have a brand new executables based on the changes you made in the scripts:
+
+* **Build_Webman_PKG.exe**
+* **Edit_Param_SFO.exe** 
+* **FTP_Game_List.exe** 
 
 # Linux dev environment setup
 
@@ -83,5 +87,6 @@ You now have a brand new **Build_Webman_PKG.exe** / **Edit_Param_SFO.exe** / **F
 * pip install pyinstaller
 
 **Building executables**
+
 Right now you can't build any executables for linux
 
