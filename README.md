@@ -84,6 +84,7 @@ You now have a brand new executables based on the changes you made in the script
 * sudo apt-get update
 * sudo apt-get install python2.7
 * sudo apt-get install python-tk
+* sudo apt-get install python-pip
 * pip install pillow
 * pip install pyinstaller
 
