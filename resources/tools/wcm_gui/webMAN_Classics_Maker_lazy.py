@@ -33,25 +33,40 @@ class Main():
 
 		# images
 		self.logo_drives = []
-
 		self.logo_drives.append(PhotoImage(Image.open("logo_drive_hdd.gif")))
-		self.logo_drives.append(PhotoImage(file='logo_drive_usb.gif'))
+		self.logo_drives.append(PhotoImage(Image.open('logo_drive_usb.gif')))
 
 		self.logo_systems = []
-		self.logo_systems.append(PhotoImage(file='logo_system_PSP.gif'))
-		self.logo_systems.append(PhotoImage(file='logo_system_PSX.gif'))
-		self.logo_systems.append(PhotoImage(file='logo_system_PS2.gif'))
-		self.logo_systems.append(PhotoImage(file='logo_system_PS3.gif'))
+		self.logo_systems.append(PhotoImage(Image.open('logo_system_PSP.gif')))
+		self.logo_systems.append(PhotoImage(Image.open('logo_system_PSX.gif')))
+		self.logo_systems.append(PhotoImage(Image.open('logo_system_PS2.gif')))
+		self.logo_systems.append(PhotoImage(Image.open('logo_system_PS3.gif')))
 
 		self.wallpapers = []
-		self.wallpapers.append(PhotoImage(file='background_light_dark_1920_1080.gif'))
-		self.wallpapers.append(PhotoImage(file='background_dark_1920_1080.gif'))
-		self.wallpapers.append(PhotoImage(file='background_light_1920_1080.gif'))
-		self.wallpapers.append(PhotoImage(file='background_dark_blue_symbols_1920_1080.gif'))
-		self.wallpapers.append(PhotoImage(file='background_light_blue_waves_1920_1080.gif'))
-		self.wallpapers.append(PhotoImage(file='background_light_blue_symbols_1920_1080.gif'))
+		self.wallpapers.append(PhotoImage(Image.open('background_light_dark_1920_1080.gif')))
+		self.wallpapers.append(PhotoImage(Image.open('background_dark_1920_1080.gif')))
+		self.wallpapers.append(PhotoImage(Image.open('background_light_1920_1080.gif')))
+		self.wallpapers.append(PhotoImage(Image.open('background_dark_blue_symbols_1920_1080.gif')))
+		self.wallpapers.append(PhotoImage(Image.open('background_light_blue_waves_1920_1080.gif')))
+		self.wallpapers.append(PhotoImage(Image.open('background_light_blue_symbols_1920_1080.gif')))
 
+		image_pic1  = Image.open('../../pkg/PIC1.PNG')
+		image_icon0 = Image.open('../../pkg/ICON0.PNG')
 
+		pic1_x_scale		= 896.0/image_pic1.width
+		pic1_y_scale		= 504.0/image_pic1.height
+
+		icon0_width			= int(pic1_x_scale * image_icon0.width)
+		icon0_height 		= int(pic1_y_scale * image_icon0.height)
+
+		image_icon0 = image_icon0.crop((10, 10, image_icon0.width-10, image_icon0.height-10))
+
+		pic1_size			= (int(image_pic1.width*pic1_x_scale), int(image_pic1.height*pic1_y_scale))
+		icon0_size 			= (icon0_width, icon0_height)
+
+		self.pkg_images = []
+		self.pkg_images.append(PhotoImage(image_pic1.resize(pic1_size)))
+		self.pkg_images.append(PhotoImage(image_icon0.resize(icon0_size)))
 
 		# set first image on canvas
 		self.my_image_number = 0
@@ -119,13 +134,16 @@ class Main():
 		self.button_PS2 	= Button(main, image=self.logo_systems[2], bd=1, command=lambda: self.on_drive_system_filename_choice_button(self.state_drive_choice, self.selection_system_list[2]))
 		self.button_PS3 	= Button(main, image=self.logo_systems[3], bd=1, command=lambda: self.on_drive_system_filename_choice_button(self.state_drive_choice, self.selection_system_list[3]))
 
+		self.pkg_pic1		= Button(main, image=self.pkg_images[0], bd=1)
+		self.pkg_icon0		= Button(main, image=self.pkg_images[1], bd=1)
+
 		# dark side save-button
 		self.save_button = Button(main, text="Save", command=self.on_save_button, bd=1, bg="#FBFCFB")
 
 		# Placements
 		self.title_id_text_id 	= self.canvas.create_text(title_id_text_x_pos,	title_id_text_y_pos +2,	text=text_title_id,	fill="White", font=("Helvetica", 15))
-		self.title_text_id 		= self.canvas.create_text(title_text_x_pos,		title_text_y_pos	+2, 		text=text_title, 	fill="White", font=("Helvetica", 15))
-		self.title_filename 	= self.canvas.create_text(filename_text_x_pos,	filename_text_y_pos +2, 	text=text_filename,	fill="White", font=("Helvetica", 15))
+		self.title_text_id 		= self.canvas.create_text(title_text_x_pos,	title_text_y_pos	+2, text=text_title, 	fill="White", font=("Helvetica", 15))
+		self.title_filename 	= self.canvas.create_text(filename_text_x_pos,	filename_text_y_pos +2, text=text_filename,	fill="White", font=("Helvetica", 15))
 		self.iso_path_text_id 	= self.canvas.create_text(iso_path_text_x_pos,	iso_path_text_y_pos +2,	text=text_iso_path,	fill="White", font=("Helvetica", 15))
 
 		self.entry_field_title_id.place(	x=text_box_spacing + iso_path_text_x_pos, y=title_id_text_y_pos	-height_of_text/3, width=200)
@@ -140,6 +158,9 @@ class Main():
 		self.button_PSX.place(	x=main_offset_x_pos + 3 * 29, y=main_offset_y_pos -80)
 		self.button_PS2.place(	x=main_offset_x_pos + 6 * 29, y=main_offset_y_pos -80)
 		self.button_PS3.place(	x=main_offset_x_pos + 9 * 29, y=main_offset_y_pos -80)
+
+		self.pkg_pic1.place(x=10, y=200)
+		self.pkg_icon0.place(x=100, y=500)
 
 		self.save_button.place(x=text_box_spacing + iso_path_text_x_pos, y=iso_path_text_y_pos + 20)
 
@@ -324,10 +345,13 @@ main_window = Tk()
 # changing the title of our master widget
 main_window.title('webMAN Classics Maker UI')
 # icon upper left corner
-try:
-	main_window.iconbitmap(r'../../images/webman.ico')
-except:
-	print('error applying icon, linux problem?')
+
+if "linux" not in sys.platform:
+	print('linux')
+	main_window.iconbitmap('../../images/webman.ico')
+else:
+	main_window.iconbitmap('@../../images/webman_icon.xbm')
+
 
 main_window.geometry(str(main_window_width) + 'x' + str(main_window_height))
 Main(main_window)
