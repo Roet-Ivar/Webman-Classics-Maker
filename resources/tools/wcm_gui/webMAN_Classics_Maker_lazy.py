@@ -213,7 +213,8 @@ class Main():
 		self.image_pic1.paste(self.image_icon0, (425, 450), self.image_icon0)
 		self.image_pic1.save('test.png')
 		# test_img.paste(self.pkg_images[2], (0, 0), self.pkg_images[2])
-		os.startfile('test.png')
+		if "linux" not in sys.platform:
+			os.startfile('test.png')
 		# self.image_pic1.paste(self.image_icon0, (425, 500))
 
 		# self.canvas.create_text(200,500,fill="white",font="Helvetica 14 italic bold",
