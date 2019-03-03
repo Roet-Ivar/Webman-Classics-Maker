@@ -1,13 +1,21 @@
 import json
-import sys
+import struct
 
 from Tkinter import *
 from tkFont import Font
 
-from pillow_egg_27_64.pillow import Image
-from pillow_egg_27_64.pillow import ImageTk
-from pillow_egg_27_64.pillow import PhotoImage
-
+# check if python runs as 32 or 64 bit
+# if struct.calcsize('P') * 8 == 64:
+# 	from pillow_egg_27_64.pillow import Image
+# 	from pillow_egg_27_64.pillow import ImageTk
+# 	from pillow_egg_27_64.pillow import PhotoImage
+# else:
+# 	from pillow_egg_27_32.pillow import Image
+# 	from pillow_egg_27_32.pillow import ImageTk
+# 	from pillow_egg_27_32.pillow import PhotoImage
+from PIL import Image
+from PIL import ImageTk
+from PIL.ImageTk import PhotoImage
 
 
 
