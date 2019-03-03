@@ -1,21 +1,16 @@
 import json
-import struct
+import sys
+import os
 
 from Tkinter import *
 from tkFont import Font
 
-# check if python runs as 32 or 64 bit
-# if struct.calcsize('P') * 8 == 64:
-# 	from pillow_egg_27_64.pillow import Image
-# 	from pillow_egg_27_64.pillow import ImageTk
-# 	from pillow_egg_27_64.pillow import PhotoImage
-# else:
-# 	from pillow_egg_27_32.pillow import Image
-# 	from pillow_egg_27_32.pillow import ImageTk
-# 	from pillow_egg_27_32.pillow import PhotoImage
 from PIL import Image
 from PIL import ImageTk
 from PIL.ImageTk import PhotoImage
+from PIL import ImageDraw
+from PIL import ImageFont
+
 
 
 
@@ -58,23 +53,60 @@ class Main():
 		self.wallpapers.append(PhotoImage(Image.open('background_light_blue_waves_1920_1080.gif')))
 		self.wallpapers.append(PhotoImage(Image.open('background_light_blue_symbols_1920_1080.gif')))
 
-		image_pic1  = Image.open('../../pkg/PIC1.PNG')
-		image_icon0 = Image.open('../../pkg/ICON0.PNG')
+		self.image_xmb_icons = Image.open('XMB_icons.png')
 
-		pic1_x_scale		= 896.0/image_pic1.width
-		pic1_y_scale		= 504.0/image_pic1.height
+		self.image_pic1	= Image.open('../../pkg/PIC1.PNG')
+		self.image_pic0	= Image.open('../../pkg/PIC0.PNG')
+		self.image_icon0	= Image.open('../../pkg/ICON0.PNG')
+		self.image_icon0 = self.image_icon0.crop((10, 10, self.image_icon0.width - 10, self.image_icon0.height - 10))
 
-		icon0_width			= int(pic1_x_scale * image_icon0.width)
-		icon0_height 		= int(pic1_y_scale * image_icon0.height)
 
-		image_icon0 = image_icon0.crop((10, 10, image_icon0.width-10, image_icon0.height-10))
 
-		pic1_size			= (int(image_pic1.width*pic1_x_scale), int(image_pic1.height*pic1_y_scale))
-		icon0_size 			= (icon0_width, icon0_height)
+		pic1_x_scale		= 896.0/self.image_pic1.width
+		pic1_y_scale		= 504.0/self.image_pic1.height
+
+		# self.image_pic1.paste(self.image_icon0, (425, 500))
+		self.image_pic1.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
+
+		self.pic1_dimensions	= (int(self.image_pic1.width*pic1_x_scale), int(self.image_pic1.height*pic1_y_scale))
+		self.pic0_dimensions 	= (int(pic1_x_scale * self.image_pic0.width), int(pic1_y_scale * self.image_pic0.height))
+		self.icon0_dimensions 	= (int(pic1_x_scale * self.image_icon0.width), int(pic1_y_scale * self.image_icon0.height))
+
+		game_title_test_text = 'Burnout Revenge'
+		draw = ImageDraw.Draw(self.image_pic1)
+
+		game_text_font = ImageFont.truetype('./fonts/LeelaUIb.ttf', 40)
+		shadowColor = 'black'
+		x = 850
+		y = 475
+		outlineAmount = 2
+		for adj in range(outlineAmount):
+			# move right
+			draw.text((x - adj, y), game_title_test_text, font=game_text_font, fill=shadowColor)
+			# move left
+			draw.text((x + adj, y), game_title_test_text, font=game_text_font, fill=shadowColor)
+			# move up
+			draw.text((x, y + adj), game_title_test_text, font=game_text_font, fill=shadowColor)
+			# move down
+			draw.text((x, y - adj), game_title_test_text, font=game_text_font, fill=shadowColor)
+			# diagnal left up
+			draw.text((x - adj, y + adj), game_title_test_text, font=game_text_font, fill=shadowColor)
+			# diagnal right up
+			draw.text((x + adj, y + adj), game_title_test_text, font=game_text_font, fill=shadowColor)
+			# diagnal left down
+			draw.text((x - adj, y - adj), game_title_test_text, font=game_text_font, fill=shadowColor)
+			# diagnal right down
+			draw.text((x + adj, y - adj), game_title_test_text, font=game_text_font, fill=shadowColor)
+
+		draw.text((850, 475), game_title_test_text, fill='white', font=ImageFont.truetype('./fonts/LeelaUIb.ttf', 40))
+
+
+		# self.pkg_pic1	= Button(main, image=PhotoImage(self.image_pic1.resize(self.pic1_dimensions)), bd=1, bg="#000000")
 
 		self.pkg_images = []
-		self.pkg_images.append(PhotoImage(image_pic1.resize(pic1_size)))
-		self.pkg_images.append(PhotoImage(image_icon0.resize(icon0_size)))
+		self.pkg_images.append(PhotoImage(self.image_pic0.resize(self.pic0_dimensions)))
+		self.pkg_images.append(PhotoImage(self.image_pic1.resize(self.pic1_dimensions)))
+		self.pkg_images.append(PhotoImage(self.image_icon0.resize(self.icon0_dimensions)))
 
 		# set first image on canvas
 		self.my_image_number = 0
@@ -84,10 +116,10 @@ class Main():
 
 	def init_param_sfo_labels(self, main):
 		# Constants
-		text_title_id 			= 'TITLE ID'
-		text_title				= 'TITLE'
-		text_filename			= 'FILENAME'
-		text_iso_path			= 'ISO PATH'
+		text_title_id 	= 'TITLE ID'
+		text_title		= 'TITLE'
+		text_filename	= 'FILENAME'
+		text_iso_path	= 'ISO PATH'
 
 		height_of_text = Font(font='Helvetica').metrics('linespace')
 		width_of_title_id_text 	= Font(size=15, family='Helvetica').measure(text_title_id)
@@ -142,8 +174,9 @@ class Main():
 		self.button_PS2 	= Button(main, image=self.logo_systems[2], bd=1, command=lambda: self.on_drive_system_filename_choice_button(self.state_drive_choice, self.selection_system_list[2]))
 		self.button_PS3 	= Button(main, image=self.logo_systems[3], bd=1, command=lambda: self.on_drive_system_filename_choice_button(self.state_drive_choice, self.selection_system_list[3]))
 
-		self.pkg_pic1		= Button(main, image=self.pkg_images[0], bd=1)
-		self.pkg_icon0		= Button(main, image=self.pkg_images[1], bd=1)
+		# self.pkg_pic1		= Button(main, image=self.pkg_images[0], bd=1, bg="#000000")
+		self.pkg_pic0 		= Button(main, image=self.pkg_images[1], bd=1, bg="#000000")
+		self.pkg_icon0		= Button(main, image=self.pkg_images[2], bd=1, bg="#000000")
 
 		# dark side save-button
 		self.save_button = Button(main, text="Save", command=self.on_save_button, bd=1, bg="#FBFCFB")
@@ -155,7 +188,7 @@ class Main():
 		self.iso_path_text_id 	= self.canvas.create_text(iso_path_text_x_pos,	iso_path_text_y_pos +2,	text=text_iso_path,	fill="White", font=("Helvetica", 15))
 
 		self.entry_field_title_id.place(	x=text_box_spacing + iso_path_text_x_pos, y=title_id_text_y_pos	-height_of_text/3, width=200)
-		self.entry_field_title.place(		x=text_box_spacing + iso_path_text_x_pos, y=title_text_y_pos	-height_of_text/3, width=200)
+		self.entry_field_title.place(		x=text_box_spacing + iso_path_text_x_pos, y=title_text_y_pos		-height_of_text/3, width=200)
 		self.entry_field_filename.place(	x=text_box_spacing + iso_path_text_x_pos, y=filename_text_y_pos	-height_of_text/3, width=200)
 		self.entry_field_iso_path.place(	x=text_box_spacing + iso_path_text_x_pos, y=iso_path_text_y_pos	-height_of_text/3, width=200)
 
@@ -167,8 +200,24 @@ class Main():
 		self.button_PS2.place(	x=main_offset_x_pos + 6 * 29, y=main_offset_y_pos -80)
 		self.button_PS3.place(	x=main_offset_x_pos + 9 * 29, y=main_offset_y_pos -80)
 
+		self.pkg_pic1	= Button(main, image=self.pkg_images[1], bd=1, bg="#000000")
 		self.pkg_pic1.place(x=10, y=200)
-		self.pkg_icon0.place(x=100, y=500)
+
+		# self.pkg_pic1.place()
+		# self.pkg_pic0.place(x=250, y=300)
+		# self.pkg_pic1 = Button(main, image=self.pkg_images[1], bd=1, bg="#000000")
+		self.pkg_icon0		= Button(main, image=self.pkg_images[2], bd=1, bg="#000000")
+		self.pkg_icon0.place(x=210, y=400)
+
+
+		self.image_pic1.paste(self.image_icon0, (425, 450), self.image_icon0)
+		self.image_pic1.save('test.png')
+		# test_img.paste(self.pkg_images[2], (0, 0), self.pkg_images[2])
+		os.startfile('test.png')
+		# self.image_pic1.paste(self.image_icon0, (425, 500))
+
+		# self.canvas.create_text(200,500,fill="white",font="Helvetica 14 italic bold",
+        #                 text="This Is A Game Title")
 
 		self.save_button.place(x=text_box_spacing + iso_path_text_x_pos, y=iso_path_text_y_pos + 20)
 
