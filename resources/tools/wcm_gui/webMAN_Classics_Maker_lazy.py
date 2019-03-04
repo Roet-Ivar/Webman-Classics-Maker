@@ -11,6 +11,11 @@ from PIL.ImageTk import PhotoImage
 from PIL import ImageDraw
 from PIL import ImageFont
 
+if 'linux' not in sys.platform:
+	import ctypes
+	user32 = ctypes.windll.user32
+	user32.SetProcessDPIAware()
+
 
 
 
@@ -45,8 +50,14 @@ class Main():
 		self.logo_systems.append(PhotoImage(Image.open('logo_system_PS2.gif')))
 		self.logo_systems.append(PhotoImage(Image.open('logo_system_PS3.gif')))
 
+
+		game_title_test_text = 'Burnout Revenge'
+		img = Image.open('background_light_dark_1920_1080.png')
+		draw = ImageDraw.Draw(img)
+		draw.text((850, 475), game_title_test_text, fill='white', font=ImageFont.truetype('./fonts/LeelaUIb.ttf', 40))
+
 		self.wallpapers = []
-		self.wallpapers.append(PhotoImage(Image.open('background_light_dark_1920_1080.gif')))
+		self.wallpapers.append(PhotoImage(img))
 		self.wallpapers.append(PhotoImage(Image.open('background_dark_1920_1080.gif')))
 		self.wallpapers.append(PhotoImage(Image.open('background_light_1920_1080.gif')))
 		self.wallpapers.append(PhotoImage(Image.open('background_dark_blue_symbols_1920_1080.gif')))
@@ -115,6 +126,7 @@ class Main():
 		self.init_param_sfo_labels(main)
 
 	def init_param_sfo_labels(self, main):
+
 		# Constants
 		text_title_id 	= 'TITLE ID'
 		text_title		= 'TITLE'
@@ -126,6 +138,7 @@ class Main():
 		width_of_title_text 	= Font(size=15, family='Helvetica').measure(text_title)
 		width_of_filename_text	= Font(size=15, family='Helvetica').measure(text_filename)
 		width_of_iso_path_text 	= Font(size=15, family='Helvetica').measure(text_iso_path)
+
 
 		print('height_of_text' + str(height_of_text))
 		print('width_of_title_id_text' +  str(width_of_title_id_text))
@@ -183,7 +196,7 @@ class Main():
 
 		# Placements
 		self.title_id_text_id 	= self.canvas.create_text(title_id_text_x_pos,	title_id_text_y_pos +2,	text=text_title_id,	fill="White", font=("Helvetica", 15))
-		self.title_text_id 		= self.canvas.create_text(title_text_x_pos,	title_text_y_pos	+2, text=text_title, 	fill="White", font=("Helvetica", 15))
+		self.title_text_id 		= self.canvas.create_text(title_text_x_pos,		title_text_y_pos	+2, text=text_title, 	fill="White", font=("Helvetica", 15))
 		self.title_filename 	= self.canvas.create_text(filename_text_x_pos,	filename_text_y_pos +2, text=text_filename,	fill="White", font=("Helvetica", 15))
 		self.iso_path_text_id 	= self.canvas.create_text(iso_path_text_x_pos,	iso_path_text_y_pos +2,	text=text_iso_path,	fill="White", font=("Helvetica", 15))
 
