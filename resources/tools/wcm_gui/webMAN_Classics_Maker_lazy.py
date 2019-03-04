@@ -6,15 +6,14 @@ from Tkinter import *
 from tkFont import Font
 
 from PIL import Image
-from PIL import ImageTk
 from PIL.ImageTk import PhotoImage
 from PIL import ImageDraw
 from PIL import ImageFont
 
-if 'linux' not in sys.platform:
-	import ctypes
-	user32 = ctypes.windll.user32
-	user32.SetProcessDPIAware()
+# if 'linux' not in sys.platform:
+# 	import ctypes
+# 	user32 = ctypes.windll.user32
+# 	user32.SetProcessDPIAware()
 
 
 
@@ -29,10 +28,6 @@ class Main():
 		# setting defaults
 		self.state_drive_choice		= 'dev_hdd0'
 		self.state_system_choice	= 'PS2'
-		self.state_filename_choice	= ''
-
-		self.entry_field_title_id 	= None
-		self.entry_field_title 		= None
 		self.entry_field_iso_path 	= None
 
 		# canvas for image
@@ -40,17 +35,25 @@ class Main():
 		self.canvas.grid(row=0, column=0)
 
 		# images
+
+		old_x = Image.open("logo_drive_hdd.gif").width
+		old_y = Image.open("logo_drive_hdd.gif").height
+		new_x = int(Image.open("logo_drive_hdd.gif").width*1.5)
+		y_scale = float(old_y) / float(old_x)
+
+		hundred_fifty = (new_x,  int(new_x * y_scale))
+
 		self.logo_drives = []
-		self.logo_drives.append(PhotoImage(Image.open("logo_drive_hdd.gif")))
-		self.logo_drives.append(PhotoImage(Image.open('logo_drive_usb.gif')))
+		self.logo_drives.append(PhotoImage(Image.open("logo_drive_hdd.gif").resize(hundred_fifty)))
+		self.logo_drives.append(PhotoImage(Image.open('logo_drive_usb.gif').resize(hundred_fifty)))
 
 		self.logo_systems = []
-		self.logo_systems.append(PhotoImage(Image.open('logo_system_PSP.gif')))
-		self.logo_systems.append(PhotoImage(Image.open('logo_system_PSX.gif')))
-		self.logo_systems.append(PhotoImage(Image.open('logo_system_PS2.gif')))
-		self.logo_systems.append(PhotoImage(Image.open('logo_system_PS3.gif')))
+		self.logo_systems.append(PhotoImage(Image.open('logo_system_PSP.gif').resize(hundred_fifty)))
+		self.logo_systems.append(PhotoImage(Image.open('logo_system_PSX.gif').resize(hundred_fifty)))
+		self.logo_systems.append(PhotoImage(Image.open('logo_system_PS2.gif').resize(hundred_fifty)))
+		self.logo_systems.append(PhotoImage(Image.open('logo_system_PS3.gif').resize(hundred_fifty)))
 
-
+		# test text
 		game_title_test_text = 'Burnout Revenge'
 		img = Image.open('background_light_dark_1920_1080.png')
 		draw = ImageDraw.Draw(img)
@@ -73,8 +76,8 @@ class Main():
 
 
 
-		pic1_x_scale		= 896.0/self.image_pic1.width
-		pic1_y_scale		= 504.0/self.image_pic1.height
+		pic1_x_scale		= 1280.0/self.image_pic1.width
+		pic1_y_scale		= 720.0/self.image_pic1.height
 
 		# self.image_pic1.paste(self.image_icon0, (425, 500))
 		self.image_pic1.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
@@ -85,31 +88,30 @@ class Main():
 
 		game_title_test_text = 'Burnout Revenge'
 		draw = ImageDraw.Draw(self.image_pic1)
-
 		game_text_font = ImageFont.truetype('./fonts/LeelaUIb.ttf', 40)
 		shadowColor = 'black'
-		x = 850
-		y = 475
+		game_text_x = 800
+		game_text_y = 475
 		outlineAmount = 2
 		for adj in range(outlineAmount):
 			# move right
-			draw.text((x - adj, y), game_title_test_text, font=game_text_font, fill=shadowColor)
+			draw.text((game_text_x - adj, game_text_y), game_title_test_text, font=game_text_font, fill=shadowColor)
 			# move left
-			draw.text((x + adj, y), game_title_test_text, font=game_text_font, fill=shadowColor)
+			draw.text((game_text_x + adj, game_text_y), game_title_test_text, font=game_text_font, fill=shadowColor)
 			# move up
-			draw.text((x, y + adj), game_title_test_text, font=game_text_font, fill=shadowColor)
+			draw.text((game_text_x, game_text_y + adj), game_title_test_text, font=game_text_font, fill=shadowColor)
 			# move down
-			draw.text((x, y - adj), game_title_test_text, font=game_text_font, fill=shadowColor)
+			draw.text((game_text_x, game_text_y - adj), game_title_test_text, font=game_text_font, fill=shadowColor)
 			# diagnal left up
-			draw.text((x - adj, y + adj), game_title_test_text, font=game_text_font, fill=shadowColor)
+			draw.text((game_text_x - adj, game_text_y + adj), game_title_test_text, font=game_text_font, fill=shadowColor)
 			# diagnal right up
-			draw.text((x + adj, y + adj), game_title_test_text, font=game_text_font, fill=shadowColor)
+			draw.text((game_text_x + adj, game_text_y + adj), game_title_test_text, font=game_text_font, fill=shadowColor)
 			# diagnal left down
-			draw.text((x - adj, y - adj), game_title_test_text, font=game_text_font, fill=shadowColor)
+			draw.text((game_text_x - adj, game_text_y - adj), game_title_test_text, font=game_text_font, fill=shadowColor)
 			# diagnal right down
-			draw.text((x + adj, y - adj), game_title_test_text, font=game_text_font, fill=shadowColor)
+			draw.text((game_text_x + adj, game_text_y - adj), game_title_test_text, font=game_text_font, fill=shadowColor)
 
-		draw.text((850, 475), game_title_test_text, fill='white', font=ImageFont.truetype('./fonts/LeelaUIb.ttf', 40))
+		draw.text((game_text_x, game_text_y), game_title_test_text, fill='white', font=game_text_font)
 
 
 		# self.pkg_pic1	= Button(main, image=PhotoImage(self.image_pic1.resize(self.pic1_dimensions)), bd=1, bg="#000000")
@@ -128,16 +130,16 @@ class Main():
 	def init_param_sfo_labels(self, main):
 
 		# Constants
-		text_title_id 	= 'TITLE ID'
-		text_title		= 'TITLE'
-		text_filename	= 'FILENAME'
-		text_iso_path	= 'ISO PATH'
+		text_title_id 	= 'Title id'
+		text_title		= 'Title'
+		text_filename	= 'Filename'
+		text_iso_path	= 'Path'
 
 		height_of_text = Font(font='Helvetica').metrics('linespace')
-		width_of_title_id_text 	= Font(size=15, family='Helvetica').measure(text_title_id)
-		width_of_title_text 	= Font(size=15, family='Helvetica').measure(text_title)
-		width_of_filename_text	= Font(size=15, family='Helvetica').measure(text_filename)
-		width_of_iso_path_text 	= Font(size=15, family='Helvetica').measure(text_iso_path)
+		width_of_title_id_text 	= Font(size=15, family='Helvetica').measure(text_title_id.upper())
+		width_of_title_text 	= Font(size=15, family='Helvetica').measure(text_title.upper())
+		width_of_filename_text	= Font(size=15, family='Helvetica').measure(text_filename.upper())
+		width_of_iso_path_text 	= Font(size=15, family='Helvetica').measure(text_iso_path.upper())
 
 
 		print('height_of_text' + str(height_of_text))
@@ -149,10 +151,10 @@ class Main():
 
 		# paddings
 		dark_side_padding		= 20
-		text_box_spacing		= 4*dark_side_padding
+		text_box_spacing		= 8*dark_side_padding
 
 		# coordinates
-		main_offset_x_pos		= 950
+		main_offset_x_pos		= 1400
 		main_offset_y_pos		= 150
 
 		title_id_text_x_pos		= main_offset_x_pos + width_of_title_id_text/2
@@ -195,10 +197,10 @@ class Main():
 		self.save_button = Button(main, text="Save", command=self.on_save_button, bd=1, bg="#FBFCFB")
 
 		# Placements
-		self.title_id_text_id 	= self.canvas.create_text(title_id_text_x_pos,	title_id_text_y_pos +2,	text=text_title_id,	fill="White", font=("Helvetica", 15))
-		self.title_text_id 		= self.canvas.create_text(title_text_x_pos,		title_text_y_pos	+2, text=text_title, 	fill="White", font=("Helvetica", 15))
-		self.title_filename 	= self.canvas.create_text(filename_text_x_pos,	filename_text_y_pos +2, text=text_filename,	fill="White", font=("Helvetica", 15))
-		self.iso_path_text_id 	= self.canvas.create_text(iso_path_text_x_pos,	iso_path_text_y_pos +2,	text=text_iso_path,	fill="White", font=("Helvetica", 15))
+		self.title_id_text_id 	= self.canvas.create_text(title_id_text_x_pos,	title_id_text_y_pos	+8,	text=text_title_id.upper(),	fill="White", font=("Helvetica", 15))
+		self.title_text_id 		= self.canvas.create_text(title_text_x_pos,	title_text_y_pos	+8, text=text_title.upper(), 	fill="White", font=("Helvetica", 15))
+		self.title_filename 	= self.canvas.create_text(filename_text_x_pos,	filename_text_y_pos	+8, text=text_filename.upper(),	fill="White", font=("Helvetica", 15))
+		self.iso_path_text_id 	= self.canvas.create_text(iso_path_text_x_pos,	iso_path_text_y_pos	+8,	text=text_iso_path.upper(),	fill="White", font=("Helvetica", 15))
 
 		self.entry_field_title_id.place(	x=text_box_spacing + iso_path_text_x_pos, y=title_id_text_y_pos	-height_of_text/3, width=200)
 		self.entry_field_title.place(		x=text_box_spacing + iso_path_text_x_pos, y=title_text_y_pos		-height_of_text/3, width=200)
@@ -214,16 +216,16 @@ class Main():
 		self.button_PS3.place(	x=main_offset_x_pos + 9 * 29, y=main_offset_y_pos -80)
 
 		self.pkg_pic1	= Button(main, image=self.pkg_images[1], bd=1, bg="#000000")
-		self.pkg_pic1.place(x=10, y=200)
+		self.pkg_pic1.place(x=10, y=345)
 
 		# self.pkg_pic1.place()
 		# self.pkg_pic0.place(x=250, y=300)
 		# self.pkg_pic1 = Button(main, image=self.pkg_images[1], bd=1, bg="#000000")
 		self.pkg_icon0		= Button(main, image=self.pkg_images[2], bd=1, bg="#000000")
-		self.pkg_icon0.place(x=210, y=400)
+		self.pkg_icon0.place(x=290, y=625)
 
-
-		self.image_pic1.paste(self.image_icon0, (425, 450), self.image_icon0)
+		icon_img = Image.open('../../pkg/ICON0.PNG')
+		self.image_pic1.paste(icon_img, (425, 450), icon_img)
 		self.image_pic1.save('test.png')
 		# test_img.paste(self.pkg_images[2], (0, 0), self.pkg_images[2])
 		if "linux" not in sys.platform:
@@ -233,13 +235,15 @@ class Main():
 		# self.canvas.create_text(200,500,fill="white",font="Helvetica 14 italic bold",
         #                 text="This Is A Game Title")
 
-		self.save_button.place(x=text_box_spacing + iso_path_text_x_pos, y=iso_path_text_y_pos + 20)
+		self.save_button.place(x=text_box_spacing + iso_path_text_x_pos, y=iso_path_text_y_pos + 40)
 
 		####################################################################
 		# Adding an onChange -listener on 'entry_field_filename'
 		self.generateOnChange(self.entry_field_filename)
 		self.entry_field_filename.bind('<<Change>>', self.onEntryChanged)
 		####################################################################
+
+
 
 	def init_main_window_buttons(self, main):
 		# button to quit
@@ -406,11 +410,31 @@ class Main():
 				interp alias {{}} ::{widget} {{}} widget_proxy {widget} _{widget}
 			'''.format(widget=str(obj)))
 
+def dpi_awerness():
+	import ctypes
+
+	# Query DPI Awareness (Windows 10 and 8)
+	awareness = ctypes.c_int()
+	errorCode = ctypes.windll.shcore.GetProcessDpiAwareness(0, ctypes.byref(awareness))
+	print(awareness.value)
+
+	# Set DPI Awareness  (Windows 10 and 8)
+	errorCode = ctypes.windll.shcore.SetProcessDpiAwareness(2)
+	# the argument is the awareness level, which can be 0, 1 or 2:
+	# for 1-to-1 pixel control I seem to need it to be non-zero (I'm using level 2)
+
+	# Set DPI Awareness  (Windows 7 and Vista)
+	success = ctypes.windll.user32.SetProcessDPIAware()
+
+	# behaviour on later OSes is undefined, although when I run it on my Windows 10 machine, it seems to work with effects identical to SetProcessDpiAwareness(1)
+
+dpi_awerness()
+
 canvas_width = 1920
 canvas_height = 1080
 
-main_window_width = 1350
-main_window_height = 720
+main_window_width = 1920
+main_window_height = 1080
 
 main_window = Tk()
 # changing the title of our master widget
