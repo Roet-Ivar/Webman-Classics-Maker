@@ -61,6 +61,10 @@ class Main():
 
 		self.wallpapers = []
 		self.wallpapers.append(PhotoImage(img))
+		self.wallpapers.append(PhotoImage(Image.open('background_mod.png')))
+		self.wallpapers.append(PhotoImage(Image.open('background_mod_2.png')))
+		self.wallpapers.append(PhotoImage(Image.open('background_mod_3.png')))
+		self.wallpapers.append(PhotoImage(Image.open('background_mod_3_blur.png')))
 		self.wallpapers.append(PhotoImage(Image.open('background_dark_1920_1080.gif')))
 		self.wallpapers.append(PhotoImage(Image.open('background_light_1920_1080.gif')))
 		self.wallpapers.append(PhotoImage(Image.open('background_dark_blue_symbols_1920_1080.gif')))
@@ -95,6 +99,10 @@ class Main():
 		outline_amount = 2
 		# self.draw_text_on_image_w_shadow(self.image_pic1, game_title_test_text, game_text_x, game_text_y, text_size, outline_amount, text_color, shadow_color)
 		self.draw_text_on_image(self.image_pic1, game_title_test_text, game_text_x, game_text_y, text_size, text_color)
+
+
+		ps3_system_logo = Image.open('./ps3_type_logo.png')
+		self.image_pic1.paste(ps3_system_logo, (1180, 525), ps3_system_logo)
 
 		self.pkg_images = []
 		self.pkg_images.append(PhotoImage(self.image_pic0.resize(self.pic0_dimensions)))
