@@ -216,13 +216,13 @@ class Main():
 		self.button_PS3.place(	x=main_offset_x_pos + 9 * 29, y=main_offset_y_pos -80)
 
 		self.pkg_pic1	= Button(main, image=self.pkg_images[1], bd=1, bg="#000000")
-		self.pkg_pic1.place(x=10, y=345)
+		self.pkg_pic1.place(x=10, y=245)
 
 		# self.pkg_pic1.place()
 		# self.pkg_pic0.place(x=250, y=300)
 		# self.pkg_pic1 = Button(main, image=self.pkg_images[1], bd=1, bg="#000000")
 		self.pkg_icon0		= Button(main, image=self.pkg_images[2], bd=1, bg="#000000")
-		self.pkg_icon0.place(x=290, y=625)
+		self.pkg_icon0.place(x=290, y=525)
 
 		icon_img = Image.open('../../pkg/ICON0.PNG')
 		self.image_pic1.paste(icon_img, (425, 450), icon_img)
