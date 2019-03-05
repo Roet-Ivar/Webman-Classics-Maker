@@ -87,34 +87,13 @@ class Main():
 		self.icon0_dimensions 	= (int(pic1_x_scale * self.image_icon0.width), int(pic1_y_scale * self.image_icon0.height))
 
 		game_title_test_text = 'Burnout Revenge'
-		draw = ImageDraw.Draw(self.image_pic1)
-		game_text_font = ImageFont.truetype('./fonts/LeelaUIb.ttf', 40)
-		shadowColor = 'black'
+		text_color = 'white'
+		shadow_color = 'black'
 		game_text_x = 800
 		game_text_y = 475
-		outlineAmount = 2
-		for adj in range(outlineAmount):
-			# move right
-			draw.text((game_text_x - adj, game_text_y), game_title_test_text, font=game_text_font, fill=shadowColor)
-			# move left
-			draw.text((game_text_x + adj, game_text_y), game_title_test_text, font=game_text_font, fill=shadowColor)
-			# move up
-			draw.text((game_text_x, game_text_y + adj), game_title_test_text, font=game_text_font, fill=shadowColor)
-			# move down
-			draw.text((game_text_x, game_text_y - adj), game_title_test_text, font=game_text_font, fill=shadowColor)
-			# diagnal left up
-			draw.text((game_text_x - adj, game_text_y + adj), game_title_test_text, font=game_text_font, fill=shadowColor)
-			# diagnal right up
-			draw.text((game_text_x + adj, game_text_y + adj), game_title_test_text, font=game_text_font, fill=shadowColor)
-			# diagnal left down
-			draw.text((game_text_x - adj, game_text_y - adj), game_title_test_text, font=game_text_font, fill=shadowColor)
-			# diagnal right down
-			draw.text((game_text_x + adj, game_text_y - adj), game_title_test_text, font=game_text_font, fill=shadowColor)
-
-		draw.text((game_text_x, game_text_y), game_title_test_text, fill='white', font=game_text_font)
-
-
-		# self.pkg_pic1	= Button(main, image=PhotoImage(self.image_pic1.resize(self.pic1_dimensions)), bd=1, bg="#000000")
+		text_size = 40
+		outline_amount = 2
+		self.draw_text_on_image_w_shadow(self.image_pic1, game_title_test_text, game_text_x, game_text_y, text_size, outline_amount, text_color, shadow_color)
 
 		self.pkg_images = []
 		self.pkg_images.append(PhotoImage(self.image_pic0.resize(self.pic0_dimensions)))
@@ -242,6 +221,43 @@ class Main():
 		self.generateOnChange(self.entry_field_filename)
 		self.entry_field_filename.bind('<<Change>>', self.onEntryChanged)
 		####################################################################
+
+
+	def draw_text_on_image(self, image, text, text_x, text_y, text_size, text_color):
+		font = ImageFont.truetype('./fonts/LeelaUIb.ttf', text_size)
+		draw = ImageDraw.Draw(image)
+		if text_color == None:
+			text_outline = 'white'
+		return draw.text((text_x, text_y), text, fill=text_color, font=font)
+
+	def draw_text_on_image_w_shadow(self, image, text, text_x, text_y, text_size, text_outline, text_color, shadow_color):
+		font = ImageFont.truetype('./fonts/LeelaUIb.ttf', text_size)
+		if text_outline == None:
+			text_outline = 2
+		if text_color == None:
+			text_outline = 'white'
+		if shadow_color == None:
+			shadow_color = 'black'
+
+		draw = ImageDraw.Draw(image)
+		for adj in range(text_outline):
+			# move right
+			draw.text((text_x - adj, text_y), text, font=font, fill=shadow_color)
+			# move left
+			draw.text((text_x + adj, text_y), text, font=font, fill=shadow_color)
+			# move up
+			draw.text((text_x, text_y + adj), text, font=font, fill=shadow_color)
+			# move down
+			draw.text((text_x, text_y - adj), text, font=font, fill=shadow_color)
+			# diagnal left up
+			draw.text((text_x - adj, text_y + adj), text, font=font, fill=shadow_color)
+			# diagnal right up
+			draw.text((text_x + adj, text_y + adj), text, font=font, fill=shadow_color)
+			# diagnal left down
+			draw.text((text_x - adj, text_y - adj), text, font=font, fill=shadow_color)
+			# diagnal right down
+			draw.text((text_x + adj, text_y - adj), text, font=font, fill=shadow_color)
+		return draw.text((text_x, text_y), text, fill=text_color, font=font)
 
 
 
@@ -411,22 +427,22 @@ class Main():
 			'''.format(widget=str(obj)))
 
 def dpi_awerness():
-	import ctypes
+	if 'linux' not in sys.platform:
+		import ctypes
+		# Query DPI Awareness (Windows 10 and 8)
+		awareness = ctypes.c_int()
+		errorCode = ctypes.windll.shcore.GetProcessDpiAwareness(0, ctypes.byref(awareness))
+		print(awareness.value)
 
-	# Query DPI Awareness (Windows 10 and 8)
-	awareness = ctypes.c_int()
-	errorCode = ctypes.windll.shcore.GetProcessDpiAwareness(0, ctypes.byref(awareness))
-	print(awareness.value)
+		# Set DPI Awareness  (Windows 10 and 8)
+		errorCode = ctypes.windll.shcore.SetProcessDpiAwareness(2)
+		# the argument is the awareness level, which can be 0, 1 or 2:
+		# for 1-to-1 pixel control I seem to need it to be non-zero (I'm using level 2)
 
-	# Set DPI Awareness  (Windows 10 and 8)
-	errorCode = ctypes.windll.shcore.SetProcessDpiAwareness(2)
-	# the argument is the awareness level, which can be 0, 1 or 2:
-	# for 1-to-1 pixel control I seem to need it to be non-zero (I'm using level 2)
+		# Set DPI Awareness  (Windows 7 and Vista)
+		success = ctypes.windll.user32.SetProcessDPIAware()
 
-	# Set DPI Awareness  (Windows 7 and Vista)
-	success = ctypes.windll.user32.SetProcessDPIAware()
-
-	# behaviour on later OSes is undefined, although when I run it on my Windows 10 machine, it seems to work with effects identical to SetProcessDpiAwareness(1)
+		# behaviour on later OSes is undefined, although when I run it on my Windows 10 machine, it seems to work with effects identical to SetProcessDpiAwareness(1)
 
 dpi_awerness()
 
