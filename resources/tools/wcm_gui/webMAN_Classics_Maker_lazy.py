@@ -57,7 +57,7 @@ class Main():
 		game_title_test_text = 'Burnout Revenge'
 		img = Image.open('background_light_dark_1920_1080.png')
 		draw = ImageDraw.Draw(img)
-		draw.text((850, 475), game_title_test_text, fill='white', font=ImageFont.truetype('./fonts/LeelaUIb.ttf', 40))
+		draw.text((850, 475), game_title_test_text, fill='white', font=ImageFont.truetype('./fonts/SCE-PS3.ttf', 25))
 
 		self.wallpapers = []
 		self.wallpapers.append(PhotoImage(img))
@@ -89,11 +89,12 @@ class Main():
 		game_title_test_text = 'Burnout Revenge'
 		text_color = 'white'
 		shadow_color = 'black'
-		game_text_x = 800
-		game_text_y = 475
-		text_size = 40
+		game_text_x = 760
+		game_text_y = 490
+		text_size = 32
 		outline_amount = 2
-		self.draw_text_on_image_w_shadow(self.image_pic1, game_title_test_text, game_text_x, game_text_y, text_size, outline_amount, text_color, shadow_color)
+		# self.draw_text_on_image_w_shadow(self.image_pic1, game_title_test_text, game_text_x, game_text_y, text_size, outline_amount, text_color, shadow_color)
+		self.draw_text_on_image(self.image_pic1, game_title_test_text, game_text_x, game_text_y, text_size, text_color)
 
 		self.pkg_images = []
 		self.pkg_images.append(PhotoImage(self.image_pic0.resize(self.pic0_dimensions)))
@@ -201,14 +202,15 @@ class Main():
 		# self.pkg_pic0.place(x=250, y=300)
 		# self.pkg_pic1 = Button(main, image=self.pkg_images[1], bd=1, bg="#000000")
 		self.pkg_icon0		= Button(main, image=self.pkg_images[2], bd=1, bg="#000000")
-		self.pkg_icon0.place(x=290, y=525)
+		self.pkg_icon0.place(x=285, y=530)
 
 		icon_img = Image.open('../../pkg/ICON0.PNG')
 		self.image_pic1.paste(icon_img, (425, 450), icon_img)
 		self.image_pic1.save('test.png')
 		# test_img.paste(self.pkg_images[2], (0, 0), self.pkg_images[2])
 		if "linux" not in sys.platform:
-			os.startfile('test.png')
+			print('')# os.startfile('test.png')
+
 		# self.image_pic1.paste(self.image_icon0, (425, 500))
 
 		# self.canvas.create_text(200,500,fill="white",font="Helvetica 14 italic bold",
@@ -224,14 +226,14 @@ class Main():
 
 
 	def draw_text_on_image(self, image, text, text_x, text_y, text_size, text_color):
-		font = ImageFont.truetype('./fonts/LeelaUIb.ttf', text_size)
+		font = ImageFont.truetype('./fonts/SCE-PS3.ttf', text_size)
 		draw = ImageDraw.Draw(image)
 		if text_color == None:
 			text_outline = 'white'
 		return draw.text((text_x, text_y), text, fill=text_color, font=font)
 
 	def draw_text_on_image_w_shadow(self, image, text, text_x, text_y, text_size, text_outline, text_color, shadow_color):
-		font = ImageFont.truetype('./fonts/LeelaUIb.ttf', text_size)
+		font = ImageFont.truetype('./fonts/SCE-PS3.ttf', text_size)
 		if text_outline == None:
 			text_outline = 2
 		if text_color == None:
