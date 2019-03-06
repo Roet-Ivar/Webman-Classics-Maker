@@ -88,7 +88,7 @@ class Main():
 		self.main_offset_y_pos = 150
 
 		self.title_id_text_x_pos = self.main_offset_x_pos
-		self.title_id_text_y_pos = self.main_offset_y_pos + self.height_of_text / 2
+		self.title_id_text_y_pos = self.main_offset_y_pos + self.height_of_text
 
 		self.title_text_x_pos = self.main_offset_x_pos
 		self.title_text_y_pos = self.dark_side_padding + self.title_id_text_y_pos + self.height_of_text
