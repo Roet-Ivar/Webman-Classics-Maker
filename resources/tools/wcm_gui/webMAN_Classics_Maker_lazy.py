@@ -53,7 +53,6 @@ class Main():
 		self.background_images.append(Image.open('background_light_blue_symbols_1920_1080.gif'))
 
 		self.image_xmb_icons = Image.open('XMB_icons.png')
-
 		self.image_pic1		= Image.open('../../pkg/PIC1.PNG')
 		self.image_pic0		= Image.open('../../pkg/PIC0.PNG')
 		self.image_icon0	= Image.open('../../pkg/ICON0.PNG')
@@ -64,23 +63,6 @@ class Main():
 		pic1_y_scale		= 720.0/self.image_pic1.height * scaling
 		self.pic0_dimensions 	= (int(pic1_x_scale * self.image_pic0.width), int(pic1_y_scale * self.image_pic0.height))
 		self.icon0_dimensions 	= (int(pic1_x_scale * self.image_icon0.width), int(pic1_y_scale * self.image_icon0.height))
-
-		self.pkg_images_img = []
-		self.pkg_images_img.append(self.image_pic0)
-		self.pkg_images_img.append(self.image_pic1)
-		self.pkg_images_img.append(self.image_icon0_crop)
-
-
-		game_title_test_text = 'Burnout Revenge'
-		text_color = 'white'
-		game_text_x = 760
-		game_text_y = 490
-		text_size = 32
-		self.draw_text_on_image(self.image_pic1, game_title_test_text, game_text_x, game_text_y, text_size, text_color)
-
-		self.image_pic1.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
-		self.image_pic1.paste(self.ps3_system_logo, (1180, 525), self.ps3_system_logo)
-
 
 		# init defintions
 		self.init_main_window_buttons(main)
@@ -167,23 +149,18 @@ class Main():
 		self.button_PS2.place(x=int((self.main_offset_x_pos + 6 * 29) * scaling), y=int(self.main_offset_y_pos - 80))
 		self.button_PS3.place(x=int((self.main_offset_x_pos + 9 * 29) * scaling), y=int(self.main_offset_y_pos - 80))
 
-		self.img_pic1 = self.pkg_images_img[1]
-		self.img_pic1 = self.img_pic1.resize((int(1280 * scaling), int(720 * scaling)), Image.ANTIALIAS)
+		game_title = 'Burnout Revenge'
+		self.re_draw_image_on_canvas(main)
 
-		self.img_pic1 = PhotoImage(self.img_pic1)
-		self.pkg_pic1	= Button(main, image=self.img_pic1, highlightthickness=0, bd=0)
-		self.pkg_pic1.place(x=10 * scaling, y=245 * scaling)
-
-		self.icon0 = self.pkg_images_img[2]
-		self.icon0 = PhotoImage(self.icon0.resize(self.icon0_dimensions, Image.ANTIALIAS))
-		self.pkg_icon0		= Button(main, image=self.icon0, highlightthickness = 0, bd=0)
-
-		self.pkg_icon0.place(x=int(285 * scaling), y=int(530 * scaling))
-
-
-		icon_img = Image.open('../../pkg/ICON0.PNG')
-		self.image_pic1.paste(icon_img, (425, 450), icon_img)
-		self.image_pic1.save('test.png')
+		if 'linux' not in sys.platform:
+			# making test print of canvas
+			pic1_img = Image.open('../../pkg/PIC1.PNG')
+			icon_img = Image.open('../../pkg/ICON0.PNG')
+			xmb_img = Image.open('XMB_icons.png')
+			pic1_img.paste(icon_img, (425, 450), icon_img)
+			pic1_img.paste(xmb_img, (0, 0), xmb_img)
+			self.draw_text_on_image(pic1_img, 'Burnout Revenge', 760, 490, 32, 'white')
+			pic1_img.save('test.png')
 
 		self.save_button.place(x=self.text_box_spacing + self.iso_path_text_x_pos, y=self.iso_path_text_y_pos + 40)
 
@@ -192,6 +169,25 @@ class Main():
 		self.generateOnChange(self.entry_field_filename)
 		self.entry_field_filename.bind('<<Change>>', self.onEntryChanged)
 		####################################################################
+
+	def re_draw_image_on_canvas(self, main):
+		game_title = "Burnout Revenge"
+		text_color = 'white'
+		game_text_x = 760
+		game_text_y = 490
+		text_size = 32
+
+		self.draw_text_on_image(self.image_pic1, game_title, game_text_x, game_text_y, text_size, text_color)
+		self.image_pic1.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
+		self.image_pic1.paste(self.ps3_system_logo, (1180, 525), self.ps3_system_logo)
+		self.photo_image_pic1 = PhotoImage(self.image_pic1.resize((int(1280 * scaling), int(720 * scaling)), Image.ANTIALIAS))
+
+		self.button_pic1	= Button(main, image=self.photo_image_pic1, highlightthickness=0, bd=0)
+		self.button_pic1.place(x=10 * scaling, y=245 * scaling)
+
+		self.photo_image_icon0 = PhotoImage(self.image_icon0_crop.resize(self.icon0_dimensions, Image.ANTIALIAS))
+		self.button_icon0		= Button(main, image=self.photo_image_icon0, highlightthickness = 0, bd=0)
+		self.button_icon0.place(x=int(285 * scaling), y=int(530 * scaling))
 
 
 	def draw_text_on_image(self, image, text, text_x, text_y, text_size, text_color):
@@ -378,6 +374,15 @@ class Main():
 		current_filename = self.entry_field_iso_path.get()
 		print("entry_field_iso_path: " + current_filename)
 
+		self.img_pic1 = Image.open('../../pkg/PIC1.PNG')
+		self.draw_text_on_image(self.img_pic1, filename, 760, 490, 32, 'white')
+		self.img_pic1.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
+		self.img_pic1.paste(self.ps3_system_logo, (1180, 525), self.ps3_system_logo)
+		self.photo_img_pic1 = PhotoImage(self.img_pic1.resize((int(1280 * scaling), int(720 * scaling)), Image.ANTIALIAS))
+
+
+		self.button_pic1.config(image=self.photo_img_pic1)
+
 	def generateOnChange(self, obj):
 		obj.tk.eval('''
 				proc widget_proxy {widget widget_command args} {
@@ -425,12 +430,12 @@ def dpi_awerness():
 
 
 main_window = Tk()
-main_window.resizable(0, 0)
 main_window.geometry("+%d+%d" % (0, 0))
+
 # changing the title of our master widget
 main_window.title('webMAN Classics Maker UI')
-# icon upper left corner
 
+# icon upper left corner
 if "linux" in sys.platform:
 	main_window.iconbitmap('@../../images/webman_icon.xbm')
 	# scaling = 1
@@ -448,9 +453,5 @@ canvas_height = int(1080* scaling)
 main_window_width = int(1920* scaling)
 main_window_height = int(1080* scaling)
 
-
-
-
 Main(main_window)
-
 main_window.mainloop()
