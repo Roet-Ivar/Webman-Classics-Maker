@@ -21,6 +21,11 @@ from PIL import ImageFont
 class Main():
 
 	def __init__(self, main):
+
+		# canvas for image
+		self.canvas = Canvas(main, width=canvas_width, height=canvas_height, borderwidth=0, highlightthickness=0)
+		self.canvas.grid(row=0, column=0)
+
 		self.vcmd = main.register(self.validate)
 		self.vcmd2 = main.register(self.validate)
 		self.maxlength = 8
@@ -30,9 +35,6 @@ class Main():
 		self.state_system_choice	= 'PS2'
 		self.entry_field_iso_path 	= None
 
-		# canvas for image
-		self.canvas = Canvas(main, width=canvas_width, height=canvas_height, borderwidth=0, highlightthickness=0)
-		self.canvas.grid(row=0, column=0)
 
 		# images
 
@@ -58,6 +60,18 @@ class Main():
 		img = Image.open('background_light_dark_1920_1080.png')
 		draw = ImageDraw.Draw(img)
 		draw.text((850, 475), game_title_test_text, fill='white', font=ImageFont.truetype('./fonts/SCE-PS3.ttf', 25))
+
+		self.background_images = []
+		self.background_images.append((img))
+		self.background_images.append((Image.open('background_mod.png')))
+		self.background_images.append((Image.open('background_mod_2.png')))
+		self.background_images.append((Image.open('background_mod_3.png')))
+		self.background_images.append((Image.open('background_mod_3_blur.png')))
+		self.background_images.append((Image.open('background_dark_1920_1080.gif')))
+		self.background_images.append((Image.open('background_light_1920_1080.gif')))
+		self.background_images.append((Image.open('background_dark_blue_symbols_1920_1080.gif')))
+		self.background_images.append((Image.open('background_light_blue_waves_1920_1080.gif')))
+		self.background_images.append((Image.open('background_light_blue_symbols_1920_1080.gif')))
 
 		self.wallpapers = []
 		self.wallpapers.append(PhotoImage(img))
@@ -109,53 +123,73 @@ class Main():
 		self.pkg_images.append(PhotoImage(self.image_pic1.resize(self.pic1_dimensions)))
 		self.pkg_images.append(PhotoImage(self.image_icon0.resize(self.icon0_dimensions)))
 
-		# set first image on canvas
-		self.my_image_number = 0
-		self.image_on_canvas = self.canvas.create_image(0, 0, anchor=NW, image=self.wallpapers[self.my_image_number])
+
+
 		self.init_main_window_buttons(main)
 		self.init_param_sfo_labels(main)
 
 	def init_param_sfo_labels(self, main):
-
 		# Constants
-		text_title_id 	= 'Title id'
-		text_title		= 'Title'
-		text_filename	= 'Filename'
-		text_iso_path	= 'Path'
-
-		height_of_text = Font(font='Helvetica').metrics('linespace')
-		width_of_title_id_text 	= Font(size=15, family='Helvetica').measure(text_title_id.upper())
-		width_of_title_text 	= Font(size=15, family='Helvetica').measure(text_title.upper())
-		width_of_filename_text	= Font(size=15, family='Helvetica').measure(text_filename.upper())
-		width_of_iso_path_text 	= Font(size=15, family='Helvetica').measure(text_iso_path.upper())
+		self.text_title_id	= 'Title id'
+		self.text_title 	= 'Title'
+		self.text_filename	= 'Filename'
+		self.text_iso_path	= 'Path'
 
 
-		print('height_of_text' + str(height_of_text))
-		print('width_of_title_id_text' +  str(width_of_title_id_text))
+		self.height_of_text = Font(font='Helvetica').metrics('linespace')
+		width_of_title_id_text = Font(size=15, family='Helvetica').measure(self.text_title_id.upper())
+		width_of_title_text = Font(size=15, family='Helvetica').measure(self.text_title.upper())
+		width_of_filename_text = Font(size=15, family='Helvetica').measure(self.text_filename.upper())
+		width_of_iso_path_text = Font(size=15, family='Helvetica').measure(self.text_iso_path.upper())
+
+		print('self.height_of_text' + str(self.height_of_text))
+		print('width_of_title_id_text' + str(width_of_title_id_text))
 		print('width_of_title_text' + str(width_of_title_text))
 		print('width_of_filename_text' + str(width_of_filename_text))
-		print('width_of_iso_path_text' +  str(width_of_iso_path_text))
-
+		print('width_of_iso_path_text' + str(width_of_iso_path_text))
 
 		# paddings
-		dark_side_padding		= 20
-		text_box_spacing		= 8*dark_side_padding
+		self.dark_side_padding = 20
+		self.text_box_spacing = 8 * self.dark_side_padding
 
 		# coordinates
-		main_offset_x_pos		= 1400
-		main_offset_y_pos		= 150
+		self.main_offset_x_pos = 1400
+		self.main_offset_y_pos = 150
 
-		title_id_text_x_pos		= main_offset_x_pos + width_of_title_id_text/2
-		title_id_text_y_pos 	= main_offset_y_pos + height_of_text/2
+		self.title_id_text_x_pos = self.main_offset_x_pos #+ width_of_title_id_text / 2
+		self.title_id_text_y_pos = self.main_offset_y_pos + self.height_of_text / 2
 
-		title_text_x_pos		= main_offset_x_pos + width_of_title_text/2
-		title_text_y_pos		= dark_side_padding + title_id_text_y_pos + height_of_text
+		self.title_text_x_pos = self.main_offset_x_pos #+ width_of_title_text / 2
+		self.title_text_y_pos = self.dark_side_padding + self.title_id_text_y_pos + self.height_of_text
 
-		filename_text_x_pos		= main_offset_x_pos + width_of_filename_text/2
-		filename_text_y_pos		= dark_side_padding + title_text_y_pos + height_of_text
+		self.filename_text_x_pos = self.main_offset_x_pos #+ width_of_filename_text / 2
+		self.filename_text_y_pos = self.dark_side_padding + self.title_text_y_pos + self.height_of_text
 
-		iso_path_text_x_pos		= main_offset_x_pos + width_of_iso_path_text/2
-		iso_path_text_y_pos		= dark_side_padding + filename_text_y_pos + height_of_text
+		self.iso_path_text_x_pos = self.main_offset_x_pos #+ width_of_iso_path_text / 2
+		self.iso_path_text_y_pos = self.dark_side_padding + self.filename_text_y_pos + self.height_of_text
+
+		# set background with label texts on canvas
+		# self.my_image_number = 0
+		# self.draw_text_on_image(self.background_images[self.my_image_number], self.text_title_id.upper(), 	self.title_id_text_x_pos,	self.title_id_text_y_pos,	25, 'white')
+		# self.draw_text_on_image(self.background_images[self.my_image_number], self.text_title.upper(), 	self.title_text_x_pos,		self.title_text_y_pos, 		25, 'white')
+		# self.draw_text_on_image(self.background_images[self.my_image_number], self.text_filename.upper(), 	self.filename_text_x_pos,	self.filename_text_y_pos,	25, 'white')
+		# self.draw_text_on_image(self.background_images[self.my_image_number], self.text_iso_path.upper(), 	self.iso_path_text_x_pos,	self.iso_path_text_y_pos,	25, 'white')
+		# self.current_background = PhotoImage(self.background_images[self.my_image_number])
+		# self.image_on_canvas = self.canvas.create_image(0, 0, anchor=NW, image=self.current_background)
+
+
+		self.my_image_number = 0
+		self.draw_text_on_image(self.background_images[self.my_image_number], self.text_title_id.upper(), 	self.title_id_text_x_pos,	self.title_id_text_y_pos,	25, 'white')
+		self.draw_text_on_image(self.background_images[self.my_image_number], self.text_title.upper(), 	self.title_text_x_pos,		self.title_text_y_pos, 		25, 'white')
+		self.draw_text_on_image(self.background_images[self.my_image_number], self.text_filename.upper(), 	self.filename_text_x_pos,	self.filename_text_y_pos,	25, 'white')
+		self.draw_text_on_image(self.background_images[self.my_image_number], self.text_iso_path.upper(), 	self.iso_path_text_x_pos,	self.iso_path_text_y_pos,	25, 'white')
+		self.current_img = self.background_images[self.my_image_number]
+		self.current_img = self.background_images[0]
+		# linux scaling test
+		# self.current_img = self.current_img.resize((int(1920 * 0.66), int(1080 * 0.66)))
+		self.current_background = PhotoImage(self.current_img)
+		self.image_on_canvas = self.canvas.create_image(0, 0, anchor=NW, image=self.current_background)
+
 
 		# defintions
 		self.entry_field_title_id	= Entry(main, validate='key', validatecommand=(self.vcmd, '%P'))
@@ -185,31 +219,26 @@ class Main():
 		self.save_button = Button(main, text="Save", command=self.on_save_button, bd=1, bg="#FBFCFB")
 
 		# Placements
-		self.title_id_text_id 	= self.canvas.create_text(title_id_text_x_pos,	title_id_text_y_pos	+8,	text=text_title_id.upper(),	fill="White", font=("Helvetica", 15))
-		self.title_text_id 		= self.canvas.create_text(title_text_x_pos,	title_text_y_pos	+8, text=text_title.upper(), 	fill="White", font=("Helvetica", 15))
-		self.title_filename 	= self.canvas.create_text(filename_text_x_pos,	filename_text_y_pos	+8, text=text_filename.upper(),	fill="White", font=("Helvetica", 15))
-		self.iso_path_text_id 	= self.canvas.create_text(iso_path_text_x_pos,	iso_path_text_y_pos	+8,	text=text_iso_path.upper(),	fill="White", font=("Helvetica", 15))
+		self.entry_field_title_id.place(	x=self.text_box_spacing + self.iso_path_text_x_pos, y=self.title_id_text_y_pos	, width=200)
+		self.entry_field_title.place(		x=self.text_box_spacing + self.iso_path_text_x_pos, y=self.title_text_y_pos	, width=200)
+		self.entry_field_filename.place(	x=self.text_box_spacing + self.iso_path_text_x_pos, y=self.filename_text_y_pos	, width=200)
+		self.entry_field_iso_path.place(	x=self.text_box_spacing + self.iso_path_text_x_pos, y=self.iso_path_text_y_pos	, width=200)
 
-		self.entry_field_title_id.place(	x=text_box_spacing + iso_path_text_x_pos, y=title_id_text_y_pos	-height_of_text/3, width=200)
-		self.entry_field_title.place(		x=text_box_spacing + iso_path_text_x_pos, y=title_text_y_pos		-height_of_text/3, width=200)
-		self.entry_field_filename.place(	x=text_box_spacing + iso_path_text_x_pos, y=filename_text_y_pos	-height_of_text/3, width=200)
-		self.entry_field_iso_path.place(	x=text_box_spacing + iso_path_text_x_pos, y=iso_path_text_y_pos	-height_of_text/3, width=200)
+		self.button_HDD.place(x=self.main_offset_x_pos + 0 * 29, y=self.main_offset_y_pos - 120)
+		self.button_USB.place(x=self.main_offset_x_pos + 3 * 29, y=self.main_offset_y_pos - 120)
 
-		self.button_HDD.place(x=main_offset_x_pos + 0 * 29, y=main_offset_y_pos - 120)
-		self.button_USB.place(x=main_offset_x_pos + 3 * 29, y=main_offset_y_pos - 120)
+		self.button_PSP.place(	x=self.main_offset_x_pos + 0 * 29, y=self.main_offset_y_pos -80)
+		self.button_PSX.place(	x=self.main_offset_x_pos + 3 * 29, y=self.main_offset_y_pos -80)
+		self.button_PS2.place(	x=self.main_offset_x_pos + 6 * 29, y=self.main_offset_y_pos -80)
+		self.button_PS3.place(	x=self.main_offset_x_pos + 9 * 29, y=self.main_offset_y_pos -80)
 
-		self.button_PSP.place(	x=main_offset_x_pos + 0 * 29, y=main_offset_y_pos -80)
-		self.button_PSX.place(	x=main_offset_x_pos + 3 * 29, y=main_offset_y_pos -80)
-		self.button_PS2.place(	x=main_offset_x_pos + 6 * 29, y=main_offset_y_pos -80)
-		self.button_PS3.place(	x=main_offset_x_pos + 9 * 29, y=main_offset_y_pos -80)
-
-		self.pkg_pic1	= Button(main, image=self.pkg_images[1], bd=1, bg="#000000")
+		self.pkg_pic1	= Button(main, image=self.pkg_images[1], highlightthickness=0, bd=0)
 		self.pkg_pic1.place(x=10, y=245)
 
 		# self.pkg_pic1.place()
 		# self.pkg_pic0.place(x=250, y=300)
 		# self.pkg_pic1 = Button(main, image=self.pkg_images[1], bd=1, bg="#000000")
-		self.pkg_icon0		= Button(main, image=self.pkg_images[2], bd=1, bg="#000000")
+		self.pkg_icon0		= Button(main, image=self.pkg_images[2], highlightthickness = 0, bd = 0)
 		self.pkg_icon0.place(x=285, y=530)
 
 		icon_img = Image.open('../../pkg/ICON0.PNG')
@@ -224,7 +253,7 @@ class Main():
 		# self.canvas.create_text(200,500,fill="white",font="Helvetica 14 italic bold",
         #                 text="This Is A Game Title")
 
-		self.save_button.place(x=text_box_spacing + iso_path_text_x_pos, y=iso_path_text_y_pos + 40)
+		self.save_button.place(x=self.text_box_spacing + self.iso_path_text_x_pos, y=self.iso_path_text_y_pos + 40)
 
 		####################################################################
 		# Adding an onChange -listener on 'entry_field_filename'
@@ -285,12 +314,20 @@ class Main():
 		# next image
 		self.my_image_number += 1
 
+		print('on change')
+
 		# return to first image
-		if self.my_image_number == len(self.wallpapers):
+		if self.my_image_number == len(self.background_images):
 			self.my_image_number = 0
 
 		# change image
-		self.canvas.itemconfig(self.image_on_canvas, image=self.wallpapers[self.my_image_number])
+		self.draw_text_on_image(self.background_images[self.my_image_number], self.text_title_id,	self.title_id_text_x_pos, 	self.title_id_text_y_pos, 25, 'white')
+		self.draw_text_on_image(self.background_images[self.my_image_number], self.text_title,		self.title_text_x_pos, 		self.title_text_y_pos, 25, 'white')
+		self.draw_text_on_image(self.background_images[self.my_image_number], self.text_filename,	self.filename_text_x_pos, 	self.filename_text_y_pos, 25, 'white')
+		self.draw_text_on_image(self.background_images[self.my_image_number], self.text_iso_path,	self.iso_path_text_x_pos, 	self.iso_path_text_y_pos, 25, 'white')
+		self.current_background = PhotoImage(self.background_images[self.my_image_number])
+
+		self.canvas.itemconfig(self.image_on_canvas, image=self.current_background)
 
 	def on_drive_system_filename_choice_button(self, drive_choice, system_choice):
 		current_iso_path 	= self.entry_field_iso_path.get()
@@ -463,6 +500,7 @@ main_window_width = 1920
 main_window_height = 1080
 
 main_window = Tk()
+main_window.geometry("+%d+%d" % (0, 0))
 # changing the title of our master widget
 main_window.title('webMAN Classics Maker UI')
 # icon upper left corner
