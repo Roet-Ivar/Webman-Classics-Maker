@@ -1,8 +1,6 @@
-import json
+import os, json, time, copy
 
 from Tkinter import *
-from tkFont import Font
-
 from PIL import Image
 from PIL.ImageTk import PhotoImage
 from PIL import ImageDraw
@@ -19,9 +17,10 @@ class Main():
 		self.canvas = Canvas(main, width=canvas_width, height=canvas_height, borderwidth=0, highlightthickness=0)
 		self.canvas.pack(fill=BOTH, expand=YES)
 
-		self.vcmd = main.register(self.validate)
-		self.vcmd2 = main.register(self.validate)
-		self.maxlength = 8
+		self.vcmd = main.register(self.dynamic_validate_title_id)
+		self.vcmd2 = main.register(self.dynamic_validate_title_id)
+		self.maxlength = len('PKGLAUNCH')
+		self.tmp_title_id = ''
 
 		# setting defaults
 		self.state_drive_choice		= 'dev_hdd0'
@@ -52,29 +51,59 @@ class Main():
 		self.background_images.append(Image.open('background_light_blue_waves_1920_1080.gif'))
 		self.background_images.append(Image.open('background_light_blue_symbols_1920_1080.gif'))
 
+		# init definitions
+		self.init_pkg_images()
+		self.init_main_window_buttons(main)
+		self.init_labels_texts_buttons(main)
+		self.draw_background_on_canvas()
+
+	def init_pkg_images(self):
+		pic0_filename	= 'PIC0.PNG'
+		pic1_filename	= 'PIC1.PNG'
+		icon0_filename	= 'ICON0.PNG'
+
+		self.image_pic0 = self.pkg_img_curr_or_def(pic0_filename)
+		self.image_pic1 = self.pkg_img_curr_or_def(pic1_filename)
+		self.image_icon0 = self.pkg_img_curr_or_def(icon0_filename)
+
 		self.image_xmb_icons = Image.open('XMB_icons.png')
-		self.image_pic1		= Image.open('../../pkg/PIC1.PNG')
-		self.image_pic0		= Image.open('../../pkg/PIC0.PNG')
-		self.image_icon0	= Image.open('../../pkg/ICON0.PNG')
 		self.image_icon0_crop 	= self.image_icon0.crop((10, 10, self.image_icon0.width - 10, self.image_icon0.height - 10))
 		self.ps3_system_logo = Image.open('./ps3_type_logo.png')
 
-		pic1_x_scale		= 1280.0/self.image_pic1.width * scaling
-		pic1_y_scale		= 720.0/self.image_pic1.height * scaling
-		self.pic0_dimensions 	= (int(pic1_x_scale * self.image_pic0.width), int(pic1_y_scale * self.image_pic0.height))
-		self.icon0_dimensions 	= (int(pic1_x_scale * self.image_icon0.width), int(pic1_y_scale * self.image_icon0.height))
 
-		# init defintions
-		self.init_main_window_buttons(main)
-		self.init_param_sfo_labels(main)
+	def pkg_img_curr_or_def(self, filename):
+		pkg_image_base_path = './resources/pkg_images/'
+		default_path = os.path.join(pkg_image_base_path, 'default')
 
-	def init_param_sfo_labels(self, main):
+		tmp_img_path = os.path.join(pkg_image_base_path, filename)
+		if os.path.isfile(tmp_img_path):
+			return Image.open(tmp_img_path)
+		else:
+			return Image.open(os.path.join(default_path, filename))
+
+
+	def draw_background_on_canvas(self):
+		self.my_image_number = 0
+
+		self.draw_text_on_image(self.background_images[self.my_image_number], self.text_title_id.upper(),	self.title_id_text_x_pos, 	self.title_id_text_y_pos, 	25, 'white')
+		self.draw_text_on_image(self.background_images[self.my_image_number], self.text_title.upper(),		self.title_text_x_pos, 		self.title_text_y_pos, 		25, 'white')
+		self.draw_text_on_image(self.background_images[self.my_image_number], self.text_filename.upper(),	self.filename_text_x_pos, 	self.filename_text_y_pos, 	25, 'white')
+		self.draw_text_on_image(self.background_images[self.my_image_number], self.text_iso_path.upper(),	self.iso_path_text_x_pos, 	self.iso_path_text_y_pos, 	25, 'white')
+
+		self.current_img = self.background_images[self.my_image_number]
+		self.current_img = self.background_images[0]
+		self.current_img = self.current_img.resize((int(1920 * scaling), int(1080 * scaling)), Image.ANTIALIAS)
+		self.current_background = PhotoImage(self.current_img)
+
+		self.image_on_canvas = self.canvas.create_image(0, 0, anchor=NW, image=self.current_background)
+
+
+	def init_labels_texts_buttons(self, main):
 		# Constants
 		self.text_title_id	= 'Title id'
 		self.text_title 	= 'Title'
 		self.text_filename	= 'Filename'
 		self.text_iso_path	= 'Path'
-
 
 		# paddings
 		self.height_of_text = 15 #Font(font='Helvetica').metrics('linespace')
@@ -99,18 +128,6 @@ class Main():
 		self.iso_path_text_x_pos = self.main_offset_x_pos
 		self.iso_path_text_y_pos = self.dark_side_padding + self.filename_text_y_pos + self.height_of_text
 
-		self.my_image_number = 0
-		self.draw_text_on_image(self.background_images[self.my_image_number], self.text_title_id.upper(), 	self.title_id_text_x_pos,	self.title_id_text_y_pos,	25, 'white')
-		self.draw_text_on_image(self.background_images[self.my_image_number], self.text_title.upper(), 	self.title_text_x_pos,		self.title_text_y_pos, 		25, 'white')
-		self.draw_text_on_image(self.background_images[self.my_image_number], self.text_filename.upper(), 	self.filename_text_x_pos,	self.filename_text_y_pos,	25, 'white')
-		self.draw_text_on_image(self.background_images[self.my_image_number], self.text_iso_path.upper(), 	self.iso_path_text_x_pos,	self.iso_path_text_y_pos,	25, 'white')
-		self.current_img = self.background_images[self.my_image_number]
-		self.current_img = self.background_images[0]
-		self.current_img = self.current_img.resize((int(1920 * scaling), int(1080 * scaling)), Image.ANTIALIAS)
-		self.current_background = PhotoImage(self.current_img)
-
-		self.image_on_canvas = self.canvas.create_image(0, 0, anchor=NW, image=self.current_background)
-
 
 		# defintions
 		self.entry_field_title_id	= Entry(main, validate='key', validatecommand=(self.vcmd, '%P'))
@@ -124,18 +141,17 @@ class Main():
 		self.selection_system_list	= ['PSP', 'PSX', 'PS2', 'PS3']
 		self.drive_path 			= self.selection_drive_list[0] 				# drive should be toggled by buttons
 
-		self.button_HDD 	= Button(main, image=self.logo_drives[0], bd=1, command=lambda: self.on_drive_system_filename_choice_button(self.selection_drive_list[0], self.state_system_choice))
-		self.button_USB 	= Button(main, image=self.logo_drives[1], bd=1, command=lambda: self.on_drive_system_filename_choice_button(self.selection_drive_list[2], self.state_system_choice))
+		self.button_HDD 	= Button(main, image=self.logo_drives[0], bd=1, command=lambda: self.on_drive_and_system_button(self.selection_drive_list[0], self.state_system_choice))
+		self.button_USB 	= Button(main, image=self.logo_drives[1], bd=1, command=lambda: self.on_drive_and_system_button(self.selection_drive_list[2], self.state_system_choice))
 
-		self.button_PSP 	= Button(main, image=self.logo_systems[0], bd=1, command=lambda: self.on_drive_system_filename_choice_button(self.state_drive_choice, self.selection_system_list[0]))
-		self.button_PSX 	= Button(main, image=self.logo_systems[1], bd=1, command=lambda: self.on_drive_system_filename_choice_button(self.state_drive_choice, self.selection_system_list[1]))
-		self.button_PS2 	= Button(main, image=self.logo_systems[2], bd=1, command=lambda: self.on_drive_system_filename_choice_button(self.state_drive_choice, self.selection_system_list[2]))
-		self.button_PS3 	= Button(main, image=self.logo_systems[3], bd=1, command=lambda: self.on_drive_system_filename_choice_button(self.state_drive_choice, self.selection_system_list[3]))
-
+		self.button_PSP 	= Button(main, image=self.logo_systems[0], bd=1, command=lambda: self.on_drive_and_system_button(self.state_drive_choice, self.selection_system_list[0]))
+		self.button_PSX 	= Button(main, image=self.logo_systems[1], bd=1, command=lambda: self.on_drive_and_system_button(self.state_drive_choice, self.selection_system_list[1]))
+		self.button_PS2 	= Button(main, image=self.logo_systems[2], bd=1, command=lambda: self.on_drive_and_system_button(self.state_drive_choice, self.selection_system_list[2]))
+		self.button_PS3 	= Button(main, image=self.logo_systems[3], bd=1, command=lambda: self.on_drive_and_system_button(self.state_drive_choice, self.selection_system_list[3]))
 
 		self.save_button = Button(main, text="Save", command=self.on_save_button, bd=1, bg="#FBFCFB")
 
-		# Placements
+		# Entry and Button placements
 		self.entry_field_title_id.place(x=int((self.text_box_spacing + self.iso_path_text_x_pos) * scaling), y=int(self.title_id_text_y_pos	* scaling)	, width=200)
 		self.entry_field_title.place(	x=int((self.text_box_spacing + self.iso_path_text_x_pos) * scaling), y=int(self.title_text_y_pos	* scaling)	, width=200)
 		self.entry_field_filename.place(x=int((self.text_box_spacing + self.iso_path_text_x_pos) * scaling), y=int(self.filename_text_y_pos	* scaling)	, width=200)
@@ -149,8 +165,8 @@ class Main():
 		self.button_PS2.place(x=int((self.main_offset_x_pos + 6 * 29) * scaling), y=int(self.main_offset_y_pos - 80))
 		self.button_PS3.place(x=int((self.main_offset_x_pos + 9 * 29) * scaling), y=int(self.main_offset_y_pos - 80))
 
-		game_title = 'Burnout Revenge'
-		self.re_draw_image_on_canvas(main)
+		# draws PIC1 and ICON0 on the canvas
+		self.init_draw_images_on_canvas(main)
 
 		if 'linux' not in sys.platform:
 			# making test print of canvas
@@ -162,30 +178,32 @@ class Main():
 			self.draw_text_on_image(pic1_img, 'Burnout Revenge', 760, 490, 32, 'white')
 			pic1_img.save('test.png')
 
-		self.save_button.place(x=self.text_box_spacing + self.iso_path_text_x_pos, y=self.iso_path_text_y_pos + 40)
+		self.save_button.place(x=int((self.text_box_spacing + self.iso_path_text_x_pos) * scaling), y=int((self.iso_path_text_y_pos + 40) * scaling))
 
-		####################################################################
+		##########################################################################
 		# Adding an onChange -listener on 'entry_field_filename'
-		self.generateOnChange(self.entry_field_filename)
-		self.entry_field_filename.bind('<<Change>>', self.onEntryChanged)
-		####################################################################
+		self.generate_on_change(self.entry_field_filename)
+		self.entry_field_filename.bind('<<Change>>', self.dynamic_filename_to_path)
+		###########################################################################
+		# Adding an onChange -listener on 'entry_field_title'
+		self.generate_on_change(self.entry_field_title)
+		self.entry_field_title.bind('<<Change>>', self.dynamic_title_to_pic1)
+		###########################################################################
 
-	def re_draw_image_on_canvas(self, main):
-		game_title = "Burnout Revenge"
-		text_color = 'white'
-		game_text_x = 760
-		game_text_y = 490
-		text_size = 32
+	def init_draw_images_on_canvas(self, main):
+		pic1_x_scale = 1280.0 / self.image_pic1.width * scaling
+		pic1_y_scale = 720.0 / self.image_pic1.height * scaling
+		self.icon0_dimensions = (int(pic1_x_scale * self.image_icon0.width), int(pic1_y_scale * self.image_icon0.height))
 
-		self.draw_text_on_image(self.image_pic1, game_title, game_text_x, game_text_y, text_size, text_color)
 		self.image_pic1.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
 		self.image_pic1.paste(self.ps3_system_logo, (1180, 525), self.ps3_system_logo)
+		self.image_pic1_xmb = copy.copy(self.image_pic1)
 		self.photo_image_pic1 = PhotoImage(self.image_pic1.resize((int(1280 * scaling), int(720 * scaling)), Image.ANTIALIAS))
 
 		self.button_pic1	= Button(main, image=self.photo_image_pic1, highlightthickness=0, bd=0)
 		self.button_pic1.place(x=10 * scaling, y=245 * scaling)
-
 		self.photo_image_icon0 = PhotoImage(self.image_icon0_crop.resize(self.icon0_dimensions, Image.ANTIALIAS))
+
 		self.button_icon0		= Button(main, image=self.photo_image_icon0, highlightthickness = 0, bd=0)
 		self.button_icon0.place(x=int(285 * scaling), y=int(530 * scaling))
 
@@ -193,8 +211,6 @@ class Main():
 	def draw_text_on_image(self, image, text, text_x, text_y, text_size, text_color):
 		font = ImageFont.truetype('./fonts/SCE-PS3.ttf', text_size)
 		draw = ImageDraw.Draw(image)
-		if text_color == None:
-			text_outline = 'white'
 		return draw.text((text_x, text_y), text, fill=text_color, font=font)
 
 	def draw_text_on_image_w_shadow(self, image, text, text_x, text_y, text_size, text_outline, text_color, shadow_color):
@@ -257,7 +273,7 @@ class Main():
 
 		self.canvas.itemconfig(self.image_on_canvas, image=self.current_background)
 
-	def on_drive_system_filename_choice_button(self, drive_choice, system_choice):
+	def on_drive_and_system_button(self, drive_choice, system_choice):
 		current_iso_path 	= self.entry_field_iso_path.get()
 		print('DEBUG system_choice: ' + system_choice)
 		print('DEBUG drive_choice: ' + drive_choice)
@@ -309,7 +325,7 @@ class Main():
 
 	def on_save_button(self):
 		# do stuff
-		self.validate_title_id()
+		self.validate_title_id_on_save()
 
 		self.save_pkg_info_to_json()
 
@@ -328,24 +344,26 @@ class Main():
 			newFile.write(json_text)
 
 		except ValueError:
-			print('File write error/PKGLAUNCH not found/titel_id not a string')
+			print('File write error/PKGLAUNCH not found/title-_d not a string')
 
 	# Ensure title_id doesn't exceed 8 characters
-	def validate(self, P):
-		if len(P) > self.maxlength:
-			# re-activates listener
-			main_window.after_idle(lambda: self.entry_field_title_id.config(validate='key'))
-			return None  # new value too long
-		else:
-			print('DEBUG Title ID: ' + P)
-			return True
+	def dynamic_validate_title_id(self, P):
+		P = P.upper()
+		P = P.replace('_', '')
+		P = P.replace('-', '')
+		self.entry_field_title_id.delete(0, END)
+		self.entry_field_title_id.insert(0, P[0:self.maxlength])
+		print('DEBUG Title ID: ' + self.entry_field_title_id.get())
+		main_window.after_idle(lambda: self.entry_field_title_id.config(validate='key'))
+		return True
 
-	# Ensures title id is exactly 8 characters during save
-	def validate_title_id(self):
+	# Ensures title id is exactly 9 characters during save
+	def validate_title_id_on_save(self):
 		title_id = self.entry_field_title_id.get().upper()
-		if len(title_id) < self.maxlength:
-			title_id = title_id + 'XXXXXXXX'
-			title_id = title_id[0:self.maxlength]
+		title_id = title_id.replace('_', '')
+		title_id = title_id.replace('-', '')
+		title_id = title_id + 'XXXXXXXX'
+		title_id = title_id[0:self.maxlength]
 
 		self.entry_field_title_id.delete(0, END)
 		self.entry_field_title_id.insert(0, title_id)
@@ -353,7 +371,7 @@ class Main():
 
 
 	# Dynamic update of the 'entry_field_filename' into the 'entry_field_iso_path'
-	def onEntryChanged(self, event):
+	def dynamic_filename_to_path(self, event):
 		drive = ''
 		system = ''
 		filename = event.widget.get()
@@ -374,16 +392,15 @@ class Main():
 		current_filename = self.entry_field_iso_path.get()
 		print("entry_field_iso_path: " + current_filename)
 
-		self.img_pic1 = Image.open('../../pkg/PIC1.PNG')
-		self.draw_text_on_image(self.img_pic1, filename, 760, 490, 32, 'white')
-		self.img_pic1.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
-		self.img_pic1.paste(self.ps3_system_logo, (1180, 525), self.ps3_system_logo)
-		self.photo_img_pic1 = PhotoImage(self.img_pic1.resize((int(1280 * scaling), int(720 * scaling)), Image.ANTIALIAS))
 
+	# Dynamic update of the game title on to the PIC1 image
+	def dynamic_title_to_pic1(self, event):
+		tmp_img = copy.copy(self.image_pic1_xmb)
+		self.draw_text_on_image(tmp_img, event.widget.get(), 760, 490, 32, 'white')
+		self.photo_image_pic1_xmb = PhotoImage(tmp_img.resize((int(1280 * scaling), int(720 * scaling)), Image.ANTIALIAS))
+		self.button_pic1.config(image=self.photo_image_pic1_xmb)
 
-		self.button_pic1.config(image=self.photo_img_pic1)
-
-	def generateOnChange(self, obj):
+	def generate_on_change(self, obj):
 		obj.tk.eval('''
 				proc widget_proxy {widget widget_command args} {
 
@@ -409,24 +426,6 @@ class Main():
 				rename {widget} _{widget}
 				interp alias {{}} ::{widget} {{}} widget_proxy {widget} _{widget}
 			'''.format(widget=str(obj)))
-
-def dpi_awerness():
-	if 'linux' not in sys.platform:
-		import ctypes
-		# Query DPI Awareness (Windows 10 and 8)
-		awareness = ctypes.c_int()
-		errorCode = ctypes.windll.shcore.GetProcessDpiAwareness(0, ctypes.byref(awareness))
-		print(awareness.value)
-
-		# Set DPI Awareness  (Windows 10 and 8)
-		errorCode = ctypes.windll.shcore.SetProcessDpiAwareness(4)
-		# the argument is the awareness level, which can be 0, 1 or 2:
-		# for 1-to-1 pixel control I seem to need it to be non-zero (I'm using level 2)
-
-		# Set DPI Awareness  (Windows 7 and Vista)
-		success = ctypes.windll.user32.SetProcessDPIAware()
-
-		# behaviour on later OSes is undefined, although when I run it on my Windows 10 machine, it seems to work with effects identical to SetProcessDpiAwareness(1)
 
 
 main_window = Tk()
