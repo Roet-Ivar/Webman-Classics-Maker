@@ -17,6 +17,9 @@ class Main():
 		self.canvas = Canvas(main, width=canvas_width, height=canvas_height, borderwidth=0, highlightthickness=0)
 		self.canvas.pack(fill=BOTH, expand=YES)
 
+		self.main_offset_x_pos = 1325
+		self.main_offset_y_pos = 150
+
 		self.vcmd = main.register(self.dynamic_validate_title_id)
 		self.vcmd2 = main.register(self.dynamic_validate_title_id)
 		self.maxlength = len('PKGLAUNCH')
@@ -113,9 +116,6 @@ class Main():
 		self.text_box_spacing = 8 * self.dark_side_padding
 
 		# coordinates
-		self.main_offset_x_pos = 1400
-		self.main_offset_y_pos = 150
-
 		self.title_id_text_x_pos = self.main_offset_x_pos
 		self.title_id_text_y_pos = self.main_offset_y_pos + self.height_of_text
 
