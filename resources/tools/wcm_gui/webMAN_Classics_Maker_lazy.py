@@ -157,13 +157,13 @@ class Main():
 		self.entry_field_filename.place(x=int((self.text_box_spacing + self.iso_path_text_x_pos) * scaling), y=int(self.filename_text_y_pos	* scaling)	, width=200)
 		self.entry_field_iso_path.place(x=int((self.text_box_spacing + self.iso_path_text_x_pos) * scaling), y=int(self.iso_path_text_y_pos	* scaling)	, width=200)
 
-		self.button_HDD.place(x=int((self.main_offset_x_pos + 0 * 29) * scaling), y=int(self.main_offset_y_pos - 120))
-		self.button_USB.place(x=int((self.main_offset_x_pos + 3 * 29) * scaling), y=int(self.main_offset_y_pos - 120))
+		self.button_HDD.place(x=int((self.main_offset_x_pos + 0 * 35) * scaling), y=int(self.main_offset_y_pos - 120))
+		self.button_USB.place(x=int((self.main_offset_x_pos + 3 * 35) * scaling), y=int(self.main_offset_y_pos - 120))
 
-		self.button_PSP.place(x=int((self.main_offset_x_pos + 0 * 29) * scaling), y=int(self.main_offset_y_pos - 80))
-		self.button_PSX.place(x=int((self.main_offset_x_pos + 3 * 29) * scaling), y=int(self.main_offset_y_pos - 80))
-		self.button_PS2.place(x=int((self.main_offset_x_pos + 6 * 29) * scaling), y=int(self.main_offset_y_pos - 80))
-		self.button_PS3.place(x=int((self.main_offset_x_pos + 9 * 29) * scaling), y=int(self.main_offset_y_pos - 80))
+		self.button_PSP.place(x=int((self.main_offset_x_pos + 0 * 35) * scaling), y=int(self.main_offset_y_pos - 80))
+		self.button_PSX.place(x=int((self.main_offset_x_pos + 3 * 35) * scaling), y=int(self.main_offset_y_pos - 80))
+		self.button_PS2.place(x=int((self.main_offset_x_pos + 6 * 35) * scaling), y=int(self.main_offset_y_pos - 80))
+		self.button_PS3.place(x=int((self.main_offset_x_pos + 9 * 35) * scaling), y=int(self.main_offset_y_pos - 80))
 
 		# draws PIC1 and ICON0 on the canvas
 		self.init_draw_images_on_canvas(main)
@@ -346,7 +346,7 @@ class Main():
 		except ValueError:
 			print('File write error/PKGLAUNCH not found/title-_d not a string')
 
-	# Ensure title_id doesn't exceed 8 characters
+	# Dynamic validation of title id
 	def dynamic_validate_title_id(self, P):
 		P = P.upper()
 		P = P.replace('_', '')
