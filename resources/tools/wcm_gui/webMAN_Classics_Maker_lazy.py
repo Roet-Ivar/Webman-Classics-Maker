@@ -33,26 +33,26 @@ class Main():
 
 		# images
 		self.logo_drives = []
-		self.logo_drives.append(PhotoImage(Image.open("logo_drive_hdd.gif")))
-		self.logo_drives.append(PhotoImage(Image.open('logo_drive_usb.gif')))
+		self.logo_drives.append(PhotoImage(Image.open("./resources/images/buttons/logo_drive_hdd.gif")))
+		self.logo_drives.append(PhotoImage(Image.open('./resources/images/buttons/logo_drive_usb.gif')))
 
 		self.logo_systems = []
-		self.logo_systems.append(PhotoImage(Image.open('logo_system_PSP.gif')))
-		self.logo_systems.append(PhotoImage(Image.open('logo_system_PSX.gif')))
-		self.logo_systems.append(PhotoImage(Image.open('logo_system_PS2.gif')))
-		self.logo_systems.append(PhotoImage(Image.open('logo_system_PS3.gif')))
+		self.logo_systems.append(PhotoImage(Image.open('./resources/images/buttons/logo_system_PSP.gif')))
+		self.logo_systems.append(PhotoImage(Image.open('./resources/images/buttons/logo_system_PSX.gif')))
+		self.logo_systems.append(PhotoImage(Image.open('./resources/images/buttons/logo_system_PS2.gif')))
+		self.logo_systems.append(PhotoImage(Image.open('./resources/images/buttons/logo_system_PS3.gif')))
 
 		self.background_images = []
-		self.background_images.append(Image.open('background_light_dark_1920_1080.png'))
-		self.background_images.append(Image.open('background_mod.png'))
-		self.background_images.append(Image.open('background_mod_2.png'))
-		self.background_images.append(Image.open('background_mod_3.png'))
-		self.background_images.append(Image.open('background_mod_3_blur.png'))
-		self.background_images.append(Image.open('background_dark_1920_1080.gif'))
-		self.background_images.append(Image.open('background_light_1920_1080.gif'))
-		self.background_images.append(Image.open('background_dark_blue_symbols_1920_1080.gif'))
-		self.background_images.append(Image.open('background_light_blue_waves_1920_1080.gif'))
-		self.background_images.append(Image.open('background_light_blue_symbols_1920_1080.gif'))
+		self.background_images.append(Image.open('./resources/images/wallpapers/background_light_dark_1920_1080.png'))
+		self.background_images.append(Image.open('./resources/images/wallpapers/background_mod.png'))
+		self.background_images.append(Image.open('./resources/images/wallpapers/background_mod_2.png'))
+		self.background_images.append(Image.open('./resources/images/wallpapers/background_mod_3.png'))
+		self.background_images.append(Image.open('./resources/images/wallpapers/background_mod_3_blur.png'))
+		self.background_images.append(Image.open('./resources/images/wallpapers/background_dark_1920_1080.gif'))
+		self.background_images.append(Image.open('./resources/images/wallpapers/background_light_1920_1080.gif'))
+		self.background_images.append(Image.open('./resources/images/wallpapers/background_dark_blue_symbols_1920_1080.gif'))
+		self.background_images.append(Image.open('./resources/images/wallpapers/background_light_blue_waves_1920_1080.gif'))
+		self.background_images.append(Image.open('./resources/images/wallpapers/background_light_blue_symbols_1920_1080.gif'))
 
 		# init definitions
 		self.init_pkg_images()
@@ -69,20 +69,19 @@ class Main():
 		self.image_pic1 = self.pkg_img_curr_or_def(pic1_filename)
 		self.image_icon0 = self.pkg_img_curr_or_def(icon0_filename)
 
-		self.image_xmb_icons = Image.open('XMB_icons.png')
-		self.image_icon0_crop 	= self.image_icon0.crop((10, 10, self.image_icon0.width - 10, self.image_icon0.height - 10))
-		self.ps3_system_logo = Image.open('./ps3_type_logo.png')
+		self.image_xmb_icons = Image.open('./resources/images/misc/XMB_icons.png')
+		self.ps3_system_logo = Image.open('./resources/images/misc/ps3_type_logo.png')
 
 
 	def pkg_img_curr_or_def(self, filename):
-		pkg_image_base_path = './resources/pkg_images/'
-		default_path = os.path.join(pkg_image_base_path, 'default')
+		pkg_image_base_path = './resources/images/pkg/'
 
 		tmp_img_path = os.path.join(pkg_image_base_path, filename)
+		print(tmp_img_path)
 		if os.path.isfile(tmp_img_path):
 			return Image.open(tmp_img_path)
 		else:
-			return Image.open(os.path.join(default_path, filename))
+			return Image.open(os.path.join(pkg_image_base_path, 'default'))
 
 
 	def draw_background_on_canvas(self):
@@ -172,7 +171,7 @@ class Main():
 			# making test print of canvas
 			pic1_img = Image.open('../../pkg/PIC1.PNG')
 			icon_img = Image.open('../../pkg/ICON0.PNG')
-			xmb_img = Image.open('XMB_icons.png')
+			xmb_img = Image.open('./resources/images/misc/XMB_icons.png')
 			pic1_img.paste(icon_img, (425, 450), icon_img)
 			pic1_img.paste(xmb_img, (0, 0), xmb_img)
 			self.draw_text_on_image(pic1_img, 'Burnout Revenge', 760, 490, 32, 'white')
@@ -202,7 +201,12 @@ class Main():
 
 		self.button_pic1	= Button(main, image=self.photo_image_pic1, highlightthickness=0, bd=0)
 		self.button_pic1.place(x=10 * scaling, y=245 * scaling)
-		self.photo_image_icon0 = PhotoImage(self.image_icon0_crop.resize(self.icon0_dimensions, Image.ANTIALIAS))
+
+		# removing 7 pixels from all sides due to transparent border
+		self.image_icon0_crop 	= self.image_icon0.crop((7, 7, self.image_icon0.width - 7, self.image_icon0.height - 7))
+		self.image_icon0_crop = self.image_icon0_crop.resize((self.icon0_dimensions[0] -7, self.icon0_dimensions[1] -7), Image.ANTIALIAS)
+
+		self.photo_image_icon0 = PhotoImage(self.image_icon0_crop)
 
 		self.button_icon0		= Button(main, image=self.photo_image_icon0, highlightthickness = 0, bd=0)
 		self.button_icon0.place(x=int(285 * scaling), y=int(530 * scaling))
