@@ -30,17 +30,16 @@ class Main():
 		self.state_system_choice	= 'PS2'
 		self.entry_field_iso_path 	= None
 
-
 		# images
 		self.logo_drives = []
-		self.logo_drives.append(PhotoImage(Image.open("./resources/images/buttons/logo_drive_hdd.gif")))
-		self.logo_drives.append(PhotoImage(Image.open('./resources/images/buttons/logo_drive_usb.gif')))
+		self.logo_drives.append(PhotoImage(self.button_maker('HDD')))
+		self.logo_drives.append(PhotoImage(self.button_maker('USB')))
 
 		self.logo_systems = []
-		self.logo_systems.append(PhotoImage(Image.open('./resources/images/buttons/logo_system_PSP.gif')))
-		self.logo_systems.append(PhotoImage(Image.open('./resources/images/buttons/logo_system_PSX.gif')))
-		self.logo_systems.append(PhotoImage(Image.open('./resources/images/buttons/logo_system_PS2.gif')))
-		self.logo_systems.append(PhotoImage(Image.open('./resources/images/buttons/logo_system_PS3.gif')))
+		self.logo_systems.append(PhotoImage(self.button_maker('PSP')))
+		self.logo_systems.append(PhotoImage(self.button_maker('PSX')))
+		self.logo_systems.append(PhotoImage(self.button_maker('PS2')))
+		self.logo_systems.append(PhotoImage(self.button_maker('PS3')))
 
 		self.background_images = []
 		self.background_images.append(Image.open('./resources/images/wallpapers/background_light_dark_1920_1080.png'))
@@ -59,6 +58,11 @@ class Main():
 		self.init_main_window_buttons(main)
 		self.init_labels_texts_buttons(main)
 		self.draw_background_on_canvas()
+
+	def button_maker(self, text):
+		icon_bg_img = Image.new('RGB', (54, 20), color='black')
+		self.draw_text_on_image_w_font(icon_bg_img, text, 7, 1, 15, 'white', './resources/fonts/conthrax-sb.ttf')
+		return copy.copy(icon_bg_img)
 
 	def init_pkg_images(self):
 		pic0_filename	= 'PIC0.PNG'
@@ -213,12 +217,19 @@ class Main():
 
 
 	def draw_text_on_image(self, image, text, text_x, text_y, text_size, text_color):
-		font = ImageFont.truetype('./fonts/SCE-PS3.ttf', text_size)
+		font = ImageFont.truetype('./resources/fonts/SCE-PS3.ttf', text_size)
+		draw = ImageDraw.Draw(image)
+		return draw.text((text_x, text_y), text, fill=text_color, font=font)
+
+	def draw_text_on_image_w_font(self, image, text, text_x, text_y, text_size, text_color, font):
+		if not os.path.isfile(font):
+			print('font does not exist')
+		font = ImageFont.truetype(font, text_size)
 		draw = ImageDraw.Draw(image)
 		return draw.text((text_x, text_y), text, fill=text_color, font=font)
 
 	def draw_text_on_image_w_shadow(self, image, text, text_x, text_y, text_size, text_outline, text_color, shadow_color):
-		font = ImageFont.truetype('./fonts/SCE-PS3.ttf', text_size)
+		font = ImageFont.truetype('./resources/fonts/SCE-PS3.ttf', text_size)
 		if text_outline == None:
 			text_outline = 2
 		if text_color == None:
@@ -250,12 +261,15 @@ class Main():
 
 	def init_main_window_buttons(self, main):
 		# button to quit
-		self.quit_button = Button(main, text="Quit", command=main.quit, bd=1, bg="#FBFCFB")
+		# self.quit_button = Button(main, text="Quit", command=main.quit, bd=1, bg="#FBFCFB")
+		self.quit_button = Button(main, text="Quit", command=main.quit, bd=2, fg='#FBFCFB', bg="#000000")
+
 		self.quit_button.place(x=0, y=0)
 		self.quit_button.config(height=1, width=3)
 
 		# button to change image
-		self.change_button = Button(main, text="Change", command=self.on_change_button, bd=1, bg="#FBFCFB")
+		self.change_button = Button(main, text="Change", command=self.on_change_button, bd=2, fg='#FBFCFB', bg="#000000")
+
 		self.change_button.place(x=45, y=0)
 
 	def on_change_button(self):
