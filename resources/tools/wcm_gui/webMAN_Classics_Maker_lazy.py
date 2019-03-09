@@ -23,7 +23,7 @@ class Main():
 		self.vcmd = main.register(self.dynamic_validate_title_id)
 		self.vcmd2 = main.register(self.dynamic_validate_title_id)
 		self.canvas_image_number = 0
-		self.maxlength = len('PKGLAUNCH')
+		self.title_id_maxlength = len('PKGLAUNCH')
 		self.tmp_title_id = ''
 
 		# setting defaults
@@ -106,8 +106,8 @@ class Main():
 						if 'dark_transp.png' not in file:
 							tmp_img = Image.open(base_path+file)
 							width, height = tmp_img.size
-							dark = dark.resize((618, height))
-							tmp_img.paste(dark, (width - 618, 0), dark)
+							dark = dark.resize(((600 +8), (height -115 -12)))
+							tmp_img.paste(dark, (width - (610 +8), 12), dark)
 							self.background_images.append(tmp_img)
 
 	def init_labels_texts_buttons(self, main):
@@ -338,50 +338,9 @@ class Main():
 
 
 
-	def on_save_button(self):
-		# do stuff
-		self.validate_title_id_on_save()
 
-		self.save_pkg_info_to_json()
 
-	def save_pkg_info_to_json(self):
-		with open('../util_resources/params.json.BAK') as f:
-			json_data = json.load(f)
 
-		try:
-			json_data['title']=str(self.entry_field_title.get())
-			json_data['title_id']=self.entry_field_title_id.get()
-			json_data['content_id']='UP0001-'+ self.entry_field_title_id.get() + '_00-0000000000000000'
-			json_data['iso_filepath']=str(self.entry_field_iso_path.get())
-
-			newFile = open("../util_generated_files/webman_classics_pkg.json", "w")
-			json_text = json.dumps(json_data, indent=4, separators=(",", ":"))
-			newFile.write(json_text)
-
-		except ValueError:
-			print('File write error/PKGLAUNCH not found/title-_d not a string')
-
-	# Dynamic validation of title id
-	def dynamic_validate_title_id(self, P):
-		P = P.upper()
-		P = P.replace('_', '')
-		P = P.replace('-', '')
-		self.entry_field_title_id.delete(0, END)
-		self.entry_field_title_id.insert(0, P[0:self.maxlength])
-		print('DEBUG Title ID: ' + self.entry_field_title_id.get())
-		main_window.after_idle(lambda: self.entry_field_title_id.config(validate='key'))
-		return True
-
-	# Ensures title id is exactly 9 characters during save
-	def validate_title_id_on_save(self):
-		title_id = self.entry_field_title_id.get().upper()
-		title_id = title_id.replace('_', '')
-		title_id = title_id.replace('-', '')
-		title_id = title_id + 'XXXXXXXX'
-		title_id = title_id[0:self.maxlength]
-
-		self.entry_field_title_id.delete(0, END)
-		self.entry_field_title_id.insert(0, title_id)
 
 
 
@@ -402,6 +361,7 @@ class Main():
 		self.entry_field_iso_path.config(state=NORMAL)
 		self.entry_field_iso_path.delete(0, END)
 		self.entry_field_iso_path.insert(0, iso_path)
+		self.entry_field_iso_path.xview_moveto(1)
 		self.entry_field_iso_path.config(state=DISABLED)
 
 		current_filename = self.entry_field_iso_path.get()
@@ -442,6 +402,103 @@ class Main():
 				interp alias {{}} ::{widget} {{}} widget_proxy {widget} _{widget}
 			'''.format(widget=str(obj)))
 
+	# Dynamic validation of title id
+	def dynamic_validate_title_id(self, P):
+		P = P.upper()
+		P = P.replace('_', '')
+		P = P.replace('-', '')
+		self.entry_field_title_id.delete(0, END)
+		self.entry_field_title_id.insert(0, P[0:self.title_id_maxlength])
+		print('DEBUG Title ID: ' + self.entry_field_title_id.get())
+		main_window.after_idle(lambda: self.entry_field_title_id.config(validate='key'))
+		return True
+
+	# Ensures title id is exactly 9 characters during save
+	def validate_title_id_on_save(self):
+		title_id = self.entry_field_title_id.get().upper()
+		title_id = title_id.replace('_', '')
+		title_id = title_id.replace('-', '')
+
+		if len(title_id) is not self.title_id_maxlength:
+			self.title_id_error_msg = 'Title id must be 9 characters long.'
+			print(self.title_id_error_msg)
+			self.entry_field_title_id.focus_set()
+			self.entry_field_title_id.icursor(0)
+			return False
+		else:
+			return True
+
+	def validate_title_on_save(self):
+		if len(self.entry_field_title.get()) > 0:
+			return True
+		else:
+			self.title_error_msg = 'Title cannot be empty.'
+			print(self.title_error_msg)
+			self.entry_field_title.focus_set()
+			self.entry_field_title.icursor(0)
+			return False
+
+	# Ensures title id is exactly 9 characters during save
+	def validate_filename_on_save(self):
+		filename = self.entry_field_filename.get()
+		tmp_name = filename.lower()
+
+		if 'iso' in tmp_name or 'bin' in tmp_name and len(tmp_name) > 4:
+			main_window.focus()
+			return True;
+
+		elif len(tmp_name) < 1:
+			self.filename_error_msg = 'The file must have a name'
+			print(self.filename_error_msg)
+			self.entry_field_filename.focus_set()
+			self.entry_field_filename.icursor(0)
+			return False
+		elif 'iso' in tmp_name or 'bin' in tmp_name:
+			self.filename_error_msg = 'The file must have a name'
+			print(self.filename_error_msg)
+			self.entry_field_filename.focus_set()
+			self.entry_field_filename.icursor(0)
+			return False
+		else:
+			self.filename_error_msg = 'Filename \'' + filename + '\' must end on \'.iso\' or \'.bin\''
+			print(self.filename_error_msg)
+			self.entry_field_filename.focus_set()
+			self.entry_field_filename.icursor(0)
+			return False
+
+	def on_save_button(self):
+		# do stuff
+		if self.validate_title_id_on_save():
+			print('Title_id: OK')
+		else:
+			return
+		if self.validate_title_on_save():
+			print('Title: OK')
+		else:
+			return
+		if self.validate_filename_on_save():
+			print('Title_id: OK')
+		else:
+			return
+
+		self.save_pkg_info_to_json()
+
+	def save_pkg_info_to_json(self):
+		with open('../util_resources/params.json.BAK') as f:
+			json_data = json.load(f)
+
+		try:
+			json_data['title']=str(self.entry_field_title.get())
+			json_data['title_id']=self.entry_field_title_id.get()
+			json_data['content_id']='UP0001-'+ self.entry_field_title_id.get() + '_00-0000000000000000'
+			json_data['iso_filepath']=str(self.entry_field_iso_path.get())
+
+			newFile = open("../util_generated_files/webman_classics_pkg.json", "w")
+			json_text = json.dumps(json_data, indent=4, separators=(",", ":"))
+			newFile.write(json_text)
+
+		except ValueError:
+			print('File write error/PKGLAUNCH not found/title-_d not a string')
 
 main_window = Tk()
 main_window.geometry("+%d+%d" % (0, 0))

@@ -6,7 +6,7 @@ from ftplib import FTP
 
 current_path= os.getcwd()
 # print('current_path: ' + current_path)
-if '\util_scripts' not in os.getcwd():
+if 'util_scripts' not in os.getcwd():
 	os.chdir('./resources/tools/util_scripts/')
 
 #Constants
