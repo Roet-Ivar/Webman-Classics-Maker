@@ -22,6 +22,7 @@ class Main():
 
 		self.vcmd = main.register(self.dynamic_validate_title_id)
 		self.vcmd2 = main.register(self.dynamic_validate_title_id)
+		self.canvas_image_number = 0
 		self.maxlength = len('PKGLAUNCH')
 		self.tmp_title_id = ''
 
@@ -42,16 +43,7 @@ class Main():
 		self.logo_systems.append(PhotoImage(self.button_maker('PS3')))
 
 		self.background_images = []
-		self.background_images.append(Image.open('./resources/images/wallpapers/background_light_dark_1920_1080.png'))
-		self.background_images.append(Image.open('./resources/images/wallpapers/background_mod.png'))
-		self.background_images.append(Image.open('./resources/images/wallpapers/background_mod_2.png'))
-		self.background_images.append(Image.open('./resources/images/wallpapers/background_mod_3.png'))
-		self.background_images.append(Image.open('./resources/images/wallpapers/background_mod_3_blur.png'))
-		self.background_images.append(Image.open('./resources/images/wallpapers/background_dark_1920_1080.gif'))
-		self.background_images.append(Image.open('./resources/images/wallpapers/background_light_1920_1080.gif'))
-		self.background_images.append(Image.open('./resources/images/wallpapers/background_dark_blue_symbols_1920_1080.gif'))
-		self.background_images.append(Image.open('./resources/images/wallpapers/background_light_blue_waves_1920_1080.gif'))
-		self.background_images.append(Image.open('./resources/images/wallpapers/background_light_blue_symbols_1920_1080.gif'))
+		self.load_backgrounds()
 
 		# init definitions
 		self.init_pkg_images()
@@ -89,20 +81,34 @@ class Main():
 
 
 	def draw_background_on_canvas(self):
-		self.my_image_number = 0
+		self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_title_id.upper(), self.title_id_text_x_pos, self.title_id_text_y_pos, 25, 'white')
+		self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_title.upper(), self.title_text_x_pos, self.title_text_y_pos, 25, 'white')
+		self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_filename.upper(), self.filename_text_x_pos, self.filename_text_y_pos, 25, 'white')
+		self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_iso_path.upper(), self.iso_path_text_x_pos, self.iso_path_text_y_pos, 25, 'white')
 
-		self.draw_text_on_image(self.background_images[self.my_image_number], self.text_title_id.upper(),	self.title_id_text_x_pos, 	self.title_id_text_y_pos, 	25, 'white')
-		self.draw_text_on_image(self.background_images[self.my_image_number], self.text_title.upper(),		self.title_text_x_pos, 		self.title_text_y_pos, 		25, 'white')
-		self.draw_text_on_image(self.background_images[self.my_image_number], self.text_filename.upper(),	self.filename_text_x_pos, 	self.filename_text_y_pos, 	25, 'white')
-		self.draw_text_on_image(self.background_images[self.my_image_number], self.text_iso_path.upper(),	self.iso_path_text_x_pos, 	self.iso_path_text_y_pos, 	25, 'white')
-
-		self.current_img = self.background_images[self.my_image_number]
-		self.current_img = self.background_images[0]
+		self.current_img = self.background_images[self.canvas_image_number]
+		# self.current_img = self.background_images[0]
 		self.current_img = self.current_img.resize((int(1920 * scaling), int(1080 * scaling)), Image.ANTIALIAS)
 		self.current_background = PhotoImage(self.current_img)
 
-		self.image_on_canvas = self.canvas.create_image(0, 0, anchor=NW, image=self.current_background)
+		try:
+			self.canvas.itemconfig(self.image_on_canvas, image=self.current_background)
+		except:
+			self.image_on_canvas = self.canvas.create_image(0, 0, anchor=NW, image=self.current_background)
 
+	def load_backgrounds(self):
+		base_path = "./resources/images/backgrounds/"
+		dark = Image.open(base_path + 'dark_transp.png')
+		for files in os.walk(base_path):
+			for filenames in files:
+				for file in filenames:
+					if 'png' in file:
+						if 'dark_transp.png' not in file:
+							tmp_img = Image.open(base_path+file)
+							width, height = tmp_img.size
+							dark = dark.resize((618, height))
+							tmp_img.paste(dark, (width - 618, 0), dark)
+							self.background_images.append(tmp_img)
 
 	def init_labels_texts_buttons(self, main):
 		# Constants
@@ -274,22 +280,13 @@ class Main():
 
 	def on_change_button(self):
 		# next image
-		self.my_image_number += 1
-
-		print('on change')
+		self.canvas_image_number += 1
 
 		# return to first image
-		if self.my_image_number == len(self.background_images):
-			self.my_image_number = 0
+		if self.canvas_image_number == len(self.background_images):
+			self.canvas_image_number = 0
 
-		# change image
-		self.draw_text_on_image(self.background_images[self.my_image_number], self.text_title_id,	self.title_id_text_x_pos, 	self.title_id_text_y_pos, 25, 'white')
-		self.draw_text_on_image(self.background_images[self.my_image_number], self.text_title,		self.title_text_x_pos, 		self.title_text_y_pos, 25, 'white')
-		self.draw_text_on_image(self.background_images[self.my_image_number], self.text_filename,	self.filename_text_x_pos, 	self.filename_text_y_pos, 25, 'white')
-		self.draw_text_on_image(self.background_images[self.my_image_number], self.text_iso_path,	self.iso_path_text_x_pos, 	self.iso_path_text_y_pos, 25, 'white')
-		self.current_background = PhotoImage(self.background_images[self.my_image_number])
-
-		self.canvas.itemconfig(self.image_on_canvas, image=self.current_background)
+		self.draw_background_on_canvas()
 
 	def on_drive_and_system_button(self, drive_choice, system_choice):
 		current_iso_path 	= self.entry_field_iso_path.get()
