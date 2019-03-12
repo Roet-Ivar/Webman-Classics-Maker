@@ -443,16 +443,18 @@ class Main():
 		filename = self.entry_field_filename.get()
 		tmp_name = filename.lower()
 
-		if 'iso' in tmp_name or 'bin' in tmp_name and len(tmp_name) > 4:
-			main_window.focus()
-			return True;
-
-		elif len(tmp_name) < 1:
-			self.filename_error_msg = 'The file must have a name'
+		if len(tmp_name) < 1:
+			self.filename_error_msg = 'The file must have a name and \'iso\' / \'bin\' extension'
 			print(self.filename_error_msg)
 			self.entry_field_filename.focus_set()
 			self.entry_field_filename.icursor(0)
 			return False
+
+		if 'iso' in tmp_name or 'bin' in tmp_name and len(tmp_name) > 4:
+			main_window.focus()
+			return True
+
+
 		elif 'iso' in tmp_name or 'bin' in tmp_name:
 			self.filename_error_msg = 'The file must have a name'
 			print(self.filename_error_msg)
