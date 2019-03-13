@@ -1,6 +1,5 @@
 {
-    "psx_games":[],
-    "ps2_games":[
+    "game_list":[
         {
             "title":null,
             "title_id":null,
@@ -128,112 +127,6 @@
             "installed":null,
             "filename":"ESPN International Track & Field (USA)_480p.iso",
             "last_change":null
-        },
-        {
-            "title":null,
-            "title_id":null,
-            "game_type":null,
-            "installed":null,
-            "filename":"Time Crisis II (USA).bin",
-            "last_change":null
-        },
-        {
-            "title":null,
-            "title_id":null,
-            "game_type":null,
-            "installed":null,
-            "filename":"SwapMagicDVD_v3.6.iso",
-            "last_change":null
-        },
-        {
-            "title":null,
-            "title_id":null,
-            "game_type":null,
-            "installed":null,
-            "filename":"OPL_091.iso",
-            "last_change":null
-        },
-        {
-            "title":null,
-            "title_id":null,
-            "game_type":null,
-            "installed":null,
-            "filename":"OPL_09.iso",
-            "last_change":null
-        },
-        {
-            "title":null,
-            "title_id":null,
-            "game_type":null,
-            "installed":null,
-            "filename":"imagen.iso",
-            "last_change":null
-        },
-        {
-            "title":null,
-            "title_id":null,
-            "game_type":null,
-            "installed":null,
-            "filename":"Marvel vs. Capcom 2 - New Age of Heroes (USA) [auto].iso",
-            "last_change":null
-        },
-        {
-            "title":null,
-            "title_id":null,
-            "game_type":null,
-            "installed":null,
-            "filename":"Buzz Pop Quiz.iso",
-            "last_change":null
-        },
-        {
-            "title":null,
-            "title_id":null,
-            "game_type":null,
-            "installed":null,
-            "filename":"Burnout Revenge (USA).iso",
-            "last_change":null
-        },
-        {
-            "title":null,
-            "title_id":null,
-            "game_type":null,
-            "installed":null,
-            "filename":"uLaunch_w_saves.iso",
-            "last_change":null
-        },
-        {
-            "title":null,
-            "title_id":null,
-            "game_type":null,
-            "installed":null,
-            "filename":"Sega Rally Championship 1995_widescreen.iso",
-            "last_change":null
-        },
-        {
-            "title":null,
-            "title_id":null,
-            "game_type":null,
-            "installed":null,
-            "filename":"Sega Rally 2006.iso",
-            "last_change":null
-        },
-        {
-            "title":null,
-            "title_id":null,
-            "game_type":null,
-            "installed":null,
-            "filename":"Drive to Survive (USA).iso",
-            "last_change":null
-        },
-        {
-            "title":null,
-            "title_id":null,
-            "game_type":null,
-            "installed":null,
-            "filename":"Marvel vs. Capcom 2 - New Age of Heroes (USA).iso",
-            "last_change":null
         }
-    ],
-    "ps3_games":[],
-    "psp_games":[]
+    ]
 }

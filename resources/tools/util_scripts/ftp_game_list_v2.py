@@ -4,6 +4,75 @@ import sys
 from ftplib import FTP
 
 
+class AbortableDownload():
+	def __init__(self, ftp):
+		self.ftp = ftp
+
+	def getpart_callback(self, received):
+		print "received a packet"
+		if self.cnt <= 0:
+			return True
+		else:
+			print 'received packet, [0] = %x' % ord(received[0])
+			self.outf.write(received)
+			# self.outf.flush()
+			self.cnt -= len(received)
+
+	def getpart(self, ftp_filename, rest, cnt, out_filename):
+		self.outf = open(out_filename, 'wb')
+		self.cnt = cnt
+		self.ftp.voidcmd('TYPE I')
+		conn = self.ftp.transfercmd('RETR ' + ftp_filename, rest)
+		while 1:
+			data = conn.recv(1024)
+			if not data:
+				break
+			if self.getpart_callback(data):
+				try:
+					ftp.set_debuglevel(2)
+					print("begin waiting")
+					conn.close()
+					print("1")
+					self.ftp.voidresp()
+				except Exception, e:
+					ftp.set_debuglevel(0)
+					print(e)
+					break
+
+		self.outf.close()
+
+
+
+
+
+class Done_reading_exception(Exception):
+	def __init__(self, value):
+		self.value = value
+
+	def __str__(self):
+		return repr(self.value)
+
+class Downloader():
+	# file_path = file_path
+	blockSize = 1024
+	blockCount = 1000 #1
+
+
+	def __init__(self, ftp, file_path):
+		self.handle = open(file_path.lstrip("/"), 'wb')
+		self.blocks = 0
+		self.ftp = ftp
+
+	def callback(self, block):
+		self.handle.write(block)
+		self.blocks += 1
+		if self.blocks >= Downloader.blockCount:
+			self.ftp.abort()
+			# self.handle.close()
+			#raise Done_reading_exception("Done reading")
+			raise Exception("Done reading")
+
+
 current_path= os.getcwd()
 # print('current_path: ' + current_path)
 if 'util_scripts' not in os.getcwd():
@@ -13,7 +82,7 @@ if 'util_scripts' not in os.getcwd():
 pause_message		= 'Press ENTER to continue...'
 mock_data_file		= '../util_resources/mock_ftp_game_list_response.txt'
 user_settings_file	= '../../../settings/ftp_settings.txt'
-game_data = './game_list_data.json'
+game_data 			= './game_list_data.json'
 
 pspiso_path 		= '/dev_hdd0/PSPISO/'
 psxiso_path 		= '/dev_hdd0/PSISO/'
@@ -26,6 +95,9 @@ psxlines			= []
 ps2lines			= []
 ps3lines			= []
 psnlines			= []
+
+
+
 
 try:
 	with open(user_settings_file) as f:
@@ -47,15 +119,6 @@ except Exception, e:
 	raw_input(pause_message)
 	sys.exit()
 	
-try:
-	with open(game_data) as game_list_data:
-		json_game_data = json.load(game_list_data)
-		
-		
-except Exception, e:
-	print('Error: ' + str(e))
-	raw_input(pause_message)
-	sys.exit()
 	
 try:
 	print('Connecting to PS3 at: ' + ps3_lan_ip)
@@ -92,7 +155,7 @@ except Exception, e:
 
 
 def iso_filter(list_of_files):
-	if('.iso' in list_of_files):
+	if('.iso' in list_of_files or '.bin' in list_of_files):
 		return True
 	else:
 		return False
@@ -138,12 +201,45 @@ if(show_ps2_list):
 	ps2_list = ps2_list + ('  _____|   |    _____| \n')
 	ps2_list = ps2_list + (' |      ___|   |_____  \n')
 	ps2_list = ps2_list + ('_______________________\n')
-	
+
+	with open('game_list_data.json') as f:
+		json_game_list_data = json.load(f)
+
 	filtered_ps2lines = filter(iso_filter, ps2lines)
-	for line in filtered_ps2lines:
-		json_game_data['game_list'].append({'filename':line})
-	
-	
+	null = None
+	game_exist = False
+
+	for ps2_game in filtered_ps2lines:
+		game_exist = False
+		for list_game in json_game_list_data['ps2_games']:
+			if ps2_game == list_game['filename']:
+				game_exist = True
+				pass
+		if not game_exist:
+			# try:
+			# 	dl = Downloader(ftp, ps2_game)
+				# ftp.retrbinary('RETR /dev_hdd0/PS2ISO/%s' % ps2_game, dl.callback, Downloader.blockSize)
+				# ftp.abort()
+				# ftp.transfercmd('RETR /dev_hdd0/PS2ISO/%s' % ps2_game, dl.callback)
+
+			# except Done_reading_exception, e:
+			# except Exception, e:
+			# 	print(e)
+
+			filename = '/dev_hdd0/PS2ISO/%s' % ps2_game
+			dl = AbortableDownload(ftp)
+			dl.getpart(filename, 0, 1000*1024, ps2_game)
+
+			print('New game found, adding: ' + ps2_game)
+			json_game_list_data['ps2_games'].append({
+				"title_id": null,
+				"title": null,
+				"game_type": null,
+				"filename": ps2_game,
+				"last_change": null,
+				"installed": null})
+
+
 	if len(filtered_ps2lines) > 0:
 		for isoname in filtered_ps2lines:
 			ps2_list = ps2_list + (ps2iso_path + isoname) + '\n'
@@ -187,10 +283,14 @@ if(show_psn_list):
 
 with open("../../../game_list.txt", "wb") as f:
 	f.write(ftp_game_list)
-	f.close()
-	
-json.dump(game_list_data,json_game_data)
-	
 
-print(ftp_game_list)
+with open('../util_resources/params.json.BAK') as f:
+	json_data = json.load(f)
+
+with open("game_list_data.json", "w") as newFile:
+	json_text = json.dumps(json_game_list_data, indent=4, separators=(",", ":"))
+	newFile.write(json_text)
+
+
+# print(ftp_game_list)
 raw_input(pause_message)
