@@ -4,22 +4,26 @@ import sys
 from ftplib import FTP
 
 
-class AbortableDownload():
+class ChunkDownloader():
 	def __init__(self, ftp):
 		self.ftp = ftp
 
 	def getpart_callback(self, received):
-		print "received a packet"
+		# print "received a packet"
 		if self.cnt <= 0:
 			return True
 		else:
-			print 'received packet, [0] = %x' % ord(received[0])
+			# print 'received packet, [0] = %x' % ord(received[0])
+			if 'SCES' in received: #.decode('latin-1'):
+				print('got SCES: ' + received)
+			self.sio.write(received)
 			self.outf.write(received)
-			# self.outf.flush()
 			self.cnt -= len(received)
 
 	def getpart(self, ftp_filename, rest, cnt, out_filename):
-		self.outf = open(out_filename, 'wb')
+		import StringIO
+		self.sio = StringIO.StringIO()
+		self.outf = open('_chunk_' + out_filename, 'wb')
 		self.cnt = cnt
 		self.ftp.voidcmd('TYPE I')
 		conn = self.ftp.transfercmd('RETR ' + ftp_filename, rest)
@@ -29,48 +33,16 @@ class AbortableDownload():
 				break
 			if self.getpart_callback(data):
 				try:
-					ftp.set_debuglevel(2)
-					print("begin waiting")
+					# ftp.set_debuglevel(2)
 					conn.close()
-					print("1")
 					self.ftp.voidresp()
 				except Exception, e:
-					ftp.set_debuglevel(0)
-					print(e)
+					# ftp.set_debuglevel(0)
+					# print(e)
 					break
 
 		self.outf.close()
 
-
-
-
-
-class Done_reading_exception(Exception):
-	def __init__(self, value):
-		self.value = value
-
-	def __str__(self):
-		return repr(self.value)
-
-class Downloader():
-	# file_path = file_path
-	blockSize = 1024
-	blockCount = 1000 #1
-
-
-	def __init__(self, ftp, file_path):
-		self.handle = open(file_path.lstrip("/"), 'wb')
-		self.blocks = 0
-		self.ftp = ftp
-
-	def callback(self, block):
-		self.handle.write(block)
-		self.blocks += 1
-		if self.blocks >= Downloader.blockCount:
-			self.ftp.abort()
-			# self.handle.close()
-			#raise Done_reading_exception("Done reading")
-			raise Exception("Done reading")
 
 
 current_path= os.getcwd()
@@ -103,8 +75,8 @@ try:
 	with open(user_settings_file) as f:
 		json_data = json.load(f)
 		
-		# use_mock_data	= json_data['use_mock_data']
-		use_mock_data	= True
+		use_mock_data	= json_data['use_mock_data']
+		# use_mock_data	= True
 		ps3_lan_ip 	= json_data['ps3_lan_ip']
 		ftp_timeout 	= json_data['ftp_timeout']
 		
@@ -121,11 +93,11 @@ except Exception, e:
 	
 	
 try:
-	print('Connecting to PS3 at: ' + ps3_lan_ip)
+	print('Connecting to PS3 at: ' + ps3_lan_ip + ' ...')
 	ftp = FTP(ps3_lan_ip, timeout=ftp_timeout)
 	ftp.login(user='', passwd = '')
 
-	ftp.retrlines('NLST ' + psxiso_path, psplines.append)
+	ftp.retrlines('NLST ' + pspiso_path, psplines.append)
 	ftp.retrlines('NLST ' + psxiso_path, psxlines.append)
 	ftp.retrlines('NLST ' + ps2iso_path, ps2lines.append)
 	ftp.retrlines('NLST ' + ps3iso_path, ps3lines.append)
@@ -155,7 +127,8 @@ except Exception, e:
 
 
 def iso_filter(list_of_files):
-	if('.iso' in list_of_files or '.bin' in list_of_files):
+	list_of_files = list_of_files.lower()
+	if '.iso' in list_of_files or '.bin' in list_of_files:
 		return True
 	else:
 		return False
@@ -213,24 +186,30 @@ if(show_ps2_list):
 		game_exist = False
 		for list_game in json_game_list_data['ps2_games']:
 			if ps2_game == list_game['filename']:
+				print('Game exist: ' + ps2_game)
 				game_exist = True
 				pass
 		if not game_exist:
-			# try:
-			# 	dl = Downloader(ftp, ps2_game)
-				# ftp.retrbinary('RETR /dev_hdd0/PS2ISO/%s' % ps2_game, dl.callback, Downloader.blockSize)
-				# ftp.abort()
-				# ftp.transfercmd('RETR /dev_hdd0/PS2ISO/%s' % ps2_game, dl.callback)
-
-			# except Done_reading_exception, e:
-			# except Exception, e:
-			# 	print(e)
-
+			# print('New game found, adding: ' + ps2_game)
 			filename = '/dev_hdd0/PS2ISO/%s' % ps2_game
-			dl = AbortableDownload(ftp)
-			dl.getpart(filename, 0, 1000*1024, ps2_game)
 
-			print('New game found, adding: ' + ps2_game)
+			try:
+				dl = ChunkDownloader(ftp)
+				dl.getpart(filename, 0, 750*1024, ps2_game)
+
+				print('Added new game: ' + ps2_game)
+			except Exception, e:
+				print('Connection timed out when adding: ' + ps2_game + '\nAuto retry attempt in 20s ...')
+				import time
+				time.sleep(20)
+				ftp.close()
+				ftp = FTP(ps3_lan_ip, timeout=ftp_timeout)
+				ftp.login(user='', passwd='')
+				dl = ChunkDownloader(ftp)
+				dl.getpart(filename, 0, 750 * 1024, ps2_game)
+
+				print('Added new game: ' + ps2_game)
+
 			json_game_list_data['ps2_games'].append({
 				"title_id": null,
 				"title": null,
@@ -293,4 +272,4 @@ with open("game_list_data.json", "w") as newFile:
 
 
 # print(ftp_game_list)
-raw_input(pause_message)
+# raw_input(pause_message)
