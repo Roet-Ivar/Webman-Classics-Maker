@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import re
 from ftplib import FTP
 
 
@@ -8,42 +9,62 @@ class ChunkDownloader():
 	def __init__(self, ftp):
 		self.ftp = ftp
 
+
+	def get_game_id(self, buffer_data):
+		# for m in re.finditer("""\s(\w{4}\_\d{3}\.\d{2})\s""", buffer_data):
+		# 	print('game_id: ' + str(m.group(0)))
+		game_id = ''
+		try:
+			for m in re.finditer("""\s(\w{4}\_\d{3}\.\d{2})\s""", buffer_data):
+				game_id = str(m.group(0))
+
+		except Exception, e1:
+			print('e1: ' + e1)
+			game_id = ''
+		finally:
+			return game_id
+
 	def getpart_callback(self, received):
-		# print "received a packet"
+		tmp_arr = ''
+		for char in received:
+
+			if ord(char) < 32 or ord(char) > 126:
+				tmp_arr = tmp_arr + ' '
+			else:
+				if char == ';':
+					char = '\n'
+				tmp_arr = tmp_arr + str(char)
+		tmp_arr = re.sub("[\r\n]+", "\n", tmp_arr)
 		if self.cnt <= 0:
 			return True
+
 		else:
-			# print 'received packet, [0] = %x' % ord(received[0])
-			if 'SCES' in received: #.decode('latin-1'):
-				print('got SCES: ' + received)
-			self.sio.write(received)
-			self.outf.write(received)
-			self.cnt -= len(received)
+			self.sio.write(tmp_arr)
+
+		self.cnt -= len(received)
 
 	def getpart(self, ftp_filename, rest, cnt, out_filename):
 		import StringIO
 		self.sio = StringIO.StringIO()
-		self.outf = open('_chunk_' + out_filename, 'wb')
 		self.cnt = cnt
 		self.ftp.voidcmd('TYPE I')
 		conn = self.ftp.transfercmd('RETR ' + ftp_filename, rest)
+		game_id = ''
+
 		while 1:
-			data = conn.recv(1024)
+			data = conn.recv(1460)
 			if not data:
 				break
 			if self.getpart_callback(data):
 				try:
-					# ftp.set_debuglevel(2)
 					conn.close()
 					self.ftp.voidresp()
 				except Exception, e:
-					# ftp.set_debuglevel(0)
-					# print(e)
+					game_id = self.get_game_id(self.sio.getvalue())
+					self.sio.close()
+					conn.close()
 					break
-
-		self.outf.close()
-
-
+		return game_id
 
 current_path= os.getcwd()
 # print('current_path: ' + current_path)
@@ -186,19 +207,22 @@ if(show_ps2_list):
 		game_exist = False
 		for list_game in json_game_list_data['ps2_games']:
 			if ps2_game == list_game['filename']:
-				print('Game exist: ' + ps2_game)
+				print('\nExisting game: ' + ps2_game + '\n')
 				game_exist = True
 				pass
 		if not game_exist:
-			# print('New game found, adding: ' + ps2_game)
 			filename = '/dev_hdd0/PS2ISO/%s' % ps2_game
-
 			try:
 				dl = ChunkDownloader(ftp)
-				dl.getpart(filename, 0, 750*1024, ps2_game)
-
-				print('Added new game: ' + ps2_game)
 			except Exception, e:
+				print('ChunkDownloader: ' + str(e))
+			try:
+				game_id = dl.getpart(filename, 0, 750*1024, ps2_game)
+				print('Added new game: ' + ps2_game + '\nGame_id: ' + game_id)
+			except Exception, e2:
+				print('getpart: ' + str(e2))
+
+				# print(e)
 				print('Connection timed out when adding: ' + ps2_game + '\nAuto retry attempt in 20s ...')
 				import time
 				time.sleep(20)

@@ -1,5 +1,5 @@
 {
-  "ps3_lan_ip": "192.168.1.153",
+  "ps3_lan_ip": "10.251.40.227",
   "ftp_timeout": 5,
   "use_mock_data": false,
   "show_psp_list": true,
