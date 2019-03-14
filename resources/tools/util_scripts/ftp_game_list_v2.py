@@ -2,6 +2,7 @@ import json
 import os
 import sys
 import re
+import StringIO
 from ftplib import FTP
 
 
@@ -11,12 +12,12 @@ class ChunkDownloader():
 
 
 	def get_game_id(self, buffer_data):
-		# for m in re.finditer("""\s(\w{4}\_\d{3}\.\d{2})\s""", buffer_data):
-		# 	print('game_id: ' + str(m.group(0)))
 		game_id = ''
 		try:
 			for m in re.finditer("""\s(\w{4}\_\d{3}\.\d{2})\s""", buffer_data):
-				game_id = str(m.group(0))
+				game_id = str(m.group(0)).strip()
+				game_id = game_id.replace('_', '')
+				game_id = game_id.replace('.', '')
 
 		except Exception, e1:
 			print('e1: ' + e1)
@@ -34,7 +35,7 @@ class ChunkDownloader():
 				if char == ';':
 					char = '\n'
 				tmp_arr = tmp_arr + str(char)
-		tmp_arr = re.sub("[\r\n]+", "\n", tmp_arr)
+		# tmp_arr = re.sub("[\r\n]+", "\n", tmp_arr)
 		if self.cnt <= 0:
 			return True
 
@@ -43,8 +44,7 @@ class ChunkDownloader():
 
 		self.cnt -= len(received)
 
-	def getpart(self, ftp_filename, rest, cnt, out_filename):
-		import StringIO
+	def getpart(self, ftp_filename, rest, cnt):
 		self.sio = StringIO.StringIO()
 		self.cnt = cnt
 		self.ftp.voidcmd('TYPE I')
@@ -217,25 +217,26 @@ if(show_ps2_list):
 			except Exception, e:
 				print('ChunkDownloader: ' + str(e))
 			try:
-				game_id = dl.getpart(filename, 0, 750*1024, ps2_game)
+				game_id = dl.getpart(filename, 0, 750*1024)
 				print('Added new game: ' + ps2_game + '\nGame_id: ' + game_id)
 			except Exception, e2:
 				print('getpart: ' + str(e2))
 
 				# print(e)
-				print('Connection timed out when adding: ' + ps2_game + '\nAuto retry attempt in 20s ...')
+				print('Connection timed out when adding: ' + ps2_game + '\nAuto retry attempt in 10s ...')
 				import time
-				time.sleep(20)
+				time.sleep(10)
 				ftp.close()
-				ftp = FTP(ps3_lan_ip, timeout=ftp_timeout)
+				ftp = FTP(ps3_lan_ip, timeout=30)
 				ftp.login(user='', passwd='')
 				dl = ChunkDownloader(ftp)
-				dl.getpart(filename, 0, 750 * 1024, ps2_game)
+				dl.getpart(filename, 0, 750 * 1024)
 
-				print('Added new game: ' + ps2_game)
+				print('Added new game: ' + ps2_game + '\nGame_id: ' + game_id)
+
 
 			json_game_list_data['ps2_games'].append({
-				"title_id": null,
+				"title_id": game_id,
 				"title": null,
 				"game_type": null,
 				"filename": ps2_game,
