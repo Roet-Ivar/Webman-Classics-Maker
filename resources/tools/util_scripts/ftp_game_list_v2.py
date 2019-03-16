@@ -16,7 +16,7 @@ class ChunkDownloader():
 		try:
 			for m in re.finditer("""\s(\w{4}\_\d{3}\.\d{2})\s""", buffer_data):
 				game_id = str(m.group(0)).strip()
-				game_id = game_id.replace('_', '')
+				game_id = game_id.replace('_', '-')
 				game_id = game_id.replace('.', '')
 
 		except Exception, e1:
