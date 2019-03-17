@@ -89,6 +89,8 @@ ps2lines			= []
 ps3lines			= []
 psnlines			= []
 
+platform 			= None
+
 
 
 
@@ -157,6 +159,7 @@ def iso_filter(list_of_files):
 
 ftp_game_list 	= ''
 if(show_psx_list):
+	platform = 'psp'
 	psp_list = ''
 	psp_list =  psp_list + (' ______     ___ _____  \n')
 	psp_list =  psp_list + ('  _____|   |    _____| \n')
@@ -173,6 +176,7 @@ if(show_psx_list):
 	ftp_game_list = ftp_game_list + psp_list + '\n'
 
 if(show_psx_list):
+	platform = 'psx'
 	psx_list = ''
 	psx_list =  psx_list + (' ______     ___ _    _  \n')
 	psx_list =  psx_list + ('  _____|   |     \__/   \n')
@@ -190,6 +194,7 @@ if(show_psx_list):
 
 
 if(show_ps2_list):
+	platform = 'ps2'
 	ps2_list = ''
 	ps2_list = ps2_list + (' ______     ___ _____  \n')
 	ps2_list = ps2_list + ('  _____|   |    _____| \n')
@@ -217,8 +222,8 @@ if(show_ps2_list):
 			except Exception, e:
 				print('ChunkDownloader: ' + str(e))
 			try:
-				game_id = dl.getpart(filename, 0, 750*1024)
-				print('Added new game: ' + ps2_game + '\nGame_id: ' + game_id)
+				title_id = dl.getpart(filename, 0, 750 * 1024)
+				print('Added new game: ' + ps2_game + '\nGame_id: ' + title_id)
 			except Exception, e2:
 				print('getpart: ' + str(e2))
 
@@ -232,15 +237,35 @@ if(show_ps2_list):
 				dl = ChunkDownloader(ftp)
 				dl.getpart(filename, 0, 750 * 1024)
 
-				print('Added new game: ' + ps2_game + '\nGame_id: ' + game_id)
+				print('Added new game: ' + ps2_game + '\nGame_id: ' + title_id)
 
+			with open('./games_metadata/region_list.json') as f:
+				region_json_data = json.load(f)
+
+			title = null
+			id_region_list = region_json_data[platform.upper()]
+			for id_reg in id_region_list:
+				if title_id[0:4] in id_reg['id']:
+					tmp_reg = id_reg['region']
+					print('game region: ' + platform + ' ' + tmp_reg)
+
+					with open('./games_metadata/' + platform + '_' + tmp_reg + '_games_list.json') as f:
+						games_list_json_data = json.load(f)
+
+					games = games_list_json_data['games']
+					for game in games:
+						tmp_title_id = str(game['title_id'])
+						if title_id == tmp_title_id:
+							title = str(game['title'])
+							print('Title: ' + title)
+					
+			print()
 
 			json_game_list_data['ps2_games'].append({
-				"title_id": game_id,
-				"title": null,
-				"game_type": null,
+				"title_id": title_id,
+				"title": title,
+				"game_type": platform,
 				"filename": ps2_game,
-				"last_change": null,
 				"installed": null})
 
 
@@ -253,6 +278,7 @@ if(show_ps2_list):
 	ftp_game_list = ftp_game_list + ps2_list + '\n'
 	
 if(show_ps3_list):
+	platform = 'ps3'
 	ps3_list = ''
 	ps3_list = ps3_list + (' ______     ___ _____  \n')
 	ps3_list = ps3_list + ('  _____|   |    _____] \n')

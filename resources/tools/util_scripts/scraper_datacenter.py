@@ -12,7 +12,7 @@ game_list_file_name = []
 page_link_list = []
 
 if 'psp' == platform:
-    x = """{"psp_games":[]}"""
+    x = """{"games":[]}"""
     json_game_list_data = json.loads(x)
     game_list = json_game_list_data['psp_games']
 
@@ -27,7 +27,7 @@ if 'psp' == platform:
 
 
 if 'psx' == platform:
-    x = """{"psx_games":[]}"""
+    x = """{"games":[]}"""
     json_game_list_data = json.loads(x)
     game_list = json_game_list_data['psx_games']
 
@@ -41,7 +41,7 @@ if 'psx' == platform:
     page_link_list.append('https://psxdatacenter.com/jlist.html')
 
 if 'ps2' == platform:
-    x = """{"ps2_games":[]}"""
+    x = """{"games":[]}"""
     json_game_list_data = json.loads(x)
     game_list = json_game_list_data['ps2_games']
 
