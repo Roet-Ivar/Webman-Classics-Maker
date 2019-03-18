@@ -38,7 +38,7 @@ if 'psx' == platform:
     game_list_file_name.append('./games_metadata/psx_eu_games_list.json')
     page_link_list.append('https://psxdatacenter.com/plist.html')
 
-    game_list_file_name.append('./games_metadata/psx_eu_games_list.json')
+    game_list_file_name.append('./games_metadata/psx_jp_games_list.json')
     page_link_list.append('https://psxdatacenter.com/jlist.html')
 
 if 'ps2' == platform:
