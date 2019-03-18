@@ -6,10 +6,25 @@ import StringIO
 from ftplib import FTP
 
 
+class game_metadata_finder():
+	def __init__(self, game_json_data):
+		game_data = game_json_data
+
+		if game_data['meta_data_link'] is not null:
+			print('Game')
+
+	def get_title_from_pdc(self):
+			print()
+
+	def get_title_from_pcsx2(self):
+			print()
+
+	# def get_game_title(self):
+	# 	def collect
+
 class ChunkDownloader():
 	def __init__(self, ftp):
 		self.ftp = ftp
-
 
 	def get_game_id(self, buffer_data):
 		game_id = ''
@@ -255,10 +270,23 @@ if(show_ps2_list):
 					games = games_list_json_data['games']
 					for game in games:
 						tmp_title_id = str(game['title_id'])
+						tmp_meta_data_link = str(game['meta_data_link'])
 						if title_id == tmp_title_id:
 							title = str(game['title'])
+
+							# remove parenthesis and content
+							title = re.sub(r'\([^)]*\)', '', title)
+							if title.isupper():
+								# should check original title if meta link
+								if tmp_meta_data_link is not null:
+									# try get new title from meta_data_link
+									print()
+
+								title = title.title()
 							print('Title: ' + title)
-					
+
+
+
 			print()
 
 			json_game_list_data['ps2_games'].append({
@@ -266,7 +294,8 @@ if(show_ps2_list):
 				"title": title,
 				"game_type": platform,
 				"filename": ps2_game,
-				"installed": null})
+				"installed": null
+				"meta_data_link": meta_data_link})
 
 
 	if len(filtered_ps2lines) > 0:

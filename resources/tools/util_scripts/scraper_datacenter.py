@@ -1,9 +1,10 @@
 import json
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Comment
 import requests
+import re
 
 # Platform: 'psp'/'psx'/'ps2'
-platform = 'psp'
+platform = 'psx'
 
 # Region: 0 - 2 -> us/eu/jp
 region = 2
@@ -14,7 +15,7 @@ page_link_list = []
 if 'psp' == platform:
     x = """{"games":[]}"""
     json_game_list_data = json.loads(x)
-    game_list = json_game_list_data['psp_games']
+    game_list = json_game_list_data['games']
 
     game_list_file_name.append('./games_metadata/psp_us_games_list.json')
     page_link_list.append('https://psxdatacenter.com/psp/ulist.html')
@@ -29,7 +30,7 @@ if 'psp' == platform:
 if 'psx' == platform:
     x = """{"games":[]}"""
     json_game_list_data = json.loads(x)
-    game_list = json_game_list_data['psx_games']
+    game_list = json_game_list_data['games']
 
     game_list_file_name.append('./games_metadata/psx_us_games_list.json')
     page_link_list.append('https://psxdatacenter.com/ulist.html')
@@ -43,7 +44,7 @@ if 'psx' == platform:
 if 'ps2' == platform:
     x = """{"games":[]}"""
     json_game_list_data = json.loads(x)
-    game_list = json_game_list_data['ps2_games']
+    game_list = json_game_list_data['games']
 
     game_list_file_name.append('./games_metadata/ps2_us_games_list.json')
     page_link_list.append('https://psxdatacenter.com/psx2/ulist2.html')
@@ -73,23 +74,64 @@ col3s = page_content.findAll('td', {"class":"col3"})
 col7s = page_content.findAll('td', {"class":"col7"})
 col3s.extend(col7s)
 
-
 link = []
 title_id = []
 title = []
 null = None
 
+
+def get_title_from_meta_link(meta_link):
+    base_url = 'https://psxdatacenter.com/'
+    platform_url = ''
+    if 'psp' in platform:
+        platform_url = 'psp/'
+        ot_word = 'OFFICIAL TITLE'
+    elif 'psx' in platform:
+        platform_url = ''
+        ot_word = 'Official Title'
+    elif 'ps2' in platform:
+        platform_url = 'psx2/'
+        ot_word = 'OFFICIAL TITLE'
+
+    full_link = base_url + platform_url + meta_link
+    meta_link_response = requests.get(full_link, timeout=5)
+    meta_link_content = BeautifulSoup(meta_link_response.content, "html.parser")
+
+    ot_text = meta_link_content.find(text="""\r\n\t\t\t\t""" + ot_word)
+    if ot_text is null or ot_text is '':
+        ot_text = meta_link_content.find(text=re.compile(r'(\s)*' + ot_word))
+        print()
+    try:
+        ot_parent = ot_text.parent
+    except Exception, e:
+        print(str(e))
+    title_parent = ot_parent.findNext('td')
+    title_text = title_parent.contents[0].strip()
+
+    # print('Title: ' + title_text)
+    print(title_text)
+    return title_text
+
 i = 0
 for col in col1s:
-    link = ''
+    title = null
+    link = null
     try:
         link = col.a.get('href')
     except:
         link = null
 
+    # if there is a metadata link, get title
+    if link is not null:
+        title = get_title_from_meta_link(link)
+
+
+    # if no title from link, get regular title
+    if title is null:
+        title = col3s[i].get_text(separator=u' ')
+        title = title.replace(u"\u00A0", "") # removes the initial non-breaking space
+
     title_id = col2s[i].get_text(separator=u' ')
-    title = col3s[i].get_text(separator=u' ')
-    title = title.replace(u"\u00A0", "") # removes the initial non-breaking space
 
     game_list.append({
         "meta_data_link": link,
