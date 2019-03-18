@@ -4,7 +4,7 @@
         {
             "title":"Athens 2004",
             "title_id":"SCUS-97379",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":"games2/SCUS-97379.html",
             "filename":"Athens 2004 (USA).iso"
@@ -12,7 +12,7 @@
         {
             "title":"Escape from Monkey Island",
             "title_id":"SLUS-20181",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":"games2/SLUS-20181.html",
             "filename":"Escape from Monkey Island (USA).iso"
@@ -20,7 +20,7 @@
         {
             "title":"ESPN International Track & Field",
             "title_id":"SLUS-20041",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":"games2/SLUS-20041.html",
             "filename":"ESPN International Track & Field (USA).iso"
@@ -28,7 +28,7 @@
         {
             "title":null,
             "title_id":"SCES-55096",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":null,
             "filename":"Buzz Pop Quiz.iso"
@@ -36,15 +36,15 @@
         {
             "title":"Burnout Revenge",
             "title_id":"SLUS-21242",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":null,
             "filename":"Burnout Revenge (USA).iso"
         },
         {
-            "title":"Burnout Revenge",
+            "title":null,
             "title_id":"LNCF-99999",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":null,
             "filename":"uLaunch_w_saves.iso"
@@ -52,7 +52,7 @@
         {
             "title":"Gun.",
             "title_id":"SLUS-21139",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":"games2/SLUS-21139.html",
             "filename":"Gun (USA).iso"
@@ -60,7 +60,7 @@
         {
             "title":"Need for Speed - Hot Pursuit 2",
             "title_id":"SLUS-20362",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":"games2/SLUS-20362.html",
             "filename":"Need for Speed - Hot Pursuit 2 (USA)_60fps_widescreen.iso"
@@ -68,7 +68,7 @@
         {
             "title":"Sega Rally Championship '95",
             "title_id":"SLPM-62703",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":"games2/SLPM-62703.html",
             "filename":"Sega Rally Championship 1995_widescreen.iso"
@@ -76,7 +76,7 @@
         {
             "title":"Sega Rally 2006",
             "title_id":"SLPM-66212",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":"games2/SLPM-66212.html",
             "filename":"Sega Rally 2006.iso"
@@ -84,7 +84,7 @@
         {
             "title":"Drive to Survive",
             "title_id":"SLUS-21109",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":"games2/SLUS-21109.html",
             "filename":"Drive to Survive (USA).iso"
@@ -92,7 +92,7 @@
         {
             "title":"Soul Calibur 2",
             "title_id":"SLUS-20643",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":null,
             "filename":"Soulcalibur II (USA).iso"
@@ -100,7 +100,7 @@
         {
             "title":"Soul Calibur III",
             "title_id":"SLUS-21216",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":"games2/SLUS-21216.html",
             "filename":"Soulcalibur III (USA).iso"
@@ -108,7 +108,7 @@
         {
             "title":"Tekken Tag Tournament",
             "title_id":"SLUS-20001",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":null,
             "filename":"Tekken Tag Tournament (USA) (v2.00).iso"
@@ -116,7 +116,7 @@
         {
             "title":"Kingdom Hearts",
             "title_id":"SLUS-20370",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":"games2/SLUS-20370.html",
             "filename":"Kingdom Hearts (USA).iso"
@@ -124,7 +124,7 @@
         {
             "title":"Kingdom Hearts II",
             "title_id":"SLUS-21005",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":null,
             "filename":"Kingdom Hearts II (USA).iso"
@@ -132,7 +132,7 @@
         {
             "title":"Marvel - Ultimate Alliance 2",
             "title_id":"SLUS-21879",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":null,
             "filename":"Marvel - Ultimate Alliance 2 (USA).iso"
@@ -140,7 +140,7 @@
         {
             "title":"Marvel vs Capcom 2",
             "title_id":"SLUS-20486",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":"games2/SLUS-20486.html",
             "filename":"Marvel vs. Capcom 2 - New Age of Heroes (USA).iso"
@@ -148,7 +148,7 @@
         {
             "title":"Time Crisis 3",
             "title_id":"SLUS-20645",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":null,
             "filename":"Time Crisis 3 (USA).iso"
@@ -156,7 +156,7 @@
         {
             "title":"Time Crisis II",
             "title_id":"SLUS-20219",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":null,
             "filename":"Time Crisis II (USA).bin"
@@ -164,7 +164,7 @@
         {
             "title":"Virtua Fighter 4 - Evolution",
             "title_id":"SLUS-20616",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":null,
             "filename":"Virtua Fighter 4 - Evolution (USA).iso"
@@ -172,7 +172,7 @@
         {
             "title":"Sega Ages 2500 Series Vol. 15 - Decathlete Collection",
             "title_id":"SLPM-62444",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":null,
             "filename":"Deacthlete Collection.iso"
@@ -180,7 +180,7 @@
         {
             "title":"X-Men Legends II - Rise of Apocalypse",
             "title_id":"SLUS-21138",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":null,
             "filename":"X-Men Legends II - Rise of Apocalypse (USA).iso"
@@ -188,7 +188,7 @@
         {
             "title":"Buzz! - The Sports Quiz",
             "title_id":"SCES-54266",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":"games2/SCES-54266.html",
             "filename":"Buzz! The Sports Quiz.ISO"
@@ -196,23 +196,23 @@
         {
             "title":"Drive to Survive",
             "title_id":"SLUS-21109",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":"games2/SLUS-21109.html",
             "filename":"Drive to Survive (USA).bin"
         },
         {
-            "title":"Drive to Survive",
+            "title":null,
             "title_id":"GAME-609WA",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
-            "meta_data_link":"games2/SLUS-21109.html",
+            "meta_data_link":null,
             "filename":"Buzz! Junior Ace Racers.ISO"
         },
         {
             "title":"Burnout 3 - Takedown",
             "title_id":"SLUS-21050",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":null,
             "filename":"Burnout 3 - Takedown (USA).iso"
@@ -220,7 +220,7 @@
         {
             "title":"Need for Speed - Hot Pursuit 2",
             "title_id":"SLUS-20362",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":"games2/SLUS-20362.html",
             "filename":"Need for Speed - Hot Pursuit 2 (USA).iso"
@@ -228,7 +228,7 @@
         {
             "title":"Drive to Survive",
             "title_id":"SLUS-21109",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":"games2/SLUS-21109.html",
             "filename":"Drive to Survive (USA)_480p_aggressive.iso"
@@ -236,7 +236,7 @@
         {
             "title":"Tennis",
             "title_id":"SLUS-20480",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":null,
             "filename":"Sega Sports Tennis (USA).iso"
@@ -244,7 +244,7 @@
         {
             "title":"Buzz! The Mega Quiz",
             "title_id":"SCES-54507",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":null,
             "filename":"Buzz! The Mega Quiz.ISO"
@@ -252,7 +252,7 @@
         {
             "title":"Buzz! The Hollywood Quiz",
             "title_id":"SCES-54851",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":null,
             "filename":"Buzz! The Hollywood Quiz.ISO"
@@ -260,7 +260,7 @@
         {
             "title":"Buzz! - The Music Quiz",
             "title_id":"SCES-53307",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":"games2/SCES-53307.html",
             "filename":"Buzz! The Music Quiz.ISO"
@@ -268,7 +268,7 @@
         {
             "title":"Spider-Man 2",
             "title_id":"SLUS-20776",
-            "game_type":"ps2",
+            "game_type":"PS2",
             "installed":null,
             "meta_data_link":null,
             "filename":"Spider-Man 2 (USA)_widescreen.iso"

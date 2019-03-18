@@ -33,7 +33,7 @@ class FTPChunkDownloader():
 
 	def get_title_id(self, ftp_filename, rest, cnt):
 		self.sio = StringIO.StringIO()
-		self.cnt = cnt
+		self.cnt = cnt * 1024
 		self.ftp.voidcmd('TYPE I')
 		conn = self.ftp.transfercmd('RETR ' + ftp_filename, rest)
 		game_id = null
@@ -229,7 +229,7 @@ if(show_ps2_list):
 	null = None
 	game_exist = False
 	meta_data_link = null
-	chunk_size = 750
+	chunk_size_kb = 750
 
 	for ps2_game in filtered_ps2lines:
 		game_exist = False
@@ -245,7 +245,7 @@ if(show_ps2_list):
 			except Exception, e:
 				print('FTPChunkDownloader exception: ' + str(e))
 			try:
-				title_id = dl.get_title_id(filename, 0, chunk_size * 1024)
+				title_id = dl.get_title_id(filename, 0, chunk_size_kb)
 				print('Added new game: ' + ps2_game + '\nGame_id: ' + title_id)
 
 			# retry connection
@@ -261,34 +261,35 @@ if(show_ps2_list):
 				ftp.login(user='', passwd='')
 
 				dl = FTPChunkDownloader(ftp)
-				title_id = dl.get_title_id(filename, 0, chunk_size * 1024)
+				title_id = dl.get_title_id(filename, 0, chunk_size_kb)
 
 				print('Added new game: ' + ps2_game + '\nGame_id: ' + title_id)
 
 			with open('./games_metadata/region_list.json') as f:
 				region_json_data = json.load(f)
 
-
+			# gets all region list data based on platform
 			id_region_list = region_json_data[platform.upper()]
 			for id_reg in id_region_list:
+				# find the correct region from title_id e.g: 'SLUS' -> U-NTSC PS2 games
 				if title_id[0:4] in id_reg['id']:
 					tmp_reg = id_reg['region']
 					print('Platform/region: ' + platform.upper() + '/' + tmp_reg)
 
+					# with the region we can now load the correct game DB (json file)
 					with open('./games_metadata/' + platform + '_' + tmp_reg + '_games_list.json') as f:
 						games_list_json_data = json.load(f)
 
+					# iterate through the games in the chosen DB (json file)
 					games = games_list_json_data['games']
 					for game in games:
-						title = null
-						meta_data_link = null
-
-						tmp_title_id = str(game['title_id'])
-						if title_id == tmp_title_id:
+						# find a match in of title_id
+						if title_id == str(game['title_id']):
 							title = str(game['title'])
 							if game['meta_data_link'] is not null:
 								meta_data_link = str(game['meta_data_link'])
-							# remove parenthesis and content
+
+							# removes parenthesis and content
 							title = re.sub(r'\([^)]*\)', '', title)
 
 							if title.isupper() and meta_data_link == null:
@@ -300,14 +301,19 @@ if(show_ps2_list):
 
 
 
+
 			json_game_list_data['ps2_games'].append({
 				"title_id": title_id,
 				"title": title,
-				"game_type": platform,
+				"game_type": platform.upper(),
 				"filename": ps2_game,
 				"installed": null,
 				"meta_data_link": meta_data_link})
 
+			# reset game data for next iteration
+			title 			= null
+			title_id 		= null
+			meta_data_link 	= null
 
 	if len(filtered_ps2lines) > 0:
 		for isoname in filtered_ps2lines:
