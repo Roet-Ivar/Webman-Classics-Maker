@@ -6,6 +6,9 @@ import StringIO
 import time
 from ftplib import FTP
 
+class FTPInstallChecker():
+	print()
+
 
 class GameMetadataFetcher():
 	def __init__(self, game_json_data):
@@ -32,6 +35,39 @@ class FTPChunkDownloader():
 		self.ftp = ftp
 
 	def get_title_id(self, ftp_filename, rest, cnt):
+		def get_chunk_callback(self, received):
+			tmp_arr = ''
+			for char in received:
+
+				if ord(char) < 32 or ord(char) > 126:
+					tmp_arr = tmp_arr + ' '
+				else:
+					if char == ';':
+						char = '\n'
+					tmp_arr = tmp_arr + str(char)
+			if self.cnt <= 0:
+				return True
+
+			else:
+				self.sio.write(tmp_arr)
+			self.cnt -= len(received)
+
+
+		def get_chunk(self, buffer_data):
+			game_id = null
+			try:
+				for m in re.finditer("""\w{4}\_\d{3}\.\d{2}""", buffer_data):
+					game_id = str(m.group(0)).strip()
+					game_id = game_id.replace('_', '-')
+					game_id = game_id.replace('.', '')
+
+			except Exception as e1:
+				print('get_title_id exception: ' + str(e1))
+				game_id = null
+			finally:
+				return game_id
+
+
 		self.sio = StringIO.StringIO()
 		self.cnt = cnt * 1024
 		self.ftp.voidcmd('TYPE I')
@@ -42,50 +78,20 @@ class FTPChunkDownloader():
 			data = conn.recv(1460)
 			if not data:
 				break
-			if self.get_chunk_callback(data):
+			if get_chunk_callback(self, data):
 				try:
 					conn.close()
 					self.ftp.voidresp()
 
 				# intended exception is thrown when chunk has been loaded in memory
 				except Exception, e:
-					game_id = self.get_chunk(self.sio.getvalue())
+					game_id = get_chunk(self, self.sio.getvalue())
 					self.sio.close()
 					conn.close()
 					break
 		return game_id
 
-	def get_chunk_callback(self, received):
-		tmp_arr = ''
-		for char in received:
 
-			if ord(char) < 32 or ord(char) > 126:
-				tmp_arr = tmp_arr + ' '
-			else:
-				if char == ';':
-					char = '\n'
-				tmp_arr = tmp_arr + str(char)
-		if self.cnt <= 0:
-			return True
-
-		else:
-			self.sio.write(tmp_arr)
-
-		self.cnt -= len(received)
-
-	def get_chunk(self, buffer_data):
-		game_id = null
-		try:
-			for m in re.finditer("""\w{4}\_\d{3}\.\w{2}""", buffer_data):
-				game_id = str(m.group(0)).strip()
-				game_id = game_id.replace('_', '-')
-				game_id = game_id.replace('.', '')
-
-		except Exception, e1:
-			print('get_title_id exception: ' + e1)
-			game_id = null
-		finally:
-			return game_id
 
 current_path= os.getcwd()
 # print('current_path: ' + current_path)
@@ -119,16 +125,17 @@ try:
 	with open(user_settings_file) as f:
 		json_data = json.load(f)
 		
-		use_mock_data	= json_data['use_mock_data']
-		# use_mock_data	= True
-		ps3_lan_ip 	= json_data['ps3_lan_ip']
-		ftp_timeout 	= json_data['ftp_timeout']
+		use_mock_data		= json_data['use_mock_data']
+		# use_mock_data		= True
+		ps3_lan_ip 			= json_data['ps3_lan_ip']
+		ftp_timeout 		= json_data['ftp_timeout']
+		ftp_passive_mode 	= json_data['ftp_passive_mode']
 		
-		show_psp_list 	= json_data['show_psx_list']
-		show_psx_list 	= json_data['show_psx_list']
-		show_ps2_list 	= json_data['show_ps2_list']
-		show_ps3_list 	= json_data['show_ps3_list']
-		show_psn_list 	= json_data['show_psn_list']
+		show_psp_list 		= json_data['show_psx_list']
+		show_psx_list 		= json_data['show_psx_list']
+		show_ps2_list 		= json_data['show_ps2_list']
+		show_ps3_list 		= json_data['show_ps3_list']
+		show_psn_list 		= json_data['show_psn_list']
 		
 except Exception, e:
 	print('Error: ' + str(e))
@@ -231,29 +238,29 @@ if(show_ps2_list):
 	meta_data_link = null
 	chunk_size_kb = 750
 
-	for ps2_game in filtered_ps2lines:
+	for game_filename in filtered_ps2lines:
 		game_exist = False
 		for list_game in json_game_list_data['ps2_games']:
-			if ps2_game == list_game['filename']:
-				print('\nExisting game: ' + ps2_game + '\n')
+			if game_filename == list_game['filename']:
+				print('\nExisting game: ' + game_filename + '\n')
 				game_exist = True
 				pass
 		if not game_exist:
-			filename = '/dev_hdd0/PS2ISO/%s' % ps2_game
+			filename = '/dev_hdd0/PS2ISO/' + game_filename
 			try:
 				dl = FTPChunkDownloader(ftp)
 			except Exception, e:
 				print('FTPChunkDownloader exception: ' + str(e))
+				sys.exit()
+
 			try:
 				title_id = dl.get_title_id(filename, 0, chunk_size_kb)
-				print('Added new game: ' + ps2_game + '\nGame_id: ' + title_id)
+				print('Added new game: ' + game_filename + '\nGame_id: ' + title_id)
 
 			# retry connection
-			except Exception, e2:
+			except Exception as e2:
 				print('get_title_id exception: ' + str(e2))
-
-				# print(e)
-				print('Connection timed out when adding: ' + ps2_game + '\nAuto retry attempt in 10s ...')
+				print('Connection timed out when adding: ' + game_filename + '\nAuto retry attempt in 10s ...')
 				ftp.close()
 				time.sleep(10)
 
@@ -263,7 +270,7 @@ if(show_ps2_list):
 				dl = FTPChunkDownloader(ftp)
 				title_id = dl.get_title_id(filename, 0, chunk_size_kb)
 
-				print('Added new game: ' + ps2_game + '\nGame_id: ' + title_id)
+				print('Added new game: ' + game_filename + '\nGame_id: ' + title_id)
 
 			with open('./games_metadata/region_list.json') as f:
 				region_json_data = json.load(f)
@@ -293,21 +300,17 @@ if(show_ps2_list):
 							title = re.sub(r'\([^)]*\)', '', title)
 
 							if title.isupper() and meta_data_link == null:
-								# if no meta link, fix uppercase titles
+								# if no meta_data_link, capitalize titles with all upper-case
 								title = title.title()
 							print('Title: ' + title + '\n')
 							break
 
-
-
-
-
 			json_game_list_data['ps2_games'].append({
-				"title_id": title_id,
-				"title": title,
-				"game_type": platform.upper(),
-				"filename": ps2_game,
-				"installed": null,
+				"title_id"		: title_id,
+				"title"			: title,
+				"game_type"		: platform.upper(),
+				"filename"		: game_filename,
+				"installed"		: null,
 				"meta_data_link": meta_data_link})
 
 			# reset game data for next iteration

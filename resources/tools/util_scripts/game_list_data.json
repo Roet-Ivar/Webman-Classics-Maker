@@ -1,5 +1,5 @@
 {
-    "psx_games":[],
+    "psp_games":[],
     "ps2_games":[
         {
             "title":"Athens 2004",
@@ -202,11 +202,11 @@
             "filename":"Drive to Survive (USA).bin"
         },
         {
-            "title":null,
-            "title_id":"GAME-609WA",
+            "title":"Buzz! Junior - Ace Racers",
+            "title_id":"SCES-55211",
             "game_type":"PS2",
             "installed":null,
-            "meta_data_link":null,
+            "meta_data_link":"games2/SCES-55211.html",
             "filename":"Buzz! Junior Ace Racers.ISO"
         },
         {
@@ -275,5 +275,5 @@
         }
     ],
     "ps3_games":[],
-    "psp_games":[]
+    "psx_games":[]
 }
