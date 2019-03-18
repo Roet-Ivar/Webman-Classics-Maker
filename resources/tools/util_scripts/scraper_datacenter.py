@@ -4,7 +4,7 @@ import requests
 import re
 
 # Platform: 'psp'/'psx'/'ps2'
-platform = 'psx'
+platform = 'ps2'
 
 # Region: 0 - 2 -> us/eu/jp
 region = 2
@@ -103,12 +103,13 @@ def get_title_from_meta_link(meta_link):
         print()
     try:
         ot_parent = ot_text.parent
-    except Exception, e:
-        print(str(e))
-    title_parent = ot_parent.findNext('td')
-    title_text = title_parent.contents[0].strip()
+        title_parent = ot_parent.findNext('td')
+        title_text = title_parent.contents[0].strip()
 
-    # print('Title: ' + title_text)
+    except Exception, e:
+        print('parent error?: ' + str(e))
+        title_text = null
+        return title_text
     print(title_text)
     return title_text
 
@@ -116,6 +117,8 @@ i = 0
 for col in col1s:
     title = null
     link = null
+    title_id = col2s[i].get_text(separator=u' ')
+
     try:
         link = col.a.get('href')
     except:
@@ -130,8 +133,9 @@ for col in col1s:
     if title is null:
         title = col3s[i].get_text(separator=u' ')
         title = title.replace(u"\u00A0", "") # removes the initial non-breaking space
+        title = title.title()
 
-    title_id = col2s[i].get_text(separator=u' ')
+
 
     game_list.append({
         "meta_data_link": link,
