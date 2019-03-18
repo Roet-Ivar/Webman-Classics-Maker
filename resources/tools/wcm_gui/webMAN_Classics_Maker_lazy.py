@@ -1,10 +1,10 @@
-import os, json, time, copy
+import os, json, copy
 
 from Tkinter import *
 from PIL import Image
-from PIL.ImageTk import PhotoImage
 from PIL import ImageDraw
 from PIL import ImageFont
+from PIL.ImageTk import PhotoImage
 
 
 
@@ -33,14 +33,19 @@ class Main():
 
 		# images
 		self.logo_drives = []
-		self.logo_drives.append(PhotoImage(self.button_maker('HDD')))
-		self.logo_drives.append(PhotoImage(self.button_maker('USB')))
-
+		self.logo_drives.append(PhotoImage(self.small_button_maker('HDD', font='conthrax-sb.ttf', x=-4, y=0)))
+		self.logo_drives.append(PhotoImage(self.small_button_maker('USB', font='conthrax-sb.ttf', x=-4, y=0)))
 		self.logo_systems = []
-		self.logo_systems.append(PhotoImage(self.button_maker('PSP')))
-		self.logo_systems.append(PhotoImage(self.button_maker('PSX')))
-		self.logo_systems.append(PhotoImage(self.button_maker('PS2')))
-		self.logo_systems.append(PhotoImage(self.button_maker('PS3')))
+		self.logo_systems.append(PhotoImage(self.small_button_maker('PSP', font='conthrax-sb.ttf', x=-4, y=0)))
+		self.logo_systems.append(PhotoImage(self.small_button_maker('PSX', font='conthrax-sb.ttf', x=-4, y=0)))
+		self.logo_systems.append(PhotoImage(self.small_button_maker('PS2', font='conthrax-sb.ttf', x=-4, y=0)))
+		self.logo_systems.append(PhotoImage(self.small_button_maker('PS3', font='conthrax-sb.ttf', x=-4, y=0)))
+
+		self.function_buttons = []
+		self.function_buttons.append(PhotoImage(self.small_button_maker('Save', font='arial.ttf', x=0, y=0)))
+		self.function_buttons.append(PhotoImage(self.small_button_maker('Build', font='arial.ttf', x=0, y=0)))
+		self.function_buttons.append(PhotoImage(self.small_button_maker('Quit', font='arial.ttf', x=0, y=0)))
+		self.function_buttons.append(PhotoImage(self.small_button_maker('Change', font='arial.ttf', x=0, y=0)))
 
 		self.background_images = []
 		self.load_backgrounds()
@@ -51,9 +56,40 @@ class Main():
 		self.init_labels_texts_buttons(main)
 		self.draw_background_on_canvas()
 
-	def button_maker(self, text):
+	def small_button_maker(self, text, **args):
+		font = None
+		x = None
+		icon_bg_img = Image.new('RGB', (44, 20), color='black')
+		for key, value in args.iteritems():
+			if 'font' is key:
+				font = value
+			elif 'x' is key:
+				x = value
+			elif 'y' is key:
+				val_y = value
+
+		if not font:
+			self.draw_text_on_image_w_font(icon_bg_img, text, 7, 3, 12, 'white', './resources/fonts/arial.ttf')
+		else:
+
+			if x:
+				x_val = x + 12 - len(text)
+			else:
+				x_val = 12 - len(text)
+
+			self.draw_text_on_image_w_font(icon_bg_img, text, x_val, 3 + val_y, 12, 'white', './resources/fonts/'+font)
+
+		return copy.copy(icon_bg_img)
+
+
+	def medium_button_maker(self, text, *font_name):
 		icon_bg_img = Image.new('RGB', (54, 20), color='black')
-		self.draw_text_on_image_w_font(icon_bg_img, text, 7, 1, 15, 'white', './resources/fonts/conthrax-sb.ttf')
+		if not font_name:
+			self.draw_text_on_image_w_font(icon_bg_img, text, 7, 1, 15, 'white', './resources/fonts/conthrax-sb.ttf')
+		else:
+			tmp_font = str(font_name[0])
+			print(tmp_font)
+			self.draw_text_on_image_w_font(icon_bg_img, text, 7, 1, 15, 'white', './resources/fonts/'+tmp_font)
 		return copy.copy(icon_bg_img)
 
 	def init_pkg_images(self):
@@ -150,15 +186,16 @@ class Main():
 		self.selection_system_list	= ['PSP', 'PSX', 'PS2', 'PS3']
 		self.drive_path 			= self.selection_drive_list[0] 				# drive should be toggled by buttons
 
-		self.button_HDD 	= Button(main, image=self.logo_drives[0], bd=1, command=lambda: self.on_drive_and_system_button(self.selection_drive_list[0], self.state_system_choice))
-		self.button_USB 	= Button(main, image=self.logo_drives[1], bd=1, command=lambda: self.on_drive_and_system_button(self.selection_drive_list[2], self.state_system_choice))
+		self.button_HDD 	= Button(main, image=self.logo_drives[0], borderwidth=1, command=lambda: self.on_drive_and_system_button(self.selection_drive_list[0], self.state_system_choice))
+		self.button_USB 	= Button(main, image=self.logo_drives[1], borderwidth=1, command=lambda: self.on_drive_and_system_button(self.selection_drive_list[2], self.state_system_choice))
 
-		self.button_PSP 	= Button(main, image=self.logo_systems[0], bd=1, command=lambda: self.on_drive_and_system_button(self.state_drive_choice, self.selection_system_list[0]))
-		self.button_PSX 	= Button(main, image=self.logo_systems[1], bd=1, command=lambda: self.on_drive_and_system_button(self.state_drive_choice, self.selection_system_list[1]))
-		self.button_PS2 	= Button(main, image=self.logo_systems[2], bd=1, command=lambda: self.on_drive_and_system_button(self.state_drive_choice, self.selection_system_list[2]))
-		self.button_PS3 	= Button(main, image=self.logo_systems[3], bd=1, command=lambda: self.on_drive_and_system_button(self.state_drive_choice, self.selection_system_list[3]))
+		self.button_PSP 	= Button(main, image=self.logo_systems[0], borderwidth=1, command=lambda: self.on_drive_and_system_button(self.state_drive_choice, self.selection_system_list[0]))
+		self.button_PSX 	= Button(main, image=self.logo_systems[1], borderwidth=1, command=lambda: self.on_drive_and_system_button(self.state_drive_choice, self.selection_system_list[1]))
+		self.button_PS2 	= Button(main, image=self.logo_systems[2], borderwidth=1, command=lambda: self.on_drive_and_system_button(self.state_drive_choice, self.selection_system_list[2]))
+		self.button_PS3 	= Button(main, image=self.logo_systems[3], borderwidth=1, command=lambda: self.on_drive_and_system_button(self.state_drive_choice, self.selection_system_list[3]))
 
-		self.save_button = Button(main, text="Save", command=self.on_save_button, bd=1, bg="#FBFCFB")
+		self.save_button = Button(main, image=self.function_buttons[0], borderwidth=0, command=self.on_save_button, bg="#FBFCFB")
+		self.build_button = Button(main, image=self.function_buttons[1], borderwidth=0, bg="#FBFCFB")
 
 		# Entry and Button placements
 		self.entry_field_title_id.place(x=int((self.text_box_spacing + self.iso_path_text_x_pos) * scaling), y=int(self.title_id_text_y_pos	* scaling)	, width=200)
@@ -187,8 +224,14 @@ class Main():
 			self.draw_text_on_image(pic1_img, 'Burnout Revenge', 760, 490, 32, 'white')
 			pic1_img.save('test.png')
 
-		self.save_button.place(x=int((self.text_box_spacing + self.iso_path_text_x_pos) * scaling), y=int((self.iso_path_text_y_pos + 40) * scaling))
 
+		if 'linux' in sys.platform:
+			button_spacing = 70
+		else:
+			button_spacing = 70
+
+		self.save_button.place(x=int((self.text_box_spacing + self.iso_path_text_x_pos) * scaling), y=int((self.iso_path_text_y_pos + 40) * scaling))
+		self.build_button.place(x=int((button_spacing + 10 + self.text_box_spacing + self.iso_path_text_x_pos) * scaling),y=int((self.iso_path_text_y_pos + 40) * scaling))
 		##########################################################################
 		# Adding an onChange -listener on 'entry_field_filename'
 		self.generate_on_change(self.entry_field_filename)
@@ -267,16 +310,12 @@ class Main():
 
 	def init_main_window_buttons(self, main):
 		# button to quit
-		# self.quit_button = Button(main, text="Quit", command=main.quit, bd=1, bg="#FBFCFB")
-		self.quit_button = Button(main, text="Quit", command=main.quit, bd=2, fg='#FBFCFB', bg="#000000")
-
-		self.quit_button.place(x=0, y=0)
-		self.quit_button.config(height=1, width=3)
+		self.quit_button = Button(main, borderwidth=0, image=self.function_buttons[2], command=main.quit, bd=1)
+		self.quit_button.place(x=0, y=1)
 
 		# button to change image
-		self.change_button = Button(main, text="Change", command=self.on_change_button, bd=2, fg='#FBFCFB', bg="#000000")
-
-		self.change_button.place(x=45, y=0)
+		self.change_button = Button(main, borderwidth=0, image=self.function_buttons[3], command=self.on_change_button, bd=1)
+		self.change_button.place(x=40+10, y=1)
 
 	def on_change_button(self):
 		# next image

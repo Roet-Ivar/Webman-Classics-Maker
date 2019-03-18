@@ -35,7 +35,7 @@ class FTPChunkDownloader():
 		self.ftp = ftp
 
 	def get_title_id(self, ftp_filename, rest, cnt):
-		def get_chunk_callback(self, received):
+		def fill_buffer(self, received):
 			tmp_arr = ''
 			for char in received:
 
@@ -53,7 +53,7 @@ class FTPChunkDownloader():
 			self.cnt -= len(received)
 
 
-		def get_chunk(self, buffer_data):
+		def get_id_from_buffer(self, buffer_data):
 			game_id = null
 			try:
 				for m in re.finditer("""\w{4}\_\d{3}\.\d{2}""", buffer_data):
@@ -61,9 +61,8 @@ class FTPChunkDownloader():
 					game_id = game_id.replace('_', '-')
 					game_id = game_id.replace('.', '')
 
-			except Exception as e1:
-				print('get_title_id exception: ' + str(e1))
-				game_id = null
+			except Exception:
+				print('Exception: get_title_id failed during regex.')
 			finally:
 				return game_id
 
@@ -78,14 +77,14 @@ class FTPChunkDownloader():
 			data = conn.recv(1460)
 			if not data:
 				break
-			if get_chunk_callback(self, data):
+			if fill_buffer(self, data):
 				try:
 					conn.close()
 					self.ftp.voidresp()
 
-				# intended exception is thrown when chunk has been loaded in memory
-				except Exception, e:
-					game_id = get_chunk(self, self.sio.getvalue())
+				# intended exception: this is thrown when the data chunk been stored in buffer
+				except Exception:
+					game_id = get_id_from_buffer(self, self.sio.getvalue())
 					self.sio.close()
 					conn.close()
 					break
@@ -235,11 +234,15 @@ if(show_ps2_list):
 	filtered_ps2lines = filter(iso_filter, ps2lines)
 	null = None
 	game_exist = False
-	meta_data_link = null
 	chunk_size_kb = 750
+
+	title = null
+	title_id = null
+	meta_data_link = null
 
 	for game_filename in filtered_ps2lines:
 		game_exist = False
+
 		for list_game in json_game_list_data['ps2_games']:
 			if game_filename == list_game['filename']:
 				print('\nExisting game: ' + game_filename + '\n')
@@ -255,11 +258,10 @@ if(show_ps2_list):
 
 			try:
 				title_id = dl.get_title_id(filename, 0, chunk_size_kb)
-				print('Added new game: ' + game_filename + '\nGame_id: ' + title_id)
+				print('Added new game: ' + game_filename + '\nGame_id: ' + str(title_id))
 
 			# retry connection
-			except Exception as e2:
-				print('get_title_id exception: ' + str(e2))
+			except Exception:
 				print('Connection timed out when adding: ' + game_filename + '\nAuto retry attempt in 10s ...')
 				ftp.close()
 				time.sleep(10)
@@ -269,8 +271,7 @@ if(show_ps2_list):
 
 				dl = FTPChunkDownloader(ftp)
 				title_id = dl.get_title_id(filename, 0, chunk_size_kb)
-
-				print('Added new game: ' + game_filename + '\nGame_id: ' + title_id)
+				print('Added new game: ' + game_filename + '\nGame_id: ' + str(title_id))
 
 			with open('./games_metadata/region_list.json') as f:
 				region_json_data = json.load(f)
@@ -279,7 +280,7 @@ if(show_ps2_list):
 			id_region_list = region_json_data[platform.upper()]
 			for id_reg in id_region_list:
 				# find the correct region from title_id e.g: 'SLUS' -> U-NTSC PS2 games
-				if title_id[0:4] in id_reg['id']:
+				if len(str(title_id)) == 10 and title_id[0:4] in id_reg['id']:
 					tmp_reg = id_reg['region']
 					print('Platform/region: ' + platform.upper() + '/' + tmp_reg)
 
@@ -296,21 +297,21 @@ if(show_ps2_list):
 							if game['meta_data_link'] is not null:
 								meta_data_link = str(game['meta_data_link'])
 
-							# removes parenthesis and content
+							# removes parenthesis including content of title
 							title = re.sub(r'\([^)]*\)', '', title)
 
-							if title.isupper() and meta_data_link == null:
+							if str(title).isupper() and str(meta_data_link) == null:
 								# if no meta_data_link, capitalize titles with all upper-case
 								title = title.title()
-							print('Title: ' + title + '\n')
+							print('Title: ' + str(title) + '\n')
 							break
 
 			json_game_list_data['ps2_games'].append({
-				"title_id"		: title_id,
-				"title"			: title,
-				"game_type"		: platform.upper(),
-				"filename"		: game_filename,
-				"installed"		: null,
+				"title_id": title_id,
+				"title": title,
+				"game_type": platform.upper(),
+				"filename": game_filename,
+				"installed": null,
 				"meta_data_link": meta_data_link})
 
 			# reset game data for next iteration
