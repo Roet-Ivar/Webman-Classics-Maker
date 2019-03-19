@@ -5,9 +5,7 @@ from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 from PIL.ImageTk import PhotoImage
-
-
-
+from game_lister import Gamelist
 
 class Main():
 
@@ -55,6 +53,13 @@ class Main():
 		self.init_main_window_buttons(main)
 		self.init_labels_texts_buttons(main)
 		self.draw_background_on_canvas()
+		self.draw_game_listbox()
+
+	def draw_game_listbox(self):
+		glist = Gamelist()
+		g1 = glist.start()
+		g1.place(x=1000 - 10, y=300, width=200, height=340)
+		game_list = glist.get_game_list()
 
 	def small_button_maker(self, text, **args):
 		font = None
@@ -123,7 +128,6 @@ class Main():
 		self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_iso_path.upper(), self.iso_path_text_x_pos, self.iso_path_text_y_pos, 25, 'white')
 
 		self.current_img = self.background_images[self.canvas_image_number]
-		# self.current_img = self.background_images[0]
 		self.current_img = self.current_img.resize((int(1920 * scaling), int(1080 * scaling)), Image.ANTIALIAS)
 		self.current_background = PhotoImage(self.current_img)
 
