@@ -1,15 +1,11 @@
-import struct
-import sys
-import hashlib
-import os
-import getopt
-import glob
-import json
-import shutil
+
+from __future__ import with_statement
+import struct, sys, os, shutil, json
 
 CURRENT_DIR = os.path.dirname(__file__)
 PKGCRYPT_DIR = 'pkgcrypt'
 pkgcrypt_ver = 'py'
+
 # check python version less than 3
 if sys.version_info[0]<3:
 	pkgcrypt_ver += '27_'
@@ -19,13 +15,327 @@ if struct.calcsize('P') * 8 == 64:
 else:
 	pkgcrypt_ver += '32'
 
-sys.path.append(os.path.join(CURRENT_DIR, PKGCRYPT_DIR))
 sys.path.append(os.path.join(CURRENT_DIR, PKGCRYPT_DIR, pkgcrypt_ver))
 
-import pkgcrypt
-from Sstruct import Sstruct
-from fself import SelfHeader, AppInfo
+try:
+	import pkgcrypt
+except Exception, e:
+	print(e)
 
+class StructType(tuple):
+	def __getitem__(self, value):
+		return [self] * value
+	def __call__(self, value, endian='<'):
+		if isinstance(value, str):
+			return struct.unpack(endian + tuple.__getitem__(self, 0), value[:tuple.__getitem__(self, 1)])[0]
+		else:
+			return struct.pack(endian + tuple.__getitem__(self, 0), value)
+
+class Struct(object):
+	__slots__ = ('__attrs__', '__baked__', '__defs__', '__endian__', '__next__', '__sizes__', '__values__')
+	int8 = StructType(('b', 1))
+	uint8 = StructType(('B', 1))
+	
+	int16 = StructType(('h', 2))
+	uint16 = StructType(('H', 2))
+	
+	int32 = StructType(('l', 4))
+	uint32 = StructType(('L', 4))
+	
+	int64 = StructType(('q', 8))
+	uint64 = StructType(('Q', 8))
+	
+	float = StructType(('f', 4))
+
+	def string(cls, len, offset=0, encoding=None, stripNulls=False, value=''):
+		return StructType(('string', (len, offset, encoding, stripNulls, value)))
+	string = classmethod(string)
+	
+	LE = '<'
+	BE = '>'
+	__endian__ = '<'
+	
+	def __init__(self, func=None, unpack=None, **kwargs):
+		self.__defs__ = []
+		self.__sizes__ = []
+		self.__attrs__ = []
+		self.__values__ = {}
+		self.__next__ = True
+		self.__baked__ = False
+		
+		if func == None:
+			self.__format__()
+		else:
+			sys.settrace(self.__trace__)
+			func()
+			for name in func.func_code.co_varnames:
+				value = self.__frame__.f_locals[name]
+				self.__setattr__(name, value)
+		
+		self.__baked__ = True
+		
+		if unpack != None:
+			if isinstance(unpack, tuple):
+				self.unpack(*unpack)
+			else:
+				self.unpack(unpack)
+		
+		if len(kwargs):
+			for name in kwargs:
+				self.__values__[name] = kwargs[name]
+	
+	def __trace__(self, frame, event, arg):
+		self.__frame__ = frame
+		sys.settrace(None)
+	
+	def __setattr__(self, name, value):
+		if name in self.__slots__:
+			return object.__setattr__(self, name, value)
+		
+		if self.__baked__ == False:
+			if not isinstance(value, list):
+				value = [value]
+				attrname = name
+			else:
+				attrname = '*' + name
+			
+			self.__values__[name] = None
+			
+			for sub in value:
+				if isinstance(sub, Struct):
+					sub = sub.__class__
+				try:
+					if issubclass(sub, Struct):
+						sub = ('struct', sub)
+				except TypeError:
+					pass
+				type_, size = tuple(sub)
+				if type_ == 'string':
+					self.__defs__.append(Struct.string)
+					self.__sizes__.append(size)
+					self.__attrs__.append(attrname)
+					self.__next__ = True
+					
+					if attrname[0] != '*':
+						self.__values__[name] = size[3]
+					elif self.__values__[name] == None:
+						self.__values__[name] = [size[3] for val in value]
+				elif type_ == 'struct':
+					self.__defs__.append(Struct)
+					self.__sizes__.append(size)
+					self.__attrs__.append(attrname)
+					self.__next__ = True
+					
+					if attrname[0] != '*':
+						self.__values__[name] = size()
+					elif self.__values__[name] == None:
+						self.__values__[name] = [size() for val in value]
+				else:
+					if self.__next__:
+						self.__defs__.append('')
+						self.__sizes__.append(0)
+						self.__attrs__.append([])
+						self.__next__ = False
+					
+					self.__defs__[-1] += type_
+					self.__sizes__[-1] += size
+					self.__attrs__[-1].append(attrname)
+					
+					if attrname[0] != '*':
+						self.__values__[name] = 0
+					elif self.__values__[name] == None:
+						self.__values__[name] = [0 for val in value]
+		else:
+			try:
+				self.__values__[name] = value
+			except KeyError:
+				raise AttributeError(name)
+	
+	def __getattr__(self, name):
+		if self.__baked__ == False:
+			return name
+		else:
+			try:
+				return self.__values__[name]
+			except KeyError:
+				raise AttributeError(name)
+	
+	def __len__(self):
+		ret = 0
+		arraypos, arrayname = None, None
+		
+		for i in range(len(self.__defs__)):
+			sdef, size, attrs = self.__defs__[i], self.__sizes__[i], self.__attrs__[i]
+			
+			if sdef == Struct.string:
+				size, offset, encoding, stripNulls, value = size
+				if isinstance(size, str):
+					size = self.__values__[size] + offset
+			elif sdef == Struct:
+				if attrs[0] == '*':
+					if arrayname != attrs:
+						arrayname = attrs
+						arraypos = 0
+					size = len(self.__values__[attrs[1:]][arraypos])
+				size = len(self.__values__[attrs])
+			
+			ret += size
+		
+		return ret
+	
+	def unpack(self, data, pos=0):
+		for name in self.__values__:
+			if not isinstance(self.__values__[name], Struct):
+				self.__values__[name] = None
+			elif self.__values__[name].__class__ == list and len(self.__values__[name]) != 0:
+				if not isinstance(self.__values__[name][0], Struct):
+					self.__values__[name] = None
+		
+		arraypos, arrayname = None, None
+		
+		for i in range(len(self.__defs__)):
+			sdef, size, attrs = self.__defs__[i], self.__sizes__[i], self.__attrs__[i]
+			
+			if sdef == Struct.string:
+				size, offset, encoding, stripNulls, value = size
+				if isinstance(size, str):
+					size = self.__values__[size] + offset
+				
+				temp = data[pos:pos+size]
+				if len(temp) != size:
+					raise StructException('Expected %i byte string, got %i' % (size, len(temp)))
+				
+				if encoding != None:
+					temp = temp.decode(encoding)
+				
+				if stripNulls:
+					temp = temp.rstrip('\0')
+				
+				if attrs[0] == '*':
+					name = attrs[1:]
+					if self.__values__[name] == None:
+						self.__values__[name] = []
+					self.__values__[name].append(temp)
+				else:
+					self.__values__[attrs] = temp
+				pos += size
+			elif sdef == Struct:
+				if attrs[0] == '*':
+					if arrayname != attrs:
+						arrayname = attrs
+						arraypos = 0
+					name = attrs[1:]
+					self.__values__[attrs][arraypos].unpack(data, pos)
+					pos += len(self.__values__[attrs][arraypos])
+					arraypos += 1
+				else:
+					self.__values__[attrs].unpack(data, pos)
+					pos += len(self.__values__[attrs])
+			else:
+				values = struct.unpack(self.__endian__+sdef, data[pos:pos+size])
+				pos += size
+				j = 0
+				for name in attrs:
+					if name[0] == '*':
+						name = name[1:]
+						if self.__values__[name] == None:
+							self.__values__[name] = []
+						self.__values__[name].append(values[j])
+					else:
+						self.__values__[name] = values[j]
+					j += 1
+		
+		return self
+	
+	def pack(self):
+		arraypos, arrayname = None, None
+		
+		ret = ''
+		for i in range(len(self.__defs__)):
+			sdef, size, attrs = self.__defs__[i], self.__sizes__[i], self.__attrs__[i]
+			
+			if sdef == Struct.string:
+				size, offset, encoding, stripNulls, value = size
+				if isinstance(size, str):
+					size = self.__values__[size]+offset
+				
+				if attrs[0] == '*':
+					if arrayname != attrs:
+						arraypos = 0
+						arrayname = attrs
+					temp = self.__values__[attrs[1:]][arraypos]
+					arraypos += 1
+				else:
+					temp = self.__values__[attrs]
+				
+				if encoding != None:
+					temp = temp.encode(encoding)
+				
+				temp = temp[:size]
+				ret += temp + ('\0' * (size - len(temp)))
+			elif sdef == Struct:
+				if attrs[0] == '*':
+					if arrayname != attrs:
+						arraypos = 0
+						arrayname = attrs
+					ret += self.__values__[attrs[1:]][arraypos].pack()
+					arraypos += 1
+				else:
+					ret += self.__values__[attrs].pack()
+			else:
+				values = []
+				for name in attrs:
+					if name[0] == '*':
+						if arrayname != name:
+							arraypos = 0
+							arrayname = name
+						values.append(self.__values__[name[1:]][arraypos])
+						arraypos += 1
+					else:
+						values.append(self.__values__[name])
+				
+				ret += struct.pack(self.__endian__+sdef, *values)
+		return ret
+	
+	def __getitem__(self, value):
+		return [('struct', self.__class__)] * value
+
+class SelfHeader(Struct):
+	__endian__ = Struct.BE
+	def __format__(self):
+		self.magic	= Struct.uint32
+		self.headerVer  = Struct.uint32
+		self.flags	= Struct.uint16
+		self.type	= Struct.uint16
+		self.meta	= Struct.uint32
+		self.headerSize = Struct.uint64
+		self.encryptedSize = Struct.uint64
+		self.unknown	= Struct.uint64
+		self.AppInfo	= Struct.uint64
+		self.elf	= Struct.uint64
+		self.phdr	= Struct.uint64
+		self.shdr	= Struct.uint64
+		self.phdrOffsets = Struct.uint64
+		self.sceversion = Struct.uint64
+		self.digest	= Struct.uint64
+		self.digestSize = Struct.uint64
+
+class AppInfo(Struct):
+	__endian__ = Struct.BE
+	def __format__(self):
+		self.authid	= Struct.uint64
+		self.unknown	= Struct.uint32
+		self.appType	= Struct.uint32
+		self.appVersion = Struct.uint64
+
+import struct
+import sys
+import hashlib
+import os
+import getopt
+import ConfigParser
+import io
+import glob
 
 TYPE_NPDRMSELF = 0x1
 TYPE_RAW = 0x3
@@ -33,60 +343,58 @@ TYPE_DIRECTORY = 0x4
 
 TYPE_OVERWRITE_ALLOWED = 0x80000000
 
-debug = False
-
-class EbootMeta(Sstruct):
-	__endian__ = Sstruct.BE
+class EbootMeta(Struct):
+	__endian__ = Struct.BE
 	def __format__(self):
-		self.magic 			= Sstruct.uint32
-		self.unk1 			= Sstruct.uint32
-		self.drmType 		= Sstruct.uint32
-		self.unk2			= Sstruct.uint32
-		self.contentID 		= Sstruct.uint8[0x30]
-		self.fileSHA1 		= Sstruct.uint8[0x10]
-		self.notSHA1 		= Sstruct.uint8[0x10]
-		self.notXORKLSHA1 	= Sstruct.uint8[0x10]
-		self.nulls 			= Sstruct.uint8[0x10]
-class MetaHeader(Sstruct):
-	__endian__ = Sstruct.BE
+		self.magic 		= Struct.uint32
+		self.unk1 		= Struct.uint32
+		self.drmType 		= Struct.uint32
+		self.unk2		= Struct.uint32
+		self.contentID 		= Struct.uint8[0x30]
+		self.fileSHA1 		= Struct.uint8[0x10]
+		self.notSHA1 		= Struct.uint8[0x10]
+		self.notXORKLSHA1 	= Struct.uint8[0x10]
+		self.nulls 		= Struct.uint8[0x10]
+class MetaHeader(Struct):
+	__endian__ = Struct.BE
 	def __format__(self):
-		self.unk1 	= Sstruct.uint32
-		self.unk2 	= Sstruct.uint32
-		self.drmType 	= Sstruct.uint32
-		self.unk4 	= Sstruct.uint32
+		self.unk1 	= Struct.uint32
+		self.unk2 	= Struct.uint32
+		self.drmType 	= Struct.uint32
+		self.unk4 	= Struct.uint32
 		
-		self.unk21 	= Sstruct.uint32
-		self.unk22 	= Sstruct.uint32
-		self.unk23 	= Sstruct.uint32
-		self.unk24 	= Sstruct.uint32
+		self.unk21 	= Struct.uint32
+		self.unk22 	= Struct.uint32
+		self.unk23 	= Struct.uint32
+		self.unk24 	= Struct.uint32
 		
-		self.unk31 	= Sstruct.uint32
-		self.unk32 	= Sstruct.uint32
-		self.unk33 	= Sstruct.uint32
-		self.secondaryVersion 	= Sstruct.uint16
-		self.unk34 	= Sstruct.uint16
+		self.unk31 	= Struct.uint32
+		self.unk32 	= Struct.uint32
+		self.unk33 	= Struct.uint32
+		self.secondaryVersion 	= Struct.uint16
+		self.unk34 	= Struct.uint16
 		
-		self.dataSize 	= Sstruct.uint32
-		self.unk42 	= Sstruct.uint32
-		self.unk43 	= Sstruct.uint32
-		self.packagedBy 	= Sstruct.uint16
-		self.packageVersion 	= Sstruct.uint16
-class DigestBlock(Sstruct):
-	__endian__ = Sstruct.BE
+		self.dataSize 	= Struct.uint32
+		self.unk42 	= Struct.uint32
+		self.unk43 	= Struct.uint32
+		self.packagedBy 	= Struct.uint16
+		self.packageVersion 	= Struct.uint16
+class DigestBlock(Struct):
+	__endian__ = Struct.BE
 	def __format__(self):
-		self.type 	= Sstruct.uint32
-		self.size 	= Sstruct.uint32
-		self.isNext = Sstruct.uint64
-class FileHeader(Sstruct):
-	__endian__ = Sstruct.BE
+		self.type 	= Struct.uint32
+		self.size 	= Struct.uint32
+		self.isNext = Struct.uint64
+class FileHeader(Struct):
+	__endian__ = Struct.BE
 	def __format__(self):
-		self.fileNameOff 	= Sstruct.uint32
-		self.fileNameLength = Sstruct.uint32
-		self.fileOff 		= Sstruct.uint64
+		self.fileNameOff 	= Struct.uint32
+		self.fileNameLength = Struct.uint32
+		self.fileOff 		= Struct.uint64
 		
-		self.fileSize 	= Sstruct.uint64
-		self.flags		= Sstruct.uint32
-		self.padding 		= Sstruct.uint32
+		self.fileSize 	= Struct.uint64
+		self.flags		= Struct.uint32
+		self.padding 		= Struct.uint32
 	def __str__(self):
 		out  = ""
 		out += "[X] File Name: %s [" % self.fileName
@@ -118,43 +426,27 @@ class FileHeader(Sstruct):
 	def __repr__(self):
 		return self.fileName + ("<FileHeader> Size: 0x%016x" % self.fileSize)
 	def __init__(self):
-		Sstruct.__init__(self)
+		Struct.__init__(self)
 		self.fileName = ""
-	def doWork(self, decrypteddata, context = None):
-		if context == None:
-			self.fileName = nullterm(decrypteddata[self.fileNameOff:self.fileNameOff+self.fileNameLength])
-		else:
-			self.fileName = nullterm(crypt(context, decrypteddata[self.fileNameOff:self.fileNameOff+self.fileNameLength], self.fileNameLength))
-	def dump(self, directory, data, header):
-		if self.flags & 0xFF == 0x4:
-			try:
-				os.makedirs(directory + "/" + self.fileName)
-			except Exception, e:
-				print
-			
-		else:
-			tFile = open(directory + "/" + self.fileName, "wb")
-			tFile.write(data[self.fileOff:self.fileOff+self.fileSize])
-			
 
-class Header(Sstruct):
-	__endian__ = Sstruct.BE
+class Header(Struct):
+	__endian__ = Struct.BE
 	def __format__(self):
-		self.magic = Sstruct.uint32
-		self.type = Sstruct.uint32
-		self.pkgInfoOff = Sstruct.uint32
-		self.unk1 = Sstruct.uint32
+		self.magic = Struct.uint32
+		self.type = Struct.uint32
+		self.pkgInfoOff = Struct.uint32
+		self.unk1 = Struct.uint32
 		
-		self.headSize = Sstruct.uint32
-		self.itemCount = Sstruct.uint32
-		self.packageSize = Sstruct.uint64
+		self.headSize = Struct.uint32
+		self.itemCount = Struct.uint32
+		self.packageSize = Struct.uint64
 		
-		self.dataOff = Sstruct.uint64
-		self.dataSize = Sstruct.uint64
+		self.dataOff = Struct.uint64
+		self.dataSize = Struct.uint64
 		
-		self.contentID = Sstruct.uint8[0x30]
-		self.QADigest = Sstruct.uint8[0x10]
-		self.KLicensee = Sstruct.uint8[0x10]
+		self.contentID = Struct.uint8[0x30]
+		self.QADigest = Struct.uint8[0x10]
+		self.KLicensee = Struct.uint8[0x10]
 		
 		
 		
@@ -241,7 +533,20 @@ def setContextNum(key, tmpnum):
 	key[0x3e] = ord(tmpchrs[6])
 	key[0x3f] = ord(tmpchrs[7])
 
-# import pkgcrypt
+try:
+	import pkgcrypt
+except:
+	print ""
+	print "-----------------"
+	print "PKG BUILD ERROR"
+	print "-----------------"
+	print "Couldn't make PKG file. Go into the ps3py directory, and type the following:"
+	print ""
+	print "python2 setup.py build"
+	print ""
+	print "This should create a pkgcrypt.so file in the build/ directory. Move that file"
+	print "over to the root of the ps3py directory and try running this script again."
+
 
 def crypt(key, inbuf, length):
 	if not isinstance(key, list):
@@ -270,80 +575,6 @@ def SHA1(data):
 
 pkgcrypt.register_sha1_callback(SHA1)
 	
-def listPkg(filename):
-	with open(filename, 'rb') as fp:
-		data = fp.read()
-		offset = 0
-		header = Header()
-		header.unpack(data[offset:offset+len(header)])
-		print header
-		print
-		
-		assert header.type == 0x00000001, 'Unsupported Type'
-		if header.itemCount > 0:
-			print 'Listing: "' + filename + '"'
-			print "+) overwrite, -) no overwrite"
-			print
-			dataEnc = data[header.dataOff:header.dataOff+header.dataSize]
-			context = keyToContext(header.QADigest)
-			
-			decData = crypt(context, dataEnc, len(FileHeader())*header.itemCount)
-			
-			fileDescs = []
-			for i in range(0, header.itemCount):
-				fileD = FileHeader()
-				fileD.unpack(decData[0x20 * i:0x20 * i + 0x20])
-				fileDescs.append(fileD)
-			for fileD in fileDescs:
-				fileD.doWork(dataEnc, context)
-				out = ""
-				if fileD.flags & 0xFF == TYPE_NPDRMSELF:
-					out += " NPDRM SELF:"
-				elif fileD.flags & 0xFF == TYPE_DIRECTORY:
-					out += "  directory:"
-				elif fileD.flags & 0xFF == TYPE_RAW:
-					out += "   raw data:"
-				else:
-					out += "    unknown:"
-				if (fileD.flags & TYPE_OVERWRITE_ALLOWED ) != 0:
-					out += "+"
-				else:
-					out += "-"
-				out += "%11d: " % fileD.fileSize
-				out += fileD.fileName
-				print out,
-				print
-				#print fileD
-def unpack(filename):
-	with open(filename, 'rb') as fp:
-		data = fp.read()
-		offset = 0
-		header = Header()
-		header.unpack(data[offset:offset+len(header)])
-		if debug:
-			print header
-			print
-		
-		assert header.type == 0x00000001, 'Unsupported Type'
-		if header.itemCount > 0:
-			dataEnc = data[header.dataOff:header.dataOff+header.dataSize]
-			context = keyToContext(header.QADigest)
-			
-			decData = crypt(context, dataEnc, header.dataSize)
-			directory = nullterm(header.contentID)
-			try:
-				os.makedirs(directory)
-			except Exception, e:
-				pass
-			fileDescs = []
-			for i in range(0, header.itemCount):
-				fileD = FileHeader()
-				fileD.unpack(decData[0x20 * i:0x20 * i + 0x20])
-				fileD.doWork(decData)
-				fileDescs.append(fileD)
-				if debug:
-					print fileD
-				fileD.dump(directory, decData, header)
 def getFiles(files, folder, original):
 	oldfolder = folder
 	foundFiles = glob.glob( os.path.join(folder, '*') )
@@ -408,54 +639,52 @@ def pack(folder, contentid, outname=None):
 		header.QADigest[i] = 0
 		header.KLicensee[i] = 0
 	
+	#content type	type name		install path (on ps3)	notes
+	#0x00000004	GameData (also Patches)	/dev_hdd0/game/
+	#0x00000005	Game_Exec		/dev_hdd0/game/
+	#0x00000006	PS1emu			/dev_hdd0/game/
+	#0x00000007	PSP & PCEngine		/dev_hdd0/game/
+	#0x00000008
+	#0x00000009	Theme			/dev_hdd0/theme
+	#0x0000000A	Widget			/dev_hdd0/widget
+	#0x0000000B	License			/dev_hdd0/home/<current user>/exdata
+	#0x0000000C	VSH Module		/dev_hdd0/vsh/modules/
+	#0x0000000D	PSN Avatar		/dev_hdd0/home/<current user>/psn_avatar
+	#0x0000000E	PSPgo			/dev_hdd0/game/		Displayed as Unknown Album: Corrupted Data
+	#0x0000000F	Minis			/dev_hdd0/game/
+	#0x00000010	NEOGEO			/dev_hdd0/game/
+	#0x00000011	VMC			/dev_hdd0/tmp/vmc/
+	#0x00000012	Seen on PS2 classic	/dev_hdd0/game/
+	#0x00000013
+	#0x00000014	Seen on PSP remastered	/dev_hdd0/game/
+	#0x00000015	PSVita (PSP2GD)
+	#0x00000016	PSVita (PSP2AC)
+	#0x00000017	PSVita (PSP2LA)
+	#0x00000018
+	#0x00000019	WT (Web TV?)		/dev_hdd0/game/
 	
-
-
-	#content type	type name				install path (on ps3)	notes
-	#0x00000004		GameData (also Patches)	/dev_hdd0/game/	
-	#0x00000005		Game_Exec				/dev_hdd0/game/	
-	#0x00000006		PS1emu					/dev_hdd0/game/	
-	#0x00000007		PSP & PCEngine			/dev_hdd0/game/	
-	#0x00000008				
-	#0x00000009		Theme					/dev_hdd0/theme	
-	#0x0000000A		Widget					/dev_hdd0/widget	
-	#0x0000000B		License					/dev_hdd0/home/<current user>/exdata	
-	#0x0000000C		VSH Module				/dev_hdd0/vsh/modules/	
-	#0x0000000D		PSN Avatar				/dev_hdd0/home/<current user>/psn_avatar	
-	#0x0000000E		PSPgo					/dev_hdd0/game/	Displayed as Unknown Album: Corrupted Data
-	#0x0000000F		Minis					/dev_hdd0/game/	
-	#0x00000010		NEOGEO					/dev_hdd0/game/	
-	#0x00000011		VMC						/dev_hdd0/tmp/vmc/	
-	#0x00000012		Seen on PS2 classic		/dev_hdd0/game/	
-	#0x00000014		Seen on PSP remastered	/dev_hdd0/game/	
-	#0x00000015		PSVita (PSP2GD)
-	#0x00000016		PSVita (PSP2AC)
-	#0x00000017		PSVita (PSP2LA)	
-	#0x00000019		WT (Web TV?)			/dev_hdd0/game/
-
 	metaBlock = MetaHeader()
-	metaBlock.unk1 		= 1 #doesnt change output of --extract
-	metaBlock.unk2 		= 4 #doesnt change output of --extract
-	metaBlock.drmType 	= 3 #1 = Network, 2 = Local, 3 = Free, anything else = unknown
-	metaBlock.unk4 		= 2 
-	
-	metaBlock.unk21 	= 4
-	metaBlock.unk22 	= 5 #content type = 5 == gameexec, 4 == gamedata
-	metaBlock.unk23 	= 3
-	metaBlock.unk24 	= 4
-	
-	metaBlock.unk31 	= 0xE   #packageType 0x10 == patch, 0x8 == Demo&Key, 0x0 == Demo&Key (AND UserFiles = NotOverWrite), 0xE == normal, use 0xE for gamexec, and 8 for gamedata
-	metaBlock.unk32 	= 4   #when this is 5 secondary version gets used??
-	metaBlock.unk33 	= 8   #doesnt change output of --extract
-	metaBlock.secondaryVersion 	= 0
-	metaBlock.unk34 	= 0
-	
-	metaBlock.dataSize 	= 0
-	metaBlock.unk42 	= 5
-	metaBlock.unk43 	= 4
-	metaBlock.packagedBy 	= 0x1061
-	metaBlock.packageVersion 	= 0
-	
+	metaBlock.unk1 = 1  # doesnt change output of --extract
+	metaBlock.unk2 = 4  # doesnt change output of --extract
+	metaBlock.drmType = 3  # 1 = Network, 2 = Local, 3 = Free, anything else = unknown
+	metaBlock.unk4 = 2
+
+	metaBlock.unk21 = 4
+	metaBlock.unk22 = 5  # content type = 5 == gameexec, 4 == gamedata
+	metaBlock.unk23 = 3
+	metaBlock.unk24 = 4
+
+	metaBlock.unk31 = 0xE  # packageType 0x10 == patch, 0x8 == Demo&Key, 0x0 == Demo&Key (AND UserFiles = NotOverWrite), 0xE == normal, use 0xE for gamexec, and 8 for gamedata
+	metaBlock.unk32 = 4  # when this is 5 secondary version gets used??
+	metaBlock.unk33 = 8  # doesnt change output of --extract
+	metaBlock.secondaryVersion = 0
+	metaBlock.unk34 = 0
+
+	metaBlock.dataSize = 0
+	metaBlock.unk42 = 5
+	metaBlock.unk43 = 4
+	metaBlock.packagedBy = 0x1061
+	metaBlock.packageVersion = 0
 	
 	files = []
 	getFiles(files, folder, folder)
@@ -592,14 +821,12 @@ def usage():
         --help                  print this message."""
 
 def version():
-	print """pky.py 0.5"""
+	print """pkg.py 0.5"""
 
 class Webman_pkg:
 	def execute(self):
-		global debug
 		extract = False
 		list = False
-		contentid = None
 		
 		with open('../util_generated_files/webman_classics_pkg.json') as f:
 			json_data = json.load(f)
@@ -619,9 +846,9 @@ class Webman_pkg:
 		
 		build_dir_path='../../../builds/'
 		
-		arg_list = [pkg_build_script, pkg_flag, contentid, pkg_dir_path, pkg_name]
+		arg_list = [pkg_build_script, pkg_flag, contentid, pkg_dir_path, pkg_name]	
 		try:
-			opts, args = getopt.getopt(arg_list[1:], "hx:dvl:c:", ["help", "extract=", "debug","version", "list=", "contentid="])
+			opts, args = getopt.getopt(arg_list[1:], "hx:dvl:c:", ["help", "extract=", "version", "list=", "contentid="])
 		except getopt.GetoptError:
 			usage()
 			sys.exit(2)
@@ -638,8 +865,6 @@ class Webman_pkg:
 			elif opt in ("-l", "--list"):
 				fileToList = arg
 				list = True
-			elif opt in ("-d", "--debug"):
-				debug = True
 			elif opt in ("-c", "--contentid"):
 				contentid = arg
 			else:
@@ -647,8 +872,6 @@ class Webman_pkg:
 				sys.exit(2)
 		if extract:
 			unpack(fileToExtract)
-		elif list:
-			listPkg(fileToList)
 		else:
 			if len(args) == 1 and contentid != None:
 				pack(args[0], contentid)
@@ -666,13 +889,10 @@ class Webman_pkg:
 							try:
 								os.remove(file)
 							except:
-								print(str(file ) + ' will be left.')
-
+								print(str(file) + ' could not be deleted.')
 				print('Execution of \'webman_pkg.py\':             Done')
 				print('-----------------------------------------------\n')
 				print('Package created: ' + '/builds/' + pkg_name + '\n')
 			else:
 				usage()
 				sys.exit(2)
-
-	
