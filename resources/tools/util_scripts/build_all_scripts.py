@@ -1,6 +1,6 @@
 import os
 
-from param_sfo_to_json import Param_to_json
+from write_json_to_param_sfo import Write_param_sfo
 from content_id_elf_replace import Elf_replace
 from resign_eboot import Resign_eboot
 from edit_launch_txt import Edit_launch_txt
@@ -11,11 +11,8 @@ current_path= os.getcwd()
 if 'util_scripts' not in os.getcwd():
 	os.chdir('./resources/tools/util_scripts/')
 	
-# print('__file__:' + __file__)
-# print('real path:' + os.path.dirname(os.path.realpath(__file__)))
-
-param_sfo_to_json = Param_to_json()
-param_sfo_to_json.execute()
+write_json_to_param_sfo = Write_param_sfo()
+write_json_to_param_sfo.execute()
 
 content_id_elf_replace = Elf_replace()
 content_id_elf_replace.execute()

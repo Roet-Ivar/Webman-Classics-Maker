@@ -4,24 +4,25 @@ import json
 
 
 class Gamelist():
-    def __init__(self, ref_title_id, ref_title, ref_filename):
-        self.entry_title_id     = ref_title_id
-        self.entry_title        = ref_title
-        self.entry_filename     = ref_filename
 
-        self.sel = ()
-        self.tmp_sel = ()
+    def __init__(self, ref_title_id, ref_title, ref_filename):
+        self.entry_title_id = ref_title_id
+        self.entry_title    = ref_title
+        self.entry_filename = ref_filename
+
+        self.last_selection = (None, 0)
+        self.platform = 'ps2'
 
 
     def start(self):
-        self.create_window()
-        return self.F1
+        self.create_main_frame()
+        return self.main_frame
 
-    def create_window(self):
+    def create_main_frame(self):
         self.corrected_index = []
-        self.F1 = Frame()
-        s = Scrollbar(self.F1)
-        self._listbox = Listbox(self.F1, width=1000)
+        self.main_frame = Frame()
+        s = Scrollbar(self.main_frame)
+        self._listbox = Listbox(self.main_frame, width=1000)
 
         s.pack(side=RIGHT, fill=Y)
         self._listbox.pack(side=LEFT, fill=Y)
@@ -35,25 +36,21 @@ class Gamelist():
         for list_game in self.json_game_list_data['ps2_games']:
             self.add_item(list_game['title'])
 
-        self.F2 = Frame()
-        self.label = Label(self.F2)
-        self.poll()
+        self.label = Label(self.main_frame)
+        self.cursor_poller()
 
-    def poll(self):
-        self.label.after(200, self.poll)
-
-        self.sel = self._listbox.curselection()
-        print('sel: ' + str(self.sel) + ' vs tmp_sel: ' + str(self.tmp_sel))
-        if self.sel is not () and self.tmp_sel is not ():
-            if self.sel[0] is not self.tmp_sel[0]:
-                print('sel is not tmp_sel')
-                for list_game in self.json_game_list_data['ps2_games']:
-                    s = self._listbox.get(self.sel[0])
-                    if s in str(list_game['title']):
-                        # print(str(list_game['title_id']))
-                        selected_title_id       = str(list_game['title_id'])
-                        selected_title          = str(list_game['title'])
-                        selected_filename       = str(list_game['filename'])
+    def cursor_poller(self):
+        self.label.after(200, self.cursor_poller)
+        # cursor har been initiated
+        if self._listbox.curselection() is not ():
+            new_selection = self._listbox.curselection()
+            if new_selection[0] is not self.last_selection[0]:
+                for list_game in self.json_game_list_data[self.platform + '_games']:
+                    selected_title = self._listbox.get(new_selection[0])
+                    if selected_title in str(list_game['title']):
+                        selected_title_id   = str(list_game['title_id'])
+                        selected_title      = str(list_game['title'])
+                        selected_filename   = str(list_game['filename'])
 
                         self.entry_title_id.delete(0, END)
                         self.entry_title_id.insert(0, selected_title_id.replace('-', ''))
@@ -65,62 +62,37 @@ class Gamelist():
                         self.entry_filename.insert(0, selected_filename)
 
                         break
-        self.tmp_sel = self._listbox.curselection()
+            self.last_selection = new_selection
 
     def get_game_listbox(self):
         return self._listbox
 
-    def get_corrected_index(self):
-        return self.corrected_index
-
-    def bisect(self, list_of_items, item, ascending_order=True, ignore_case=False):
+    def get_ascending_index(self, list_of_items, item, ignore_case=False):
         lo = 0
         hi = len(list_of_items)
 
-        # I repeat a little bit myself here because I want to be more efficient.
-        if ascending_order:
-            if ignore_case:
-                item = item.lower()
-                while lo < hi:
-                    mid = (lo + hi) // 2
+        if ignore_case:
+            item = item.lower()
+            while lo < hi:
+                mid = (lo + hi) // 2
 
-                    if item < list_of_items[mid].lower():
-                        hi = mid
-                    else:
-                        lo = mid + 1
-            else:
-                while lo < hi:
-                    mid = (lo + hi) // 2
-
-                    if item < list_of_items[mid]:
-                        hi = mid
-                    else:
-                        lo = mid + 1
+                if item < list_of_items[mid].lower():
+                    hi = mid
+                else:
+                    lo = mid + 1
         else:
-            if ignore_case:
-                item = item.lower()
-                while lo < hi:
-                    mid = (lo + hi) // 2
+            while lo < hi:
+                mid = (lo + hi) // 2
 
-                    if item > list_of_items[mid].lower():
-                        hi = mid
-                    else:
-                        lo = mid + 1
-            else:
-                while lo < hi:
-                    mid = (lo + hi) // 2
-
-                    if item > list_of_items[mid]:
-                        hi = mid
-                    else:
-                        lo = mid + 1
+                if item < list_of_items[mid]:
+                    hi = mid
+                else:
+                    lo = mid + 1
         return lo
 
     def add_item(self, item):
         list_of_items = self._listbox.get(0, END)
-        index = self.bisect(list_of_items, item)
-        self._listbox.insert(index, item)
-        # print('index: ' + str(index) + ' & item: ' + str(item))
 
-    def get_json_index_of_title(self, title):
-        return self._listbox.get(0, "end").index(title)
+        # getting ascending index in order to sort alphabetically
+        index = self.get_ascending_index(list_of_items, item)
+        self._listbox.insert(index, item)
