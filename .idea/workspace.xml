@@ -2,42 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="84b997fe-ca42-42ea-aff4-e38f1bf92a4f" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/resources/images/ICON0 - Copy.PNG" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/resources/images/PIC1 - Copy.PNG" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/resources/tools/util_scripts/write_json_to_param_sfo.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/Webman-Classics-Maker.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Webman-Classics-Maker.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/pkg/.pkg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/pkg/ICON0.PNG" beforeDir="false" afterPath="$PROJECT_DIR$/resources/pkg/ICON0.PNG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/pkg/PARAM.SFO" beforeDir="false" afterPath="$PROJECT_DIR$/resources/pkg/PARAM.SFO" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/pkg/PIC0.PNG" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/pkg/PIC1.PNG" beforeDir="false" afterPath="$PROJECT_DIR$/resources/pkg/PIC1.PNG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/pkg/USRDIR/url.txt" beforeDir="false" afterPath="$PROJECT_DIR$/resources/pkg/USRDIR/url.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/tools/scetool/EBOOT.ELF" beforeDir="false" afterPath="$PROJECT_DIR$/resources/tools/scetool/EBOOT.ELF" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/tools/util_generated_files/webman_classics_pkg.json" beforeDir="false" afterPath="$PROJECT_DIR$/resources/tools/util_generated_files/webman_classics_pkg.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/tools/util_resources/PARAM _PS2.SFO.BAK" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/tools/util_resources/PARAM.SFO.BAK" beforeDir="false" afterPath="$PROJECT_DIR$/resources/tools/util_resources/PARAM.SFO.BAK" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/tools/util_resources/PARAM.SFO.BAK.SFO" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/tools/util_resources/PARAM_PS1.SFO.BAK" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/tools/util_resources/PARAM_PS3.SFO.BAK" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/tools/util_resources/PARAM_PSP.SFO.BAK" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/tools/util_scripts/_not_used_param_sfo_write.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/tools/util_scripts/build_all_scripts.py" beforeDir="false" afterPath="$PROJECT_DIR$/resources/tools/util_scripts/build_all_scripts.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/tools/util_scripts/build_all_scripts_linux.py" beforeDir="false" afterPath="$PROJECT_DIR$/resources/tools/util_scripts/build_all_scripts_linux.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/tools/util_scripts/content_id_elf_replace.py" beforeDir="false" afterPath="$PROJECT_DIR$/resources/tools/util_scripts/content_id_elf_replace.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/tools/util_scripts/edit_launch_txt.py" beforeDir="false" afterPath="$PROJECT_DIR$/resources/tools/util_scripts/edit_launch_txt.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/tools/util_scripts/param_sfo_to_json.py" beforeDir="false" afterPath="$PROJECT_DIR$/resources/tools/util_scripts/_not_used_param_sfo_to_json.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/tools/util_scripts/resign_eboot.py" beforeDir="false" afterPath="$PROJECT_DIR$/resources/tools/util_scripts/resign_eboot.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/tools/util_scripts/resign_eboot_linux.py" beforeDir="false" afterPath="$PROJECT_DIR$/resources/tools/util_scripts/resign_eboot_linux.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/resources/tools/util_scripts/webman_pkg.py" beforeDir="false" afterPath="$PROJECT_DIR$/resources/tools/util_scripts/webman_pkg.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/tools/wcm_gui/_tmp/pillow_egg_27_64/Pillow-5.4.1-py2.7-win-amd64.egg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/tools/wcm_gui/_tmp/pillow_egg_27_64/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/tools/wcm_gui/_tmp/pillow_egg_27_64/pillow.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/tools/wcm_gui/_tmp/pillow_whl_27_64/Pillow-5.4.1-cp27-cp27mu-manylinux1_x86_64.whl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/tools/wcm_gui/game_lister.py" beforeDir="false" afterPath="$PROJECT_DIR$/resources/tools/wcm_gui/game_lister.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/tools/wcm_gui/test.png" beforeDir="false" afterPath="$PROJECT_DIR$/resources/tools/wcm_gui/test.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/tools/wcm_gui/webMAN_Classics_Maker_lazy.py" beforeDir="false" afterPath="$PROJECT_DIR$/resources/tools/wcm_gui/webMAN_Classics_Maker_lazy.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -50,22 +18,13 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/resources/tools/wcm_gui/webMAN_Classics_Maker_lazy.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="36">
-              <caret line="3" selection-start-line="3" selection-end-line="3" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/resources/tools/util_scripts/write_json_to_param_sfo.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="425">
-              <caret line="25" column="12" lean-forward="true" selection-start-line="25" selection-start-column="12" selection-end-line="25" selection-end-column="12" />
+            <state relative-caret-position="1105">
+              <caret line="112" column="8" selection-start-line="112" selection-start-column="8" selection-end-line="112" selection-end-column="8" />
               <folding>
-                <element signature="e#0#9#0" expanded="true" />
+                <element signature="e#0#21#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -74,8 +33,23 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/resources/tools/wcm_gui/game_lister.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="289">
-              <caret line="19" selection-start-line="19" selection-end-line="19" />
+            <state relative-caret-position="595">
+              <caret line="35" column="63" selection-start-line="35" selection-start-column="63" selection-end-line="35" selection-end-column="63" />
+              <folding>
+                <element signature="e#0#14#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/resources/tools/util_scripts/webman_pkg.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="408">
+              <caret line="32" lean-forward="true" selection-start-line="32" selection-end-line="32" />
+              <folding>
+                <element signature="e#0#13#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -84,7 +58,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>pack</find>
       <find>LEFT</find>
       <find>)</find>
       <find>sel</find>
@@ -114,6 +87,7 @@
       <find>type</find>
       <find>f2</find>
       <find>title</find>
+      <find>tmp_se7</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -125,19 +99,21 @@
         <option value="$PROJECT_DIR$/resources/tools/wcm_gui/game_lister.py" />
         <option value="$PROJECT_DIR$/resources/tools/wcm_gui/webMAN_Classics_Maker_lazy.py" />
         <option value="$PROJECT_DIR$/resources/tools/util_scripts/write_json_to_param_sfo.py" />
+        <option value="$PROJECT_DIR$/resources/tools/util_scripts/webman_pkg.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-7" />
-    <option name="width" value="1294" />
-    <option name="height" value="690" />
+    <option name="x" value="-11" />
+    <option name="width" value="1937" />
+    <option name="height" value="1031" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -174,7 +150,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -194,7 +169,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.webman_pkg">
     <configuration name="webMAN_Classics_Maker_lazy" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Webman-Classics-Maker" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -216,8 +191,30 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="webman_pkg" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="Webman-Classics-Maker" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/resources/tools/util_scripts" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/resources/tools/util_scripts/webman_pkg.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.webman_pkg" />
         <item itemvalue="Python.webMAN_Classics_Maker_lazy" />
       </list>
     </recent_temporary>
@@ -236,14 +233,15 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-7" width="2208" height="1208" extended-state="6" />
+    <frame x="-7" y="-7" width="1295" height="695" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4965422" visible="true" weight="0.16482505" />
-      <window_info id="Structure" order="1" sideWeight="0.50345784" side_tool="true" visible="true" weight="0.16482505" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.716129" visible="true" weight="0.28616852" />
+      <window_info id="Structure" order="1" sideWeight="0.28387097" side_tool="true" visible="true" weight="0.28616852" />
       <window_info id="Favorites" order="2" sideWeight="0.50080776" side_tool="true" weight="0.16491044" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32961932" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.3286908" />
+      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.44937834" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.2943361" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -274,8 +272,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/resources/tools/wcm_gui/game_lister.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="19" selection-start-line="19" selection-end-line="19" />
+        <state relative-caret-position="595">
+          <caret line="35" column="63" selection-start-line="35" selection-start-column="63" selection-end-line="35" selection-end-column="63" />
+          <folding>
+            <element signature="e#0#14#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -291,8 +292,21 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/resources/tools/wcm_gui/webMAN_Classics_Maker_lazy.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="36">
-          <caret line="3" selection-start-line="3" selection-end-line="3" />
+        <state relative-caret-position="1105">
+          <caret line="112" column="8" selection-start-line="112" selection-start-column="8" selection-end-line="112" selection-end-column="8" />
+          <folding>
+            <element signature="e#0#21#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/resources/tools/util_scripts/webman_pkg.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="408">
+          <caret line="32" lean-forward="true" selection-start-line="32" selection-end-line="32" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

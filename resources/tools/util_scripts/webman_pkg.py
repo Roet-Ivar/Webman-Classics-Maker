@@ -1,13 +1,15 @@
-
-from __future__ import with_statement
-import struct, sys, os, shutil, json
-# from pkgcrypt import fself
-# from pkgcrypt import Sstruct
+import struct
+import sys
+import hashlib
+import os
+import getopt
+import glob
+import json
+import shutil
 
 CURRENT_DIR = os.path.dirname(__file__)
 PKGCRYPT_DIR = 'pkgcrypt'
 pkgcrypt_ver = 'py'
-sys.path.append(os.path.join(CURRENT_DIR, PKGCRYPT_DIR))
 # check python version less than 3
 if sys.version_info[0]<3:
 	pkgcrypt_ver += '27_'
@@ -17,26 +19,13 @@ if struct.calcsize('P') * 8 == 64:
 else:
 	pkgcrypt_ver += '32'
 
-	
+sys.path.append(os.path.join(CURRENT_DIR, PKGCRYPT_DIR))
 sys.path.append(os.path.join(CURRENT_DIR, PKGCRYPT_DIR, pkgcrypt_ver))
 
-try:
-	import pkgcrypt
-except Exception, e:
-	print(e)
+import pkgcrypt
 from Sstruct import Sstruct
 from fself import SelfHeader, AppInfo
 
-import struct
-import sys
-import hashlib
-import os
-import getopt
-import ConfigParser
-import io
-import glob
-import json
-import shutil
 
 TYPE_NPDRMSELF = 0x1
 TYPE_RAW = 0x3
