@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/Webman-Classics-Maker.iml" filepath="$PROJECT_DIR$/.idea/Webman-Classics-Maker.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Webman-Classics-Maker.iml" filepath="$PROJECT_DIR$/Webman-Classics-Maker.iml" />
     </modules>
   </component>
 </project>
