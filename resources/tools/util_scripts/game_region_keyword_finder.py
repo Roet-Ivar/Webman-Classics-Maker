@@ -66,7 +66,7 @@ try:
                 "id": id, "region": region})
         reg_exist = False
 
-except Exception, e1:
+except Exception as e1:
     print('e1: ' + str(e1))
     game_id = ''
 # us_game_list_data

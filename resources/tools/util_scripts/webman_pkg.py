@@ -7,20 +7,17 @@ PKGCRYPT_DIR = 'pkgcrypt'
 pkgcrypt_ver = 'py'
 
 # check python version less than 3
-if sys.version_info[0]<3:
+if sys.version_info[0] < 3:
 	pkgcrypt_ver += '27_'
+else:
+	print('Error: webMAN Classics Maker is only compatible with python 2.7 32/64')
+	sys.exit(1)
 # check if python runs as 32 or 64 bit
 if struct.calcsize('P') * 8 == 64:
 	pkgcrypt_ver += '64'
 else:
 	pkgcrypt_ver += '32'
-
 sys.path.append(os.path.join(CURRENT_DIR, PKGCRYPT_DIR, pkgcrypt_ver))
-
-try:
-	import pkgcrypt
-except Exception, e:
-	print(e)
 
 class StructType(tuple):
 	def __getitem__(self, value):
@@ -536,16 +533,16 @@ def setContextNum(key, tmpnum):
 try:
 	import pkgcrypt
 except:
-	print ""
-	print "-----------------"
-	print "PKG BUILD ERROR"
-	print "-----------------"
-	print "Couldn't make PKG file. Go into the ps3py directory, and type the following:"
-	print ""
-	print "python2 setup.py build"
-	print ""
-	print "This should create a pkgcrypt.so file in the build/ directory. Move that file"
-	print "over to the root of the ps3py directory and try running this script again."
+	print("""
+	-----------------
+	PKG BUILD ERROR
+	-----------------
+	Couldn't make PKG file. Go into the ps3py directory, and type the following:
+	
+	python2 setup.py build
+	
+	This should create a pkgcrypt.so file in the build/ directory. Move that file
+	over to the root of the ps3py directory and try running this script again.""")
 
 
 def crypt(key, inbuf, length):
@@ -893,6 +890,8 @@ class Webman_pkg:
 				print('Execution of \'webman_pkg.py\':             Done')
 				print('-----------------------------------------------\n')
 				print('Package created: ' + '/builds/' + pkg_name + '\n')
+
+				return pkg_name
 			else:
 				usage()
 				sys.exit(2)

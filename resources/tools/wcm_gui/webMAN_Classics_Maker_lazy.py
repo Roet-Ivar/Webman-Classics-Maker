@@ -1,4 +1,4 @@
-import os, json, copy
+import os, sys, json, copy
 
 from Tkinter import *
 from PIL import Image
@@ -6,6 +6,19 @@ from PIL import ImageDraw
 from PIL import ImageFont
 from PIL.ImageTk import PhotoImage
 from game_lister import Gamelist
+
+# check python version less than 3
+if sys.version_info[0] > 2:
+	print('Error: webMAN Classics Maker is only compatible with python 2.7 32/64')
+	sys.exit(1)
+
+CURRENT_DIR = os.path.dirname(__file__)
+UTIL_SCRIPTS_DIR = os.path.dirname('../util_scripts/')
+sys.path.append(os.path.join(CURRENT_DIR, UTIL_SCRIPTS_DIR))
+if 'linux' in sys.platform:
+	import build_all_scripts_linux as WMC
+else:
+	import build_all_scripts as WMC
 
 
 class Main():
@@ -229,9 +242,11 @@ class Main():
 								 command=lambda: self.on_drive_and_system_button(self.state_drive_choice,
 																				 self.selection_system_list[3]))
 
-		self.save_button = Button(main, image=self.function_buttons[0], borderwidth=0, command=self.on_save_button,
+		self.save_button = Button(main, image=self.function_buttons[0], borderwidth=0, command=self.validate_on_save_button,
 								  bg="#FBFCFB")
-		self.build_button = Button(main, image=self.function_buttons[1], borderwidth=0, bg="#FBFCFB")
+
+		self.build_button = Button(main, image=self.function_buttons[1], borderwidth=0, command=self.on_build_button,
+								   bg="#FBFCFB")
 
 		# Entry and Button placements
 		entry_width = 260
@@ -248,22 +263,22 @@ class Main():
 										y=int(self.iso_path_text_y_pos * scaling), width=entry_width)
 
 		self.button_HDD.place(x=int((self.text_box_spacing + self.main_offset_x_pos + 0 * 75) * scaling),
-							  y=int(self.device_text_y_pos) -40)
+							  y=int(self.device_text_y_pos) - 40)
 
 		self.button_USB.place(x=int((self.text_box_spacing + self.main_offset_x_pos + 1 * 75) * scaling),
-							  y=int(self.device_text_y_pos) -40)
+							  y=int(self.device_text_y_pos) - 40)
 
 		self.button_PSP.place(x=int((self.text_box_spacing + self.main_offset_x_pos + 0 * 75) * scaling),
-							  y=int(self.main_offset_y_pos) +5)
+							  y=int(self.main_offset_y_pos) + 5)
 
 		self.button_PSX.place(x=int((self.text_box_spacing + self.main_offset_x_pos + 1 * 75) * scaling),
-							  y=int(self.main_offset_y_pos) +5)
+							  y=int(self.main_offset_y_pos) + 5)
 
 		self.button_PS2.place(x=int((self.text_box_spacing + self.main_offset_x_pos + 2 * 75) * scaling),
-							  y=int(self.main_offset_y_pos) +5)
+							  y=int(self.main_offset_y_pos) + 5)
 
 		self.button_PS3.place(x=int((self.text_box_spacing + self.main_offset_x_pos + 3 * 75) * scaling),
-							  y=int(self.main_offset_y_pos) +5)
+							  y=int(self.main_offset_y_pos) + 5)
 
 		# draws PIC1 and ICON0 on the canvas
 		self.init_draw_images_on_canvas(main)
@@ -557,22 +572,67 @@ class Main():
 			self.entry_field_filename.icursor(0)
 			return False
 
-	def on_save_button(self):
+	def validate_on_save_button(self):
 		# do stuff
 		if self.validate_title_id_on_save():
 			print('Title_id: OK')
 		else:
-			return
+			return False
 		if self.validate_title_on_save():
 			print('Title: OK')
 		else:
-			return
+			return False
 		if self.validate_filename_on_save():
 			print('Title_id: OK')
 		else:
-			return
+			return False
 
 		self.save_pkg_info_to_json()
+		return True
+
+	def on_build_button(self):
+		# do stuff
+		if self.validate_on_save_button():
+			wmc = WMC.WebmanClassicsBuilder()
+			pkg_name = wmc.make_webman_pkg()
+
+			if pkg_name is not None:
+				# self.main_btn_img = PhotoImage(Image.open('main_build_btn.png').resize((250, 95)))
+				# self.btn_img = PhotoImage(Image.open('build_btn.png'))
+				#
+				# main_btn_img = Button(main_window, image=self.main_btn_img, borderwidth=0)
+				# main_btn_img.place(x=670, y=200)
+				# label = Label(frame, text="Build successful", bg='#000000', fg='#FFFFFF').place(x=10, y=10)
+
+
+				import tkMessageBox
+				def popup():
+					msgBox = tkMessageBox.showinfo("Build status", "Build successful!")
+					# msgBox.
+				popup()
+
+				# btn_img = PhotoImage(self.small_button_maker('OK', font='arial.ttf', x=0, y=0))
+				# B1 = Button(main_window, text="Build successful", command=popup(), bg='#000000', fg='#FFFFFF')
+				# B1.pack()
+			else:
+				import tkMessageBox
+				tkMessageBox.showinfo("Build status", "Build failed!")
+
+
+
+
+
+
+
+
+			# open builds folder in windows explorer
+			if 'win' in sys.platform:
+				BUILDS_DIR = os.path.join(CURRENT_DIR, os.path.dirname('../../../builds/'))
+				try:
+					os.startfile(BUILDS_DIR)
+				except:
+					print('ERROR: Could not show the builds folder in explorer')
+
 
 	def save_pkg_info_to_json(self):
 		with open('../util_resources/params.json.BAK') as f:

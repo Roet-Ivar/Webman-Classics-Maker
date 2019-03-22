@@ -106,7 +106,7 @@ def get_title_from_meta_link(meta_link):
         title_parent = ot_parent.findNext('td')
         title_text = title_parent.contents[0].strip()
 
-    except Exception, e:
+    except Exception as e:
         print('parent error?: ' + str(e))
         title_text = null
         return title_text

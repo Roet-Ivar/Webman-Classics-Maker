@@ -40,7 +40,7 @@ try:
 		show_ps3_list 	= json_data['show_ps3_list']
 		show_psn_list 	= json_data['show_psn_list']
 		
-except Exception, e:
+except Exception as e:
 	print('Error: ' + str(e))
 	raw_input(pause_message)
 	sys.exit()
@@ -56,7 +56,7 @@ try:
 	ftp.retrlines('NLST ' + ps3iso_path, ps3lines.append)
 	ftp.retrlines('NLST ' + hdgame_path, psnlines.append)
 	
-except Exception, e:
+except Exception as e:
 	error_message = str(e)
 	if 'Errno 10061' in error_message:
 		print('Error: ' + error_message)

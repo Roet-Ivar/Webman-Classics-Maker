@@ -23,5 +23,5 @@ class Edit_launch_txt:
 			
 			print('Execution of \'edit_launch_txt.py\':        Done')
 			print('-----------------------------------------------')
-		except Exception, e:
+		except Exception as e:
 			print('Error: ' + str(e))
