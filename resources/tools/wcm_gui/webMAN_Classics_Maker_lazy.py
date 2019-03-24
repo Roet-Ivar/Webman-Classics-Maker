@@ -19,7 +19,7 @@ if 'linux' in sys.platform:
 	import build_all_scripts_linux as WMC
 else:
 	import build_all_scripts as WMC
-
+from ftp_game_list_v2 import FtpGameList
 
 class Main():
 
@@ -58,6 +58,10 @@ class Main():
 		self.function_buttons.append(PhotoImage(self.small_button_maker('Quit', font='arial.ttf', x=0, y=0)))
 		self.function_buttons.append(PhotoImage(self.small_button_maker('Change', font='arial.ttf', x=0, y=0)))
 
+		self.gamelist_buttons = []
+		self.gamelist_buttons.append(PhotoImage(self.small_button_maker('Sync', font='arial.ttf', x=0, y=0)))
+		self.gamelist_buttons.append(PhotoImage(self.small_button_maker('Refresh', font='arial.ttf', x=0, y=0)))
+
 		self.background_images = []
 		self.load_backgrounds()
 
@@ -73,7 +77,7 @@ class Main():
 		game_list_frame = glist.start()
 		game_list_box = glist.get_game_listbox()
 		game_list_box.config(activestyle='dotbox', borderwidth=0)  # , fg='#FFFFFF', bg='#000000')
-		game_list_frame.place(x=900 - 15, y=302, width=370, height=340)
+		game_list_frame.place(x=900 - 15, y=342, width=370, height=300)
 
 	def small_button_maker(self, text, **args):
 		font = None
@@ -85,7 +89,11 @@ class Main():
 			elif 'x' is key:
 				x = value
 			elif 'y' is key:
-				val_y = value
+				y = value
+			elif 'width' is key:
+				width = value
+			elif 'height' is key:
+				height = value
 
 		if not font:
 			self.draw_text_on_image_w_font(icon_bg_img, text, 7, 3, 12, 'white', './resources/fonts/arial.ttf')
@@ -96,7 +104,7 @@ class Main():
 			else:
 				x_val = 12 - len(text)
 
-			self.draw_text_on_image_w_font(icon_bg_img, text, x_val, 3 + val_y, 12, 'white',
+			self.draw_text_on_image_w_font(icon_bg_img, text, x_val, 3 + y, 12, 'white',
 										   './resources/fonts/' + font)
 
 		return copy.copy(icon_bg_img)
@@ -248,6 +256,12 @@ class Main():
 		self.build_button = Button(main, image=self.function_buttons[1], borderwidth=0, command=self.on_build_button,
 								   bg="#FBFCFB")
 
+		self.ftp_sync_button = Button(main, image=self.gamelist_buttons[0], borderwidth=0, command=self.on_ftp_sync_button,
+								   bg="#FBFCFB")
+
+		self.game_list_refresh_button = Button(main, image=self.gamelist_buttons[1], borderwidth=0, command=self.on_game_list_refresh,
+									  bg="#FBFCFB")
+
 		# Entry and Button placements
 		entry_width = 260
 		self.entry_field_title_id.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * scaling),
@@ -293,16 +307,27 @@ class Main():
 			self.draw_text_on_image(pic1_img, 'Burnout Revenge', 760, 490, 32, 'white')
 			pic1_img.save('test.png')
 
-		if 'linux' in sys.platform:
-			button_spacing = 70
-		else:
-			button_spacing = 70
 
-		self.save_button.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * scaling),
-							   y=int((self.iso_path_text_y_pos + 40) * scaling))
-		self.build_button.place(
-			x=int((button_spacing + 10 + self.text_box_spacing + self.main_offset_x_pos) * scaling),
+		self.button_spacing = 70
+
+		self.save_button.place(
+			x=int((self.text_box_spacing + self.main_offset_x_pos) * scaling),
 			y=int((self.iso_path_text_y_pos + 40) * scaling))
+
+		self.build_button.place(
+			x=int((self.button_spacing + 10 + self.text_box_spacing + self.main_offset_x_pos) * scaling),
+			y=int((self.iso_path_text_y_pos + 40) * scaling))
+
+
+		self.ftp_sync_button.place(
+			x=int((self.main_offset_x_pos + 2) * scaling),
+			y=int((self.iso_path_text_y_pos + 165) * scaling))
+
+		self.game_list_refresh_button.place(
+			x=int((self.main_offset_x_pos + 10 + self.button_spacing) * scaling),
+			y=int((self.iso_path_text_y_pos + 165) * scaling))
+
+
 		##########################################################################
 		# Adding an onChange -listener on 'entry_field_filename'
 		self.generate_on_change(self.entry_field_filename)
@@ -322,7 +347,7 @@ class Main():
 
 		self.image_pic1.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
 		self.image_pic1.paste(self.ps3_system_logo, (1180, 525), self.ps3_system_logo)
-		self.draw_text_on_image_w_shadow(self.image_pic1, "11/11/2006 00:00", 760, 522, 20, 2, 'white', 'black')
+		self.draw_text_on_image_w_shadow(self.image_pic1, "11/11/2006 00:00", 760, 522, 20, 1, 'white', 'black')
 		self.image_pic1_xmb = copy.copy(self.image_pic1)
 		self.photo_image_pic1 = PhotoImage(
 			self.image_pic1.resize((int(1280 * scaling), int(720 * scaling)), Image.ANTIALIAS))
@@ -628,6 +653,14 @@ class Main():
 				except:
 					print('ERROR: Could not show the builds folder in explorer')
 
+	def on_ftp_sync_button(self):
+		ftp_game_list = FtpGameList()
+		ftp_game_list.execute()
+
+		self.on_game_list_refresh()
+
+	def on_game_list_refresh(self):
+		self.draw_game_listbox()
 
 	def save_pkg_info_to_json(self):
 		with open('../util_resources/params.json.BAK') as f:
