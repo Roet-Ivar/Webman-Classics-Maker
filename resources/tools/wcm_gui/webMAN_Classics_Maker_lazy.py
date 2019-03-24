@@ -322,6 +322,7 @@ class Main():
 
 		self.image_pic1.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
 		self.image_pic1.paste(self.ps3_system_logo, (1180, 525), self.ps3_system_logo)
+		self.draw_text_on_image_w_shadow(self.image_pic1, "11/11/2006 00:00", 760, 522, 20, 2, 'white', 'black')
 		self.image_pic1_xmb = copy.copy(self.image_pic1)
 		self.photo_image_pic1 = PhotoImage(
 			self.image_pic1.resize((int(1280 * scaling), int(720 * scaling)), Image.ANTIALIAS))
@@ -474,7 +475,8 @@ class Main():
 	# Dynamic update of the game title on to the PIC1 image
 	def dynamic_title_to_pic1(self, event):
 		tmp_img = copy.copy(self.image_pic1_xmb)
-		self.draw_text_on_image(tmp_img, event.widget.get(), 760, 490, 32, 'white')
+		# self, image, text, text_x, text_y, text_size, text_outline, text_color,
+		self.draw_text_on_image_w_shadow(tmp_img, event.widget.get(), 760, 487, 32, 2, 'white', 'black')
 		self.photo_image_pic1_xmb = PhotoImage(
 			tmp_img.resize((int(1280 * scaling), int(720 * scaling)), Image.ANTIALIAS))
 		self.button_pic1.config(image=self.photo_image_pic1_xmb)
@@ -618,16 +620,9 @@ class Main():
 				import tkMessageBox
 				tkMessageBox.showinfo("Build status", "Build failed!")
 
-
-
-
-
-
-
-
 			# open builds folder in windows explorer
 			if 'win' in sys.platform:
-				BUILDS_DIR = os.path.join(CURRENT_DIR, os.path.dirname('../../../builds/'))
+				BUILDS_DIR = os.path.join(CURRENT_DIR, os.path.dirname('../../../builds/'), pkg_name.replace('.pkg',''))
 				try:
 					os.startfile(BUILDS_DIR)
 				except:

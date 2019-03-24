@@ -841,7 +841,7 @@ class Webman_pkg:
 		pkg_name = titleid + '_' + filepath_arr[3][:-4] + '.pkg'
 		pkg_name = pkg_name.replace(' ', '_')
 		
-		build_dir_path='../../../builds/'
+		build_dir_path = '../../../builds/' + pkg_name.replace('.pkg','') + '/'
 		
 		arg_list = [pkg_build_script, pkg_flag, contentid, pkg_dir_path, pkg_name]	
 		try:
@@ -877,7 +877,7 @@ class Webman_pkg:
 				
 				if not os.path.exists(build_dir_path):
 					os.makedirs(build_dir_path)
-				
+
 				shutil.move(pkg_name, build_dir_path + pkg_name)
 				
 				for root, dirs, files in os.walk('..'):

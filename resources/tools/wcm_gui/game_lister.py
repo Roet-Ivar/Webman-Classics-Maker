@@ -33,8 +33,9 @@ class Gamelist():
         with open('../util_scripts/game_list_data.json') as f:
             self.json_game_list_data = json.load(f)
 
-        for list_game in self.json_game_list_data['ps2_games']:
+        for list_game in self.json_game_list_data[self.platform + '_games']:
             self.add_item(list_game['title'])
+
 
         self.label = Label(self.main_frame)
         self.cursor_poller()
@@ -47,7 +48,8 @@ class Gamelist():
             if new_selection[0] is not self.last_selection[0]:
                 for list_game in self.json_game_list_data[self.platform + '_games']:
                     selected_title = self._listbox.get(new_selection[0])
-                    if selected_title in str(list_game['title']):
+                    tmp_title = list_game['title']
+                    if selected_title == str(tmp_title):
                         selected_title_id   = str(list_game['title_id'])
                         selected_title      = str(list_game['title'])
                         selected_filename   = str(list_game['filename'])
@@ -91,8 +93,10 @@ class Gamelist():
         return lo
 
     def add_item(self, item):
-        list_of_items = self._listbox.get(0, END)
-
+        self.list_of_items = self._listbox.get(0, END)
         # getting ascending index in order to sort alphabetically
-        index = self.get_ascending_index(list_of_items, item)
+        index = self.get_ascending_index(self.list_of_items, item)
         self._listbox.insert(index, item)
+
+    def get_game_list(self):
+        return self.list_of_items

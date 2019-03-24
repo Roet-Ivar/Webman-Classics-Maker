@@ -309,7 +309,7 @@ if(show_ps2_list):
 
 			
 			if title_id is None:
-				m_filename = re.search('ISO.*', filename)
+				m_filename = re.search('iso.*', filename.lower())
 				title = m_filename.group(0).replace('ISO/', '')
 				print()
 
@@ -317,10 +317,20 @@ if(show_ps2_list):
 				if title_id is not None:
 					title = title_id
 
-			# check for duplicates of the same game, returning filename as title instead
-			if str(title_id) in str(json_game_list_data['ps2_games']):
-				m_filename = re.search('ISO.*', filename)
-				title = m_filename.group(0).replace('ISO/', '')
+			# check for duplicates of the same title in the list
+			for game in json_game_list_data['ps2_games']:
+				if str(title) == str(game['title']):
+					# check if there are earlier duplicates (1), (2) etc
+					dup_title = re.search('\(\d{1,3}\)$', str(title))
+					if dup_title is not None:
+						pre = str(title)[:len(str(title))-3]
+						suf = str(title)[len(str(title))-3:]
+						new_suf = re.sub('\d(?!\d)', lambda x: str(int(x.group(0)) + 1), suf)
+						title = pre + new_suf
+
+					# no earlier duplicates, makes the first one (1)
+					else:
+						title = str(title) + ' (1)'
 
 
 			print('Added new game: ' + game_filename + '\nGame_id: ' + str(title_id) + '\n' + 'Title: ' + str(title) + '\n')
