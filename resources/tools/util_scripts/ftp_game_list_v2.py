@@ -285,7 +285,6 @@ if(show_ps2_list):
 					print('Platform/region: ' + platform.upper() + '/' + tmp_reg)
 
 					# with the region we can now load the correct game DB (json file)
-					# with open('./games_metadata/' + platform + '_' + tmp_reg + '_games_list.json') as f:
 					with open('./games_metadata/ps2_pcsx2_list.json' ) as f:
 						games_list_json_data = json.load(f)
 
@@ -301,26 +300,23 @@ if(show_ps2_list):
 
 							# removes parenthesis including content of title
 							title = re.sub(r'\([^)]*\)', '', title)
+							title = re.sub(r'\[[^)]*\]', '', title)
 
 							if str(title).isupper() and str(meta_data_link) == null:
 								# if no meta_data_link, capitalize titles with all upper-case
 								title = title.title()
 							break
 
-			
+			# if no title_id, use filename as title
 			if title_id is None:
-				m_filename = re.search('iso.*', filename.lower())
+				m_filename = re.search('ISO.*', filename)
 				title = m_filename.group(0).replace('ISO/', '')
-				print()
-
-			elif title is None:
-				if title_id is not None:
-					title = title_id
 
 			# check for duplicates of the same title in the list
 			for game in json_game_list_data['ps2_games']:
 				if str(title) == str(game['title']):
-					# check if there are earlier duplicates (1), (2) etc
+
+					# check if there are earlier duplicates title + (1), (2) etc
 					dup_title = re.search('\(\d{1,3}\)$', str(title))
 					if dup_title is not None:
 						pre = str(title)[:len(str(title))-3]
