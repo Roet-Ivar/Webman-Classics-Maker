@@ -2,7 +2,7 @@
     "psx_games":[],
     "ps2_games":[
         {
-            "title":null,
+            "title":"Buzz! Pop Quiz",
             "title_id":"SCES-55096",
             "game_type":"PS2",
             "installed":null,
@@ -26,19 +26,19 @@
             "filename":"Buzz! The Mega Quiz.ISO"
         },
         {
-            "title":"Buzz! - The Music Quiz",
+            "title":"Buzz! The Music Quiz",
             "title_id":"SCES-53307",
             "game_type":"PS2",
             "installed":null,
-            "meta_data_link":"games2/SCES-53307.html",
+            "meta_data_link":null,
             "filename":"Buzz! The Music Quiz.ISO"
         },
         {
-            "title":"Buzz! - The Sports Quiz",
+            "title":"Buzz! The Sports Quiz",
             "title_id":"SCES-54266",
             "game_type":"PS2",
             "installed":null,
-            "meta_data_link":"games2/SCES-54266.html",
+            "meta_data_link":null,
             "filename":"Buzz! The Sports Quiz.ISO"
         },
         {
@@ -50,7 +50,7 @@
             "filename":"Buzz! Junior Ace Racers.ISO"
         },
         {
-            "title":"Singstar Anthems",
+            "title":"SingStar Anthems",
             "title_id":"SCES-54131",
             "game_type":"PS2",
             "installed":null,
@@ -58,7 +58,7 @@
             "filename":"SingStar Anthems.ISO"
         },
         {
-            "title":"Singstar Party",
+            "title":"SingStar Party",
             "title_id":"SCES-52826",
             "game_type":"PS2",
             "installed":null,
@@ -66,7 +66,7 @@
             "filename":"SingStar Party.ISO"
         },
         {
-            "title":null,
+            "title":"SingStar Motown",
             "title_id":"SCES-55549",
             "game_type":"PS2",
             "installed":null,
@@ -74,7 +74,7 @@
             "filename":"SingStar Motown.ISO"
         },
         {
-            "title":"Singstar Svenska Hits",
+            "title":"SingStar Svenska Hits",
             "title_id":"SCES-53185",
             "game_type":"PS2",
             "installed":null,
@@ -82,7 +82,7 @@
             "filename":"SingStar Svenska hits.ISO"
         },
         {
-            "title":"Singstar Summer Party",
+            "title":"SingStar Summer Party",
             "title_id":"SCES-55056",
             "game_type":"PS2",
             "installed":null,
@@ -98,7 +98,7 @@
             "filename":"SingStar Legends.ISO"
         },
         {
-            "title":"Singstar Singalong With Disney",
+            "title":"SingStar Singalong With Disney",
             "title_id":"SCES-55255",
             "game_type":"PS2",
             "installed":null,
@@ -106,7 +106,7 @@
             "filename":"SingStar Sing along with Disney [Eng].ISO"
         },
         {
-            "title":"Singstar Rocks!",
+            "title":"SingStar Rocks!",
             "title_id":"SCES-53889",
             "game_type":"PS2",
             "installed":null,
@@ -114,7 +114,7 @@
             "filename":"SingStar Rocks.ISO"
         },
         {
-            "title":"Singstar Queen",
+            "title":"SingStar Queen",
             "title_id":"SCES-55453",
             "game_type":"PS2",
             "installed":null,
@@ -122,7 +122,7 @@
             "filename":"SingStar Queen.ISO"
         },
         {
-            "title":null,
+            "title":"SingStar Hottest Hits",
             "title_id":"SCES-55362",
             "game_type":"PS2",
             "installed":null,
@@ -130,7 +130,7 @@
             "filename":"SingStar Hottest hits.ISO"
         },
         {
-            "title":"Singstar Svenska Hits Schlager",
+            "title":"SingStar Svenska Hits Schlager",
             "title_id":"SCES-54598",
             "game_type":"PS2",
             "installed":null,
@@ -138,7 +138,7 @@
             "filename":"SingStar Svenska hits - Schlager.ISO"
         },
         {
-            "title":null,
+            "title":"SingStar Pop Volume 2",
             "title_id":"SCUS-97627",
             "game_type":"PS2",
             "installed":null,
@@ -146,7 +146,7 @@
             "filename":"SingStar Pop Vol 2.ISO"
         },
         {
-            "title":"Singstar Sjung Med Disney",
+            "title":"SingStar Sjung Med Disney",
             "title_id":"SCES-55261",
             "game_type":"PS2",
             "installed":null,
@@ -154,7 +154,7 @@
             "filename":"SingStar Sjung med disney.ISO"
         },
         {
-            "title":"Singstar Boys Bands Vs Girls Bands",
+            "title":"SingStar Boy Bands Vs Girl Bands",
             "title_id":"SCES-55178",
             "game_type":"PS2",
             "installed":null,
@@ -162,7 +162,7 @@
             "filename":"SingStar Anthems Boybands vs Girlbands.ISO"
         },
         {
-            "title":"Singstar Take That",
+            "title":"SingStar Take That",
             "title_id":"SCES-55554",
             "game_type":"PS2",
             "installed":null,
@@ -170,11 +170,11 @@
             "filename":"SingStar Take That.ISO"
         },
         {
-            "title":"SingStar '80s [with Microphones]",
+            "title":"SingStar '80s",
             "title_id":"SCUS-97616",
             "game_type":"PS2",
             "installed":null,
-            "meta_data_link":"games2/SCUS-97616.html",
+            "meta_data_link":null,
             "filename":"SingStar 80's Eng.ISO"
         },
         {
@@ -190,11 +190,11 @@
             "title_id":"SCES-53609",
             "game_type":"PS2",
             "installed":null,
-            "meta_data_link":"games2/SCES-53609.html",
+            "meta_data_link":null,
             "filename":"SingStar 80's Swe.ISO"
         },
         {
-            "title":"Singstar Abba",
+            "title":"SingStar Abba",
             "title_id":"SCES-55435",
             "game_type":"PS2",
             "installed":null,
@@ -202,7 +202,7 @@
             "filename":"SingStar ABBA.ISO"
         },
         {
-            "title":null,
+            "title":"SingStar Pop Hits",
             "title_id":"SCES-54573",
             "game_type":"PS2",
             "installed":null,
@@ -210,7 +210,7 @@
             "filename":"SingStar Pop Hits.ISO"
         },
         {
-            "title":null,
+            "title":"imagen.iso",
             "title_id":null,
             "game_type":"PS2",
             "installed":null,
@@ -218,7 +218,7 @@
             "filename":"imagen.iso"
         },
         {
-            "title":"SingStar Amped ",
+            "title":"SingStar Amped [with Microphone]",
             "title_id":"SCUS-97611",
             "game_type":"PS2",
             "installed":null,
@@ -226,7 +226,7 @@
             "filename":"SingStar Amped.ISO"
         },
         {
-            "title":"Singstar Rock Ballads",
+            "title":"SingStar Rock Ballads",
             "title_id":"SCES-54597",
             "game_type":"PS2",
             "installed":null,
@@ -234,35 +234,27 @@
             "filename":"SingStar Rock Ballads.ISO"
         },
         {
-            "title":"Singstar '90S",
-            "title_id":"SCES-54599",
+            "title":"SingStar R&B",
+            "title_id":"SCES-54760",
             "game_type":"PS2",
             "installed":null,
             "meta_data_link":null,
             "filename":"SingStar R&B.ISO"
         },
         {
-            "title":"Singstar R&B",
-            "title_id":"SCES-54760",
-            "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
-            "filename":"SingStar 90s.ISO"
-        },
-        {
             "title":"ESPN International Track & Field",
             "title_id":"SLUS-20041",
             "game_type":"PS2",
             "installed":null,
-            "meta_data_link":"games2/SLUS-20041.html",
+            "meta_data_link":null,
             "filename":"ESPN International Track & Field (USA)_480p.iso"
         },
         {
-            "title":"Singstar",
+            "title":"SingStar",
             "title_id":"SCES-52268",
             "game_type":"PS2",
             "installed":null,
-            "meta_data_link":"games2/SCES-52268.html",
+            "meta_data_link":null,
             "filename":"SingStar.ISO"
         },
         {
@@ -270,23 +262,23 @@
             "title_id":"SCUS-97379",
             "game_type":"PS2",
             "installed":null,
-            "meta_data_link":"games2/SCUS-97379.html",
+            "meta_data_link":null,
             "filename":"Athens 2004 (USA).iso"
         },
         {
-            "title":"ESPN International Track & Field",
+            "title":"ESPN International Track & Field (USA).iso",
             "title_id":"SLUS-20041",
             "game_type":"PS2",
             "installed":null,
-            "meta_data_link":"games2/SLUS-20041.html",
+            "meta_data_link":null,
             "filename":"ESPN International Track & Field (USA).iso"
         },
         {
-            "title":"Gun.",
+            "title":"Gun",
             "title_id":"SLUS-21139",
             "game_type":"PS2",
             "installed":null,
-            "meta_data_link":"games2/SLUS-21139.html",
+            "meta_data_link":null,
             "filename":"Gun (USA).iso"
         },
         {
@@ -294,7 +286,7 @@
             "title_id":"SLUS-20181",
             "game_type":"PS2",
             "installed":null,
-            "meta_data_link":"games2/SLUS-20181.html",
+            "meta_data_link":null,
             "filename":"Escape from Monkey Island (USA).iso"
         },
         {
@@ -302,7 +294,7 @@
             "title_id":"SLUS-20370",
             "game_type":"PS2",
             "installed":null,
-            "meta_data_link":"games2/SLUS-20370.html",
+            "meta_data_link":null,
             "filename":"Kingdom Hearts (USA).iso"
         },
         {
@@ -322,15 +314,15 @@
             "filename":"Marvel - Ultimate Alliance 2 (USA).iso"
         },
         {
-            "title":"Marvel vs Capcom 2",
+            "title":"Marvel vs. Capcom 2",
             "title_id":"SLUS-20486",
             "game_type":"PS2",
             "installed":null,
-            "meta_data_link":"games2/SLUS-20486.html",
+            "meta_data_link":null,
             "filename":"Marvel vs. Capcom 2 - New Age of Heroes (USA).iso"
         },
         {
-            "title":"Time Crisis 3",
+            "title":"Time Crisis 3 [with Guncon]",
             "title_id":"SLUS-20645",
             "game_type":"PS2",
             "installed":null,
@@ -342,7 +334,7 @@
             "title_id":"SLUS-20362",
             "game_type":"PS2",
             "installed":null,
-            "meta_data_link":"games2/SLUS-20362.html",
+            "meta_data_link":null,
             "filename":"Need for Speed - Hot Pursuit 2 (USA)_60fps_widescreen.iso"
         },
         {
@@ -358,7 +350,7 @@
             "title_id":"SLUS-21216",
             "game_type":"PS2",
             "installed":null,
-            "meta_data_link":"games2/SLUS-21216.html",
+            "meta_data_link":null,
             "filename":"Soulcalibur III (USA).iso"
         },
         {
@@ -398,8 +390,16 @@
             "title_id":"SLES-52568",
             "game_type":"PS2",
             "installed":null,
-            "meta_data_link":"games2/SLES-52568.html",
+            "meta_data_link":null,
             "filename":"Crash Twinsanity (Europe).ISO"
+        },
+        {
+            "title":"SingStar '90s",
+            "title_id":"SCES-54599",
+            "game_type":"PS2",
+            "installed":null,
+            "meta_data_link":null,
+            "filename":"SingStar 90's.ISO"
         }
     ],
     "ps3_games":[],

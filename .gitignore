@@ -5,6 +5,6 @@ FTP_Game_List.exe
 game_list.txt
 builds
 release
-.idea/workspace.xml
-.idea/misc.xml
-.idea/Webman-Classics-Maker.iml
+.idea/
+venv/
+Webman-Classics-Maker.iml

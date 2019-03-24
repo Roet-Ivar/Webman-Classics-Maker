@@ -271,7 +271,7 @@ if(show_ps2_list):
 
 				dl = FTPChunkDownloader(ftp)
 				title_id = dl.get_title_id(filename, 0, chunk_size_kb)
-				print('Added new game: ' + game_filename + '\nGame_id: ' + str(title_id))
+
 
 			with open('./games_metadata/region_list.json') as f:
 				region_json_data = json.load(f)
@@ -285,7 +285,8 @@ if(show_ps2_list):
 					print('Platform/region: ' + platform.upper() + '/' + tmp_reg)
 
 					# with the region we can now load the correct game DB (json file)
-					with open('./games_metadata/' + platform + '_' + tmp_reg + '_games_list.json') as f:
+					# with open('./games_metadata/' + platform + '_' + tmp_reg + '_games_list.json') as f:
+					with open('./games_metadata/ps2_pcsx2_list.json' ) as f:
 						games_list_json_data = json.load(f)
 
 					# iterate through the games in the chosen DB (json file)
@@ -294,6 +295,7 @@ if(show_ps2_list):
 						# find a match in of title_id
 						if title_id == str(game['title_id']):
 							title = str(game['title'])
+
 							if game['meta_data_link'] is not null:
 								meta_data_link = str(game['meta_data_link'])
 
@@ -303,9 +305,25 @@ if(show_ps2_list):
 							if str(title).isupper() and str(meta_data_link) == null:
 								# if no meta_data_link, capitalize titles with all upper-case
 								title = title.title()
-							print('Title: ' + str(title) + '\n')
 							break
 
+			
+			if title_id is None:
+				m_filename = re.search('ISO.*', filename)
+				title = m_filename.group(0).replace('ISO/', '')
+				print()
+
+			elif title is None:
+				if title_id is not None:
+					title = title_id
+
+			# check for duplicates of the same game, returning filename as title instead
+			if str(title_id) in str(json_game_list_data['ps2_games']):
+				m_filename = re.search('ISO.*', filename)
+				title = m_filename.group(0).replace('ISO/', '')
+
+
+			print('Added new game: ' + game_filename + '\nGame_id: ' + str(title_id) + '\n' + 'Title: ' + str(title) + '\n')
 			json_game_list_data['ps2_games'].append({
 				"title_id": title_id,
 				"title": title,
