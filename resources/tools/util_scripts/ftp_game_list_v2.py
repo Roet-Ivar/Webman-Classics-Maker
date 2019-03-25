@@ -391,7 +391,7 @@ class FtpGameList():
 		with open(os.path.join(current_dir, '../../../game_list.txt'), "wb") as f:
 			f.write(ftp_game_list)
 
-		with open(os.path.join(current_dir, '../util_resources/params.json.BAK')) as f:
+		with open(os.path.join(current_dir, '../util_resources/pkg.json.BAK')) as f:
 			json_data = json.load(f)
 
 		with open(os.path.join(current_dir, 'game_list_data.json'), 'w') as newFile:

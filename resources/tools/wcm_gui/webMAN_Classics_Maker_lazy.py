@@ -25,7 +25,7 @@ class Main():
 
 	def __init__(self, main):
 		self.main_offset_x_pos = 1325
-		self.main_offset_y_pos = 90
+		self.main_offset_y_pos = 50
 
 		# canvas for image
 		self.canvas = Canvas(main, width=canvas_width, height=canvas_height, borderwidth=0, highlightthickness=0)
@@ -39,28 +39,29 @@ class Main():
 
 		# setting defaults
 		self.state_drive_choice 	= 'dev_hdd0'
-		self.state_system_choice 	= 'PS2'
+		self.state_system_choice 	= 'PS2ISO'
 		self.entry_field_iso_path 	= None
 
 		# images
 		self.logo_drives = []
-		self.logo_drives.append(PhotoImage(self.small_button_maker('HDD', font='conthrax-sb.ttf', x=-4, y=0)))
-		self.logo_drives.append(PhotoImage(self.small_button_maker('USB', font='conthrax-sb.ttf', x=-4, y=0)))
+		self.logo_drives.append(PhotoImage(self.smaller_button_maker('HDD', font='conthrax-sb.ttf', x=-1, y=-2)))
+		self.logo_drives.append(PhotoImage(self.smaller_button_maker('USB', font='conthrax-sb.ttf', x=-1, y=-2)))
+
 		self.logo_systems = []
-		self.logo_systems.append(PhotoImage(self.small_button_maker('PSP', font='conthrax-sb.ttf', x=-4, y=0)))
-		self.logo_systems.append(PhotoImage(self.small_button_maker('PSX', font='conthrax-sb.ttf', x=-4, y=0)))
-		self.logo_systems.append(PhotoImage(self.small_button_maker('PS2', font='conthrax-sb.ttf', x=-4, y=0)))
-		self.logo_systems.append(PhotoImage(self.small_button_maker('PS3', font='conthrax-sb.ttf', x=-4, y=0)))
+		self.logo_systems.append(PhotoImage(self.smaller_button_maker('PSP', font='conthrax-sb.ttf', x=-1, y=-2)))
+		self.logo_systems.append(PhotoImage(self.smaller_button_maker('PSX', font='conthrax-sb.ttf', x=-1, y=-2)))
+		self.logo_systems.append(PhotoImage(self.smaller_button_maker('PS2', font='conthrax-sb.ttf', x=-1, y=-2)))
+		self.logo_systems.append(PhotoImage(self.smaller_button_maker('PS3', font='conthrax-sb.ttf', x=-1, y=-2)))
 
 		self.function_buttons = []
-		self.function_buttons.append(PhotoImage(self.small_button_maker('Save', font='arial.ttf', x=0, y=0)))
-		self.function_buttons.append(PhotoImage(self.small_button_maker('Build', font='arial.ttf', x=0, y=0)))
-		self.function_buttons.append(PhotoImage(self.small_button_maker('Quit', font='arial.ttf', x=0, y=0)))
-		self.function_buttons.append(PhotoImage(self.small_button_maker('Change', font='arial.ttf', x=-5, y=0)))
+		self.function_buttons.append(PhotoImage(self.small_button_maker('Save', font='arial.ttf',	x=3, y=0)))
+		self.function_buttons.append(PhotoImage(self.small_button_maker('Build', font='arial.ttf',	x=3, y=0)))
+		self.function_buttons.append(PhotoImage(self.small_button_maker('Quit', font='arial.ttf',	x=3, y=0)))
+		self.function_buttons.append(PhotoImage(self.small_button_maker('Change', font='arial.ttf',x=-3, y=0)))
 
 		self.gamelist_buttons = []
-		self.gamelist_buttons.append(PhotoImage(self.small_button_maker('Sync', font='arial.ttf', x=0, y=0)))
-		self.gamelist_buttons.append(PhotoImage(self.small_button_maker('Refresh', font='arial.ttf', x=-5, y=0)))
+		self.gamelist_buttons.append(PhotoImage(self.small_button_maker('Sync', font='arial.ttf', x=3, y=0)))
+		self.gamelist_buttons.append(PhotoImage(self.small_button_maker('Refresh', font='arial.ttf', x=-1, y=0)))
 
 		self.background_images = []
 		self.load_backgrounds()
@@ -84,20 +85,50 @@ class Main():
 		else:
 			return str(ip)
 
-
-
-
 	def draw_game_listbox(self):
 		glist = Gamelist(self.entry_field_title_id, self.entry_field_title, self.entry_field_filename)
 		game_list_frame = glist.start()
 		game_list_box = glist.get_game_listbox()
-		game_list_box.config(activestyle='dotbox', borderwidth=0)  # , fg='#FFFFFF', bg='#000000')
-		game_list_frame.place(x=900 - 15, y=342-30, width=370, height=300)
+		game_list_box.config(selectmode='SINGLE', activestyle='dotbox', borderwidth=0)
+		game_list_frame.place(x=self.main_offset_x_pos - 440, y=self.main_offset_y_pos + 220, width=370, height=300)
+
+		print('listbox')
+
+	def smaller_button_maker(self, text, **args):
+		font = None
+		x = None
+		icon_bg_img = Image.new('RGB', (44, 15), color='black')
+		for key, value in args.iteritems():
+			if 'font' is key:
+				font = value
+			elif 'x' is key:
+				x = value
+			elif 'y' is key:
+				y = value
+			elif 'width' is key:
+				width = value
+			elif 'height' is key:
+				height = value
+
+		if not font:
+			self.draw_text_on_image_w_font(icon_bg_img, text, 7, 3, 12, 'white', './resources/fonts/arial.ttf')
+		else:
+
+			if x:
+				x_val = x + 12 - len(text)
+			else:
+				x_val = 12 - len(text)
+
+			self.draw_text_on_image_w_font(icon_bg_img, text, x_val, 3 + y, 10, 'white',
+										   './resources/fonts/' + font)
+
+		return copy.copy(icon_bg_img)
+
 
 	def small_button_maker(self, text, **args):
 		font = None
 		x = None
-		icon_bg_img = Image.new('RGB', (44, 20), color='black')
+		icon_bg_img = Image.new('RGB', (50, 20), color='black')
 		for key, value in args.iteritems():
 			if 'font' is key:
 				font = value
@@ -179,7 +210,7 @@ class Main():
 								self.main_offset_x_pos, self.iso_path_text_y_pos + 120, 25, 'white')
 
 		self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_ps3_ip_label.upper(),
-								self.main_offset_x_pos + 290,  self.iso_path_text_y_pos + 623, 20, 'white')
+								self.main_offset_x_pos,  self.main_offset_y_pos + 820, 20, 'white')
 
 
 
@@ -228,7 +259,7 @@ class Main():
 		# coordinates
 		self.device_text_y_pos = self.main_offset_y_pos + self.height_of_text
 
-		self.platform_text_y_pos = self.dark_side_padding * 2 + self.device_text_y_pos + self.height_of_text
+		self.platform_text_y_pos = self.dark_side_padding * 1 + self.device_text_y_pos + self.height_of_text
 
 		self.title_id_text_y_pos = self.dark_side_padding * 1.5 + self.platform_text_y_pos + self.height_of_text +2
 
@@ -249,7 +280,7 @@ class Main():
 		# system choice buttons
 		self.selection_drive_list = ['dev_hdd0', 'dev_hdd1',
 									 'dev_usb000']  # usb port 'x' should be selected through a list
-		self.selection_system_list = ['PSP', 'PSX', 'PS2', 'PS3']
+		self.selection_system_list = ['PSPISO', 'PSXISO', 'PS2ISO', 'PS3ISO']
 		self.drive_path = self.selection_drive_list[0]  # drive should be toggled by buttons
 
 		self.button_HDD = Button(main, image=self.logo_drives[0], borderwidth=1,
@@ -302,28 +333,30 @@ class Main():
 		self.entry_field_iso_path.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * scaling),
 										y=int(self.iso_path_text_y_pos * scaling), width=entry_width)
 
-		self.entry_field_ftp_ip.place(x=int((self.text_box_spacing + self.main_offset_x_pos + 218) * scaling),
-										y=int((self.iso_path_text_y_pos + 620) * scaling), width=120)
+		self.entry_field_ftp_ip.place(x=int((self.main_offset_x_pos + 90) * scaling),
+										y=int((self.main_offset_y_pos + 815) * scaling), width=120)
 
 
 		# Button placements
 		self.button_HDD.place(x=int((self.text_box_spacing + self.main_offset_x_pos + 0 * 75) * scaling),
-							  y=int(self.device_text_y_pos) - 40)
+							  y=int(self.device_text_y_pos * scaling))
 
 		self.button_USB.place(x=int((self.text_box_spacing + self.main_offset_x_pos + 1 * 75) * scaling),
-							  y=int(self.device_text_y_pos) - 40)
+							  y=int(self.device_text_y_pos * scaling))
+
+
 
 		self.button_PSP.place(x=int((self.text_box_spacing + self.main_offset_x_pos + 0 * 75) * scaling),
-							  y=int(self.main_offset_y_pos) + 5)
+							  y=int(self.platform_text_y_pos * scaling))
 
 		self.button_PSX.place(x=int((self.text_box_spacing + self.main_offset_x_pos + 1 * 75) * scaling),
-							  y=int(self.main_offset_y_pos) + 5)
+							  y=int(self.platform_text_y_pos * scaling))
 
 		self.button_PS2.place(x=int((self.text_box_spacing + self.main_offset_x_pos + 2 * 75) * scaling),
-							  y=int(self.main_offset_y_pos) + 5)
+							  y=int(self.platform_text_y_pos * scaling))
 
 		self.button_PS3.place(x=int((self.text_box_spacing + self.main_offset_x_pos + 3 * 75) * scaling),
-							  y=int(self.main_offset_y_pos) + 5)
+							  y=int(self.platform_text_y_pos * scaling))
 
 		# draws PIC1 and ICON0 on the canvas
 		self.init_draw_images_on_canvas(main)
@@ -339,12 +372,12 @@ class Main():
 
 
 		self.ftp_sync_button.place(
-			x=int((self.main_offset_x_pos +2) * scaling),
-			y=int((self.iso_path_text_y_pos  + 620) * scaling))
+			x=int((self.main_offset_x_pos) * scaling),
+			y=int((self.main_offset_y_pos + 855) * scaling))
 
 		self.game_list_refresh_button.place(
-			x=int((self.main_offset_x_pos + 10 + self.button_spacing) * scaling),
-			y=int((self.iso_path_text_y_pos  + 620) * scaling))
+			x=int((self.main_offset_x_pos + 80) * scaling),
+			y=int((self.main_offset_y_pos + 855) * scaling))
 
 
 		##########################################################################
@@ -434,7 +467,7 @@ class Main():
 		# button to change image
 		self.change_button = Button(main, borderwidth=0, image=self.function_buttons[3], command=self.on_change_button,
 									bd=1)
-		self.change_button.place(x=40 + 10, y=1)
+		self.change_button.place(x=40 + 13, y=1)
 
 	def on_change_button(self):
 		# next image
@@ -514,7 +547,7 @@ class Main():
 		self.entry_field_iso_path.config(state=DISABLED)
 
 		current_filename = self.entry_field_iso_path.get()
-		print("entry_field_iso_path: " + current_filename)
+		# print("entry_field_iso_path: " + current_filename)
 
 	# Dynamic update of the game title on to the PIC1 image
 	def dynamic_title_to_pic1(self, event):
@@ -555,11 +588,11 @@ class Main():
 	# Dynamic validation of title id
 	def dynamic_validate_title_id(self, P):
 		P = P.upper()
-		P = P.replace('_', '')
 		P = P.replace('-', '')
+		P = re.sub(r'[^a-zA-Z0-9 -]', '', P)
+
 		self.entry_field_title_id.delete(0, END)
 		self.entry_field_title_id.insert(0, P[0:self.title_id_maxlength])
-		print('DEBUG Title ID: ' + self.entry_field_title_id.get())
 		main_window.after_idle(lambda: self.entry_field_title_id.config(validate='key'))
 		return True
 
@@ -640,14 +673,17 @@ class Main():
 		return True
 
 	def load_pkg_project(self, title_id, filename):
-		_filename = filename.replace(' ', '_')
+		_title_id = title_id.replace('-', '')
+		_filename = str(self.entry_field_filename.get())[:-4].replace(' ', '_')
+		print('title_id: ' + _title_id + '\n' + 'filename: ' + _filename)
 
 		build_base_path = '../../../builds/'
-		pkg_project_name = title_id + '_' + _filename[:-4]
-		build_dir_path = os.path.join(build_base_path, pkg_project_name)
+		pkg_project_name = _title_id + '_' + _filename[:-4]
 
+		build_dir_path = os.path.join(build_base_path, pkg_project_name)
 		if os.path.exists(build_dir_path):
 			print(_filename + ' project exist')
+
 
 	def save_pkg_project(self):
 		pkg_dir = '../../pkg'
@@ -659,11 +695,10 @@ class Main():
 
 		pkg_project_name = title_id + '_' + filename[:-4]
 		build_dir_path = os.path.join(build_base_path, pkg_project_name)
-		build_dir_resources_path = os.path.join(build_dir_path, 'resources')
-		build_dir_pkg_path = os.path.join(build_dir_resources_path, 'pkg')
+		build_dir_pkg_path = os.path.join(build_dir_path, 'pkg')
 
 		self.copytree(pkg_dir, build_dir_pkg_path)
-		shutil.copyfile(proj_json_file_path, build_dir_resources_path + '/' + 'pkg.json')
+		shutil.copyfile(proj_json_file_path, build_dir_pkg_path + '/' + 'pkg.json')
 		shutil.copyfile('preview.png', build_dir_path + '/' + title_id + '_preview.png')
 
 
@@ -767,7 +802,7 @@ class Main():
 		self.draw_game_listbox()
 
 	def save_pkg_info_to_json(self):
-		with open('../util_resources/params.json.BAK') as f:
+		with open('../util_resources/pkg.json.BAK') as f:
 			json_data = json.load(f)
 
 		try:
@@ -792,15 +827,18 @@ main_window.title('webMAN Classics Maker UI')
 
 # icon upper left corner
 if "linux" in sys.platform:
+	print('Running Linux')
 	main_window.iconbitmap('@../../images/webman_icon.xbm')
 	# scaling = 1
 	scaling = 1280.0 / 1920.0
 
-else:
-	print('not linux')
+elif 'win' in sys.platform:
+	print('Running Windows')
 	main_window.iconbitmap('../../images/webman.ico')
 	# scaling = 1
 	scaling = 1280.0 / 1920.0
+else:
+	print('Running ' + str(sys.platform))
 
 canvas_width = int(1920 * scaling)
 canvas_height = int(1080 * scaling)

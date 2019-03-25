@@ -1,6 +1,6 @@
 import Tkinter
 from Tkinter import Frame, Scrollbar, Listbox, LEFT, RIGHT, Y, END, TOP, Label
-import json
+import json, os
 
 
 class Gamelist():
@@ -36,6 +36,9 @@ class Gamelist():
         for list_game in self.json_game_list_data[self.platform + '_games']:
             self.add_item(list_game['title'])
 
+        for x in range(0, len(self.list_of_items)-1):
+            if x % 2 == 0:
+                self._listbox.itemconfig(x, background='#e6f2ff')
 
         self.label = Label(self.main_frame)
         self.cursor_poller()
@@ -53,6 +56,8 @@ class Gamelist():
                         selected_title_id   = str(list_game['title_id'])
                         selected_title      = str(list_game['title'])
                         selected_filename   = str(list_game['filename'])
+
+                        # self.load_pkg_project(selected_title_id.replace('-', ''), selected_filename)
 
                         self.entry_title_id.delete(0, END)
                         self.entry_title_id.insert(0, selected_title_id.replace('-', ''))
@@ -94,9 +99,20 @@ class Gamelist():
 
     def add_item(self, item):
         self.list_of_items = self._listbox.get(0, END)
+
         # getting ascending index in order to sort alphabetically
         index = self.get_ascending_index(self.list_of_items, item)
         self._listbox.insert(index, item)
 
     def get_game_list(self):
         return self.list_of_items
+
+    def load_pkg_project(self, title_id, filename):
+        _filename = filename.replace(' ', '_')
+        build_base_path = '../../../builds/'
+        pkg_project_name = title_id + '_' + _filename[:-4]
+
+        build_dir_path = os.path.join(build_base_path, pkg_project_name)
+        if os.path.exists(build_dir_path):
+            print(_filename + ' project exist')
+        # print(title_id + '\n' + _filename)

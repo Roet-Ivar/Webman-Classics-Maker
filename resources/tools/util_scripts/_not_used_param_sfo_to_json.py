@@ -3,7 +3,7 @@ import json
 
 class Param_to_json:
 	def execute(self):
-		with open('../util_resources/params.json.BAK') as f:
+		with open('../util_resources/pkg.json.BAK') as f:
 			json_data = json.load(f)
 
 
