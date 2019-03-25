@@ -4,7 +4,7 @@ from shutil import copyfile
 
 class Resign_eboot:
 	def execute(self):
-		with open('../util_generated_files/webman_classics_pkg.json') as f:
+		with open('../util_generated_files/pkg.json') as f:
 			json_data = json.load(f)
 			
 		content_id = json_data['content_id']

@@ -4,7 +4,7 @@ import re
 
 class Write_param_sfo():
 	def execute(self):
-		with open('../util_generated_files/webman_classics_pkg.json') as f:
+		with open('../util_generated_files/pkg.json') as f:
 			json_data = json.load(f)
 
 		title = json_data['title']

@@ -1,4 +1,4 @@
-import os, json, copy
+import os, json, copy, shutil
 
 from Tkinter import *
 from PIL import Image
@@ -92,7 +92,7 @@ class Main():
 		game_list_frame = glist.start()
 		game_list_box = glist.get_game_listbox()
 		game_list_box.config(activestyle='dotbox', borderwidth=0)  # , fg='#FFFFFF', bg='#000000')
-		game_list_frame.place(x=900 - 15, y=342-25, width=370, height=300)
+		game_list_frame.place(x=900 - 15, y=342-30, width=370, height=300)
 
 	def small_button_maker(self, text, **args):
 		font = None
@@ -176,14 +176,10 @@ class Main():
 								self.main_offset_x_pos, self.iso_path_text_y_pos, 25, 'white')
 
 		self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_ftp_game_list.upper(),
-								self.main_offset_x_pos, self.iso_path_text_y_pos + 130, 25, 'white')
+								self.main_offset_x_pos, self.iso_path_text_y_pos + 120, 25, 'white')
 
 		self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_ps3_ip_label.upper(),
-								self.main_offset_x_pos + 275,  self.iso_path_text_y_pos + 622, 25, 'white')
-
-
-		# x=int((self.text_box_spacing + self.main_offset_x_pos + 218) * scaling),
-		# y=int((self.iso_path_text_y_pos + 620) * scaling), width=120)
+								self.main_offset_x_pos + 290,  self.iso_path_text_y_pos + 623, 20, 'white')
 
 
 
@@ -331,18 +327,6 @@ class Main():
 
 		# draws PIC1 and ICON0 on the canvas
 		self.init_draw_images_on_canvas(main)
-
-		if 'linux' not in sys.platform:
-			# making test print of canvas
-			pic1_img = Image.open('../../pkg/PIC1.PNG')
-			icon_img = Image.open('../../pkg/ICON0.PNG')
-			xmb_img = Image.open('./resources/images/misc/XMB_icons.png')
-			pic1_img.paste(icon_img, (425, 450), icon_img)
-			pic1_img.paste(xmb_img, (0, 0), xmb_img)
-			self.draw_text_on_image(pic1_img, 'Burnout Revenge', 760, 490, 32, 'white')
-			pic1_img.save('test.png')
-
-
 		self.button_spacing = 70
 
 		self.save_button.place(
@@ -650,7 +634,64 @@ class Main():
 			return False
 
 		self.save_pkg_info_to_json()
+		self.save_preview_image()
+		self.save_pkg_project()
+
 		return True
+
+	def load_pkg_project(self, title_id, filename):
+		_filename = filename.replace(' ', '_')
+
+		build_base_path = '../../../builds/'
+		pkg_project_name = title_id + '_' + _filename[:-4]
+		build_dir_path = os.path.join(build_base_path, pkg_project_name)
+
+		if os.path.exists(build_dir_path):
+			print(_filename + ' project exist')
+
+	def save_pkg_project(self):
+		pkg_dir = '../../pkg'
+		build_base_path = '../../../builds/'
+		proj_json_file_path = '../util_generated_files/pkg.json'
+
+		title_id = str(self.entry_field_title_id.get())
+		filename = str(self.entry_field_filename.get()).replace(' ', '_')
+
+		pkg_project_name = title_id + '_' + filename[:-4]
+		build_dir_path = os.path.join(build_base_path, pkg_project_name)
+		build_dir_resources_path = os.path.join(build_dir_path, 'resources')
+		build_dir_pkg_path = os.path.join(build_dir_resources_path, 'pkg')
+
+		self.copytree(pkg_dir, build_dir_pkg_path)
+		shutil.copyfile(proj_json_file_path, build_dir_resources_path + '/' + 'pkg.json')
+		shutil.copyfile('preview.png', build_dir_path + '/' + title_id + '_preview.png')
+
+
+	def copytree(self, src, dst, symlinks = False, ignore = None):
+		if not os.path.exists(dst):
+			os.makedirs(dst)
+			shutil.copystat(src, dst)
+		lst = os.listdir(src)
+		if ignore:
+			excl = ignore(src, lst)
+			lst = [x for x in lst if x not in excl]
+		for item in lst:
+			s = os.path.join(src, item)
+			d = os.path.join(dst, item)
+			if symlinks and os.path.islink(s):
+				if os.path.lexists(d):
+					os.remove(d)
+				os.symlink(os.readlink(s), d)
+				try:
+					st = os.lstat(s)
+					mode = stat.S_IMODE(st.st_mode)
+					os.lchmod(d, mode)
+				except:
+					pass # lchmod not available
+			elif os.path.isdir(s):
+				self.copytree(s, d, symlinks, ignore)
+			else:
+				shutil.copy2(s, d)
 
 	def on_build_button(self):
 		# do stuff
@@ -711,7 +752,16 @@ class Main():
 			# json.dumps
 			# 	f.write(json.dumps(self.config_file))
 
-
+	def save_preview_image(self):
+		# making a preview print of the game canvas
+		pic1_img = Image.open('../../pkg/PIC1.PNG')
+		icon_img = Image.open('../../pkg/ICON0.PNG')
+		xmb_img = Image.open('./resources/images/misc/XMB_icons.png')
+		pic1_img.paste(icon_img, (425, 450), icon_img)
+		pic1_img.paste(xmb_img, (0, 0), xmb_img)
+		self.draw_text_on_image_w_shadow(pic1_img, "11/11/2006 00:00", 760, 522, 20, 1, 'white', 'black')
+		self.draw_text_on_image_w_shadow(pic1_img, str(self.entry_field_title.get()), 760, 487, 32, 2, 'white', 'black')
+		pic1_img.save('preview.png')
 
 	def on_game_list_refresh(self):
 		self.draw_game_listbox()
@@ -726,7 +776,7 @@ class Main():
 			json_data['content_id'] = 'UP0001-' + self.entry_field_title_id.get() + '_00-0000000000000000'
 			json_data['iso_filepath'] = str(self.entry_field_iso_path.get())
 
-			newFile = open("../util_generated_files/webman_classics_pkg.json", "w")
+			newFile = open("../util_generated_files/pkg.json", "w")
 			json_text = json.dumps(json_data, indent=4, separators=(",", ":"))
 			newFile.write(json_text)
 

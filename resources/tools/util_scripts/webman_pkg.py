@@ -825,7 +825,7 @@ class Webman_pkg:
 		extract = False
 		list = False
 		
-		with open('../util_generated_files/webman_classics_pkg.json') as f:
+		with open('../util_generated_files/pkg.json') as f:
 			json_data = json.load(f)
 
 		contentid = str(json_data['content_id'])
@@ -889,7 +889,7 @@ class Webman_pkg:
 								print(str(file) + ' could not be deleted.')
 				print('Execution of \'webman_pkg.py\':             Done')
 				print('-----------------------------------------------\n')
-				print('Package created: ' + '/builds/' + pkg_name + '\n')
+				print('Package created: ' + '/builds/' + build_dir_path + pkg_name + '\n')
 
 				return pkg_name
 			else:

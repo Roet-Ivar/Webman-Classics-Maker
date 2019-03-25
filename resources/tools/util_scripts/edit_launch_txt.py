@@ -5,7 +5,7 @@ import urllib
 class Edit_launch_txt:
 	def execute(self):
 		try:
-			with open('../util_generated_files/webman_classics_pkg.json') as f:
+			with open('../util_generated_files/pkg.json') as f:
 				json_data = json.load(f)
 
 			web_command = '/play.ps3'
