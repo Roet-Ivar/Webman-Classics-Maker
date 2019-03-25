@@ -1,4 +1,4 @@
-import os, sys, json, copy
+import os, json, copy
 
 from Tkinter import *
 from PIL import Image
@@ -38,9 +38,9 @@ class Main():
 		self.tmp_title_id = ''
 
 		# setting defaults
-		self.state_drive_choice = 'dev_hdd0'
-		self.state_system_choice = 'PS2'
-		self.entry_field_iso_path = None
+		self.state_drive_choice 	= 'dev_hdd0'
+		self.state_system_choice 	= 'PS2'
+		self.entry_field_iso_path 	= None
 
 		# images
 		self.logo_drives = []
@@ -56,11 +56,11 @@ class Main():
 		self.function_buttons.append(PhotoImage(self.small_button_maker('Save', font='arial.ttf', x=0, y=0)))
 		self.function_buttons.append(PhotoImage(self.small_button_maker('Build', font='arial.ttf', x=0, y=0)))
 		self.function_buttons.append(PhotoImage(self.small_button_maker('Quit', font='arial.ttf', x=0, y=0)))
-		self.function_buttons.append(PhotoImage(self.small_button_maker('Change', font='arial.ttf', x=0, y=0)))
+		self.function_buttons.append(PhotoImage(self.small_button_maker('Change', font='arial.ttf', x=-5, y=0)))
 
 		self.gamelist_buttons = []
 		self.gamelist_buttons.append(PhotoImage(self.small_button_maker('Sync', font='arial.ttf', x=0, y=0)))
-		self.gamelist_buttons.append(PhotoImage(self.small_button_maker('Refresh', font='arial.ttf', x=0, y=0)))
+		self.gamelist_buttons.append(PhotoImage(self.small_button_maker('Refresh', font='arial.ttf', x=-5, y=0)))
 
 		self.background_images = []
 		self.load_backgrounds()
@@ -72,12 +72,27 @@ class Main():
 		self.draw_background_on_canvas()
 		self.draw_game_listbox()
 
+	def get_ps3_ip_from_config(self):
+		CURRENT_DIR = os.path.dirname(__file__)
+
+		# print(os.path.join(CURRENT_DIR, '../../settings/ftp_settings.txt'))
+		with open(os.path.join(CURRENT_DIR, '../../../settings/ftp_settings.txt')) as f:
+			self.config_file = json.load(f)
+		ip = self.config_file['ps3_lan_ip']
+		if ip is None:
+			return ''
+		else:
+			return str(ip)
+
+
+
+
 	def draw_game_listbox(self):
 		glist = Gamelist(self.entry_field_title_id, self.entry_field_title, self.entry_field_filename)
 		game_list_frame = glist.start()
 		game_list_box = glist.get_game_listbox()
 		game_list_box.config(activestyle='dotbox', borderwidth=0)  # , fg='#FFFFFF', bg='#000000')
-		game_list_frame.place(x=900 - 15, y=342, width=370, height=300)
+		game_list_frame.place(x=900 - 15, y=342-25, width=370, height=300)
 
 	def small_button_maker(self, text, **args):
 		font = None
@@ -160,6 +175,18 @@ class Main():
 		self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_iso_path.upper(),
 								self.main_offset_x_pos, self.iso_path_text_y_pos, 25, 'white')
 
+		self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_ftp_game_list.upper(),
+								self.main_offset_x_pos, self.iso_path_text_y_pos + 130, 25, 'white')
+
+		self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_ps3_ip_label.upper(),
+								self.main_offset_x_pos + 275,  self.iso_path_text_y_pos + 622, 25, 'white')
+
+
+		# x=int((self.text_box_spacing + self.main_offset_x_pos + 218) * scaling),
+		# y=int((self.iso_path_text_y_pos + 620) * scaling), width=120)
+
+
+
 		self.current_img = self.background_images[self.canvas_image_number]
 		self.current_img = self.current_img.resize((int(1920 * scaling), int(1080 * scaling)), Image.ANTIALIAS)
 		self.current_background = PhotoImage(self.current_img)
@@ -185,15 +212,16 @@ class Main():
 
 	def init_labels_texts_buttons(self, main):
 		# Constants
-		self.text_device = 'Device'
-		self.text_platform = 'platform'
+		self.text_device 	= 'Device'
+		self.text_platform 	= 'platform'
 
-		self.text_title_id = 'Title id'
-		self.text_title = 'Title'
-		self.text_filename = 'Filename'
-		self.text_iso_path = 'Path'
+		self.text_title_id	= 'Title id'
+		self.text_title 	= 'Title'
+		self.text_filename 	= 'Filename'
+		self.text_iso_path	= 'Path'
 
-		self.text_game_list = 'Game list'
+		self.text_ftp_game_list = 'FTP Game list'
+		self.text_ps3_ip_label	= 'PS3-IP:'
 
 		# Paddings
 		self.height_of_text = 15  # Font(font='Helvetica').metrics('linespace')
@@ -204,21 +232,23 @@ class Main():
 		# coordinates
 		self.device_text_y_pos = self.main_offset_y_pos + self.height_of_text
 
-		self.platform_text_y_pos = self.dark_side_padding * 1.5 + self.device_text_y_pos + self.height_of_text
+		self.platform_text_y_pos = self.dark_side_padding * 2 + self.device_text_y_pos + self.height_of_text
 
-		self.title_id_text_y_pos = self.dark_side_padding * 2 + self.platform_text_y_pos + self.height_of_text
+		self.title_id_text_y_pos = self.dark_side_padding * 1.5 + self.platform_text_y_pos + self.height_of_text +2
 
 		self.title_text_y_pos = self.dark_side_padding + self.title_id_text_y_pos + self.height_of_text
 
 		self.filename_text_y_pos = self.dark_side_padding + self.title_text_y_pos + self.height_of_text
 
-		self.iso_path_text_y_pos = self.dark_side_padding + self.filename_text_y_pos + self.height_of_text
+		self.iso_path_text_y_pos = self.dark_side_padding + self.filename_text_y_pos + self.height_of_text -1
 
-		# defintions
-		self.entry_field_title_id = Entry(main, validate='key', validatecommand=(self.vcmd, '%P'))
-		self.entry_field_title = Entry(main)
-		self.entry_field_filename = Entry(main)
-		self.entry_field_iso_path = Entry(main, state='disabled')
+		# entry fields
+		self.entry_field_title_id 	= Entry(main, validate='key', validatecommand=(self.vcmd, '%P'))
+		self.entry_field_title 		= Entry(main)
+		self.entry_field_filename 	= Entry(main)
+		self.entry_field_iso_path 	= Entry(main, state='disabled')
+		self.entry_field_ftp_ip		= Entry(main)
+		self.entry_field_ftp_ip.insert(0, self.get_ps3_ip_from_config())
 
 		# system choice buttons
 		self.selection_drive_list = ['dev_hdd0', 'dev_hdd1',
@@ -262,13 +292,13 @@ class Main():
 		self.game_list_refresh_button = Button(main, image=self.gamelist_buttons[1], borderwidth=0, command=self.on_game_list_refresh,
 									  bg="#FBFCFB")
 
-		# Entry and Button placements
+		# Entry placements
 		entry_width = 260
 		self.entry_field_title_id.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * scaling),
 										y=int(self.title_id_text_y_pos * scaling), width=entry_width)
 
 		self.entry_field_title.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * scaling),
-									 y=int(self.title_text_y_pos * scaling), width=entry_width)
+										y=int(self.title_text_y_pos * scaling), width=entry_width)
 
 		self.entry_field_filename.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * scaling),
 										y=int(self.filename_text_y_pos * scaling), width=entry_width)
@@ -276,6 +306,11 @@ class Main():
 		self.entry_field_iso_path.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * scaling),
 										y=int(self.iso_path_text_y_pos * scaling), width=entry_width)
 
+		self.entry_field_ftp_ip.place(x=int((self.text_box_spacing + self.main_offset_x_pos + 218) * scaling),
+										y=int((self.iso_path_text_y_pos + 620) * scaling), width=120)
+
+
+		# Button placements
 		self.button_HDD.place(x=int((self.text_box_spacing + self.main_offset_x_pos + 0 * 75) * scaling),
 							  y=int(self.device_text_y_pos) - 40)
 
@@ -320,12 +355,12 @@ class Main():
 
 
 		self.ftp_sync_button.place(
-			x=int((self.main_offset_x_pos + 2) * scaling),
-			y=int((self.iso_path_text_y_pos + 165) * scaling))
+			x=int((self.main_offset_x_pos +2) * scaling),
+			y=int((self.iso_path_text_y_pos  + 620) * scaling))
 
 		self.game_list_refresh_button.place(
 			x=int((self.main_offset_x_pos + 10 + self.button_spacing) * scaling),
-			y=int((self.iso_path_text_y_pos + 165) * scaling))
+			y=int((self.iso_path_text_y_pos  + 620) * scaling))
 
 
 		##########################################################################
@@ -654,10 +689,29 @@ class Main():
 					print('ERROR: Could not show the builds folder in explorer')
 
 	def on_ftp_sync_button(self):
+		# save the ps3-ip field to config file
+		self.save_ps3_ip_on_sync()
 		ftp_game_list = FtpGameList()
 		ftp_game_list.execute()
 
 		self.on_game_list_refresh()
+
+	def save_ps3_ip_on_sync(self):
+		ip = str(self.entry_field_ftp_ip.get())
+
+		if ip != '':
+			self.config_file['ps3_lan_ip'] = ip
+
+			CURRENT_DIR = os.path.dirname(__file__)
+			# with open(os.path.join(CURRENT_DIR, '../../../settings/ftp_settings.txt'), 'w') as f:
+			newFile = open(os.path.join(CURRENT_DIR, '../../../settings/ftp_settings.txt'), "w")
+			json_text = json.dumps(self.config_file, indent=4, separators=(",", ":"))
+			newFile.write(json_text)
+
+			# json.dumps
+			# 	f.write(json.dumps(self.config_file))
+
+
 
 	def on_game_list_refresh(self):
 		self.draw_game_listbox()
