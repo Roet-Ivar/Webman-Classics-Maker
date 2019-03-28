@@ -86,9 +86,9 @@ class Main():
 			return str(ip)
 
 	def draw_game_listbox(self):
-		glist = Gamelist(self.entry_field_title_id, self.entry_field_title, self.entry_field_filename)
-		game_list_frame = glist.start()
-		game_list_box = glist.get_game_listbox()
+		game_list = Gamelist(self.entry_field_title_id, self.entry_field_title, self.entry_field_filename)
+		game_list_frame = game_list.start()
+		game_list_box = game_list.get_game_listbox()
 		game_list_box.config(selectmode='SINGLE', activestyle='dotbox', borderwidth=0)
 		game_list_frame.place(x=self.main_offset_x_pos - 440, y=self.main_offset_y_pos + 220, width=370, height=300)
 

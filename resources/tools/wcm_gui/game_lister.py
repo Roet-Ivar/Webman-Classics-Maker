@@ -12,6 +12,7 @@ class Gamelist():
 
         self.last_selection = (None, 0)
         self.platform = 'ps2'
+        self.list_of_items = []
 
 
     def start(self):
