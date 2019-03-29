@@ -36,10 +36,14 @@ class Gamelist():
 
         for list_game in self.json_game_list_data[self.platform + '_games']:
             self.add_item(list_game['title'])
+        if self._listbox.size() == 0:
+            for x in range(21):
+                self.add_item('')
 
+        # adding shade to every other row of the list
         for x in range(0, len(self.list_of_items)-1):
             if x % 2 == 0:
-                self._listbox.itemconfig(x, background='#e6f2ff')
+                self._listbox.itemconfig(x, background='#E2E7EC')
 
         self.label = Label(self.main_frame)
         self.cursor_poller()

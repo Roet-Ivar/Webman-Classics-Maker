@@ -90,7 +90,7 @@ class Main():
 		game_list_frame = game_list.start()
 		game_list_box = game_list.get_game_listbox()
 		game_list_box.config(selectmode='SINGLE', activestyle='dotbox', borderwidth=0)
-		game_list_frame.place(x=self.main_offset_x_pos - 440, y=self.main_offset_y_pos + 220, width=370, height=300)
+		game_list_frame.place(x=self.main_offset_x_pos - 440, y=self.main_offset_y_pos + 220, width=270, height=300)
 
 		print('listbox')
 
@@ -188,6 +188,20 @@ class Main():
 			return Image.open(os.path.join(pkg_image_base_path, 'default'))
 
 	def draw_background_on_canvas(self):
+
+		self.current_img = self.background_images[self.canvas_image_number]
+
+		self.draw_text_on_image_w_shadow(self.background_images[self.canvas_image_number], 'webMAN',
+										 400, 20, 110, 5, 'blue', 'black', font='./resources/fonts/LLPIXEL3.ttf')
+
+
+
+		self.draw_text_on_image_w_shadow(self.background_images[self.canvas_image_number], 'Classics Maker',
+										 350, 100, 80, 5, 'white', 'black', font='./resources/fonts/LLPIXEL3.ttf')
+
+		# self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], 'Classics Maker',
+		# 						250, 100, 110, 'white', './resources/fonts/LLPIXEL3.ttf')
+
 		self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_device.upper(),
 								self.main_offset_x_pos, self.device_text_y_pos, 25, 'white')
 
@@ -430,8 +444,14 @@ class Main():
 		return draw.text((text_x, text_y), text, fill=text_color, font=font)
 
 	def draw_text_on_image_w_shadow(self, image, text, text_x, text_y, text_size, text_outline, text_color,
-									shadow_color):
-		font = ImageFont.truetype('./resources/fonts/SCE-PS3.ttf', text_size)
+									shadow_color, **font_path):
+
+		if 'font' in font_path:
+			print(font_path['font'])
+			font = ImageFont.truetype(font_path['font'], text_size)
+		else:
+			font = ImageFont.truetype('./resources/fonts/LLPIXEL3.ttf', text_size)
+
 		if text_outline == None:
 			text_outline = 2
 		if text_color == None:
