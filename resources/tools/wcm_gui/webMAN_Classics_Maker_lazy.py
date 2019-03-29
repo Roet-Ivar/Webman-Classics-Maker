@@ -188,19 +188,18 @@ class Main():
 			return Image.open(os.path.join(pkg_image_base_path, 'default'))
 
 	def draw_background_on_canvas(self):
-
 		self.current_img = self.background_images[self.canvas_image_number]
+		webman_logo = Image.open('./resources/images/misc/webman_text_icon_bw.png').resize((int(464*0.5), int(255*0.5)))
+
 
 		self.draw_text_on_image_w_shadow(self.background_images[self.canvas_image_number], 'webMAN',
-										 400, 20, 110, 5, 'blue', 'black', font='./resources/fonts/LLPIXEL3.ttf')
+										 420, 18, 110, 6, 'blue', 'black', font='./resources/fonts/LLPIXEL3.ttf')
 
+		self.current_img.paste(webman_logo, (435, 30), webman_logo)
 
 
 		self.draw_text_on_image_w_shadow(self.background_images[self.canvas_image_number], 'Classics Maker',
-										 350, 100, 80, 5, 'white', 'black', font='./resources/fonts/LLPIXEL3.ttf')
-
-		# self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], 'Classics Maker',
-		# 						250, 100, 110, 'white', './resources/fonts/LLPIXEL3.ttf')
+										 350, 90, 80, 5, 'white', 'black', font='./resources/fonts/LLPIXEL3.ttf')
 
 		self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_device.upper(),
 								self.main_offset_x_pos, self.device_text_y_pos, 25, 'white')
@@ -450,7 +449,7 @@ class Main():
 			print(font_path['font'])
 			font = ImageFont.truetype(font_path['font'], text_size)
 		else:
-			font = ImageFont.truetype('./resources/fonts/LLPIXEL3.ttf', text_size)
+			font = ImageFont.truetype('./resources/fonts/SCE-PS3.ttf', text_size)
 
 		if text_outline == None:
 			text_outline = 2
