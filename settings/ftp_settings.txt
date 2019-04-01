@@ -4,7 +4,7 @@
     "ftp_timeout":10,
     "ftp_passive_mode":false,
     "show_ps3_list":true,
-    "ps3_lan_ip":"10.251.40.237",
+    "ps3_lan_ip":"10.251.40.225",
     "show_psn_list":true,
     "show_psp_list":true,
     "show_ps2_list":true

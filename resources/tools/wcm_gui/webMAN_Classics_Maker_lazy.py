@@ -203,29 +203,68 @@ class Main():
 
 		self.current_img.paste(webman_logo, (445, 45), webman_logo)
 
-		self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_device.upper(),
-								self.main_offset_x_pos, self.device_text_y_pos, 25, 'white')
+		# self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_device.upper(),
+		# 						self.main_offset_x_pos, self.device_text_y_pos, 25, 'white')
 
-		self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_platform.upper(),
-								self.main_offset_x_pos, self.platform_text_y_pos, 25, 'white')
+		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_device.upper(),
+										 self.main_offset_x_pos, self.device_text_y_pos, 25, 'white', font='./resources/fonts/LLPIXEL3.ttf')
 
-		self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_title_id.upper(),
-								self.main_offset_x_pos, self.title_id_text_y_pos, 25, 'white')
+		# self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_platform.upper(),
+		# 						self.main_offset_x_pos, self.platform_text_y_pos, 25, 'white')
 
-		self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_title.upper(),
-								self.main_offset_x_pos, self.title_text_y_pos, 25, 'white')
+		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_platform.upper(),
+										 self.main_offset_x_pos, self.platform_text_y_pos, 25, 'white', font='./resources/fonts/LLPIXEL3.ttf')
 
-		self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_filename.upper(),
-								self.main_offset_x_pos, self.filename_text_y_pos, 25, 'white')
+		#
+		# self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_title_id.upper(),
+		# 						self.main_offset_x_pos, self.title_id_text_y_pos, 25, 'white')
 
-		self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_iso_path.upper(),
-								self.main_offset_x_pos, self.iso_path_text_y_pos, 25, 'white')
 
-		self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_ftp_game_list.upper(),
-								self.main_offset_x_pos, self.iso_path_text_y_pos + 120, 25, 'white')
+		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_title_id.upper(),
+									 self.main_offset_x_pos, self.title_id_text_y_pos, 25, 'white', font='./resources/fonts/LLPIXEL3.ttf')
 
-		self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_ps3_ip_label.upper(),
-								self.main_offset_x_pos,  self.main_offset_y_pos + 820, 20, 'white')
+
+		# self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_title.upper(),
+		# 						self.main_offset_x_pos, self.title_text_y_pos, 25, 'white')
+
+		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_title.upper(),
+										 self.main_offset_x_pos, self.title_text_y_pos, 25, 'white', font='./resources/fonts/LLPIXEL3.ttf')
+
+
+		# self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_filename.upper(),
+		# 						self.main_offset_x_pos, self.filename_text_y_pos, 25, 'white')
+
+		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_filename.upper(),
+										 self.main_offset_x_pos, self.filename_text_y_pos, 25, 'white', font='./resources/fonts/LLPIXEL3.ttf')
+
+
+		# self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_iso_path.upper(),
+		# 						self.main_offset_x_pos, self.iso_path_text_y_pos, 25, 'white')
+
+
+		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_iso_path.upper(),
+										 self.main_offset_x_pos, self.iso_path_text_y_pos, 25, 'white', font='./resources/fonts/LLPIXEL3.ttf')
+
+
+		# self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_ftp_game_list.upper(),
+		# 						self.main_offset_x_pos, self.iso_path_text_y_pos + 120, 25, 'white')
+
+		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_ftp_game_list.upper(),
+									   self.main_offset_x_pos, self.iso_path_text_y_pos + 120, 25, 'white', font='./resources/fonts/LLPIXEL3.ttf')
+
+
+		# self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_ps3_ip_label.upper(),
+		# 						self.main_offset_x_pos,  self.main_offset_y_pos + 820, 20, 'white')
+
+		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_ps3_ip_label.upper(),
+									   self.main_offset_x_pos + 0 * 50, self.main_offset_y_pos + 810, 20, 'white', font='./resources/fonts/LLPIXEL3.ttf')
+
+		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_ps3_usr_label.upper(),
+									   self.main_offset_x_pos + 5 * 50, self.main_offset_y_pos + 810, 20, 'white', font='./resources/fonts/LLPIXEL3.ttf')
+
+		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_ps3_pass_label.upper(),
+									   self.main_offset_x_pos + 7 * 50, self.main_offset_y_pos + 810, 20, 'white', font='./resources/fonts/LLPIXEL3.ttf')
+
 
 
 
@@ -262,8 +301,11 @@ class Main():
 		self.text_filename 	= 'Filename'
 		self.text_iso_path	= 'Path'
 
-		self.text_ftp_game_list = 'FTP Game list'
-		self.text_ps3_ip_label	= 'PS3-IP:'
+		self.text_ftp_game_list		= 'FTP Game list'
+		self.text_ps3_ip_label		= 'PS3-ip'
+		self.text_ps3_usr_label		= 'Usr'
+		self.text_ps3_pass_label	= 'Pass'
+
 
 		# Paddings
 		self.height_of_text = 15  # Font(font='Helvetica').metrics('linespace')
@@ -349,7 +391,7 @@ class Main():
 										y=int(self.iso_path_text_y_pos * scaling), width=entry_width)
 
 		self.entry_field_ftp_ip.place(x=int((self.main_offset_x_pos + 90) * scaling),
-										y=int((self.main_offset_y_pos + 815) * scaling), width=120)
+										y=int((self.main_offset_y_pos + 815) * scaling), width=90)
 
 
 		# Button placements

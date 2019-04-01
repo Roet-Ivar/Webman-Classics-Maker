@@ -91,13 +91,6 @@ class FTPChunkDownloader():
 
 class FtpGameList():
 	def execute(self):
-		# current_path= os.getcwd()
-		# print('current_path: ' + current_path)
-		# if 'util_scripts' not in os.getcwd():
-		# os.chdir(os.path.dirname(__file__))
-
-
-
 		#Constants
 		pause_message		= 'Press ENTER to continue...'
 		current_dir 		= os.path.dirname(__file__)
@@ -146,7 +139,7 @@ class FtpGameList():
 
 		try:
 			print('Connecting to PS3 at: ' + ps3_lan_ip + ' ...')
-			ftp = FTP(ps3_lan_ip, timeout=ftp_timeout)
+			ftp = FTP(ps3_lan_ip, timeout=ftp_timeout, set_pasv=ftp_passive_mode)
 			ftp.login(user='', passwd = '')
 
 			ftp.retrlines('NLST ' + pspiso_path, psplines.append)
@@ -175,7 +168,7 @@ class FtpGameList():
 					ps2lines = file.split(', ')
 			else:
 				print(pause_message)
-				sys.exit()
+				# sys.exit()
 
 
 		def iso_filter(list_of_files):
