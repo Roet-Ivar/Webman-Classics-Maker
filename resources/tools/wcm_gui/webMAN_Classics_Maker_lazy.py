@@ -5,7 +5,7 @@ from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 from PIL.ImageTk import PhotoImage
-from game_lister import Gamelist
+from game_listbox import Gamelist
 
 # check python version less than 3
 if sys.version_info[0] > 2:
@@ -24,7 +24,8 @@ from ftp_game_list_v2 import FtpGameList
 class Main():
 
 	def __init__(self, main):
-		self.main_offset_x_pos = 1325
+		# self.main_offset_x_pos = 1325
+		self.main_offset_x_pos = 1450
 		self.main_offset_y_pos = 50
 
 		# canvas for image
@@ -73,26 +74,56 @@ class Main():
 		self.draw_background_on_canvas()
 		self.draw_game_listbox()
 
-	def get_ps3_ip_from_config(self):
+
+	def get_ftp_ip_from_config(self):
 		CURRENT_DIR = os.path.dirname(__file__)
 
-		# print(os.path.join(CURRENT_DIR, '../../settings/ftp_settings.txt'))
 		with open(os.path.join(CURRENT_DIR, '../../../settings/ftp_settings.txt')) as f:
 			self.config_file = json.load(f)
 		ip = self.config_file['ps3_lan_ip']
+
 		if ip is None:
-			return ''
+			ip = ''
 		else:
-			return str(ip)
+			ip = str(ip)
+		return ip
+
+
+	def get_ftp_user_from_config(self):
+		CURRENT_DIR = os.path.dirname(__file__)
+
+		with open(os.path.join(CURRENT_DIR, '../../../settings/ftp_settings.txt')) as f:
+			self.config_file = json.load(f)
+		user = self.config_file['ftp_user']
+
+		if user is None:
+			user = ''
+		else:
+			user = str(user)
+		return user
+
+
+	def get_ftp_pass_from_config(self):
+		CURRENT_DIR = os.path.dirname(__file__)
+
+		with open(os.path.join(CURRENT_DIR, '../../../settings/ftp_settings.txt')) as f:
+			self.config_file = json.load(f)
+		password	= self.config_file['ftp_password']
+
+		if password is None:
+			password = ''
+		else:
+			password =  str(password)
+		return password
+
+
 
 	def draw_game_listbox(self):
 		game_list = Gamelist(self.entry_field_title_id, self.entry_field_title, self.entry_field_filename)
 		game_list_frame = game_list.start()
 		game_list_box = game_list.get_game_listbox()
 		game_list_box.config(selectmode='SINGLE', activestyle='dotbox', borderwidth=0)
-		game_list_frame.place(x=self.main_offset_x_pos - 440, y=self.main_offset_y_pos + 220, width=270, height=300)
-
-		print('listbox')
+		game_list_frame.place(x=int((self.main_offset_x_pos)*scaling), y=self.main_offset_y_pos + 220, width=270, height=300)
 
 	def smaller_button_maker(self, text, **args):
 		font = None
@@ -166,18 +197,18 @@ class Main():
 		return copy.copy(icon_bg_img)
 
 	def init_pkg_images(self):
-		pic0_filename = 'PIC0.PNG'
-		pic1_filename = 'PIC1.PNG'
-		icon0_filename = 'ICON0.PNG'
+		pic0_filename	= 'PIC0.PNG'
+		pic1_filename	= 'PIC1.PNG'
+		icon0_filename	= 'ICON0.PNG'
 
-		self.image_pic0 = self.pkg_img_curr_or_def(pic0_filename)
-		self.image_pic1 = self.pkg_img_curr_or_def(pic1_filename)
-		self.image_icon0 = self.pkg_img_curr_or_def(icon0_filename)
+		self.image_pic0 = self.pkg_img_current_or_default(pic0_filename)
+		self.image_pic1 = self.pkg_img_current_or_default(pic1_filename)
+		self.image_icon0 = self.pkg_img_current_or_default(icon0_filename)
 
 		self.image_xmb_icons = Image.open('./resources/images/misc/XMB_icons.png')
 		self.ps3_system_logo = Image.open('./resources/images/misc/ps3_type_logo.png')
 
-	def pkg_img_curr_or_def(self, filename):
+	def pkg_img_current_or_default(self, filename):
 		pkg_image_base_path = './resources/images/pkg/'
 
 		tmp_img_path = os.path.join(pkg_image_base_path, filename)
@@ -193,83 +224,54 @@ class Main():
 
 
 		self.draw_text_on_image_w_shadow(self.background_images[self.canvas_image_number], 'webMAN',
-										 420, 18, 110, 6, 'blue', 'black', font='./resources/fonts/LLPIXEL3.ttf')
-
-
-
+										 490, -10, 110, 6, 'blue', 'black', font='./resources/fonts/LLPIXEL3.ttf')
 
 		self.draw_text_on_image_w_shadow(self.background_images[self.canvas_image_number], 'Classics Maker',
-										 350, 90, 80, 5, 'white', 'black', font='./resources/fonts/LLPIXEL3.ttf')
+										 422, 60, 80, 5, 'white', 'black', font='./resources/fonts/LLPIXEL3.ttf')
 
-		self.current_img.paste(webman_logo, (445, 45), webman_logo)
+		self.current_img.paste(webman_logo, (515, 22), webman_logo)
 
-		# self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_device.upper(),
-		# 						self.main_offset_x_pos, self.device_text_y_pos, 25, 'white')
+
 
 		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_device.upper(),
 										 self.main_offset_x_pos, self.device_text_y_pos, 25, 'white', font='./resources/fonts/LLPIXEL3.ttf')
 
-		# self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_platform.upper(),
-		# 						self.main_offset_x_pos, self.platform_text_y_pos, 25, 'white')
-
 		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_platform.upper(),
-										 self.main_offset_x_pos, self.platform_text_y_pos, 25, 'white', font='./resources/fonts/LLPIXEL3.ttf')
-
-		#
-		# self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_title_id.upper(),
-		# 						self.main_offset_x_pos, self.title_id_text_y_pos, 25, 'white')
-
+									   self.main_offset_x_pos, self.type_text_y_pos, 25, 'white', font='./resources/fonts/LLPIXEL3.ttf')
 
 		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_title_id.upper(),
 									 self.main_offset_x_pos, self.title_id_text_y_pos, 25, 'white', font='./resources/fonts/LLPIXEL3.ttf')
 
-
-		# self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_title.upper(),
-		# 						self.main_offset_x_pos, self.title_text_y_pos, 25, 'white')
-
 		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_title.upper(),
 										 self.main_offset_x_pos, self.title_text_y_pos, 25, 'white', font='./resources/fonts/LLPIXEL3.ttf')
-
-
-		# self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_filename.upper(),
-		# 						self.main_offset_x_pos, self.filename_text_y_pos, 25, 'white')
 
 		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_filename.upper(),
 										 self.main_offset_x_pos, self.filename_text_y_pos, 25, 'white', font='./resources/fonts/LLPIXEL3.ttf')
 
-
-		# self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_iso_path.upper(),
-		# 						self.main_offset_x_pos, self.iso_path_text_y_pos, 25, 'white')
-
-
 		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_iso_path.upper(),
 										 self.main_offset_x_pos, self.iso_path_text_y_pos, 25, 'white', font='./resources/fonts/LLPIXEL3.ttf')
-
-
-		# self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_ftp_game_list.upper(),
-		# 						self.main_offset_x_pos, self.iso_path_text_y_pos + 120, 25, 'white')
 
 		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_ftp_game_list.upper(),
 									   self.main_offset_x_pos, self.iso_path_text_y_pos + 120, 25, 'white', font='./resources/fonts/LLPIXEL3.ttf')
 
-
-		# self.draw_text_on_image(self.background_images[self.canvas_image_number], self.text_ps3_ip_label.upper(),
-		# 						self.main_offset_x_pos,  self.main_offset_y_pos + 820, 20, 'white')
-
 		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_ps3_ip_label.upper(),
-									   self.main_offset_x_pos + 0 * 50, self.main_offset_y_pos + 810, 20, 'white', font='./resources/fonts/LLPIXEL3.ttf')
+									   self.main_offset_x_pos + 0 * 50, self.main_offset_y_pos + 815, 20, 'white', font='./resources/fonts/LLPIXEL3.ttf')
 
 		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_ps3_usr_label.upper(),
-									   self.main_offset_x_pos + 5 * 50, self.main_offset_y_pos + 810, 20, 'white', font='./resources/fonts/LLPIXEL3.ttf')
+									   self.main_offset_x_pos + 5 * 50, self.main_offset_y_pos + 815, 20, 'white', font='./resources/fonts/LLPIXEL3.ttf')
 
 		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_ps3_pass_label.upper(),
-									   self.main_offset_x_pos + 7 * 50, self.main_offset_y_pos + 810, 20, 'white', font='./resources/fonts/LLPIXEL3.ttf')
+									   self.main_offset_x_pos + 5 * 50, self.main_offset_y_pos + 850, 20, 'white', font='./resources/fonts/LLPIXEL3.ttf')
 
 
 
 
 		self.current_img = self.background_images[self.canvas_image_number]
 		self.current_img = self.current_img.resize((int(1920 * scaling), int(1080 * scaling)), Image.ANTIALIAS)
+
+		self.tv_frame = Image.open('./resources/images/misc/tv_frame_1080.png').resize((int(1990 * scaling), int(1327 * scaling)))
+		self.current_img.paste(self.tv_frame, (int(45 * scaling), int(143 * scaling)), self.tv_frame)
+
 		self.current_background = PhotoImage(self.current_img)
 
 		try:
@@ -287,14 +289,14 @@ class Main():
 						if 'dark_transp.png' not in file:
 							tmp_img = Image.open(base_path + file)
 							width, height = tmp_img.size
-							dark = dark.resize(((600 + 8), (height - 115 - 12)))
-							tmp_img.paste(dark, (width - (610 + 8), 12), dark)
+							dark = dark.resize(((470 + 8), (height - 115 - 12)))
+							tmp_img.paste(dark, (width - (480 + 8), 12), dark)
 							self.background_images.append(tmp_img)
 
 	def init_labels_texts_buttons(self, main):
 		# Constants
 		self.text_device 	= 'Device'
-		self.text_platform 	= 'platform'
+		self.text_platform 	= 'Type'
 
 		self.text_title_id	= 'Title id'
 		self.text_title 	= 'Title'
@@ -303,36 +305,44 @@ class Main():
 
 		self.text_ftp_game_list		= 'FTP Game list'
 		self.text_ps3_ip_label		= 'PS3-ip'
-		self.text_ps3_usr_label		= 'Usr'
+		self.text_ps3_usr_label		= 'User'
 		self.text_ps3_pass_label	= 'Pass'
 
 
 		# Paddings
 		self.height_of_text = 15  # Font(font='Helvetica').metrics('linespace')
+		self.dark_side_x_padding = 20
+		self.dark_side_y_padding = 20
 
-		self.dark_side_padding = 20
-		self.text_box_spacing = 8 * self.dark_side_padding
+		self.text_box_spacing = 7 * self.dark_side_x_padding
 
 		# coordinates
 		self.device_text_y_pos = self.main_offset_y_pos + self.height_of_text
 
-		self.platform_text_y_pos = self.dark_side_padding * 1 + self.device_text_y_pos + self.height_of_text
+		self.type_text_y_pos = self.dark_side_y_padding + self.device_text_y_pos + self.height_of_text
 
-		self.title_id_text_y_pos = self.dark_side_padding * 1.5 + self.platform_text_y_pos + self.height_of_text +2
+		self.title_id_text_y_pos = self.dark_side_y_padding + 7 + self.type_text_y_pos + self.height_of_text + 2
 
-		self.title_text_y_pos = self.dark_side_padding + self.title_id_text_y_pos + self.height_of_text
+		self.title_text_y_pos = self.dark_side_y_padding + self.title_id_text_y_pos + self.height_of_text
 
-		self.filename_text_y_pos = self.dark_side_padding + self.title_text_y_pos + self.height_of_text
+		self.filename_text_y_pos = self.dark_side_y_padding + self.title_text_y_pos + self.height_of_text
 
-		self.iso_path_text_y_pos = self.dark_side_padding + self.filename_text_y_pos + self.height_of_text -1
+		self.iso_path_text_y_pos = self.dark_side_y_padding + self.filename_text_y_pos + self.height_of_text - 1
 
 		# entry fields
 		self.entry_field_title_id 	= Entry(main, validate='key', validatecommand=(self.vcmd, '%P'))
 		self.entry_field_title 		= Entry(main)
 		self.entry_field_filename 	= Entry(main)
 		self.entry_field_iso_path 	= Entry(main, state='disabled')
+
 		self.entry_field_ftp_ip		= Entry(main)
-		self.entry_field_ftp_ip.insert(0, self.get_ps3_ip_from_config())
+		self.entry_field_ftp_ip.insert(0, self.get_ftp_ip_from_config())
+
+		self.entry_field_ftp_user		= Entry(main)
+		self.entry_field_ftp_user.insert(0, self.get_ftp_user_from_config())
+
+		self.entry_field_ftp_pass		= Entry(main)
+		self.entry_field_ftp_pass.insert(0, self.get_ftp_pass_from_config())
 
 		# system choice buttons
 		self.selection_drive_list = ['dev_hdd0', 'dev_hdd1',
@@ -377,21 +387,29 @@ class Main():
 									  bg="#FBFCFB")
 
 		# Entry placements
-		entry_width = 260
+		entry_field_width = 200
 		self.entry_field_title_id.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * scaling),
-										y=int(self.title_id_text_y_pos * scaling), width=entry_width)
+										y=int(self.title_id_text_y_pos * scaling), width=entry_field_width)
 
 		self.entry_field_title.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * scaling),
-										y=int(self.title_text_y_pos * scaling), width=entry_width)
+										y=int(self.title_text_y_pos * scaling), width=entry_field_width)
 
 		self.entry_field_filename.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * scaling),
-										y=int(self.filename_text_y_pos * scaling), width=entry_width)
+										y=int(self.filename_text_y_pos * scaling), width=entry_field_width)
 
 		self.entry_field_iso_path.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * scaling),
-										y=int(self.iso_path_text_y_pos * scaling), width=entry_width)
+										y=int(self.iso_path_text_y_pos * scaling), width=entry_field_width)
+
 
 		self.entry_field_ftp_ip.place(x=int((self.main_offset_x_pos + 90) * scaling),
 										y=int((self.main_offset_y_pos + 815) * scaling), width=90)
+
+		self.entry_field_ftp_user.place(x=int((self.main_offset_x_pos + 320) * scaling),
+									  y=int((self.main_offset_y_pos + 815) * scaling), width=60)
+
+		self.entry_field_ftp_pass.place(x=int((self.main_offset_x_pos + 320) * scaling),
+									  y=int((self.main_offset_y_pos + 850) * scaling), width=60)
+
 
 
 		# Button placements
@@ -404,16 +422,16 @@ class Main():
 
 
 		self.button_PSP.place(x=int((self.text_box_spacing + self.main_offset_x_pos + 0 * 75) * scaling),
-							  y=int(self.platform_text_y_pos * scaling))
+							  y=int(self.type_text_y_pos * scaling))
 
 		self.button_PSX.place(x=int((self.text_box_spacing + self.main_offset_x_pos + 1 * 75) * scaling),
-							  y=int(self.platform_text_y_pos * scaling))
+							  y=int(self.type_text_y_pos * scaling))
 
 		self.button_PS2.place(x=int((self.text_box_spacing + self.main_offset_x_pos + 2 * 75) * scaling),
-							  y=int(self.platform_text_y_pos * scaling))
+							  y=int(self.type_text_y_pos * scaling))
 
 		self.button_PS3.place(x=int((self.text_box_spacing + self.main_offset_x_pos + 3 * 75) * scaling),
-							  y=int(self.platform_text_y_pos * scaling))
+							  y=int(self.type_text_y_pos * scaling))
 
 		# draws PIC1 and ICON0 on the canvas
 		self.init_draw_images_on_canvas(main)
@@ -438,31 +456,38 @@ class Main():
 
 
 		##########################################################################
-		# Adding an onChange -listener on 'entry_field_filename'
+		# Adding an on_change-listener on 'entry_field_filename'
 		self.generate_on_change(self.entry_field_filename)
 		self.entry_field_filename.bind('<<Change>>', self.dynamic_filename_to_path)
 		###########################################################################
-		# Adding an onChange -listener on 'entry_field_title'
+		# Adding an on_change-listener on 'entry_field_title'
 		self.generate_on_change(self.entry_field_title)
 		self.entry_field_title.bind('<<Change>>', self.dynamic_title_to_pic1)
-
-	###########################################################################
+		###########################################################################
 
 	def init_draw_images_on_canvas(self, main):
 		pic1_x_scale = 1280.0 / self.image_pic1.width * scaling
 		pic1_y_scale = 720.0 / self.image_pic1.height * scaling
+
+		# self.tv_frame = Image.open('./resources/images/misc/tv_frame_1080.png')
+		# self.tv_frame.resize((int(2560.0 * 0.25), int(1440.0 * 0.25)))
+
 		self.icon0_dimensions = (
 			int(pic1_x_scale * self.image_icon0.width), int(pic1_y_scale * self.image_icon0.height))
 
 		self.image_pic1.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
 		self.image_pic1.paste(self.ps3_system_logo, (1180, 525), self.ps3_system_logo)
+		# self.image_pic1.paste(self.tv_frame, (-10, -10), self.tv_frame)
+
 		self.draw_text_on_image_w_shadow(self.image_pic1, "11/11/2006 00:00", 760, 522, 20, 1, 'white', 'black')
+
 		self.image_pic1_xmb = copy.copy(self.image_pic1)
+
 		self.photo_image_pic1 = PhotoImage(
 			self.image_pic1.resize((int(1280 * scaling), int(720 * scaling)), Image.ANTIALIAS))
 
 		self.button_pic1 = Button(main, image=self.photo_image_pic1, highlightthickness=0, bd=0)
-		self.button_pic1.place(x=10 * scaling, y=245 * scaling)
+
 
 		# removing 7 pixels from all sides due to transparent border
 		self.image_icon0_crop = self.image_icon0.crop((7, 7, self.image_icon0.width - 7, self.image_icon0.height - 7))
@@ -470,9 +495,13 @@ class Main():
 			(self.icon0_dimensions[0] - 7, self.icon0_dimensions[1] - 7), Image.ANTIALIAS)
 
 		self.photo_image_icon0 = PhotoImage(self.image_icon0_crop)
-
 		self.button_icon0 = Button(main, image=self.photo_image_icon0, highlightthickness=0, bd=0)
-		self.button_icon0.place(x=int(285 * scaling), y=int(530 * scaling))
+
+		self.button_pic1.place(x=75 * scaling, y=175 * scaling)
+		self.button_icon0.place(x=int(350 * scaling), y=int(460 * scaling))
+
+
+		# self.tv_frame_photoimage
 
 	def draw_text_on_image(self, image, text, text_x, text_y, text_size, text_color):
 		font = ImageFont.truetype('./resources/fonts/SCE-PS3.ttf', text_size)

@@ -23,7 +23,7 @@ class Gamelist():
         self.corrected_index = []
         self.main_frame = Frame()
         s = Scrollbar(self.main_frame)
-        self._listbox = Listbox(self.main_frame, width=1000)
+        self._listbox = Listbox(self.main_frame, width=465)
 
         s.pack(side=RIGHT, fill=Y)
         self._listbox.pack(side=LEFT, fill=Y)
