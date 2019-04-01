@@ -124,6 +124,8 @@ class FtpGameList():
 				ps3_lan_ip 			= json_data['ps3_lan_ip']
 				ftp_timeout 		= json_data['ftp_timeout']
 				ftp_passive_mode 	= json_data['ftp_passive_mode']
+				ftp_user 			= json_data['ftp_user']
+				ftp_password 		= json_data['ftp_password']
 
 				show_psp_list 		= json_data['show_psx_list']
 				show_psx_list 		= json_data['show_psx_list']
@@ -139,8 +141,9 @@ class FtpGameList():
 
 		try:
 			print('Connecting to PS3 at: ' + ps3_lan_ip + ' ...')
-			ftp = FTP(ps3_lan_ip, timeout=ftp_timeout, set_pasv=ftp_passive_mode)
-			ftp.login(user='', passwd = '')
+			ftp = FTP(ps3_lan_ip, timeout=ftp_timeout)
+			ftp.set_pasv=ftp_passive_mode
+			ftp.login(user=ftp_user, passwd = ftp_password)
 
 			ftp.retrlines('NLST ' + pspiso_path, psplines.append)
 			ftp.retrlines('NLST ' + psxiso_path, psxlines.append)
