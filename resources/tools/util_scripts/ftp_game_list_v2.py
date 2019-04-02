@@ -143,7 +143,7 @@ class FtpGameList():
 			print('Connecting to PS3 at: ' + ps3_lan_ip + ' ...')
 			ftp = FTP(ps3_lan_ip, timeout=ftp_timeout)
 			ftp.set_pasv=ftp_passive_mode
-			ftp.login(user=ftp_user, passwd = ftp_password)
+			ftp.login(user=ftp_user, passwd=ftp_password)
 
 			ftp.retrlines('NLST ' + pspiso_path, psplines.append)
 			ftp.retrlines('NLST ' + psxiso_path, psxlines.append)

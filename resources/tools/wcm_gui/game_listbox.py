@@ -43,7 +43,9 @@ class Gamelist():
         # adding shade to every other row of the list
         for x in range(0, len(self.list_of_items)-1):
             if x % 2 == 0:
-                self._listbox.itemconfig(x, background='#E2E7EC')
+                self._listbox.itemconfig(x, {'fg': 'white'}, background='#001738')
+            else:
+                self._listbox.itemconfig(x, background='#001F4C')
 
         self.label = Label(self.main_frame)
         self.cursor_poller()

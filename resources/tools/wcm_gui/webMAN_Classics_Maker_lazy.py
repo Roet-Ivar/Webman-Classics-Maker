@@ -285,7 +285,8 @@ class Main():
 		for files in os.walk(base_path):
 			for filenames in files:
 				for file in filenames:
-					if 'png' in file:
+					if any(ext in file for ext in ['png', 'jpg']):
+						# we dont want the dark transparency image to be a background
 						if 'dark_transp.png' not in file:
 							tmp_img = Image.open(base_path + file)
 							width, height = tmp_img.size
