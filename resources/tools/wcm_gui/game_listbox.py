@@ -45,7 +45,7 @@ class Gamelist():
             if x % 2 == 0:
                 self._listbox.itemconfig(x, {'fg': 'white'}, background='#001738')
             else:
-                self._listbox.itemconfig(x, background='#001F4C')
+                self._listbox.itemconfig(x, {'fg': 'white'}, background='#001F4C')
 
         self.label = Label(self.main_frame)
         self.cursor_poller()
