@@ -269,7 +269,7 @@ class Main():
 		self.current_img = self.background_images[self.canvas_image_number]
 		self.current_img = self.current_img.resize((int(1920 * scaling), int(1080 * scaling)), Image.ANTIALIAS)
 
-		self.tv_frame = Image.open('./resources/images/misc/tv_frame_1080_ps3.png').resize((int(1990 * scaling), int(1327 * scaling)))
+		self.tv_frame = Image.open('./resources/images/misc/tv_frame_1080_ps3_2.png').resize((int(1990 * scaling), int(1327 * scaling)), Image.ANTIALIAS)
 		self.current_img.paste(self.tv_frame, (int(45 * scaling), int(143 * scaling)), self.tv_frame)
 
 		self.current_background = PhotoImage(self.current_img)
