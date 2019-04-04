@@ -125,6 +125,12 @@ class Main():
 		game_list_box.config(selectmode='SINGLE', activestyle='dotbox', borderwidth=0)
 		game_list_frame.place(x=int((self.main_offset_x_pos)*scaling), y=self.main_offset_y_pos + 220, width=270, height=300)
 
+		from drop_down import ComboBox
+
+		cb = ComboBox(self.canvas)
+		cb.make_combo_box(self.canvas, 1100, 240)
+
+
 	def smaller_button_maker(self, text, **args):
 		font = None
 		x = None
@@ -224,7 +230,7 @@ class Main():
 
 
 		self.draw_text_on_image_w_shadow(self.background_images[self.canvas_image_number], 'webMAN',
-										 490, -10, 110, 6, 'blue', 'black', font='./resources/fonts/LLPIXEL3.ttf')
+										 490, -10, 110, 6, '#0C55F4', 'black', font='./resources/fonts/LLPIXEL3.ttf')
 
 		self.draw_text_on_image_w_shadow(self.background_images[self.canvas_image_number], 'Classics Maker',
 										 422, 60, 80, 5, 'white', 'black', font='./resources/fonts/LLPIXEL3.ttf')
@@ -255,13 +261,13 @@ class Main():
 									   self.main_offset_x_pos, self.iso_path_text_y_pos + 120, 25, 'white', font='./resources/fonts/LLPIXEL3.ttf')
 
 		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_ps3_ip_label.upper(),
-									   self.main_offset_x_pos + 0 * 50, self.main_offset_y_pos + 815, 20, 'white', font='./resources/fonts/LLPIXEL3.ttf')
+									   self.main_offset_x_pos + 0 * 50, self.main_offset_y_pos + 815, 20, '#D9DBDC', font='./resources/fonts/LLPIXEL3.ttf')
 
 		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_ps3_usr_label.upper(),
-									   self.main_offset_x_pos + 5 * 50, self.main_offset_y_pos + 815, 20, 'white', font='./resources/fonts/LLPIXEL3.ttf')
+									   self.main_offset_x_pos + 5 * 50, self.main_offset_y_pos + 815, 20, '#D9DBDC', font='./resources/fonts/LLPIXEL3.ttf')
 
 		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_ps3_pass_label.upper(),
-									   self.main_offset_x_pos + 5 * 50, self.main_offset_y_pos + 850, 20, 'white', font='./resources/fonts/LLPIXEL3.ttf')
+									   self.main_offset_x_pos + 5 * 50, self.main_offset_y_pos + 850, 20, '#D9DBDC', font='./resources/fonts/LLPIXEL3.ttf')
 
 
 
@@ -269,7 +275,7 @@ class Main():
 		self.current_img = self.background_images[self.canvas_image_number]
 		self.current_img = self.current_img.resize((int(1920 * scaling), int(1080 * scaling)), Image.ANTIALIAS)
 
-		self.tv_frame = Image.open('./resources/images/misc/tv_frame_1080_ps3_2.png').resize((int(1990 * scaling), int(1327 * scaling)), Image.ANTIALIAS)
+		self.tv_frame = Image.open('./resources/images/misc/tv_frame_1080_ps3_3.png').resize((int(1990 * scaling), int(1327 * scaling)), Image.ANTIALIAS)
 		self.current_img.paste(self.tv_frame, (int(45 * scaling), int(143 * scaling)), self.tv_frame)
 
 		self.current_background = PhotoImage(self.current_img)
@@ -517,11 +523,10 @@ class Main():
 		return draw.text((text_x, text_y), text, fill=text_color, font=font)
 
 	def draw_text_on_image_w_shadow(self, image, text, text_x, text_y, text_size, text_outline, text_color,
-									shadow_color, **font_path):
-
-		if 'font' in font_path:
-			print(font_path['font'])
-			font = ImageFont.truetype(font_path['font'], text_size)
+									shadow_color, **args):
+		if 'font' in args:
+			print(args['font'])
+			font = ImageFont.truetype(args['font'], text_size)
 		else:
 			font = ImageFont.truetype('./resources/fonts/SCE-PS3.ttf', text_size)
 
