@@ -887,7 +887,7 @@ class Webman_pkg:
 								os.remove(file)
 							except:
 								print(str(file) + ' could not be deleted.')
-				print('Execution of \'webman_pkg.py\':             Done')
+				print('Execution of \'webman_pkg.py\':              Done')
 				print('-----------------------------------------------\n')
 				print('Package created: ' + '/builds/' + build_dir_path + pkg_name + '\n')
 

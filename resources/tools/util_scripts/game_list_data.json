@@ -66,14 +66,6 @@
             "filename":"SingStar Party.ISO"
         },
         {
-            "title":"SingStar Motown",
-            "title_id":"SCES-55549",
-            "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
-            "filename":"SingStar Motown.ISO"
-        },
-        {
             "title":"SingStar Svenska Hits",
             "title_id":"SCES-53185",
             "game_type":"PS2",
@@ -114,14 +106,6 @@
             "filename":"SingStar Rocks.ISO"
         },
         {
-            "title":"SingStar Queen",
-            "title_id":"SCES-55453",
-            "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
-            "filename":"SingStar Queen.ISO"
-        },
-        {
             "title":"SingStar Hottest Hits",
             "title_id":"SCES-55362",
             "game_type":"PS2",
@@ -154,20 +138,20 @@
             "filename":"SingStar Sjung med disney.ISO"
         },
         {
-            "title":"SingStar Boy Bands Vs Girl Bands",
-            "title_id":"SCES-55178",
+            "title":"Burnout Dominator.iso.CONFIG",
+            "title_id":null,
             "game_type":"PS2",
             "installed":null,
             "meta_data_link":null,
-            "filename":"SingStar Anthems Boybands vs Girlbands.ISO"
+            "filename":"Burnout Dominator.iso.CONFIG"
         },
         {
-            "title":"SingStar Take That",
-            "title_id":"SCES-55554",
+            "title":"Burnout - Dominator",
+            "title_id":"SLUS-21596",
             "game_type":"PS2",
             "installed":null,
             "meta_data_link":null,
-            "filename":"SingStar Take That.ISO"
+            "filename":"Burnout Dominator.iso"
         },
         {
             "title":"SingStar '80s",
@@ -192,14 +176,6 @@
             "installed":null,
             "meta_data_link":null,
             "filename":"SingStar 80's Swe.ISO"
-        },
-        {
-            "title":"SingStar Abba",
-            "title_id":"SCES-55435",
-            "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
-            "filename":"SingStar ABBA.ISO"
         },
         {
             "title":"SingStar Pop Hits",
@@ -240,6 +216,14 @@
             "installed":null,
             "meta_data_link":null,
             "filename":"SingStar R&B.ISO"
+        },
+        {
+            "title":"Burnout Revenge",
+            "title_id":"SLUS-21242",
+            "game_type":"PS2",
+            "installed":null,
+            "meta_data_link":null,
+            "filename":"Burnout Revenge.iso"
         },
         {
             "title":"ESPN International Track & Field",
@@ -400,6 +384,22 @@
             "installed":null,
             "meta_data_link":null,
             "filename":"SingStar 90's.ISO"
+        },
+        {
+            "title":"Burnout Revenge.iso.CONFIG",
+            "title_id":null,
+            "game_type":"PS2",
+            "installed":null,
+            "meta_data_link":null,
+            "filename":"Burnout Revenge.iso.CONFIG"
+        },
+        {
+            "title":"SingStar Boy Bands Vs Girl Bands",
+            "title_id":"SCES-55178",
+            "game_type":"PS2",
+            "installed":null,
+            "meta_data_link":null,
+            "filename":"SingStar Boybands vs Girlbands.ISO"
         }
     ],
     "ps3_games":[],

@@ -20,8 +20,8 @@ class Edit_launch_txt:
 			# url_txt = open("../../pkg/USRDIR/url.txt", "wb")
 			# url_txt_byteArray = bytearray(web_url_string) + os.linesep
 			# url_txt.write(url_txt_byteArray)
-			
-			print('Execution of \'edit_launch_txt.py\':        Done')
+
+			print('Execution of \'edit_launch_txt.py\':         Done')
 			print('-----------------------------------------------')
 		except Exception as e:
 			print('Error: ' + str(e))

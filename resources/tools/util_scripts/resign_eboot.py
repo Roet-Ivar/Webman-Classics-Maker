@@ -17,5 +17,5 @@ class Resign_eboot:
 		os.chdir(current_dir)
 		copyfile(scetool_dir + 'EBOOT.BIN', './../../pkg/USRDIR/EBOOT.BIN')
 
-		print('\nExecution of \'resign_eboot.py\':           Done')		
+		print('\nExecution of \'resign_eboot.py\':            Done')
 		print('-----------------------------------------------')

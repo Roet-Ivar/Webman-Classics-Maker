@@ -28,7 +28,7 @@ class Param_to_json:
 				
 				newFile.write(json_text)
 
-				print('Execution of \'param_sfo_json.py\':         Done')
+				print('Execution of \'param_sfo_json.py\':          Done')
 				print('-----------------------------------------------')
 			except ValueError:
 				print('File write error/PKGLAUNCH not found/titel_id not a string')

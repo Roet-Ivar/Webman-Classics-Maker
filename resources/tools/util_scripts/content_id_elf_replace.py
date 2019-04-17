@@ -21,7 +21,7 @@ class Elf_replace:
 				newFileByteArray = bytearray(file)
 				newFile.write(newFileByteArray)
 
-				print('Execution of \'content_id_elf_replace.py\': Done')
+				print('Execution of \'content_id_elf_replace.py\':  Done')
 				print('-----------------------------------------------')
 			except ValueError:
 				print('File write error/PKGLAUNCH not found/titel_id not a string')

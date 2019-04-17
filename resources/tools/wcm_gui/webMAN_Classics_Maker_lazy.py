@@ -125,10 +125,10 @@ class Main():
 		game_list_box.config(selectmode='SINGLE', activestyle='dotbox', borderwidth=0)
 		game_list_frame.place(x=int((self.main_offset_x_pos)*scaling), y=self.main_offset_y_pos + 220, width=270, height=300)
 
-		from drop_down import ComboBox
-
-		cb = ComboBox(self.canvas)
-		cb.make_combo_box(self.canvas, 1100, 240)
+		from combo_box import ComboBox
+		cb = ComboBox()
+		box = cb.make_combo_box(self.canvas, 1100, 247)
+		box.config(width='4', state="readonly")
 
 
 	def smaller_button_maker(self, text, **args):
@@ -340,7 +340,7 @@ class Main():
 		self.entry_field_title_id 	= Entry(main, validate='key', validatecommand=(self.vcmd, '%P'))
 		self.entry_field_title 		= Entry(main)
 		self.entry_field_filename 	= Entry(main)
-		self.entry_field_iso_path 	= Entry(main, state='disabled')
+		self.entry_field_iso_path 	= Entry(main, state='readonly')
 
 		self.entry_field_ftp_ip		= Entry(main)
 		self.entry_field_ftp_ip.insert(0, self.get_ftp_ip_from_config())
@@ -592,7 +592,7 @@ class Main():
 			self.entry_field_iso_path.config(state=NORMAL)
 			self.entry_field_iso_path.delete(0, END)
 			self.entry_field_iso_path.insert(0, current_iso_path)
-			self.entry_field_iso_path.config(state=DISABLED)
+			self.entry_field_iso_path.config(state='readonly')
 			print('DEBUG Default path set -> ' + self.entry_field_iso_path.get())
 
 		# Check if drive of choice already set
@@ -610,7 +610,7 @@ class Main():
 			self.entry_field_iso_path.config(state=NORMAL)
 			self.entry_field_iso_path.delete(0, END)
 			self.entry_field_iso_path.insert(0, current_iso_path)
-			self.entry_field_iso_path.config(state=DISABLED)
+			self.entry_field_iso_path.config(state='readonly')
 			self.state_drive_choice = drive_choice
 
 		# Replace current system
@@ -621,7 +621,7 @@ class Main():
 			self.entry_field_iso_path.config(state=NORMAL)
 			self.entry_field_iso_path.delete(0, END)
 			self.entry_field_iso_path.insert(0, current_iso_path)
-			self.entry_field_iso_path.config(state=DISABLED)
+			self.entry_field_iso_path.config(state='readonly')
 			self.state_system_choice = system_choice
 
 	# Dynamic update of the 'entry_field_filename' into the 'entry_field_iso_path'
@@ -642,7 +642,7 @@ class Main():
 		self.entry_field_iso_path.delete(0, END)
 		self.entry_field_iso_path.insert(0, iso_path)
 		self.entry_field_iso_path.xview_moveto(1)
-		self.entry_field_iso_path.config(state=DISABLED)
+		self.entry_field_iso_path.config(state='readonly')
 
 		current_filename = self.entry_field_iso_path.get()
 		# print("entry_field_iso_path: " + current_filename)
@@ -752,15 +752,15 @@ class Main():
 	def validate_on_save_button(self):
 		# do stuff
 		if self.validate_title_id_on_save():
-			print('Title_id: OK')
+			print('DEBUG: Title_id: OK')
 		else:
 			return False
 		if self.validate_title_on_save():
-			print('Title: OK')
+			print('DEBUG: Title: OK')
 		else:
 			return False
 		if self.validate_filename_on_save():
-			print('Title_id: OK')
+			print('DEBUG: Title_id: OK')
 		else:
 			return False
 
@@ -773,14 +773,14 @@ class Main():
 	def load_pkg_project(self, title_id, filename):
 		_title_id = title_id.replace('-', '')
 		_filename = str(self.entry_field_filename.get())[:-4].replace(' ', '_')
-		print('title_id: ' + _title_id + '\n' + 'filename: ' + _filename)
+		print('DEBUG: title_id: ' + _title_id + '\n' + 'filename: ' + _filename)
 
 		build_base_path = '../../../builds/'
 		pkg_project_name = _title_id + '_' + _filename[:-4]
 
 		build_dir_path = os.path.join(build_base_path, pkg_project_name)
 		if os.path.exists(build_dir_path):
-			print(_filename + ' project exist')
+			print('DEBUG: ' + _filename + ' project exist')
 
 
 	def save_pkg_project(self):
@@ -829,27 +829,17 @@ class Main():
 	def on_build_button(self):
 		# do stuff
 		if self.validate_on_save_button():
+
 			wmc = WMC.WebmanClassicsBuilder()
 			pkg_name = wmc.make_webman_pkg()
+			self.save_pkg_project()
 
 			if pkg_name is not None:
-				# self.main_btn_img = PhotoImage(Image.open('main_build_btn.png').resize((250, 95)))
-				# self.btn_img = PhotoImage(Image.open('build_btn.png'))
-				#
-				# main_btn_img = Button(main_window, image=self.main_btn_img, borderwidth=0)
-				# main_btn_img.place(x=670, y=200)
-				# label = Label(frame, text="Build successful", bg='#000000', fg='#FFFFFF').place(x=10, y=10)
-
-
 				import tkMessageBox
 				def popup():
 					msgBox = tkMessageBox.showinfo("Build status", "Build successful!")
-					# msgBox.
 				popup()
 
-				# btn_img = PhotoImage(self.small_button_maker('OK', font='arial.ttf', x=0, y=0))
-				# B1 = Button(main_window, text="Build successful", command=popup(), bg='#000000', fg='#FFFFFF')
-				# B1.pack()
 			else:
 				import tkMessageBox
 				tkMessageBox.showinfo("Build status", "Build failed!")
@@ -889,7 +879,9 @@ class Main():
 		# making a preview print of the game canvas
 		pic1_img = Image.open('../../pkg/PIC1.PNG')
 		icon_img = Image.open('../../pkg/ICON0.PNG')
-		xmb_img = Image.open('./resources/images/misc/XMB_icons.png')
+		print('DEBUG: ' + os.path.dirname(__file__))
+		xmb_img_dir = os.path.join(CURRENT_DIR, 'resources/images/misc/XMB_icons.png')
+		xmb_img = Image.open(xmb_img_dir)
 		pic1_img.paste(icon_img, (425, 450), icon_img)
 		pic1_img.paste(xmb_img, (0, 0), xmb_img)
 		self.draw_text_on_image_w_shadow(pic1_img, "11/11/2006 00:00", 760, 522, 20, 1, 'white', 'black')
@@ -909,6 +901,9 @@ class Main():
 			json_data['content_id'] = 'UP0001-' + self.entry_field_title_id.get() + '_00-0000000000000000'
 			json_data['iso_filepath'] = str(self.entry_field_iso_path.get())
 
+			pkg_json_path = os.path.join(CURRENT_DIR, 'util_generated_files/pkg.json')
+			if(os.path.isfile(pkg_json_path)):
+				os.remove(pkg_json_path)
 			newFile = open("../util_generated_files/pkg.json", "w")
 			json_text = json.dumps(json_data, indent=4, separators=(",", ":"))
 			newFile.write(json_text)
