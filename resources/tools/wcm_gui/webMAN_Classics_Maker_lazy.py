@@ -797,7 +797,7 @@ class Main():
 		build_dir_pkg_path = os.path.join(build_dir_path, 'pkg')
 
 		self.copytree(pkg_dir, build_dir_pkg_path)
-		shutil.copyfile(proj_json_file_path, build_dir_pkg_path + '/' + 'pkg.json')
+		shutil.copyfile(proj_json_file_path, build_dir_path + '/' + 'pkg.json')
 		shutil.copyfile('preview.png', build_dir_path + '/' + title_id + '_preview.png')
 
 
