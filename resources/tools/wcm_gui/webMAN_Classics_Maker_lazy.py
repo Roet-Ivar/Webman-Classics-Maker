@@ -579,29 +579,30 @@ class Main():
 		self.draw_background_on_canvas()
 
 	def on_drive_and_system_button(self, drive_choice, system_choice):
-		current_iso_path = self.entry_field_iso_path.get()
+
+		# Check if drive of choice already set
+		if drive_choice in self.entry_field_iso_path.get():
+			print('DEBUG ' + '\'' + drive_choice + '\'' + ' already set')
+			# if usb_xxx iterate port (0-3)
+
+		# Check if system of choice already set
+		if system_choice in self.entry_field_iso_path.get():
+			print('DEBUG ' + '\'' + system_choice + '\'' + ' already set')
+
 		print('DEBUG system_choice: ' + system_choice)
 		print('DEBUG drive_choice: ' + drive_choice)
 
-		# If path is empty -> setting default values
-		if current_iso_path is '':
-			print('DEBUG Path is empty -> setting default values')
-			self.state_drive_choice = drive_choice
-			self.state_system_choice = system_choice
+		self.state_drive_choice = drive_choice
+		self.state_system_choice = system_choice
 
-			current_iso_path = '/' + self.state_drive_choice + '/' + self.state_system_choice + '/' + self.entry_field_filename.get()
-			self.entry_field_iso_path.config(state=NORMAL)
-			self.entry_field_iso_path.delete(0, END)
-			self.entry_field_iso_path.insert(0, current_iso_path)
-			self.entry_field_iso_path.config(state='readonly')
-			print('DEBUG Default path set -> ' + self.entry_field_iso_path.get())
+		current_iso_path = '/' + self.state_drive_choice + '/' + self.state_system_choice + '/' + self.entry_field_filename.get()
+		self.entry_field_iso_path.config(state=NORMAL)
+		self.entry_field_iso_path.delete(0, END)
+		self.entry_field_iso_path.insert(0, current_iso_path)
+		self.entry_field_iso_path.config(state='readonly')
+		print('DEBUG Default path set -> ' + self.entry_field_iso_path.get())
 
-		# Check if drive of choice already set
-		if drive_choice is self.state_drive_choice:
-			print('DEBUG ' + '\'' + drive_choice + '\'' + ' already set')
-		# Check if system of choice already set
-		if system_choice is self.state_system_choice:
-			print('DEBUG ' + '\'' + system_choice + '\'' + ' already set')
+
 
 		# Replace current drive
 		if drive_choice not in current_iso_path:
@@ -616,7 +617,7 @@ class Main():
 
 		# Replace current system
 		if system_choice not in current_iso_path:
-			print('DEBUG drive_choice not in current_iso_path')
+			print('DEBUG system_choice not in current_iso_path')
 			print('DEBUG ' + '\'' + self.state_system_choice + '\'' + ' changed -> ' + '\'' + system_choice + '\'')
 			current_iso_path = current_iso_path.replace(self.state_system_choice, system_choice)
 			self.entry_field_iso_path.config(state=NORMAL)
