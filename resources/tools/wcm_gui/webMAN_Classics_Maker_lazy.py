@@ -368,6 +368,7 @@ class Main():
 		self.button_PSP = Button(main, image=self.logo_systems[0], borderwidth=1,
 								 command=lambda: self.on_drive_and_system_button(self.state_drive_choice,
 																				 self.selection_system_list[0]))
+		self.button_PSP.config(state = DISABLED)
 
 		self.button_PSX = Button(main, image=self.logo_systems[1], borderwidth=1,
 								 command=lambda: self.on_drive_and_system_button(self.state_drive_choice,
