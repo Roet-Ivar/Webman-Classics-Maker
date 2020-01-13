@@ -12,7 +12,9 @@ except ImportError:
 class ComboBox:
 
     def make_combo_box(self, root, x, y):
-        combobox = ttk.Combobox(root, values=["All", "PSP", "PSX", "PS2", "PS3"])
+        # disabled PSP for now
+        # combobox = ttk.Combobox(root, values=["All", "PSP", "PSX", "PS2", "PS3"])
+        combobox = ttk.Combobox(root, values=["All", "PSX", "PS2", "PS3"])
         combobox.place(x=x, y=y)
         combobox.current(3)
 
