@@ -42,6 +42,7 @@ class Main():
 		self.state_drive_choice 	= 'dev_hdd0'
 		self.state_system_choice 	= 'PS2ISO'
 		self.entry_field_iso_path 	= None
+		self.usb_port_number 		= 0
 
 		# images
 		self.logo_drives = []
@@ -352,18 +353,16 @@ class Main():
 		self.entry_field_ftp_pass.insert(0, self.get_ftp_pass_from_config())
 
 		# system choice buttons
-		self.selection_drive_list = ['dev_hdd0', 'dev_hdd1',
-									 'dev_usb000']  # usb port 'x' should be selected through a list
+		self.selection_drive_list = ['dev_hdd0',
+									 'dev_usb000', 'dev_usb001', 'dev_usb002', 'dev_usb003']  # usb port 'x' should be selected through a list
 		self.selection_system_list = ['PSPISO', 'PSXISO', 'PS2ISO', 'PS3ISO']
 		self.drive_path = self.selection_drive_list[0]  # drive should be toggled by buttons
 
 		self.button_HDD = Button(main, image=self.logo_drives[0], borderwidth=1,
-								 command=lambda: self.on_drive_and_system_button(self.selection_drive_list[0],
-																				 self.state_system_choice))
+								 command=lambda: self.on_drive_button_push(self.selection_drive_list[0]))
 
 		self.button_USB = Button(main, image=self.logo_drives[1], borderwidth=1,
-								 command=lambda: self.on_drive_and_system_button(self.selection_drive_list[2],
-																				 self.state_system_choice))
+								 command=lambda: self.on_drive_button_push(self.selection_drive_list[self.usb_port_number +1]))
 
 		self.button_PSP = Button(main, image=self.logo_systems[0], borderwidth=1,
 								 command=lambda: self.on_drive_and_system_button(self.state_drive_choice,
@@ -578,21 +577,50 @@ class Main():
 
 		self.draw_background_on_canvas()
 
-	def on_drive_and_system_button(self, drive_choice, system_choice):
-
-		# Check if drive of choice already set
+	def on_drive_button_push(self, drive_choice):
+		# Check if same drive already set
 		if drive_choice in self.entry_field_iso_path.get():
 			print('DEBUG ' + '\'' + drive_choice + '\'' + ' already set')
-			# if usb_xxx iterate port (0-3)
+			# if dev_usb### already set -> iterate port (0-3)
+			if 'dev_usb00' in drive_choice:
+				self.usb_port_number = self.usb_port_number +1
 
-		# Check if system of choice already set
+				if self.usb_port_number > 3:
+					self.usb_port_number = 0
+				print('DEBUG usb_port_number: ' + str(self.usb_port_number))
+				drive_choice = 'dev_usb00' + str(self.usb_port_number)
+
+		print('DEBUG drive_choice: ' + drive_choice)
+		self.state_drive_choice = drive_choice
+
+		current_iso_path = '/' + self.state_drive_choice + '/' + self.state_system_choice + '/' + self.entry_field_filename.get()
+		self.entry_field_iso_path.config(state=NORMAL)
+		self.entry_field_iso_path.delete(0, END)
+		self.entry_field_iso_path.insert(0, current_iso_path)
+		self.entry_field_iso_path.config(state='readonly')
+		print('DEBUG Default path set -> ' + self.entry_field_iso_path.get())
+
+
+	def on_drive_and_system_button(self, drive_choice, system_choice):
+		# # Check if same drive already set
+		# if drive_choice in self.entry_field_iso_path.get():
+		# 	print('DEBUG ' + '\'' + drive_choice + '\'' + ' already set')
+		# 	# if dev_usb### already set -> iterate port (0-3)
+		# 	if 'dev_usb00' in drive_choice:
+		# 		self.usb_port_number = self.usb_port_number +1
+		#
+		# 		if self.usb_port_number > 3:
+		# 			self.usb_port_number = 0
+		# 		print('DEBUG usb_port_number: ' + str(self.usb_port_number))
+		# 		drive_choice = 'dev_usb00' + str(self.usb_port_number)
+
 		if system_choice in self.entry_field_iso_path.get():
 			print('DEBUG ' + '\'' + system_choice + '\'' + ' already set')
 
 		print('DEBUG system_choice: ' + system_choice)
-		print('DEBUG drive_choice: ' + drive_choice)
+		# print('DEBUG drive_choice: ' + drive_choice)
 
-		self.state_drive_choice = drive_choice
+		# self.state_drive_choice = drive_choice
 		self.state_system_choice = system_choice
 
 		current_iso_path = '/' + self.state_drive_choice + '/' + self.state_system_choice + '/' + self.entry_field_filename.get()
