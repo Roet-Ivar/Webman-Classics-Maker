@@ -1,10 +1,9 @@
 import os, json, copy, shutil
 
 from Tkinter import *
-from PIL import Image
-from PIL import ImageDraw
-from PIL import ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageTk
 from PIL.ImageTk import PhotoImage
+from tkFileDialog import askopenfile
 from game_listbox import Gamelist
 
 # check python version less than 3
@@ -27,6 +26,9 @@ class Main():
 		# self.main_offset_x_pos = 1325
 		self.main_offset_x_pos = 1450
 		self.main_offset_y_pos = 50
+
+		self.window_x_width = 1280.0
+		self.window_y_width = 720.0
 
 		# canvas for image
 		self.canvas = Canvas(main, width=canvas_width, height=canvas_height, borderwidth=0, highlightthickness=0)
@@ -71,7 +73,7 @@ class Main():
 		# init definitions
 		self.init_pkg_images()
 		self.init_main_window_buttons(main)
-		self.init_labels_texts_buttons(main)
+		self.init_default_view(main)
 		self.draw_background_on_canvas()
 		self.draw_game_listbox()
 
@@ -208,22 +210,24 @@ class Main():
 		pic1_filename	= 'PIC1.PNG'
 		icon0_filename	= 'ICON0.PNG'
 
-		self.image_pic0 = self.pkg_img_current_or_default(pic0_filename)
-		self.image_pic1 = self.pkg_img_current_or_default(pic1_filename)
-		self.image_icon0 = self.pkg_img_current_or_default(icon0_filename)
+		self.image_pic0 = self.load_pkg_images(pic0_filename)
+		self.image_pic1 = self.load_pkg_images(pic1_filename)
+		self.image_icon0 = self.load_pkg_images(icon0_filename)
 
 		self.image_xmb_icons = Image.open('./resources/images/misc/XMB_icons.png')
 		self.ps3_system_logo = Image.open('./resources/images/misc/ps3_type_logo.png')
 
-	def pkg_img_current_or_default(self, filename):
-		pkg_image_base_path = './resources/images/pkg/'
+	def load_pkg_images(self, filename):
+		default_img_dir = './resources/images/pkg/'
+		work_dir = './work_dir/'
 
-		tmp_img_path = os.path.join(pkg_image_base_path, filename)
-		print(tmp_img_path)
-		if os.path.isfile(tmp_img_path):
-			return Image.open(tmp_img_path)
+		png_path = os.path.join(work_dir, filename)
+		print(png_path)
+		if '.png' in png_path.lower() and os.path.isfile(png_path):
+			return Image.open(png_path)
 		else:
-			return Image.open(os.path.join(pkg_image_base_path, 'default'))
+			shutil.copyfile(os.path.join(default_img_dir, filename), os.path.join(work_dir, filename))
+			return Image.open(png_path)
 
 	def draw_background_on_canvas(self):
 		self.current_img = self.background_images[self.canvas_image_number]
@@ -262,13 +266,13 @@ class Main():
 									   self.main_offset_x_pos, self.iso_path_text_y_pos + 120, 25, 'white', font='./resources/fonts/LLPIXEL3.ttf')
 
 		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_ps3_ip_label.upper(),
-									   self.main_offset_x_pos + 0 * 50, self.main_offset_y_pos + 815, 20, '#D9DBDC', font='./resources/fonts/LLPIXEL3.ttf')
+									   self.main_offset_x_pos + 0 * 50, self.main_offset_y_pos + 810, 25, '#ffffff', font='./resources/fonts/LLPIXEL3.ttf')
 
 		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_ps3_usr_label.upper(),
-									   self.main_offset_x_pos + 5 * 50, self.main_offset_y_pos + 815, 20, '#D9DBDC', font='./resources/fonts/LLPIXEL3.ttf')
+									   self.main_offset_x_pos + 5 * 50, self.main_offset_y_pos + 810, 25, '#ffffff', font='./resources/fonts/LLPIXEL3.ttf')
 
 		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_ps3_pass_label.upper(),
-									   self.main_offset_x_pos + 5 * 50, self.main_offset_y_pos + 850, 20, '#D9DBDC', font='./resources/fonts/LLPIXEL3.ttf')
+									   self.main_offset_x_pos + 5 * 50, self.main_offset_y_pos + 845, 25, '#ffffff', font='./resources/fonts/LLPIXEL3.ttf')
 
 
 
@@ -301,7 +305,7 @@ class Main():
 							tmp_img.paste(dark, (width - (480 + 8), 12), dark)
 							self.background_images.append(tmp_img)
 
-	def init_labels_texts_buttons(self, main):
+	def init_default_view(self, main):
 		# Constants
 		self.text_device 	= 'Device'
 		self.text_platform 	= 'Type'
@@ -442,6 +446,7 @@ class Main():
 
 		# draws PIC1 and ICON0 on the canvas
 		self.init_draw_images_on_canvas(main)
+
 		self.button_spacing = 70
 
 		self.save_button.place(
@@ -472,43 +477,45 @@ class Main():
 		self.entry_field_title.bind('<<Change>>', self.dynamic_title_to_pic1)
 		###########################################################################
 
-	def init_draw_images_on_canvas(self, main):
-		pic1_x_scale = 1280.0 / self.image_pic1.width * scaling
-		pic1_y_scale = 720.0 / self.image_pic1.height * scaling
 
-		# self.tv_frame = Image.open('./resources/images/misc/tv_frame_1080.png')
-		# self.tv_frame.resize((int(2560.0 * 0.25), int(1440.0 * 0.25)))
+	def init_draw_images_on_canvas(self, main, *args,**kwargs):
+		img_name = kwargs.get('img_name', None)
 
-		self.icon0_dimensions = (
-			int(pic1_x_scale * self.image_icon0.width), int(pic1_y_scale * self.image_icon0.height))
+		# check if xmb_icons needs to be re-drawn
+		if img_name is None or 'pic1' in img_name:
+			print('DEBUG ' + str(img_name))
+			# draw xmb icons and system logo onto the background
+			self.image_pic1.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
+			self.image_pic1.paste(self.ps3_system_logo, (1180, 525), self.ps3_system_logo)
 
-		self.image_pic1.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
-		self.image_pic1.paste(self.ps3_system_logo, (1180, 525), self.ps3_system_logo)
-		# self.image_pic1.paste(self.tv_frame, (-10, -10), self.tv_frame)
-
+		# draw launch-date and clock beside ICON0
 		self.draw_text_on_image_w_shadow(self.image_pic1, "11/11/2006 00:00", 760, 522, 20, 1, 'white', 'black')
 
-		self.image_pic1_xmb = copy.copy(self.image_pic1)
-
 		self.photo_image_pic1 = PhotoImage(
-			self.image_pic1.resize((int(1280 * scaling), int(720 * scaling)), Image.ANTIALIAS))
+				self.image_pic1.resize((int(1280 * scaling), int(720 * scaling)), Image.ANTIALIAS))
 
-		self.button_pic1 = Button(main, image=self.photo_image_pic1, highlightthickness=0, bd=0)
+		self.button_pic1 = Button(main, image=self.photo_image_pic1, highlightthickness=0, bd=0, command=lambda : self.image_replace_browser(main))
 
 
-		# removing 7 pixels from all sides due to transparent border
+		# rezising and cropping 7 pixels from all sides (due to transparent borders)
+		icon0_x_scale = self.window_x_width / self.image_pic1.width * scaling
+		icon0_y_scale = self.window_y_width / self.image_pic1.height * scaling
+
+		self.icon0_dimensions = (
+			int(icon0_x_scale * self.image_icon0.width), int(icon0_y_scale * self.image_icon0.height))
+
 		self.image_icon0_crop = self.image_icon0.crop((7, 7, self.image_icon0.width - 7, self.image_icon0.height - 7))
 		self.image_icon0_crop = self.image_icon0_crop.resize(
 			(self.icon0_dimensions[0] - 7, self.icon0_dimensions[1] - 7), Image.ANTIALIAS)
 
 		self.photo_image_icon0 = PhotoImage(self.image_icon0_crop)
-		self.button_icon0 = Button(main, image=self.photo_image_icon0, highlightthickness=0, bd=0)
+		self.button_icon0 = Button(main, image=self.photo_image_icon0, highlightthickness=0, bd=0, command=lambda : self.image_replace_browser(main))
 
+
+		# finally placing PIC1 and ICON0 onto the canvas
 		self.button_pic1.place(x=75 * scaling, y=175 * scaling)
 		self.button_icon0.place(x=int(350 * scaling), y=int(460 * scaling))
 
-
-		# self.tv_frame_photoimage
 
 	def draw_text_on_image(self, image, text, text_x, text_y, text_size, text_color):
 		font = ImageFont.truetype('./resources/fonts/SCE-PS3.ttf', text_size)
@@ -679,12 +686,31 @@ class Main():
 
 	# Dynamic update of the game title on to the PIC1 image
 	def dynamic_title_to_pic1(self, event):
-		tmp_img = copy.copy(self.image_pic1_xmb)
+		tmp_img = copy.copy(self.image_pic1)
 		# self, image, text, text_x, text_y, text_size, text_outline, text_color,
 		self.draw_text_on_image_w_shadow(tmp_img, event.widget.get(), 760, 487, 32, 2, 'white', 'black')
 		self.photo_image_pic1_xmb = PhotoImage(
 			tmp_img.resize((int(1280 * scaling), int(720 * scaling)), Image.ANTIALIAS))
 		self.button_pic1.config(image=self.photo_image_pic1_xmb)
+
+
+
+	def image_replace_browser(self, main):
+		image = askopenfile(mode='rb', title='Browse an image', filetypes=[('PNG images', '.PNG')])
+		if image is not None:
+			img_name = None
+			print('DEBUG image content:' + image.name)
+
+			# Clear and replace image
+			if 'icon0' in image.name.lower():
+				self.image_icon0 = Image.open(image)
+				img_name = 'icon0'
+			elif 'pic1' in image.name.lower():
+				self.image_pic1 = Image.open(image)
+				img_name = 'pic1'
+
+			# re-draw image on canvas
+			self.init_draw_images_on_canvas(main, img_name=img_name)
 
 	def generate_on_change(self, obj):
 		obj.tk.eval('''
@@ -796,7 +822,7 @@ class Main():
 
 		self.save_pkg_info_to_json()
 		self.save_preview_image()
-		self.save_pkg_project()
+		self.save_project()
 
 		return True
 
@@ -813,21 +839,20 @@ class Main():
 			print('DEBUG: ' + _filename + ' project exist')
 
 
-	def save_pkg_project(self):
+	def save_project(self):
 		pkg_dir = '../../pkg'
 		build_base_path = '../../../builds/'
-		proj_json_file_path = '../util_generated_files/pkg.json'
+		pkg_json_path = '../wcm_gui/work_dir/pkg.json'
 
 		title_id = str(self.entry_field_title_id.get())
 		filename = str(self.entry_field_filename.get()).replace(' ', '_')
 
-		pkg_project_name = title_id + '_' + filename[:-4]
+		pkg_project_name = filename[:-4] + '_(' + title_id + ')'
 		build_dir_path = os.path.join(build_base_path, pkg_project_name)
-		build_dir_pkg_path = os.path.join(build_dir_path, 'pkg')
 
-		self.copytree(pkg_dir, build_dir_pkg_path)
-		shutil.copyfile(proj_json_file_path, build_dir_path + '/' + 'pkg.json')
-		shutil.copyfile('preview.png', build_dir_path + '/' + title_id + '_preview.png')
+		self.copytree(pkg_dir, os.path.join(build_dir_path, 'work_dir', 'pkg'))
+		shutil.copyfile(pkg_json_path, os.path.join(build_dir_path, 'work_dir', 'pkg.json'))
+		shutil.copyfile('preview.png', build_dir_path + '/' + filename[:-4] + '_preview.png')
 
 
 	def copytree(self, src, dst, symlinks = False, ignore = None):
@@ -862,7 +887,7 @@ class Main():
 
 			wmc = WMC.WebmanClassicsBuilder()
 			pkg_name = wmc.make_webman_pkg()
-			self.save_pkg_project()
+			self.save_project()
 
 			if pkg_name is not None:
 				import tkMessageBox
@@ -916,7 +941,7 @@ class Main():
 		pic1_img.paste(xmb_img, (0, 0), xmb_img)
 		self.draw_text_on_image_w_shadow(pic1_img, "11/11/2006 00:00", 760, 522, 20, 1, 'white', 'black')
 		self.draw_text_on_image_w_shadow(pic1_img, str(self.entry_field_title.get()), 760, 487, 32, 2, 'white', 'black')
-		pic1_img.save('preview.png')
+		# pic1_img.save('preview.png')
 
 	def on_game_list_refresh(self):
 		self.draw_game_listbox()
@@ -934,7 +959,7 @@ class Main():
 			pkg_json_path = os.path.join(CURRENT_DIR, 'util_generated_files/pkg.json')
 			if(os.path.isfile(pkg_json_path)):
 				os.remove(pkg_json_path)
-			newFile = open("../util_generated_files/pkg.json", "w")
+			newFile = open("../wcm_gui/work_dir/pkg.json", "w")
 			json_text = json.dumps(json_data, indent=4, separators=(",", ":"))
 			newFile.write(json_text)
 

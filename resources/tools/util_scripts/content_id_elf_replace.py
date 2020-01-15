@@ -4,7 +4,7 @@ import json
 class Elf_replace:
 	def execute(self):
 		
-		with open('../util_generated_files/pkg.json') as f:
+		with open('../wcm_gui/work_dir/pkg.json') as f:
 			json_data = json.load(f)
 
 			

@@ -4,7 +4,7 @@ from shutil import copyfile
 
 class Resign_eboot:
 	def execute(self):
-		with open('../util_generated_files/pkg.json') as f:
+		with open('../wcm_gui/work_dir/pkg.json') as f:
 			json_data = json.load(f)
 			
 		content_id = json_data['content_id']
@@ -16,6 +16,6 @@ class Resign_eboot:
 		subprocess.call('scetool.exe ' + args)
 		os.chdir(current_dir)
 		copyfile(scetool_dir + 'EBOOT.BIN', './../../pkg/USRDIR/EBOOT.BIN')
-
+		os.chdir('../wcm_gui/')
 		print('\nExecution of \'resign_eboot.py\':            Done')
 		print('-----------------------------------------------')

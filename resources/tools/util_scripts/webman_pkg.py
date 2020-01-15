@@ -825,7 +825,7 @@ class Webman_pkg:
 		extract = False
 		list = False
 		
-		with open('../util_generated_files/pkg.json') as f:
+		with open('../wcm_gui/work_dir/pkg.json ') as f:
 			json_data = json.load(f)
 
 		contentid = str(json_data['content_id'])
@@ -838,10 +838,10 @@ class Webman_pkg:
 		pkg_flag='--contentid'
 		pkg_dir_path='../../pkg/'
 		
-		pkg_name = titleid + '_' + filepath_arr[3][:-4] + '.pkg'
+		pkg_name = filepath_arr[3][:-4] + '_(' + titleid + ')' + '.pkg'
 		pkg_name = pkg_name.replace(' ', '_')
 		
-		build_dir_path = '../../../builds/' + pkg_name.replace('.pkg','') + '/'
+		build_dir_path = '../../../builds/' + pkg_name.replace('.pkg', '') + '/'
 		
 		arg_list = [pkg_build_script, pkg_flag, contentid, pkg_dir_path, pkg_name]	
 		try:
@@ -890,7 +890,6 @@ class Webman_pkg:
 				print('Execution of \'webman_pkg.py\':              Done')
 				print('-----------------------------------------------\n')
 				print('Package created: ' + '/builds/' + build_dir_path + pkg_name + '\n')
-
 				return pkg_name
 			else:
 				usage()

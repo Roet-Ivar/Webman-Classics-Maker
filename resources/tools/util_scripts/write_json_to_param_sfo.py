@@ -5,7 +5,7 @@ import re
 class Write_param_sfo():
 	def execute(self):
 		try:
-			with open('../util_generated_files/pkg.json') as f:
+			with open('../wcm_gui/work_dir/pkg.json') as f:
 				json_data = json.load(f)
 
 			title = json_data['title']
