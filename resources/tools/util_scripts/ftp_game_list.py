@@ -4,15 +4,17 @@ import sys
 from ftplib import FTP
 
 
-current_path= os.getcwd()
-# print('current_path: ' + current_path)
-# if 'util_scripts' not in os.getcwd():
-# 	os.chdir('./resources/tools/util_scripts/')
+thisPath = os.path.dirname(os.path.realpath(__file__))
+if 'util_scripts' in thisPath:
+	CURRENT_DIR = thisPath
+else:
+	CURRENT_DIR = os.path.join(os.getcwd(), 'resources', 'tools', 'util_scripts')
+# print('DEBUG CURRENT_DIR: ' + CURRENT_DIR)
 
 #Constants
 pause_message		= 'Press ENTER to continue...'
-mock_data_file		= '../util_resources/mock_ftp_game_list_response.txt'
-user_settings_file	= '../../../settings/ftp_settings.txt'
+mock_data_file		= os.path.join(CURRENT_DIR, '../util_resources/mock_ftp_game_list_response.txt')
+user_settings_file	= os.path.join(CURRENT_DIR, '../../../settings/ftp_settings.txt')
 
 pspiso_path 		= '/dev_hdd0/PSPISO/'
 psxiso_path 		= '/dev_hdd0/PSISO/'
@@ -46,7 +48,7 @@ except Exception as e:
 	sys.exit()
 	
 try:
-	print('Connecting to PS3 at: ' + ps3_lan_ip)
+	print('Connecting to PS3 at: ' + ps3_lan_ip + ', with timeout: ' + str(ftp_timeout) + 's')
 	ftp = FTP(ps3_lan_ip, timeout=ftp_timeout)
 	ftp.login(user='', passwd = '')
 
@@ -169,7 +171,7 @@ if(show_psn_list):
 		psn_list = psn_list + ('No PSN games found.\n')
 	ftp_game_list = ftp_game_list + psn_list + '\n'
 
-with open("../../../game_list.txt", "wb") as f:
+with open(os.path.join(CURRENT_DIR, "../../../game_list.txt"), "wb") as f:
 	f.write(ftp_game_list)
 	f.close()
 

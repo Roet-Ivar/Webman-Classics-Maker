@@ -23,6 +23,12 @@ from ftp_game_list_v2 import FtpGameList
 class Main():
 
 	def __init__(self, main):
+		# common paths
+		self.pkg_dir 		= '../../pkg'
+		self.wcm_work_dir 	= '../wcm_gui/work_dir/'
+		self.wcm_pkg_dir 	= os.path.join(self.wcm_work_dir, 'pkg')
+		self.builds_path 	= '../../../builds/'
+
 		# self.main_offset_x_pos = 1325
 		self.main_offset_x_pos = 1450
 		self.main_offset_y_pos = 50
@@ -221,13 +227,13 @@ class Main():
 		default_img_dir = './resources/images/pkg/'
 		work_dir = './work_dir/'
 
-		png_path = os.path.join(work_dir, filename)
+		png_path = os.path.join(work_dir, 'pkg', filename)
 		print(png_path)
 		if '.png' in png_path.lower() and os.path.isfile(png_path):
 			return Image.open(png_path)
 		else:
-			shutil.copyfile(os.path.join(default_img_dir, filename), os.path.join(work_dir, filename))
-			return Image.open(png_path)
+			shutil.copyfile(os.path.join(default_img_dir, filename), os.path.join(png_path))
+			return Image.open(os.path.join(png_path))
 
 	def draw_background_on_canvas(self):
 		self.current_img = self.background_images[self.canvas_image_number]
@@ -385,7 +391,7 @@ class Main():
 								 command=lambda: self.on_drive_and_system_button(self.state_drive_choice,
 																				 self.selection_system_list[3]))
 
-		self.save_button = Button(main, image=self.function_buttons[0], borderwidth=0, command=self.validate_on_save_button,
+		self.save_button = Button(main, image=self.function_buttons[0], borderwidth=0, command=self.on_save_button,
 								  bg="#FBFCFB")
 
 		self.build_button = Button(main, image=self.function_buttons[1], borderwidth=0, command=self.on_build_button,
@@ -805,7 +811,7 @@ class Main():
 			self.entry_field_filename.icursor(0)
 			return False
 
-	def validate_on_save_button(self):
+	def on_save_button(self):
 		# do stuff
 		if self.validate_title_id_on_save():
 			print('DEBUG: Title_id: OK')
@@ -820,39 +826,32 @@ class Main():
 		else:
 			return False
 
-		self.save_pkg_info_to_json()
-		self.save_preview_image()
-		self.save_project()
+		self.save_work_dir()
 
 		return True
 
-	def load_pkg_project(self, title_id, filename):
-		_title_id = title_id.replace('-', '')
-		_filename = str(self.entry_field_filename.get())[:-4].replace(' ', '_')
-		print('DEBUG: title_id: ' + _title_id + '\n' + 'filename: ' + _filename)
+	def load_work_dir(self, title_id, filename):
+		title_id = title_id.replace('-', '')
+		filename = str(self.entry_field_filename.get())[:-4].replace(' ', '_')
+		print('DEBUG: title_id: ' + title_id + '\n' + 'filename: ' + filename)
 
-		build_base_path = '../../../builds/'
-		pkg_project_name = _title_id + '_' + _filename[:-4]
+		# build_base_path = '../../../builds/'
+		pkg_project_name = title_id + '_' + filename[:-4]
 
-		build_dir_path = os.path.join(build_base_path, pkg_project_name)
+		build_dir_path = os.path.join(self.builds_path, pkg_project_name)
 		if os.path.exists(build_dir_path):
-			print('DEBUG: ' + _filename + ' project exist')
+			print('DEBUG: ' + filename + ' project exist')
 
 
-	def save_project(self):
-		pkg_dir = '../../pkg'
-		build_base_path = '../../../builds/'
-		pkg_json_path = '../wcm_gui/work_dir/pkg.json'
+	def save_work_dir(self):
+		self.image_icon0.save('./work_dir/pkg/ICON0.PNG')
+		self.image_pic0.save('./work_dir/pkg/PIC0.PNG')
+		self.image_pic1.save('./work_dir/pkg/PIC1.PNG')
 
-		title_id = str(self.entry_field_title_id.get())
-		filename = str(self.entry_field_filename.get()).replace(' ', '_')
+		self.save_preview_image()
+		self.save_pkg_info_to_json()
 
-		pkg_project_name = filename[:-4] + '_(' + title_id + ')'
-		build_dir_path = os.path.join(build_base_path, pkg_project_name)
 
-		self.copytree(pkg_dir, os.path.join(build_dir_path, 'work_dir', 'pkg'))
-		shutil.copyfile(pkg_json_path, os.path.join(build_dir_path, 'work_dir', 'pkg.json'))
-		shutil.copyfile('preview.png', build_dir_path + '/' + filename[:-4] + '_preview.png')
 
 
 	def copytree(self, src, dst, symlinks = False, ignore = None):
@@ -882,12 +881,31 @@ class Main():
 				shutil.copy2(s, d)
 
 	def on_build_button(self):
-		# do stuff
-		if self.validate_on_save_button():
+			self.on_save_button()
+
+
+			# copy ICON0, PIC0, PIC1 to pkg dir before build
+			shutil.copyfile(os.path.join(self.wcm_pkg_dir,'ICON0.PNG'), os.path.join(self.pkg_dir, 'ICON0.PNG'))
+			# shutil.copyfile(os.path.join(self.wcm_pkg_dir,'PIC0.PNG'), os.path.join(self.pkg_dir, 'PIC0.PNG'))
+			shutil.copyfile(os.path.join(self.wcm_pkg_dir,'PIC1.PNG'), os.path.join(self.pkg_dir, 'PIC1.PNG'))
+
+			# shutil.copytree(self.wcm_pkg_dir, self.pkg_dir)
 
 			wmc = WMC.WebmanClassicsBuilder()
 			pkg_name = wmc.make_webman_pkg()
-			self.save_project()
+
+			# copy content of pkg_dir to game_build_dir
+			title_id = str(self.entry_field_title_id.get())
+			filename = str(self.entry_field_filename.get()).replace(' ', '_')
+			game_folder_name = filename[:-4] + '_(' + title_id + ')'
+			game_build_dir = os.path.join(self.builds_path, game_folder_name)
+
+			self.copytree(self.pkg_dir, os.path.join(game_build_dir, 'work_dir', 'pkg'))
+
+
+			shutil.copyfile(os.path.join(self.wcm_work_dir,'pkg.json'), os.path.join(game_build_dir, 'work_dir', 'pkg.json'))
+			shutil.copyfile(os.path.join(self.wcm_work_dir, 'preview.png'), os.path.join(game_build_dir + '/' + filename[:-4] + '_preview.png'))
+
 
 			if pkg_name is not None:
 				import tkMessageBox
@@ -932,16 +950,16 @@ class Main():
 
 	def save_preview_image(self):
 		# making a preview print of the game canvas
-		pic1_img = Image.open('../../pkg/PIC1.PNG')
-		icon_img = Image.open('../../pkg/ICON0.PNG')
+		preview_img = Image.open('./work_dir/pkg/PIC1.PNG')
+		icon_img = Image.open('./work_dir/pkg/ICON0.PNG')
 		print('DEBUG: ' + os.path.dirname(__file__))
 		xmb_img_dir = os.path.join(CURRENT_DIR, 'resources/images/misc/XMB_icons.png')
 		xmb_img = Image.open(xmb_img_dir)
-		pic1_img.paste(icon_img, (425, 450), icon_img)
-		pic1_img.paste(xmb_img, (0, 0), xmb_img)
-		self.draw_text_on_image_w_shadow(pic1_img, "11/11/2006 00:00", 760, 522, 20, 1, 'white', 'black')
-		self.draw_text_on_image_w_shadow(pic1_img, str(self.entry_field_title.get()), 760, 487, 32, 2, 'white', 'black')
-		# pic1_img.save('preview.png')
+		preview_img.paste(icon_img, (425, 450), icon_img)
+		preview_img.paste(xmb_img, (0, 0), xmb_img)
+		self.draw_text_on_image_w_shadow(preview_img, "11/11/2006 00:00", 760, 522, 20, 1, 'white', 'black')
+		self.draw_text_on_image_w_shadow(preview_img, str(self.entry_field_title.get()), 760, 487, 32, 2, 'white', 'black')
+		preview_img.save('./work_dir/preview.png')
 
 	def on_game_list_refresh(self):
 		self.draw_game_listbox()
@@ -956,7 +974,7 @@ class Main():
 			json_data['content_id'] = 'UP0001-' + self.entry_field_title_id.get() + '_00-0000000000000000'
 			json_data['iso_filepath'] = str(self.entry_field_iso_path.get())
 
-			pkg_json_path = os.path.join(CURRENT_DIR, 'util_generated_files/pkg.json')
+			pkg_json_path = os.path.join(CURRENT_DIR, 'work_dir/pkg.json')
 			if(os.path.isfile(pkg_json_path)):
 				os.remove(pkg_json_path)
 			newFile = open("../wcm_gui/work_dir/pkg.json", "w")

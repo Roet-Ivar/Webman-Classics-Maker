@@ -2,7 +2,13 @@
 from __future__ import with_statement
 import struct, sys, os, shutil, json
 
-CURRENT_DIR = os.path.dirname(__file__)
+thisPath = os.path.dirname(os.path.realpath(__file__))
+if 'util_scripts' in thisPath:
+	CURRENT_DIR = thisPath
+else:
+	CURRENT_DIR = os.path.join(os.getcwd(), 'resources', 'tools', 'util_scripts')
+# print('DEBUG webman_pkg.py CURRENT_DIR: ' + CURRENT_DIR)
+
 PKGCRYPT_DIR = 'pkgcrypt'
 pkgcrypt_ver = 'py'
 
