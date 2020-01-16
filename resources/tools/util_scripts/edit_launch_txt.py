@@ -5,7 +5,13 @@ import urllib
 class Edit_launch_txt:
 	def execute(self):
 		try:
-			with open('../wcm_gui/work_dir/pkg.json ') as f:
+			thisPath = os.path.dirname(os.path.realpath(__file__))
+			if 'util_scripts' in thisPath:
+				CURRENT_DIR = thisPath
+			else:
+				CURRENT_DIR = os.path.join(os.getcwd(), 'resources', 'tools', 'util_scripts')
+
+			with open(os.path.join(CURRENT_DIR, '..', 'wcm_gui', 'work_dir', 'pkg.json')) as f:
 				json_data = json.load(f)
 
 			web_command = '/play.ps3'

@@ -831,7 +831,7 @@ class Webman_pkg:
 		extract = False
 		list = False
 		
-		with open('../wcm_gui/work_dir/pkg.json ') as f:
+		with open(os.path.join(CURRENT_DIR ,'../wcm_gui/work_dir/pkg.json')) as f:
 			json_data = json.load(f)
 
 		contentid = str(json_data['content_id'])

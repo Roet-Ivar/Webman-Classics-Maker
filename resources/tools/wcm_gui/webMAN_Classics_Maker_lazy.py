@@ -24,10 +24,15 @@ class Main():
 
 	def __init__(self, main):
 		# common paths
+		self.BASE_PATH = os.path.dirname(__file__)
+
 		self.pkg_dir 		= '../../pkg'
 		self.wcm_work_dir 	= '../wcm_gui/work_dir/'
 		self.wcm_pkg_dir 	= os.path.join(self.wcm_work_dir, 'pkg')
 		self.builds_path 	= '../../../builds/'
+
+		self.ftp_settings_path = '../../../settings/ftp_settings.txt'
+		self.fonts_path = './resources/fonts/'
 
 		# self.main_offset_x_pos = 1325
 		self.main_offset_x_pos = 1450
@@ -85,9 +90,7 @@ class Main():
 
 
 	def get_ftp_ip_from_config(self):
-		CURRENT_DIR = os.path.dirname(__file__)
-
-		with open(os.path.join(CURRENT_DIR, '../../../settings/ftp_settings.txt')) as f:
+		with open(os.path.join(self.BASE_PATH, self.ftp_settings_path)) as f:
 			self.config_file = json.load(f)
 		ip = self.config_file['ps3_lan_ip']
 
@@ -99,9 +102,7 @@ class Main():
 
 
 	def get_ftp_user_from_config(self):
-		CURRENT_DIR = os.path.dirname(__file__)
-
-		with open(os.path.join(CURRENT_DIR, '../../../settings/ftp_settings.txt')) as f:
+		with open(os.path.join(self.BASE_PATH, self.ftp_settings_path)) as f:
 			self.config_file = json.load(f)
 		user = self.config_file['ftp_user']
 
@@ -113,9 +114,7 @@ class Main():
 
 
 	def get_ftp_pass_from_config(self):
-		CURRENT_DIR = os.path.dirname(__file__)
-
-		with open(os.path.join(CURRENT_DIR, '../../../settings/ftp_settings.txt')) as f:
+		with open(os.path.join(self.BASE_PATH, self.ftp_settings_path)) as f:
 			self.config_file = json.load(f)
 		password	= self.config_file['ftp_password']
 
@@ -157,7 +156,7 @@ class Main():
 				height = value
 
 		if not font:
-			self.draw_text_on_image_w_font(icon_bg_img, text, 7, 3, 12, 'white', './resources/fonts/arial.ttf')
+			self.draw_text_on_image_w_font(icon_bg_img, text, 7, 3, 12, 'white', os.path.join(self.fonts_path, 'arial.ttf'))
 		else:
 
 			if x:
@@ -166,7 +165,7 @@ class Main():
 				x_val = 12 - len(text)
 
 			self.draw_text_on_image_w_font(icon_bg_img, text, x_val, 3 + y, 10, 'white',
-										   './resources/fonts/' + font)
+										   os.path.join(self.fonts_path, font))
 
 		return copy.copy(icon_bg_img)
 
@@ -188,7 +187,7 @@ class Main():
 				height = value
 
 		if not font:
-			self.draw_text_on_image_w_font(icon_bg_img, text, 7, 3, 12, 'white', './resources/fonts/arial.ttf')
+			self.draw_text_on_image_w_font(icon_bg_img, text, 7, 3, 12, 'white', os.path.join(self.fonts_path, 'arial.ttf'))
 		else:
 
 			if x:
@@ -197,18 +196,18 @@ class Main():
 				x_val = 12 - len(text)
 
 			self.draw_text_on_image_w_font(icon_bg_img, text, x_val, 3 + y, 12, 'white',
-										   './resources/fonts/' + font)
+										   os.path.join(self.fonts_path, font))
 
 		return copy.copy(icon_bg_img)
 
 	def medium_button_maker(self, text, *font_name):
 		icon_bg_img = Image.new('RGB', (54, 20), color='black')
 		if not font_name:
-			self.draw_text_on_image_w_font(icon_bg_img, text, 7, 1, 15, 'white', './resources/fonts/conthrax-sb.ttf')
+			self.draw_text_on_image_w_font(icon_bg_img, text, 7, 1, 15, 'white', os.path.join(self.fonts_path, 'conthrax-sb.ttf'))
 		else:
 			tmp_font = str(font_name[0])
 			print(tmp_font)
-			self.draw_text_on_image_w_font(icon_bg_img, text, 7, 1, 15, 'white', './resources/fonts/' + tmp_font)
+			self.draw_text_on_image_w_font(icon_bg_img, text, 7, 1, 15, 'white', os.path.join(self.fonts_path, tmp_font))
 		return copy.copy(icon_bg_img)
 
 	def init_pkg_images(self):
@@ -241,44 +240,44 @@ class Main():
 
 
 		self.draw_text_on_image_w_shadow(self.background_images[self.canvas_image_number], 'webMAN',
-										 490, -10, 110, 6, '#0C55F4', 'black', font='./resources/fonts/LLPIXEL3.ttf')
+										 490, -10, 110, 6, '#0C55F4', 'black', font=os.path.join(self.fonts_path, 'LLPIXEL3.ttf'))
 
 		self.draw_text_on_image_w_shadow(self.background_images[self.canvas_image_number], 'Classics Maker',
-										 422, 60, 80, 5, 'white', 'black', font='./resources/fonts/LLPIXEL3.ttf')
+										 422, 60, 80, 5, 'white', 'black', font=os.path.join(self.fonts_path, 'LLPIXEL3.ttf'))
 
 		self.current_img.paste(webman_logo, (515, 22), webman_logo)
 
 
 
 		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_device.upper(),
-										 self.main_offset_x_pos, self.device_text_y_pos, 25, 'white', font='./resources/fonts/LLPIXEL3.ttf')
+										 self.main_offset_x_pos, self.device_text_y_pos, 25, 'white', font=os.path.join(self.fonts_path, 'LLPIXEL3.ttf'))
 
 		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_platform.upper(),
-									   self.main_offset_x_pos, self.type_text_y_pos, 25, 'white', font='./resources/fonts/LLPIXEL3.ttf')
+									   self.main_offset_x_pos, self.type_text_y_pos, 25, 'white', font=os.path.join(self.fonts_path, 'LLPIXEL3.ttf'))
 
 		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_title_id.upper(),
-									 self.main_offset_x_pos, self.title_id_text_y_pos, 25, 'white', font='./resources/fonts/LLPIXEL3.ttf')
+									 self.main_offset_x_pos, self.title_id_text_y_pos, 25, 'white', font=os.path.join(self.fonts_path, 'LLPIXEL3.ttf'))
 
 		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_title.upper(),
-										 self.main_offset_x_pos, self.title_text_y_pos, 25, 'white', font='./resources/fonts/LLPIXEL3.ttf')
+										 self.main_offset_x_pos, self.title_text_y_pos, 25, 'white', font=os.path.join(self.fonts_path, 'LLPIXEL3.ttf'))
 
 		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_filename.upper(),
-										 self.main_offset_x_pos, self.filename_text_y_pos, 25, 'white', font='./resources/fonts/LLPIXEL3.ttf')
+										 self.main_offset_x_pos, self.filename_text_y_pos, 25, 'white', font=os.path.join(self.fonts_path, 'LLPIXEL3.ttf'))
 
 		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_iso_path.upper(),
-										 self.main_offset_x_pos, self.iso_path_text_y_pos, 25, 'white', font='./resources/fonts/LLPIXEL3.ttf')
+										 self.main_offset_x_pos, self.iso_path_text_y_pos, 25, 'white', font=os.path.join(self.fonts_path, 'LLPIXEL3.ttf'))
 
 		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_ftp_game_list.upper(),
-									   self.main_offset_x_pos, self.iso_path_text_y_pos + 120, 25, 'white', font='./resources/fonts/LLPIXEL3.ttf')
+									   self.main_offset_x_pos, self.iso_path_text_y_pos + 120, 25, 'white', font=os.path.join(self.fonts_path, 'LLPIXEL3.ttf'))
 
 		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_ps3_ip_label.upper(),
-									   self.main_offset_x_pos + 0 * 50, self.main_offset_y_pos + 810, 25, '#ffffff', font='./resources/fonts/LLPIXEL3.ttf')
+									   self.main_offset_x_pos + 0 * 50, self.main_offset_y_pos + 810, 25, '#ffffff', font=os.path.join(self.fonts_path, 'LLPIXEL3.ttf'))
 
 		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_ps3_usr_label.upper(),
-									   self.main_offset_x_pos + 5 * 50, self.main_offset_y_pos + 810, 25, '#ffffff', font='./resources/fonts/LLPIXEL3.ttf')
+									   self.main_offset_x_pos + 5 * 50, self.main_offset_y_pos + 810, 25, '#ffffff', font=os.path.join(self.fonts_path, 'LLPIXEL3.ttf'))
 
 		self.draw_text_on_image_w_font(self.background_images[self.canvas_image_number], self.text_ps3_pass_label.upper(),
-									   self.main_offset_x_pos + 5 * 50, self.main_offset_y_pos + 845, 25, '#ffffff', font='./resources/fonts/LLPIXEL3.ttf')
+									   self.main_offset_x_pos + 5 * 50, self.main_offset_y_pos + 845, 25, '#ffffff', font=os.path.join(self.fonts_path, 'LLPIXEL3.ttf'))
 
 
 
@@ -524,7 +523,7 @@ class Main():
 
 
 	def draw_text_on_image(self, image, text, text_x, text_y, text_size, text_color):
-		font = ImageFont.truetype('./resources/fonts/SCE-PS3.ttf', text_size)
+		font = ImageFont.truetype(os.path.join(self.fonts_path, 'SCE-PS3.ttf'), text_size)
 		draw = ImageDraw.Draw(image)
 		return draw.text((text_x, text_y), text, fill=text_color, font=font)
 
@@ -541,7 +540,7 @@ class Main():
 			print(args['font'])
 			font = ImageFont.truetype(args['font'], text_size)
 		else:
-			font = ImageFont.truetype('./resources/fonts/SCE-PS3.ttf', text_size)
+			font = ImageFont.truetype(os.path.join(self.fonts_path, 'SCE-PS3.ttf'), text_size)
 
 		if text_outline == None:
 			text_outline = 2
@@ -938,10 +937,7 @@ class Main():
 
 		if ip != '':
 			self.config_file['ps3_lan_ip'] = ip
-
-			CURRENT_DIR = os.path.dirname(__file__)
-			# with open(os.path.join(CURRENT_DIR, '../../../settings/ftp_settings.txt'), 'w') as f:
-			newFile = open(os.path.join(CURRENT_DIR, '../../../settings/ftp_settings.txt'), "w")
+			newFile = open(os.path.join(self.BASE_PATH, 'self.ftp_settings_path'), "w")
 			json_text = json.dumps(self.config_file, indent=4, separators=(",", ":"))
 			newFile.write(json_text)
 
@@ -977,7 +973,7 @@ class Main():
 			pkg_json_path = os.path.join(CURRENT_DIR, 'work_dir/pkg.json')
 			if(os.path.isfile(pkg_json_path)):
 				os.remove(pkg_json_path)
-			newFile = open("../wcm_gui/work_dir/pkg.json", "w")
+			newFile = open(os.path.join(self.wcm_work_dir, 'pkg.json'), "w")
 			json_text = json.dumps(json_data, indent=4, separators=(",", ":"))
 			newFile.write(json_text)
 
