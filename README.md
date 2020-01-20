@@ -1,5 +1,5 @@
 # ABOUT
-Webman Classics Maker is tool for the PS3 that makes PKG shortcuts for ISO files using webMAN-mod through web commands:
+Webman Classics Maker is tool for the PS3 that makes PKG shortcuts for ISO files straight to the home menu. It is using web commands  through webMAN-mod to mount and launch the ISOs automatically:
 http://www.psx-place.com/threads/webman-mod-web-commands.1508/
 
 This software is under GPLv2 license: https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html, not to be confused with the GPLv3 license.
