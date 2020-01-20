@@ -1,6 +1,7 @@
-import json
+import json, os
+from global_paths import App as AppPaths
 
-with open('./games_metadata/GamesIndex_2.json') as f:
+with open(os.path.join(AppPaths.games_metadata, 'GamesIndex_2.json')) as f:
     pcsx2_all_list_data = json.load(f)
     f.close()
 
@@ -9,13 +10,13 @@ with open('./games_metadata/GamesIndex_2.json') as f:
 region = 'NTSC-J'
 
 if 'NTSC-U' in region:
-    with open('../util_scripts/games_metadata/ps2_us_games_list.json') as f:
+    with open(os.path.join(AppPaths.games_metadata, 'ps2_us_games_list.json')) as f:
         psxcenter_list_data = json.load(f)
 if 'PAL' in region:
-    with open('../util_scripts/games_metadata/ps2_eu_games_list.json') as f:
+    with open(os.path.join(AppPaths.games_metadata, 'ps2_eu_games_list.json')) as f:
         psxcenter_list_data = json.load(f)
 if 'NTSC-J' in region:
-    with open('../util_scripts/games_metadata/ps2_jp_games_list.json') as f:
+    with open(os.path.join(AppPaths.games_metadata, 'ps2_jp_games_list.json')) as f:
         psxcenter_list_data = json.load(f)
 
 # json_body = json.loads("""{"games":[]}""")
@@ -39,6 +40,6 @@ for game in pdc_games:
 # json_body.append(str(pcsx2_games))
 
 pcsx2_all_list_data['games'] = pcsx2_games
-with open('./games_metadata/GamesIndex_2.json', "w") as newFile:
+with open(os.path.join(AppPaths.games_metadata, 'GamesIndex_2.json'), "w") as newFile:
     json_text = json.dumps(pcsx2_all_list_data, indent=4, separators=(",", ":"), ensure_ascii=False).encode('utf8')
     newFile.write(json_text)

@@ -1,11 +1,14 @@
-import Tkinter
+from global_paths import App as AppPaths
 from Tkinter import Frame, Scrollbar, Listbox, LEFT, RIGHT, Y, END, TOP, Label
 import json, os
+
 
 
 class Gamelist():
 
     def __init__(self, ref_title_id, ref_title, ref_filename):
+        self.WCM_BASE_PATH  = AppPaths.wcm_gui
+
         self.entry_title_id = ref_title_id
         self.entry_title    = ref_title
         self.entry_filename = ref_filename
@@ -31,7 +34,7 @@ class Gamelist():
         s['command'] = self._listbox.yview
         self._listbox['yscrollcommand'] = s.set
 
-        with open('../util_scripts/game_list_data.json') as f:
+        with open(os.path.join(AppPaths.util_scripts, 'game_list_data.json')) as f:
             self.json_game_list_data = json.load(f)
 
         for list_game in self.json_game_list_data[self.platform + '_games']:
@@ -116,10 +119,9 @@ class Gamelist():
 
     def load_pkg_project(self, title_id, filename):
         _filename = filename.replace(' ', '_')
-        build_base_path = '../../../builds/'
+        build_base_path = os.path.join(AppPaths.builds, 'builds')
         pkg_project_name = title_id + '_' + _filename[:-4]
 
         build_dir_path = os.path.join(build_base_path, pkg_project_name)
         if os.path.exists(build_dir_path):
             print(_filename + ' project exist')
-        # print(title_id + '\n' + _filename)

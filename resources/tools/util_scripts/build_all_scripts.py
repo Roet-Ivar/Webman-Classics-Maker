@@ -4,6 +4,8 @@ from resign_eboot import Resign_eboot
 from edit_launch_txt import Edit_launch_txt
 from webman_pkg import Webman_pkg
 
+from global_paths import App as AppPaths
+
 class WebmanClassicsBuilder:
 	def make_webman_pkg(self):
 		write_json_to_param_sfo = Write_param_sfo()
@@ -21,10 +23,25 @@ class WebmanClassicsBuilder:
 		webman_pkg = Webman_pkg()
 
 		try:
+			# clean up .pyc-files
+			import os
+			util_scipts = AppPaths.util_scripts
+			util_scripts_items = os.listdir(util_scipts)
+			for item in util_scripts_items:
+				if item.endswith(".pyc"):
+					os.remove(os.path.join(util_scipts, item))
+
+			wcm_gui = AppPaths.wcm_gui
+			wcm_gui_items = os.listdir(wcm_gui)
+			for item in wcm_gui_items:
+				if item.endswith(".pyc"):
+					os.remove(os.path.join(wcm_gui, item))
+
 			pkg_name = webman_pkg.execute()
 			return pkg_name
-		except:
-			print('Error: could not return pkg_name.')
+		except Exception as e:
+			print('Error: could not return pkg_name: ' + e.message)
+
 
 
 		# os.system("pause")

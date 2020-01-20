@@ -1,15 +1,8 @@
 
 from __future__ import with_statement
 import struct, sys, os, shutil, json
+from global_paths import App as AppPaths
 
-thisPath = os.path.dirname(os.path.realpath(__file__))
-if 'util_scripts' in thisPath:
-	CURRENT_DIR = thisPath
-else:
-	CURRENT_DIR = os.path.join(os.getcwd(), 'resources', 'tools', 'util_scripts')
-# print('DEBUG webman_pkg.py CURRENT_DIR: ' + CURRENT_DIR)
-
-PKGCRYPT_DIR = 'pkgcrypt'
 pkgcrypt_ver = 'py'
 
 # check python version less than 3
@@ -23,7 +16,8 @@ if struct.calcsize('P') * 8 == 64:
 	pkgcrypt_ver += '64'
 else:
 	pkgcrypt_ver += '32'
-sys.path.append(os.path.join(CURRENT_DIR, PKGCRYPT_DIR, pkgcrypt_ver))
+
+sys.path.append(os.path.join(AppPaths.pkgcrypt, pkgcrypt_ver))
 
 class StructType(tuple):
 	def __getitem__(self, value):
@@ -831,7 +825,7 @@ class Webman_pkg:
 		extract = False
 		list = False
 		
-		with open(os.path.join(CURRENT_DIR ,'../wcm_gui/work_dir/pkg.json')) as f:
+		with open(os.path.join(AppPaths.wcm_work_dir, 'pkg.json')) as f:
 			json_data = json.load(f)
 
 		contentid = str(json_data['content_id'])
@@ -840,14 +834,15 @@ class Webman_pkg:
 		filepath = str(json_data['iso_filepath'])
 		filepath_arr = [x for x in filepath.split('/')]
 		
-		pkg_build_script='./webman_pkg.py'
+		pkg_build_script='webman_pkg.py'
 		pkg_flag='--contentid'
-		pkg_dir_path='../../pkg/'
+		pkg_dir_path=AppPaths.pkg + '/'
 		
 		pkg_name = filepath_arr[3][:-4] + '_(' + titleid + ')' + '.pkg'
 		pkg_name = pkg_name.replace(' ', '_')
 		
-		build_dir_path = '../../../builds/' + pkg_name.replace('.pkg', '') + '/'
+		build_dir_path = os.path.join(AppPaths.builds, pkg_name.replace('.pkg', ''))
+		print('DEBUG build_dir_path: ' + build_dir_path)
 		
 		arg_list = [pkg_build_script, pkg_flag, contentid, pkg_dir_path, pkg_name]	
 		try:
@@ -884,18 +879,10 @@ class Webman_pkg:
 				if not os.path.exists(build_dir_path):
 					os.makedirs(build_dir_path)
 
-				shutil.move(pkg_name, build_dir_path + pkg_name)
-				
-				for root, dirs, files in os.walk('..'):
-					for file in files:
-						if file.endswith('.pyc') is True:
-							try:
-								os.remove(file)
-							except:
-								print(str(file) + ' could not be deleted.')
+				shutil.move(pkg_name, os.path.join(build_dir_path, pkg_name))
 				print('Execution of \'webman_pkg.py\':              Done')
 				print('-----------------------------------------------\n')
-				print('Package created: ' + '/builds/' + build_dir_path + pkg_name + '\n')
+				print('Package created: ' + build_dir_path + pkg_name + '\n')
 				return pkg_name
 			else:
 				usage()

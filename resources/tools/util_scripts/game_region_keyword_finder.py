@@ -74,7 +74,6 @@ print('')
 
 
 # save region file
-
 with open(region_list_file_name, "w") as regions_file:
     json_text = json.dumps(region_list_data, indent=4, separators=(",", ":"), ensure_ascii=False).encode('utf8')
     regions_file.write(json_text)

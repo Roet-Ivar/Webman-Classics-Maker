@@ -1,14 +1,14 @@
-import os
-import json
+import os, json
+from global_paths import App as AppPaths
 
 class Param_to_json:
 	def execute(self):
-		with open('../util_resources/pkg.json.BAK') as f:
+		with open(os.path.join(AppPaths.util_resources, 'pkg.json.BAK')) as f:
 			json_data = json.load(f)
 
 
 		# load it
-		with open("../../pkg/PARAM.SFO", 'rb') as f:
+		with open(os.path.join(AppPaths.pkg, 'PARAM.SFO'), 'rb') as f:
 			file = f.read()
 			f.close()
 			
@@ -23,7 +23,7 @@ class Param_to_json:
 				json_data['content_id']='UP0001-'+ params_arr[1] + '_00-0000000000000000'
 				json_data['iso_filepath']=params_arr[3]
 
-				newFile = open("../util_generated_files/params.json", "wb")
+				newFile = open(AppPaths.wcm_work_dir, 'pkg.json', 'wb')
 				json_text = json.dumps(json_data, indent=4, separators=(",", ":"))
 				
 				newFile.write(json_text)

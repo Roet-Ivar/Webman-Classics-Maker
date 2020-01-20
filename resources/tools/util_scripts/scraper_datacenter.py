@@ -1,7 +1,6 @@
-import json
-from bs4 import BeautifulSoup, Comment
-import requests
-import re
+import json, os, re, requests
+from bs4 import BeautifulSoup
+from global_paths import App as AppPaths
 
 # Platform: 'psp'/'psx'/'ps2'
 platform = 'ps2'
@@ -17,13 +16,13 @@ if 'psp' == platform:
     json_game_list_data = json.loads(x)
     game_list = json_game_list_data['games']
 
-    game_list_file_name.append('./games_metadata/psp_us_games_list.json')
+    game_list_file_name.append(os.path.join(AppPaths.games_metadata, 'ppsp_us_games_list.json'))
     page_link_list.append('https://psxdatacenter.com/psp/ulist.html')
 
-    game_list_file_name.append('./games_metadata/psp_eu_games_list.json')
+    game_list_file_name.append(os.path.join(AppPaths.games_metadata, 'psp_eu_games_list.json'))
     page_link_list.append('https://psxdatacenter.com/psp/plist.html')
 
-    game_list_file_name.append('./games_metadata/psp_jp_games_list.json')
+    game_list_file_name.append(os.path.join(AppPaths.games_metadata, 'psp_jp_games_list.json'))
     page_link_list.append('https://psxdatacenter.com/psp/jlist.html')
 
 
@@ -32,13 +31,13 @@ if 'psx' == platform:
     json_game_list_data = json.loads(x)
     game_list = json_game_list_data['games']
 
-    game_list_file_name.append('./games_metadata/psx_us_games_list.json')
+    game_list_file_name.append(os.path.join(AppPaths.games_metadata, 'psx_us_games_list.json'))
     page_link_list.append('https://psxdatacenter.com/ulist.html')
 
-    game_list_file_name.append('./games_metadata/psx_eu_games_list.json')
+    game_list_file_name.append(os.path.join(AppPaths.games_metadata, 'psx_eu_games_list.json'))
     page_link_list.append('https://psxdatacenter.com/plist.html')
 
-    game_list_file_name.append('./games_metadata/psx_jp_games_list.json')
+    game_list_file_name.append(os.path.join(AppPaths.games_metadata, 'psx_jp_games_list.json'))
     page_link_list.append('https://psxdatacenter.com/jlist.html')
 
 if 'ps2' == platform:
@@ -46,13 +45,13 @@ if 'ps2' == platform:
     json_game_list_data = json.loads(x)
     game_list = json_game_list_data['games']
 
-    game_list_file_name.append('./games_metadata/ps2_us_games_list.json')
+    game_list_file_name.append(os.path.join(AppPaths.games_metadata, 'ps2_us_games_list.json'))
     page_link_list.append('https://psxdatacenter.com/psx2/ulist2.html')
 
-    game_list_file_name.append('./games_metadata/ps2_eu_games_list.json')
+    game_list_file_name.append(os.path.join(AppPaths.games_metadata, 'ps2_eu_games_list.json'))
     page_link_list.append('https://psxdatacenter.com/psx2/plist2.html')
 
-    game_list_file_name.append('./games_metadata/ps2_jp_games_list.json')
+    game_list_file_name.append(os.path.join(AppPaths.games_metadata, 'ps2_jp_games_list.json'))
     page_link_list.append('https://psxdatacenter.com/psx2/jlist2.html')
 
 

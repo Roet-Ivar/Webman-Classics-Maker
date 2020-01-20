@@ -5,6 +5,8 @@ import re
 import StringIO
 import time
 from ftplib import FTP
+from shutil import copyfile
+from global_paths import App as AppPaths
 
 class FTPInstallChecker():
 	print()
@@ -94,9 +96,9 @@ class FtpGameList():
 		#Constants
 		pause_message		= 'Press ENTER to continue...'
 		current_dir 		= os.path.dirname(__file__)
-		mock_data_file		= '../util_resources/mock_ftp_game_list_response.txt'
-		user_settings_file	= '../../../settings/ftp_settings.txt'
-		game_list_data 		= 'game_list_data.json'
+		mock_data_file		= os.path.join(AppPaths.util_resources, 'mock_ftp_game_list_response.txt')
+		user_settings_file	= os.path.join(AppPaths.settings, 'ftp_settings.txt')
+		game_list_data 		= os.path.join(AppPaths.util_scripts, 'game_list_data.json')
 
 		pspiso_path 		= '/dev_hdd0/PSPISO/'
 		psxiso_path 		= '/dev_hdd0/PSISO/'
@@ -176,6 +178,9 @@ class FtpGameList():
 
 		def iso_filter(list_of_files):
 			list_of_files = list_of_files.lower()
+
+			# if lambda x: x.endswith('.bin') or x.endswith('.iso')
+
 			if '.iso' in list_of_files or '.bin' in list_of_files:
 				return True
 			else:
@@ -191,7 +196,7 @@ class FtpGameList():
 			psp_list =  psp_list + (' |      ___|   |       \n')
 			psp_list =  psp_list + ('_______________________\n')
 
-			filtered_psplines = filter(iso_filter, psplines)
+			filtered_psplines = filter(lambda x: x.endswith('.bin') or x.endswith('.iso'), psplines)
 			if len(filtered_psplines) > 0:
 				for isoname in filtered_psplines:
 					psp_list = psp_list + (pspiso_path + isoname) + '\n'
@@ -208,7 +213,7 @@ class FtpGameList():
 			psx_list =  psx_list + (' |      ___|    _/  \_  \n')
 			psx_list =  psx_list + ('_______________________ \n')
 
-			filtered_psxlines = filter(iso_filter, psxlines)
+			filtered_psxlines = filter(lambda x: x.endswith('.bin') or x.endswith('.iso'), psxlines)
 			if len(filtered_psxlines) > 0:
 				for isoname in filtered_psxlines:
 					psx_list = psx_list + (psxiso_path + isoname) + '\n'
@@ -226,11 +231,13 @@ class FtpGameList():
 			ps2_list = ps2_list + (' |      ___|   |_____  \n')
 			ps2_list = ps2_list + ('_______________________\n')
 
-			print(os.listdir(os.getcwd()))
+			if os.path.isfile(os.path.join(AppPaths.util_scripts, 'game_list_data.json') is False):
+				copyfile(os.path.join(AppPaths.util_resources, 'game_list_data.json.BAK'), os.path.join(AppPaths.util_scripts, 'game_list_data.json'))
+
 			with open(os.path.join(current_dir, game_list_data)) as f:
 				json_game_list_data = json.load(f)
 
-			filtered_ps2lines = filter(iso_filter, ps2lines)
+			filtered_ps2lines = filter(lambda x: x.endswith('.bin') or x.endswith('.iso'), ps2lines)
 			null = None
 			# game_exist = False
 			chunk_size_kb = 750
@@ -358,7 +365,7 @@ class FtpGameList():
 			ps3_list = ps3_list + (' |      ___|    _____] \n')
 			ps3_list = ps3_list + ('_______________________\n')
 
-			filtered_ps3lines = filter(iso_filter, ps3lines)
+			filtered_ps3lines = filter(lambda x: x.endswith('.bin') or x.endswith('.iso'), ps3lines)
 			if len(filtered_ps3lines) > 0:
 				for isoname in filtered_ps3lines:
 					ps3_list = ps3_list + (ps3iso_path + isoname) + '\n'
@@ -384,12 +391,12 @@ class FtpGameList():
 				psn_list = psn_list + ('No PSN games found.\n')
 			ftp_game_list = ftp_game_list + psn_list + '\n'
 
-		with open(os.path.join(current_dir, '../../../game_list.txt'), "wb") as f:
+		with open(os.path.join(AppPaths.application_path, 'game_list.txt'), "wb") as f:
 			f.write(ftp_game_list)
 
-		with open(os.path.join(current_dir, '../util_resources/pkg.json.BAK')) as f:
+		with open(os.path.join(AppPaths.util_resources, 'pkg.json.BAK')) as f:
 			json_data = json.load(f)
 
-		with open(os.path.join(current_dir, 'game_list_data.json'), 'w') as newFile:
+		with open(game_list_data, 'w') as newFile:
 			json_text = json.dumps(json_game_list_data, indent=4, separators=(",", ":"))
 			newFile.write(json_text)

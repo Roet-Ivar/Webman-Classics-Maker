@@ -2,19 +2,12 @@ import json
 import os
 import sys
 from ftplib import FTP
-
-
-thisPath = os.path.dirname(os.path.realpath(__file__))
-if 'util_scripts' in thisPath:
-	CURRENT_DIR = thisPath
-else:
-	CURRENT_DIR = os.path.join(os.getcwd(), 'resources', 'tools', 'util_scripts')
-# print('DEBUG CURRENT_DIR: ' + CURRENT_DIR)
+from global_paths import App as AppPaths
 
 #Constants
 pause_message		= 'Press ENTER to continue...'
-mock_data_file		= os.path.join(CURRENT_DIR, '../util_resources/mock_ftp_game_list_response.txt')
-user_settings_file	= os.path.join(CURRENT_DIR, '../../../settings/ftp_settings.txt')
+mock_data_file		= os.path.join(AppPaths.util_resources, 'mock_ftp_game_list_response.txt')
+user_settings_file	= os.path.join(AppPaths.settings, 'ftp_settings.txt')
 
 pspiso_path 		= '/dev_hdd0/PSPISO/'
 psxiso_path 		= '/dev_hdd0/PSISO/'
@@ -171,7 +164,7 @@ if(show_psn_list):
 		psn_list = psn_list + ('No PSN games found.\n')
 	ftp_game_list = ftp_game_list + psn_list + '\n'
 
-with open(os.path.join(CURRENT_DIR, "../../../game_list.txt"), "wb") as f:
+with open(os.path.join(AppPaths.application_path, 'game_list.txt'), 'wb') as f:
 	f.write(ftp_game_list)
 	f.close()
 
