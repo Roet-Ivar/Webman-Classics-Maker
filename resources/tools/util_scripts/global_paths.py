@@ -1,19 +1,22 @@
 import sys, os
-
 if getattr(sys, 'frozen', False):
-    application_path = os.path.dirname(sys.executable)
+    application_path = os.path.join(os.path.dirname(sys.executable))
     running_mode = 'Frozen/executable'
+
+    if 'resources' == os.path.basename(application_path):
+        application_path = os.path.join(application_path, '..')
+
+    if 'wcm_gui' == os.path.basename(application_path):
+        application_path = os.path.join(application_path, '..', '..', '..', '..')
 else:
     try:
         app_full_path = os.path.realpath(__file__)
         application_path = os.path.dirname(app_full_path)
         running_mode = "Non-interactive (e.g. 'python myapp.py')"
 
-        print('DEBUG Running mode:', running_mode)
-        print('DEBUG Appliction path  :', application_path)
-
         if 'Non-interactive' in running_mode:
             application_path = os.path.join(application_path, '..', '..', '..')
+
     except NameError:
         application_path = os.getcwd()
         running_mode = 'Interactive'
@@ -38,14 +41,14 @@ class App:
     scetool         = os.path.join(tools, 'scetool')
     util_resources  = os.path.join(tools, 'util_resources')
     util_scripts    = os.path.join(tools, 'util_scripts')
-    wcm_gui         = os.path.join(tools, 'wcm_gui')
-
-    # in wcm_gui
-    wcm_work_dir    = os.path.join(wcm_gui, 'work_dir')
 
     # in util_scripts
     games_metadata  = os.path.join(util_scripts, 'games_metadata')
     pkgcrypt        = os.path.join(util_scripts, 'pkgcrypt')
+    wcm_gui         = os.path.join(util_scripts, 'wcm_gui')
+
+    # in wcm_gui
+    wcm_work_dir    = os.path.join(wcm_gui, 'work_dir')
 
 class Image:
     images          = os.path.join(App.resources, 'images')
@@ -61,6 +64,8 @@ class Build:
     util_scripts     = App.util_scripts
     pyinstaller      = os.path.join(util_scripts, '_pyinstaller_and_release_scripts')
 
-    Param_SFO_Editor = os.path.join(application_path, 'Param_SFO_Editor')
+    Param_SFO_Editor = os.path.join(App.tools, 'Param_SFO_Editor')
+print("DEBUG in global_paths -> application_path: " + application_path)
 
-
+if not os.path.exists(os.path.join(App.wcm_work_dir, 'pkg')):
+    os.makedirs(os.path.join(App.wcm_work_dir, 'pkg'))

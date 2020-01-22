@@ -5,26 +5,24 @@
 
 import os, subprocess, sys
 from shutil import rmtree
+import application_path
 
-sys.path.append('../../wcm_gui')
-from global_paths import Image as ImagePaths
+from global_paths import App as AppPaths
 from global_paths import Build as BuildPaths
+from global_paths import Image as ImagePaths
 
 if not os.path.exists('build'):
 	os.makedirs('build')
 
-script_filename='build_all_scripts.py'
-script_folder_path=BuildPaths.util_scripts
+script_filename='build_pkg.py'
+script_folder_path=BuildPaths.pyinstaller
 
 icon_path=ImagePaths.misc
 icon_name='webman.ico'
 
 executable_name='Build_Webman_PKG'
-dist_path=BuildPaths.application_path
+dist_path=AppPaths.resources
 spec_path='build'
-
-zip_dir_path=BuildPaths.application_path
-zip_archive_name='webman_classics_maker.zip'
 
 app = 'pyinstaller.exe'
 args = '--distpath=' + dist_path + ' ' + '--specpath=' + spec_path + ' ' + '--name=' + executable_name + ' ' + '--onefile' + ' ' + '--icon=' + os.path.join(icon_path, icon_name) + ' ' + os.path.join(script_folder_path, script_filename)

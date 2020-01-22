@@ -1,6 +1,7 @@
+from Tkinter import Frame, Scrollbar, Listbox, LEFT, RIGHT, Y, END, Label
+import json, os, sys
+sys.path.append('..')
 from global_paths import App as AppPaths
-from Tkinter import Frame, Scrollbar, Listbox, LEFT, RIGHT, Y, END, TOP, Label
-import json, os
 
 
 

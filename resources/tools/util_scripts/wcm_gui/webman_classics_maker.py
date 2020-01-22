@@ -1,8 +1,13 @@
 import os, json, copy, shutil, sys
+
+# if it's an executable or if it's running from the wcm_gui
+if getattr(sys, 'frozen', False):
+    sys.path.append(os.path.join(os.path.dirname(sys.executable), 'resources', 'tools', 'util_scripts'))
+else:
+	sys.path.append('..')
+
 from global_paths import App as AppPaths
 from global_paths import Image as ImagePaths
-
-sys.path.append(AppPaths.util_scripts)
 
 from Tkinter import *
 from PIL import Image, ImageDraw, ImageFont
@@ -221,10 +226,6 @@ class Main():
 		self.ps3_system_logo = Image.open(os.path.join(ImagePaths.xmb, 'ps3_type_logo.png'))
 
 	def load_pkg_images(self, filename):
-		# make sure that necessary folders exist
-		if not os.path.exists(os.path.join(AppPaths.wcm_work_dir, 'pkg')):
-			os.makedirs(os.path.join(AppPaths.wcm_work_dir, 'pkg'))
-
 		default_pkg_img_dir = os.path.join(ImagePaths.pkg, 'default')
 		png_path = os.path.join(self.wcm_pkg_dir, filename)
 
@@ -296,7 +297,7 @@ class Main():
 		self.current_img = self.current_img.resize((int(1920 * scaling), int(1080 * scaling)), Image.ANTIALIAS)
 
 		self.tv_frame = Image.open(
-			os.path.join(self.WCM_BASE_PATH, '..', '..', 'images', 'misc', 'tv_frame_1080_ps3_3.png')).resize(
+			os.path.join(ImagePaths.misc, 'tv_frame_1080_ps3_3.png')).resize(
 			(int(1990 * scaling), int(1327 * scaling)), Image.ANTIALIAS)
 		self.current_img.paste(self.tv_frame, (int(45 * scaling), int(143 * scaling)), self.tv_frame)
 
@@ -308,7 +309,7 @@ class Main():
 			self.image_on_canvas = self.canvas.create_image(0, 0, anchor=NW, image=self.current_background)
 
 	def load_backgrounds(self):
-		base_path = os.path.join(self.WCM_BASE_PATH, '..', '..', 'images', 'backgrounds')
+		base_path = os.path.join(ImagePaths.images, 'backgrounds')
 		dark = Image.open(os.path.join(base_path, 'dark_transp.png'))
 		for files in os.walk(base_path):
 			for filenames in files:
@@ -940,7 +941,7 @@ class Main():
 		preview_img = Image.open(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG'))
 		icon_img = Image.open(os.path.join(self.wcm_pkg_dir, 'ICON0.PNG'))
 		print('DEBUG: ' + os.path.dirname(__file__))
-		xmb_img_dir = os.path.join(self.WCM_BASE_PATH, '..', '..', 'images', 'xmb', 'XMB_icons.png')
+		xmb_img_dir = os.path.join(ImagePaths.xmb, 'XMB_icons.png')
 		xmb_img = Image.open(xmb_img_dir)
 		preview_img.paste(icon_img, (425, 450), icon_img)
 		preview_img.paste(xmb_img, (0, 0), xmb_img)

@@ -8,10 +8,6 @@ from ftplib import FTP
 from shutil import copyfile
 from global_paths import App as AppPaths
 
-class FTPInstallChecker():
-	print()
-
-
 class GameMetadataFetcher():
 	def __init__(self, game_json_data):
 		game_data = game_json_data
@@ -393,9 +389,6 @@ class FtpGameList():
 
 		with open(os.path.join(AppPaths.application_path, 'game_list.txt'), "wb") as f:
 			f.write(ftp_game_list)
-
-		with open(os.path.join(AppPaths.util_resources, 'pkg.json.BAK')) as f:
-			json_data = json.load(f)
 
 		with open(game_list_data, 'w') as newFile:
 			json_text = json.dumps(json_game_list_data, indent=4, separators=(",", ":"))

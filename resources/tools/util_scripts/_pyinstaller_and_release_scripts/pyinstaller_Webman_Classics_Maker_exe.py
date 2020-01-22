@@ -3,10 +3,10 @@
 # pyinstaller.exe --onefile --icon=./resources/image_resources/webman.ico ./resources/tools/util_scripts/build_all_scripts.py
 # NOTE: '--noconsole' is optional and seems to give a false positive on my AV
 
-import os, subprocess, sys
+import os, subprocess
 from shutil import rmtree
 
-sys.path.append('../../wcm_gui')
+import application_path
 from global_paths import Image as ImagePaths
 from global_paths import App as AppPaths
 
@@ -23,11 +23,7 @@ executable_name='Webman_Classics_Maker'
 dist_path=AppPaths.application_path
 spec_path='build'
 
-zip_dir_path=AppPaths.application_path
-zip_archive_name = 'webman_classics_maker.zip'
-
-
-hidden_imports = '--hidden-import=' + 'ConfigParser' + ' ' + '--hidden-import=' + 'glob' + ' ' + '--hidden-import=' + 'PIL'
+hidden_imports = '--hidden-import=' + 'ConfigParser' + ' ' + '--hidden-import=' + 'glob'
 
 app = 'pyinstaller.exe'
 args = hidden_imports + ' ' + '--distpath=' + dist_path + ' ' + '--specpath=' + spec_path + ' ' + '--name=' + executable_name + ' ' + '--onefile' + ' ' + '--icon=' + os.path.join(icon_path, icon_name) + ' ' + os.path.join(script_folder_path, script_filename)

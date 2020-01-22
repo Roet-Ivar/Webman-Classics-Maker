@@ -1,7 +1,5 @@
 import sys, os, zipfile
-
-
-sys.path.append('../../wcm_gui')
+import application_path
 from global_paths import Build as BuildPaths
 
 import pyinstaller_Build_Webman_PKG_exe
@@ -22,7 +20,6 @@ def zipdir(path, ziph):
 	ftp_list_exe = 'FTP_Game_List.exe'
 
 	# TODO: No more CHDIR plz!
-
 	# files folders to exclude
 	os.chdir(path)
 	for root, dirs, files in os.walk('./'):
@@ -40,15 +37,20 @@ def zipdir(path, ziph):
 			dirs.remove('icons')
 		if 'tv_frames' in dirs:
 			dirs.remove('tv_frames')
+		if 'work_dir' in dirs:
+			dirs.remove('work_dir')
 		if 'xmb_capture' in dirs:
 			dirs.remove('xmb_capture')
-
+		if 'burnout_3_example' in dirs:
+			dirs.remove('burnout_3_example')
 
 		# files to exclude
 		if '.gitignore' in files:
 			files.remove('.gitignore')
 		if 'game_list.txt' in files:
 			files.remove('game_list.txt')
+		if 'Webman-Classics-Maker.iml' in files:
+			files.remove('Webman-Classics-Maker.iml')
 		if 'Webman-Classics-Maker.iml' in files:
 			files.remove('Webman-Classics-Maker.iml')
 		
@@ -74,8 +76,8 @@ if __name__ == '__main__':
 	zip_dir_path = BuildPaths.zip_dir
 	release_dir = BuildPaths.release
 	
-	if not os.path.exists(zip_dir_path + 'release'):
-		os.makedirs(zip_dir_path + 'release')
+	if not os.path.exists(os.path.join(zip_dir_path, 'release')):
+		os.makedirs(os.path.join(zip_dir_path, 'release'))
 
 	zipf = zipfile.ZipFile(os.path.join(release_dir, zip_archive_name), 'w', zipfile.ZIP_DEFLATED)
 	zipdir(zip_dir_path, zipf)

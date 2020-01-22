@@ -1,4 +1,5 @@
 import os, json
+
 from global_paths import App as AppPaths
 
 class Param_to_json:
@@ -8,7 +9,7 @@ class Param_to_json:
 
 
 		# load it
-		with open(os.path.join(AppPaths.pkg, 'PARAM.SFO'), 'rb') as f:
+		with open(os.path.join(AppPaths.util_resources, 'PARAM.SFO_MOD.BAK'), 'rb') as f:
 			file = f.read()
 			f.close()
 			
@@ -23,7 +24,7 @@ class Param_to_json:
 				json_data['content_id']='UP0001-'+ params_arr[1] + '_00-0000000000000000'
 				json_data['iso_filepath']=params_arr[3]
 
-				newFile = open(AppPaths.wcm_work_dir, 'pkg.json', 'wb')
+				newFile = open(os.path.join(AppPaths.wcm_work_dir, 'pkg.json'), 'wb')
 				json_text = json.dumps(json_data, indent=4, separators=(",", ":"))
 				
 				newFile.write(json_text)
@@ -31,4 +32,4 @@ class Param_to_json:
 				print('Execution of \'param_sfo_json.py\':          Done')
 				print('-----------------------------------------------')
 			except ValueError:
-				print('File write error/PKGLAUNCH not found/titel_id not a string')
+				print("File write error: 'PKGLAUNCH' not found or 'title_id' not a string")

@@ -18,6 +18,21 @@ else:
 	pkgcrypt_ver += '32'
 
 sys.path.append(os.path.join(AppPaths.pkgcrypt, pkgcrypt_ver))
+print('DEBUG AppPaths.pkgcrypt, pkgcrypt_ver): ' + os.path.join(AppPaths.pkgcrypt, pkgcrypt_ver))
+try:
+	import pkgcrypt
+except:
+	print("""
+	-----------------
+	PKG BUILD ERROR
+	-----------------
+	Couldn't make PKG file. Go into the ps3py directory, and type the following:
+	
+	python2 setup.py build
+	
+	This should create a pkgcrypt.so file in the build/ directory. Move that file
+	over to the root of the ps3py directory and try running this script again.""")
+
 
 class StructType(tuple):
 	def __getitem__(self, value):
@@ -529,20 +544,6 @@ def setContextNum(key, tmpnum):
 	key[0x3d] = ord(tmpchrs[5])
 	key[0x3e] = ord(tmpchrs[6])
 	key[0x3f] = ord(tmpchrs[7])
-
-try:
-	import pkgcrypt
-except:
-	print("""
-	-----------------
-	PKG BUILD ERROR
-	-----------------
-	Couldn't make PKG file. Go into the ps3py directory, and type the following:
-	
-	python2 setup.py build
-	
-	This should create a pkgcrypt.so file in the build/ directory. Move that file
-	over to the root of the ps3py directory and try running this script again.""")
 
 
 def crypt(key, inbuf, length):
