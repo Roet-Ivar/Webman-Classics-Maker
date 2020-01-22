@@ -12,7 +12,6 @@ else:
         application_path = os.path.dirname(app_full_path)
         running_mode = "Non-interactive"
 
-        print('DEBUG application_path1: ' + application_path)
         if 'wcm_gui' == os.path.basename(application_path):
             application_path = os.path.join(application_path, '..', '..', '..', '..')
         elif 'resources' == os.path.basename(application_path):

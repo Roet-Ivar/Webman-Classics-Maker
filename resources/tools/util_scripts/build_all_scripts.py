@@ -28,11 +28,11 @@ class Webman_PKG:
 
 		# clean up .pyc-files
 		import os
-		util_scipts = AppPaths.util_scripts
-		util_scripts_items = os.listdir(util_scipts)
+		util_scripts = AppPaths.util_scripts
+		util_scripts_items = os.listdir(util_scripts)
 		for item in util_scripts_items:
 			if item.endswith(".pyc"):
-				os.remove(os.path.join(util_scipts, item))
+				os.remove(os.path.join(util_scripts, item))
 
 		wcm_gui = AppPaths.wcm_gui
 		wcm_gui_items = os.listdir(wcm_gui)
@@ -40,10 +40,4 @@ class Webman_PKG:
 			if item.endswith(".pyc"):
 				os.remove(os.path.join(wcm_gui, item))
 
-
 		return pkg_name
-
-
-
-
-		# os.system("pause")
