@@ -11,12 +11,27 @@ except ImportError:
 
 class ComboBox:
 
-    def make_combo_box(self, root, x, y):
+    def make_combo_box(self, root, frame, x, y):
         # disabled PSP for now
         # combobox = ttk.Combobox(root, values=["All", "PSP", "PSX", "PS2", "PS3"])
-        combobox = ttk.Combobox(root, values=["All", "PSX", "PS2", "PS3"])
-        combobox.place(x=x, y=y)
-        combobox.current(3)
+        self.root = root
+        self.frame = frame
+        self.combobox = ttk.Combobox(root, values=["All", "PSX", "PS2", "PS3"])
+        self.combobox.place(x=x, y=y)
+        self.combobox.current(3)
 
-        return combobox
+        frame.bind('<Enter>', self._bound_to_mousewheel)
+        frame.bind('<Leave>', self._unbound_to_mousewheel)
+
+        return self.combobox
+
+    def _bound_to_mousewheel(self, event):
+        self.frame.bind_all("<MouseWheel>", self._on_mousewheel)
+
+    def _unbound_to_mousewheel(self, event):
+        self.frame.unbind_all("<MouseWheel>")
+
+    def _on_mousewheel(self, event):
+        self.frame.yview_scroll(int(-1*(event.delta/30)), "units")
+
 

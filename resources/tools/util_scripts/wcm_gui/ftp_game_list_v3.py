@@ -8,15 +8,15 @@ if getattr(sys, 'frozen', False):
 else:
     sys.path.append('..')
 
-import ftp_settings
 from global_paths import App as AppPaths
-
+sys.path.append(AppPaths.settings)
+import ftp_settings
 
 class FtpGameList():
     def __init__(self):
 
         # makes sure there is a json_game_list file
-        if os.path.isfile(os.path.join(AppPaths.util_scripts, 'game_list_data.json') is False):
+        if os.path.isfile(os.path.join(AppPaths.util_scripts, 'game_list_data.json')) is False:
             copyfile(os.path.join(AppPaths.util_resources, 'game_list_data.json.BAK'), os.path.join(AppPaths.util_scripts, 'game_list_data.json'))
 
         # messages
@@ -54,9 +54,10 @@ class FtpGameList():
         self.chunk_size_kb          = ftp_settings.chunk_size_kb
         self.ps3_lan_ip             = ftp_settings.ps3_lan_ip
         self.ftp_timeout            = ftp_settings.ftp_timeout
-        self.is_passive_mode 	    = ftp_settings.is_passive_mode
-        self.ftp_user 			    = ftp_settings.ftp_user
+        self.ftp_passive_mode       = ftp_settings.ftp_passive_mode
+        self.ftp_user               = ftp_settings.ftp_user
         self.ftp_password           = ftp_settings.ftp_password
+        self.use_mock_data          = False
 
         self.show_psp_list 		    = ftp_settings.show_psx_list
         self.show_psx_list 		    = ftp_settings.show_psx_list
@@ -101,7 +102,7 @@ class FtpGameList():
         try:
             print('Connecting to PS3 at: ' + self.ps3_lan_ip + ' ...')
             ftp = FTP(self.ps3_lan_ip, timeout=self.ftp_timeout)
-            ftp.set_pasv=self.is_passive_mode
+            ftp.set_pasv=self.ftp_passive_mode
             ftp.login(user=self.ftp_user, passwd=self.ftp_password)
 
             ftp.retrlines('NLST ' + self.PSP_ISO_PATH, self.psplines.append)
@@ -292,7 +293,7 @@ class FtpGameList():
                     self.ps2_list.join(self.PS2_ISO_PATH + isoname + '\n')
                 self.ps2_list.join('\n')
             else:
-                self.ps2_lis.join('No PS2 ISOs found.\n')
+                self.ps2_list.join('No PS2 ISOs found.' + '\n')
             self.ftp_game_list.join(self.ps2_list + '\n')
 
         if(self.show_ps3_list):
@@ -323,8 +324,8 @@ class FtpGameList():
 
 
         # write game list to files
-        with open(os.path.join(AppPaths.application_path, 'game_list.txt'), "wb") as f:
-            f.write(ftp_game_list)
+        with open(os.path.join(AppPaths.application_path, 'game_list.txt'), 'wb') as f:
+            f.write(self.ftp_game_list)
 
         with open(self.GAME_LIST_DATA_FILE, 'w') as newFile:
             json_text = json.dumps(json_game_list_data, indent=4, separators=(",", ":"))

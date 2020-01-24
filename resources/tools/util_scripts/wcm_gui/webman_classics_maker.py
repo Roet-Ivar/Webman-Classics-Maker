@@ -14,7 +14,7 @@ from PIL import Image, ImageDraw, ImageFont
 from PIL.ImageTk import PhotoImage
 from tkFileDialog import askopenfile
 from game_listbox import Gamelist
-from ftp_game_list_v2 import FtpGameList
+from ftp_game_list_v3 import FtpGameList
 
 # check python version less than 3
 if sys.version_info[0] > 2:
@@ -136,8 +136,10 @@ class Main():
 
 		from combo_box import ComboBox
 		cb = ComboBox()
-		box = cb.make_combo_box(self.canvas, 1100, 247)
+		box = cb.make_combo_box(self.canvas, game_list_box, 1100, 247)
 		box.config(width='4', state="readonly")
+
+
 
 	def smaller_button_maker(self, text, **args):
 		font = None
