@@ -164,7 +164,7 @@ if(show_psn_list):
 		psn_list = psn_list + ('No PSN games found.\n')
 	ftp_game_list = ftp_game_list + psn_list + '\n'
 
-with open(os.path.join(AppPaths.application_path, 'game_list.txt'), 'wb') as f:
+with open(os.path.join(AppPaths.resources, 'game_list.txt'), 'wb') as f:
 	f.write(ftp_game_list)
 	f.close()
 

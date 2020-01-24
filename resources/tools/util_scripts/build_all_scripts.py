@@ -24,7 +24,7 @@ class Webman_PKG:
 			webman_pkg = Webman_pkg()
 			pkg_name = webman_pkg.execute()
 		except Exception as e:
-			print('Could not build and/or pkg_name!\nError: ' + e.message)
+			print('Could not build pkg and/or return pkg_name!\nError: ' + e.message)
 
 		# clean up .pyc-files
 		import os

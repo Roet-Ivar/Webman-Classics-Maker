@@ -65,7 +65,6 @@ class Build:
     pyinstaller      = os.path.join(util_scripts, '_pyinstaller_and_release_scripts')
 
     Param_SFO_Editor = os.path.join(App.tools, 'Param_SFO_Editor')
-print("DEBUG in global_paths -> application_path: " + application_path)
 
 if not os.path.exists(os.path.join(App.wcm_work_dir, 'pkg')):
     os.makedirs(os.path.join(App.wcm_work_dir, 'pkg'))

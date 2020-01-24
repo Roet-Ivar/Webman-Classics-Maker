@@ -18,7 +18,6 @@ else:
 	pkgcrypt_ver += '32'
 
 sys.path.append(os.path.join(AppPaths.pkgcrypt, pkgcrypt_ver))
-print('DEBUG AppPaths.pkgcrypt, pkgcrypt_ver): ' + os.path.join(AppPaths.pkgcrypt, pkgcrypt_ver))
 try:
 	import pkgcrypt
 except:
