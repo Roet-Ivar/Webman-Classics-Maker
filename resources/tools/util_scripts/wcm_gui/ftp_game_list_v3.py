@@ -14,11 +14,6 @@ import ftp_settings
 
 class FtpGameList():
     def __init__(self):
-
-        # makes sure there is a json_game_list file
-        if os.path.isfile(os.path.join(AppPaths.util_scripts, 'game_list_data.json')) is False:
-            copyfile(os.path.join(AppPaths.util_resources, 'game_list_data.json.BAK'), os.path.join(AppPaths.util_scripts, 'game_list_data.json'))
-
         # messages
         self.PAUSE_MESSAGE	            = 'Press ENTER to continue...'
         self.CONNECTION_ERROR_MESSAGE   = 'Check your PS3 ip in webMAN (hold START + SELECT on the XMB), then update: ' + os.path.join(AppPaths.settings, 'ftp_settings.txt')
@@ -135,15 +130,6 @@ class FtpGameList():
                 print(self.PAUSE_MESSAGE)
 
 
-        def iso_filter(list_of_files):
-            list_of_files = list_of_files.lower()
-
-            if '.iso' in list_of_files or '.bin' in list_of_files:
-                return True
-            else:
-                return False
-
-
         if(self.show_psx_list):
             platform = 'psp'
             self.psp_list = self.psp_list_intro
@@ -202,20 +188,22 @@ class FtpGameList():
 
                     try:
                         title_id = dl.get_title_id(filename, 0, self.chunk_size_kb)
-                        print('Added new game: ' + game_filename + '\nGame_id: ' + str(title_id))
+                        # print('Added new game to the list: ' + game_filename + '\nGame_id: ' + str(title_id) + '\n' + 'Title: ' + str(title) + '\n')
 
                     # retry connection
-                    except Exception:
-                        print('Connection timed out when adding: ' + game_filename + '\nAuto retry attempt in 10s ...')
+                    except Exception as e:
+                        print('Connection timed during attempt to add: ' + game_filename + '\nAuto retry attempt in' + str(self.ftp_timeout) + ' s...')
+                        print('DEBUG in ftp_game_list execute: ' + e.message)
+
                         ftp.close()
                         time.sleep(10)
 
                         ftp = FTP(self.ps3_lan_ip, timeout=30)
+                        ftp.set_pasv(False)
                         ftp.login(user='', passwd='')
 
                         dl = FTPChunkDownloader(ftp)
                         title_id = dl.get_title_id(filename, 0, self.chunk_size_kb)
-
 
                     with open(os.path.join(AppPaths.games_metadata, 'region_list.json')) as f:
                         region_json_data = json.load(f)
@@ -374,6 +362,7 @@ class FTPChunkDownloader():
         self.sio = StringIO.StringIO()
         self.cnt = cnt * 1024
         self.ftp.voidcmd('TYPE I')
+
         conn = self.ftp.transfercmd('RETR ' + ftp_filename, rest)
         game_id = self.null
 
@@ -387,10 +376,11 @@ class FTPChunkDownloader():
                     self.ftp.voidresp()
 
                 # intended exception: this is thrown when the data chunk been stored in buffer
-                except Exception:
+                except Exception as e:
                     game_id = get_id_from_buffer(self, self.sio.getvalue())
                     self.sio.close()
                     conn.close()
+                    print('DEBUG in fill_buffer: ' + e.message)
                     break
         return game_id
 

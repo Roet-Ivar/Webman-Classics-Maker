@@ -1,5 +1,6 @@
 from Tkinter import Frame, Scrollbar, Listbox, LEFT, RIGHT, Y, END, Label
 import json, os, sys
+from shutil import copyfile
 sys.path.append('..')
 from global_paths import App as AppPaths
 
@@ -8,6 +9,10 @@ from global_paths import App as AppPaths
 class Gamelist():
 
     def __init__(self, ref_title_id, ref_title, ref_filename):
+        # makes sure there is a json_game_list file
+        if os.path.isfile(os.path.join(AppPaths.util_scripts, 'game_list_data.json')) is False:
+            copyfile(os.path.join(AppPaths.util_resources, 'game_list_data.json.BAK'), os.path.join(AppPaths.util_scripts, 'game_list_data.json'))
+
         self.WCM_BASE_PATH  = AppPaths.wcm_gui
 
         self.entry_title_id = ref_title_id
