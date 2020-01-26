@@ -15,21 +15,21 @@ import ftp_settings
 class FtpGameList():
     def __init__(self):
         # messages
-        self.PAUSE_MESSAGE	            = 'Press ENTER to continue...'
-        self.CONNECTION_ERROR_MESSAGE   = 'Check your PS3 ip in webMAN (hold START + SELECT on the XMB), then update: ' + os.path.join(AppPaths.settings, 'ftp_settings.txt')
+        self.PAUSE_MESSAGE              = 'Press ENTER to continue...'
+        self.CONNECTION_ERROR_MESSAGE   = "Find your PS3 ip in webMAN VSH menu (hold START + SELECT on the XMB), then update your 'ftp_settings.txt' accordingly"
         self.MOCK_DATA_MESSAGE          = 'DEBUG: Using PS2 ISO mock data for test purposes!'
         self.TITLE_ID_EXCEPTION_MESSAGE = 'Exception: get_title_id failed during regex operation.'
 
         # constants
-        self.MOCK_DATA_FILE	        = os.path.join(AppPaths.util_resources, 'mock_ftp_game_list_response.txt')
-        self.USER_SETTINGS_FILE	    = os.path.join(AppPaths.settings, 'ftp_settings.txt')
+        self.MOCK_DATA_FILE         = os.path.join(AppPaths.util_resources, 'mock_ftp_game_list_response.txt')
+        self.USER_SETTINGS_FILE     = os.path.join(AppPaths.settings, 'ftp_settings.txt')
         self.GAME_LIST_DATA_FILE    = os.path.join(AppPaths.util_scripts, 'game_list_data.json')
 
-        self.PSP_ISO_PATH 		    = '/dev_hdd0/PSPISO/'
-        self.PSX_ISO_PATH 		    = '/dev_hdd0/PSXISO/'
-        self.PS2_ISO_PATH 		    = '/dev_hdd0/PS2ISO/'
-        self.PS3_ISO_PATH 		    = '/dev_hdd0/PS3ISO/'
-        self.HDD_GAME_PATH 		    = '/dev_hdd0/game/'
+        self.PSP_ISO_PATH           = '/dev_hdd0/PSPISO/'
+        self.PSX_ISO_PATH           = '/dev_hdd0/PSXISO/'
+        self.PS2_ISO_PATH           = '/dev_hdd0/PS2ISO/'
+        self.PS3_ISO_PATH           = '/dev_hdd0/PS3ISO/'
+        self.HDD_GAME_PATH          = '/dev_hdd0/game/'
 
         # variables
         self.psplines   = []
@@ -37,6 +37,7 @@ class FtpGameList():
         self.ps2lines   = []
         self.ps3lines   = []
         self.psnlines   = []
+        self.all_lines  = []
 
         self.ftp_game_list  = ''
         self.psp_list       = ''
@@ -44,6 +45,12 @@ class FtpGameList():
         self.ps2_list       = ''
         self.ps3_list       = ''
         self.psn_list       = ''
+
+        # filters
+        self.psp_filter = lambda x: x.endswith('.bin') or x.endswith('.iso')
+        self.psx_filter = lambda x: x.endswith('.bin') or x.endswith('.iso')
+        self.ps2_filter = lambda x: x.endswith('.bin') or x.endswith('.iso')
+        self.ps3_filter = lambda x: x.endswith('.bin') or x.endswith('.iso')
 
         # ftp settings
         self.chunk_size_kb          = ftp_settings.chunk_size_kb
@@ -54,57 +61,35 @@ class FtpGameList():
         self.ftp_password           = ftp_settings.ftp_password
         self.use_mock_data          = False
 
+        # platforms to handle
         self.show_psp_list 		    = ftp_settings.show_psx_list
         self.show_psx_list 		    = ftp_settings.show_psx_list
         self.show_ps2_list 		    = ftp_settings.show_ps2_list
         self.show_ps3_list 		    = ftp_settings.show_ps3_list
         self.show_psn_list 		    = ftp_settings.show_psn_list
 
-        # ascii list intros
-        self.psp_list_intro = ''
-        self.psp_list_intro = self.psp_list_intro + (' ______     ___ _____  \n')
-        self.psp_list_intro = self.psp_list_intro + ('  _____|   |    _____| \n')
-        self.psp_list_intro = self.psp_list_intro + (' |      ___|   |       \n')
-        self.psp_list_intro = self.psp_list_intro + ('_______________________\n')
-
-        self.psx_list_intro = ''
-        self.psx_list_intro = self.psx_list_intro + (' ______     ___ _    _ \n')
-        self.psx_list_intro = self.psx_list_intro + ('  _____|   |     \__/  \n')
-        self.psx_list_intro = self.psx_list_intro + (' |      ___|    _/  \_ \n')
-        self.psx_list_intro = self.psx_list_intro + ('_______________________\n')
-
-        self.ps2_list_intro = ''
-        self.ps2_list_intro = self.ps2_list_intro + (' ______     ___ _____  \n')
-        self.ps2_list_intro = self.ps2_list_intro + ('  _____|   |    _____| \n')
-        self.ps2_list_intro = self.ps2_list_intro + (' |      ___|   |_____  \n')
-        self.ps2_list_intro = self.ps2_list_intro + ('_______________________\n')
-
-        self.ps3_list_intro = ''
-        self.ps3_list_intro = self.ps3_list_intro + (' ______     ___ _____  \n')
-        self.ps3_list_intro = self.ps3_list_intro + ('  _____|   |    _____] \n')
-        self.ps3_list_intro = self.ps3_list_intro + (' |      ___|    _____] \n')
-        self.ps3_list_intro = self.ps3_list_intro + ('_______________________\n')
-
-        self.psn_list_intro = ''
-        self.psn_list_intro = self.psn_list_intro + (' ______     ___ __   _ \n')
-        self.psn_list_intro = self.psn_list_intro + ('  _____|   |    | \  | \n')
-        self.psn_list_intro = self.psn_list_intro + (' |      ___|    |  \_| \n')
-        self.psn_list_intro = self.psn_list_intro + ('_______________________\n')
-
-
+        # singular instances
+        self.ftp = None
 
     def execute(self):
         try:
-            print('Connecting to PS3 at: ' + self.ps3_lan_ip + ' ...')
-            ftp = FTP(self.ps3_lan_ip, timeout=self.ftp_timeout)
-            ftp.set_pasv=self.ftp_passive_mode
-            ftp.login(user=self.ftp_user, passwd=self.ftp_password)
+            print('Connecting to PS3 at: ' + self.ps3_lan_ip + ', using a timeout of ' + str(self.ftp_timeout) + 's...\n')
+            self.ftp = FTP(self.ps3_lan_ip, timeout=self.ftp_timeout)
+            self.ftp.set_pasv=self.ftp_passive_mode
+            self.ftp.login(user=self.ftp_user, passwd=self.ftp_password)
 
-            ftp.retrlines('NLST ' + self.PSP_ISO_PATH, self.psplines.append)
-            ftp.retrlines('NLST ' + self.PSX_ISO_PATH, self.psxlines.append)
-            ftp.retrlines('NLST ' + self.PS2_ISO_PATH, self.ps2lines.append)
-            ftp.retrlines('NLST ' + self.PS3_ISO_PATH, self.ps3lines.append)
-            ftp.retrlines('NLST ' + self.HDD_GAME_PATH,self.psnlines.append)
+            self.ftp.retrlines('NLST ' + self.PSP_ISO_PATH, self.psplines.append)
+            self.ftp.retrlines('NLST ' + self.PSX_ISO_PATH, self.psxlines.append)
+            self.ftp.retrlines('NLST ' + self.PS2_ISO_PATH, self.ps2lines.append)
+            self.ftp.retrlines('NLST ' + self.PS3_ISO_PATH, self.ps3lines.append)
+            self.ftp.retrlines('NLST ' + self.HDD_GAME_PATH,self.psnlines.append)
+
+            self.all_lines.append(self.psplines)
+            self.all_lines.append(self.psxlines)
+            self.all_lines.append(self.ps2lines)
+            self.all_lines.append(self.ps3lines)
+
+            ftp_chunk_dl = FTPChunkDownloader(self.ftp)
 
         except Exception as e:
             error_message = str(e)
@@ -132,7 +117,6 @@ class FtpGameList():
 
         if(self.show_psx_list):
             platform = 'psp'
-            self.psp_list = self.psp_list_intro
             filtered_psplines = filter(lambda x: x.endswith('.bin') or x.endswith('.iso'), self.psplines)
             if len(filtered_psplines) > 0:
                 for iso_name in filtered_psplines:
@@ -144,7 +128,6 @@ class FtpGameList():
 
         if(self.show_psx_list):
             platform = 'psx'
-            self.psx_list = self.psx_list_intro
             filtered_psxlines = filter(lambda x: x.endswith('.bin') or x.endswith('.iso'), self.psxlines)
             if len(filtered_psxlines) > 0:
                 for isoname in filtered_psxlines:
@@ -157,12 +140,17 @@ class FtpGameList():
 
         if(self.show_ps2_list):
             platform = 'ps2'
-            self.ps2_list = self.ps2_list_intro
+
+            if 'ps2' == platform:
+                platform_list   = 'ps2_games'
+                platform_path   = self.PS2_ISO_PATH
+                platform_filter = self.ps2_filter
+                platform_lines  = self.ps2lines
 
             with open(self.GAME_LIST_DATA_FILE) as f:
                 json_game_list_data = json.load(f)
 
-            filtered_ps2lines = filter(lambda x: x.endswith('.bin') or x.endswith('.iso'), self.ps2lines)
+            filtered_ps2lines = filter(platform_filter, platform_lines)
             null = None
             # game_exist = False
 
@@ -173,54 +161,52 @@ class FtpGameList():
             for game_filename in filtered_ps2lines:
                 game_exist = False
 
-                for list_game in json_game_list_data['ps2_games']:
+                # check if game exist
+                for list_game in json_game_list_data[platform_list]:
                     if game_filename == list_game['filename']:
                         print('\nExisting game: ' + game_filename + '\n')
                         game_exist = True
                         pass
-                if not game_exist:
-                    filename = '/dev_hdd0/PS2ISO/' + game_filename
-                    try:
-                        dl = FTPChunkDownloader(ftp)
-                    except Exception as e:
-                        print('FTPChunkDownloader exception: ' + str(e))
-                        sys.exit()
 
+                # if not, add it
+                if not game_exist:
+                    game_filepath = platform_path + game_filename
                     try:
-                        title_id = dl.get_title_id(filename, 0, self.chunk_size_kb)
-                        # print('Added new game to the list: ' + game_filename + '\nGame_id: ' + str(title_id) + '\n' + 'Title: ' + str(title) + '\n')
+                        title_id = ftp_chunk_dl.get_title_id(game_filepath, 0, self.chunk_size_kb)
 
                     # retry connection
                     except Exception as e:
-                        print('Connection timed during attempt to add: ' + game_filename + '\nAuto retry attempt in' + str(self.ftp_timeout) + ' s...')
-                        print('DEBUG in ftp_game_list execute: ' + e.message)
+                        print('Connection timed out when adding: ' + game_filename + '\nAuto retry in ' + str(self.ftp_timeout) + ' s...\n')
 
-                        ftp.close()
-                        time.sleep(10)
+                        if '' is not e.message:
+                            print('DEBUG in ftp_game_list execute: ' + e.message)
 
-                        ftp = FTP(self.ps3_lan_ip, timeout=30)
-                        ftp.set_pasv(False)
-                        ftp.login(user='', passwd='')
+                        self.ftp.close()
+                        time.sleep(self.ftp_timeout)
 
-                        dl = FTPChunkDownloader(ftp)
-                        title_id = dl.get_title_id(filename, 0, self.chunk_size_kb)
+                        self.ftp = FTP(self.ps3_lan_ip, timeout=10)
+                        self.ftp.set_pasv=self.ftp_passive_mode
+                        self.ftp.login(user='', passwd='')
+
+                        ftp_chunk_dl = FTPChunkDownloader(self.ftp)
+                        title_id = ftp_chunk_dl.get_title_id(game_filepath, 0, self.chunk_size_kb)
 
                     with open(os.path.join(AppPaths.games_metadata, 'region_list.json')) as f:
                         region_json_data = json.load(f)
 
                     # gets all region list data based on platform
-                    id_region_list = region_json_data[platform.upper()]
-                    for id_reg in id_region_list:
-                        # find the correct region from title_id e.g: 'SLUS' -> U-NTSC PS2 games
-                        if len(str(title_id)) == 10 and title_id[0:4] in id_reg['id']:
-                            tmp_reg = id_reg['region']
-                            print('Platform/region: ' + platform.upper() + '/' + tmp_reg)
+                    region_ids = region_json_data[platform.upper()]
+                    for region_id in region_ids:
 
-                            # with the region we can now load the correct game DB (json file)
+                        # find the correct region from title_id e.g: 'SLUS' -> U-NTSC PS2 games
+                        if len(str(title_id)) == 10 and title_id[0:4] in region_id['id']:
+                            # print('DEBUG Platform/region: ' + platform.upper() + '/' + id_reg['region'].upper())
+
+                            # with a known region we can now load the correct game database (json file)
                             with open(os.path.join(AppPaths.games_metadata, 'ps2_pcsx2_list.json')) as f:
                                 games_list_json_data = json.load(f)
 
-                            # iterate through the games in the chosen DB (json file)
+                            # iterate through the games in the game database
                             games = games_list_json_data['games']
                             for game in games:
                                 # find a match in of title_id
@@ -241,11 +227,11 @@ class FtpGameList():
 
                     # if no title_id, use filename as title
                     if title_id is None:
-                        m_filename = re.search('ISO.*', filename)
+                        m_filename = re.search('ISO.*', game_filepath)
                         title = m_filename.group(0).replace('ISO/', '')
 
                     # check for duplicates of the same title in the list
-                    for game in json_game_list_data['ps2_games']:
+                    for game in json_game_list_data[platform_list]:
                         if str(title) == str(game['title']):
 
                             # check if there are earlier duplicates title + (1), (2) etc
@@ -261,11 +247,16 @@ class FtpGameList():
                                 title = str(title) + ' (1)'
 
 
-                    print('Added new game to the list: ' + game_filename + '\nGame_id: ' + str(title_id) + '\n' + 'Title: ' + str(title) + '\n')
+                    print("Added '" + str(title) + "' to the list:\n"
+                          + 'Platform: ' + platform.upper() + '\n'
+                          + 'Filename: ' + game_filename + '\n'
+                          + 'Title id: ' + str(title_id) + '\n')
+
+                    # add game to ps2 games
                     json_game_list_data['ps2_games'].append({
                         "title_id": title_id,
                         "title": title,
-                        "game_type": platform.upper(),
+                        "platform": platform.upper(),
                         "filename": game_filename,
                         "installed": null,
                         "meta_data_link": meta_data_link})
@@ -300,7 +291,6 @@ class FtpGameList():
 
         if(self.show_psn_list):
             platform = 'psn'
-            self.psn_list.join(self.psn_list_intro)
             if len(self.psnlines) > 0:
                 for game_name in self.psnlines:
                     if not game_name in ['.', '..']:
@@ -323,7 +313,7 @@ class FtpGameList():
 
 class FTPChunkDownloader():
     def __init__(self, ftp):
-        self.ftp = ftp
+        self.ftp_instance = ftp
         self.null = None
 
     def get_title_id(self, ftp_filename, rest, cnt):
@@ -361,9 +351,9 @@ class FTPChunkDownloader():
 
         self.sio = StringIO.StringIO()
         self.cnt = cnt * 1024
-        self.ftp.voidcmd('TYPE I')
+        self.ftp_instance.voidcmd('TYPE I')
 
-        conn = self.ftp.transfercmd('RETR ' + ftp_filename, rest)
+        conn = self.ftp_instance.transfercmd('RETR ' + ftp_filename, rest)
         game_id = self.null
 
         while 1:
@@ -373,14 +363,15 @@ class FTPChunkDownloader():
             if fill_buffer(self, data):
                 try:
                     conn.close()
-                    self.ftp.voidresp()
+                    self.ftp_instance.voidresp()
 
                 # intended exception: this is thrown when the data chunk been stored in buffer
                 except Exception as e:
                     game_id = get_id_from_buffer(self, self.sio.getvalue())
                     self.sio.close()
                     conn.close()
-                    print('DEBUG in fill_buffer: ' + e.message)
+                    if '451 ERR' not in e.message:
+                        print('DEBUG in fill_buffer: ' + e.message)
                     break
         return game_id
 

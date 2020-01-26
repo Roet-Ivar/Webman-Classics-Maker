@@ -18,7 +18,7 @@ from ftp_game_list_v3 import FtpGameList
 
 # check python version less than 3
 if sys.version_info[0] > 2:
-	print('Error: webMAN Classics Maker is only compatible with python 2.7 32/64')
+	print('Error: Webman Classics Maker is only compatible with python 2.7 32/64')
 	sys.exit(1)
 
 if 'linux' in sys.platform:
@@ -210,7 +210,6 @@ class Main():
 										   os.path.join(self.fonts_path, 'conthrax-sb.ttf'))
 		else:
 			tmp_font = str(font_name[0])
-			print(tmp_font)
 			self.draw_text_on_image_w_font(icon_bg_img, text, 7, 1, 15, 'white',
 										   os.path.join(self.fonts_path, tmp_font))
 		return copy.copy(icon_bg_img)
@@ -499,7 +498,6 @@ class Main():
 
 		# check if xmb_icons needs to be re-drawn
 		if img_name is None or 'pic1' in img_name:
-			print('DEBUG ' + str(img_name))
 			# draw xmb icons and system logo onto the background
 			self.image_pic1.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
 			self.image_pic1.paste(self.ps3_system_logo, (1180, 525), self.ps3_system_logo)
@@ -547,7 +545,6 @@ class Main():
 	def draw_text_on_image_w_shadow(self, image, text, text_x, text_y, text_size, text_outline, text_color,
 									shadow_color, **args):
 		if 'font' in args:
-			print(args['font'])
 			font = ImageFont.truetype(args['font'], text_size)
 		else:
 			font = ImageFont.truetype(os.path.join(self.fonts_path, 'SCE-PS3.ttf'), text_size)
