@@ -70,6 +70,7 @@ class FtpGameList():
 
         # singular instances
         self.ftp = None
+        self.ftp_chunk_dl = None
 
     def execute(self):
         try:
@@ -89,7 +90,7 @@ class FtpGameList():
             self.all_lines.append(self.ps2lines)
             self.all_lines.append(self.ps3lines)
 
-            ftp_chunk_dl = FTPChunkDownloader(self.ftp)
+            self.ftp_chunk_dl = FTPChunkDownloader(self.ftp)
 
         except Exception as e:
             error_message = str(e)
@@ -114,100 +115,94 @@ class FtpGameList():
             else:
                 print(self.PAUSE_MESSAGE)
 
-
-        if(self.show_psx_list):
-            platform = 'psp'
-            filtered_psplines = filter(lambda x: x.endswith('.bin') or x.endswith('.iso'), self.psplines)
-            if len(filtered_psplines) > 0:
-                for iso_name in filtered_psplines:
-                    self.psp_list.join(self.PSP_ISO_PATH + iso_name + '\n')
-                self.psp_list.join('\n')
-            else:
-                self.psp_list.join('No PSP ISOs found.\n')
-            self.ftp_game_list.join(self.psp_list + '\n')
-
-        if(self.show_psx_list):
-            platform = 'psx'
-            filtered_psxlines = filter(lambda x: x.endswith('.bin') or x.endswith('.iso'), self.psxlines)
-            if len(filtered_psxlines) > 0:
-                for isoname in filtered_psxlines:
-                    self.psx_list.join(self.PSX_ISO_PATH + isoname + '\n')
-                self.psx_list.join('\n')
-            else:
-                self.psx_list.join('No PSX ISOs found.\n')
-            self.ftp_game_list.join(self.psx_list + '\n')
+        # TODO clean this up
+        # iterate all platforms
+        with open(self.GAME_LIST_DATA_FILE) as f:
+            test = json.load(f)
+        for platfrm in test:
+            print('DEBUG platfrm: ' + platfrm[0:3])
+            self.json_game_list_data = self.list_builder(platfrm[0:3])
 
 
-        if(self.show_ps2_list):
-            platform = 'ps2'
+        with open(self.GAME_LIST_DATA_FILE, 'w') as newFile:
+            json_text = json.dumps(self.json_game_list_data, indent=4, separators=(",", ":"))
+            newFile.write(json_text)
 
-            if 'ps2' == platform:
-                platform_list   = 'ps2_games'
-                platform_path   = self.PS2_ISO_PATH
-                platform_filter = self.ps2_filter
-                platform_lines  = self.ps2lines
 
-            with open(self.GAME_LIST_DATA_FILE) as f:
-                json_game_list_data = json.load(f)
+    def list_builder(self, platform):
+        if 'psp' == platform.lower():
+            platform_list   = 'psp_games'
+            platform_path   = self.PSP_ISO_PATH
+            platform_filter = self.psp_filter
+            platform_lines  = self.psplines
+        elif 'psx' == platform.lower():
+            platform_list   = 'psx_games'
+            platform_path   = self.PSX_ISO_PATH
+            platform_filter = self.psx_filter
+            platform_lines  = self.psxlines
+        elif 'ps2' == platform.lower():
+            platform_list   = 'ps2_games'
+            platform_path   = self.PS2_ISO_PATH
+            platform_filter = self.ps2_filter
+            platform_lines  = self.ps2lines
+        elif 'ps3' == platform.lower():
+            platform_list   = 'ps3_games'
+            platform_path   = self.PS3_ISO_PATH
+            platform_filter = self.ps3_filter
+            platform_lines  = self.ps3lines
 
-            filtered_ps2lines = filter(platform_filter, platform_lines)
-            null = None
-            # game_exist = False
+        # filer the lines using the platform filter
+        filtered_lines = filter(platform_filter, platform_lines)
+        null = None     # to comply with json syntax
+        # game_exist = False
 
-            title = null
-            title_id = null
-            meta_data_link = null
+        title = null
+        title_id = null
+        meta_data_link = null
 
-            for game_filename in filtered_ps2lines:
-                game_exist = False
+        with open(self.GAME_LIST_DATA_FILE) as f:
+            self.json_game_list_data = json.load(f)
 
-                # check if game exist
-                for list_game in json_game_list_data[platform_list]:
-                    if game_filename == list_game['filename']:
-                        print('\nExisting game: ' + game_filename + '\n')
-                        game_exist = True
-                        pass
+        for game_filename in filtered_lines:
+            game_exist = False
 
-                # if not, add it
-                if not game_exist:
-                    game_filepath = platform_path + game_filename
-                    try:
-                        title_id = ftp_chunk_dl.get_title_id(game_filepath, 0, self.chunk_size_kb)
+            # check if game exist
+            for list_game in self.json_game_list_data[platform_list]:
+                if game_filename == list_game['filename']:
+                    print('\nSkipping game: ' + game_filename + ' already exists\n')
+                    game_exist = True
+                    pass
 
-                    # retry connection
-                    except Exception as e:
-                        print('Connection timed out when adding: ' + game_filename + '\nAuto retry in ' + str(self.ftp_timeout) + ' s...\n')
+            # if not, add it
+            if not game_exist:
 
-                        if '' is not e.message:
-                            print('DEBUG in ftp_game_list execute: ' + e.message)
+                # get title_id from PS3 using ftp
+                title_id = self.get_title_id_from_ps3(platform_path, game_filename)
 
-                        self.ftp.close()
-                        time.sleep(self.ftp_timeout)
+                if title_id is not None:
+                    # platform -> region -> title_id -> [game title, region, etc]
 
-                        self.ftp = FTP(self.ps3_lan_ip, timeout=10)
-                        self.ftp.set_pasv=self.ftp_passive_mode
-                        self.ftp.login(user='', passwd='')
-
-                        ftp_chunk_dl = FTPChunkDownloader(self.ftp)
-                        title_id = ftp_chunk_dl.get_title_id(game_filepath, 0, self.chunk_size_kb)
-
+                    # gets all region list data based on platform
                     with open(os.path.join(AppPaths.games_metadata, 'region_list.json')) as f:
                         region_json_data = json.load(f)
 
-                    # gets all region list data based on platform
                     region_ids = region_json_data[platform.upper()]
                     for region_id in region_ids:
 
                         # find the correct region from title_id e.g: 'SLUS' -> U-NTSC PS2 games
                         if len(str(title_id)) == 10 and title_id[0:4] in region_id['id']:
-                            # print('DEBUG Platform/region: ' + platform.upper() + '/' + id_reg['region'].upper())
 
                             # with a known region we can now load the correct game database (json file)
-                            with open(os.path.join(AppPaths.games_metadata, 'ps2_pcsx2_list.json')) as f:
-                                games_list_json_data = json.load(f)
+                            if 'ps2' == platform:
+                                # use the all in one  pcsx2 database
+                                platform_db_file = 'ps2_pcsx2_list.json'
+                            else:
+                                platform_db_file = platform + '_' + region_id['region'] + '_games_list.json'
+                            with open(os.path.join(AppPaths.games_metadata, platform_db_file)) as f:
+                                self.games_list_json_data = json.load(f)
 
                             # iterate through the games in the game database
-                            games = games_list_json_data['games']
+                            games = self.games_list_json_data['games']
                             for game in games:
                                 # find a match in of title_id
                                 if title_id == str(game['title_id']):
@@ -225,89 +220,90 @@ class FtpGameList():
                                         title = title.title()
                                     break
 
-                    # if no title_id, use filename as title
-                    if title_id is None:
+                # if no title_id is found, use filename as title
+                if title_id is None:
+                    game_filepath = os.path.join(platform_path, game_filename)
+
+                    if game_filepath.lower().endswith('iso'):
                         m_filename = re.search('ISO.*', game_filepath)
                         title = m_filename.group(0).replace('ISO/', '')
+                    elif game_filepath.lower().endswith('bin'):
+                        m_filename = re.search('BIN.*', game_filepath)
+                        title = m_filename.group(0).replace('BIN/', '')
 
-                    # check for duplicates of the same title in the list
-                    for game in json_game_list_data[platform_list]:
-                        if str(title) == str(game['title']):
+                # check for duplicates of the same title in the list
+                for game in self.json_game_list_data[platform_list]:
+                    if str(title) == str(game['title']):
 
-                            # check if there are earlier duplicates title + (1), (2) etc
-                            dup_title = re.search('\(\d{1,3}\)$', str(title))
-                            if dup_title is not None:
-                                pre = str(title)[:len(str(title))-3]
-                                suf = str(title)[len(str(title))-3:]
-                                new_suf = re.sub('\d(?!\d)', lambda x: str(int(x.group(0)) + 1), suf)
-                                title = pre + new_suf
+                        # check if there are earlier duplicates title + (1), (2) etc
+                        dup_title = re.search('\(\d{1,3}\)$', str(title))
+                        if dup_title is not None:
+                            pre = str(title)[:len(str(title))-3]
+                            suf = str(title)[len(str(title))-3:]
+                            new_suf = re.sub('\d(?!\d)', lambda x: str(int(x.group(0)) + 1), suf)
+                            title = pre + new_suf
 
-                            # no earlier duplicates, makes the first one (1)
-                            else:
-                                title = str(title) + ' (1)'
-
-
-                    print("Added '" + str(title) + "' to the list:\n"
-                          + 'Platform: ' + platform.upper() + '\n'
-                          + 'Filename: ' + game_filename + '\n'
-                          + 'Title id: ' + str(title_id) + '\n')
-
-                    # add game to ps2 games
-                    json_game_list_data['ps2_games'].append({
-                        "title_id": title_id,
-                        "title": title,
-                        "platform": platform.upper(),
-                        "filename": game_filename,
-                        "installed": null,
-                        "meta_data_link": meta_data_link})
-
-                    # reset game data for next iteration
-                    title 			= null
-                    title_id 		= null
-                    meta_data_link 	= null
-
-            # build the text list for manual use, just as the other platforms
-            if len(filtered_ps2lines) > 0:
-                for isoname in filtered_ps2lines:
-                    self.ps2_list.join(self.PS2_ISO_PATH + isoname + '\n')
-                self.ps2_list.join('\n')
-            else:
-                self.ps2_list.join('No PS2 ISOs found.' + '\n')
-            self.ftp_game_list.join(self.ps2_list + '\n')
-
-        if(self.show_ps3_list):
-            platform = 'ps3'
-
-            filtered_ps3lines = filter(lambda x: x.endswith('.bin') or x.endswith('.iso'), self.ps3lines)
-            if len(filtered_ps3lines) > 0:
-                for isoname in filtered_ps3lines:
-                    self.ps3_list.join(self.PS3_ISO_PATH + isoname + '\n')
-                self.ps3_list.join('\n')
-            else:
-                self.ps3_list.join('No PS3 ISOs found.\n')
-
-            self.ftp_game_list.join(self.ps3_list + '\n')
+                        # no earlier duplicates, makes the first one (1)
+                        else:
+                            title = str(title) + ' (1)'
 
 
-        if(self.show_psn_list):
-            platform = 'psn'
-            if len(self.psnlines) > 0:
-                for game_name in self.psnlines:
-                    if not game_name in ['.', '..']:
-                        self.psn_list.join(self.HDD_GAME_PATH + game_name + '\n')
-                self.psn_list.join('\n')
-            else:
-                self.psn_list.join('No PSN games found.\n')
-            self.ftp_game_list.join(self.psn_list + '\n')
+                print("Added '" + str(title) + "' to the list:\n"
+                      + 'Platform: ' + platform.upper() + '\n'
+                      + 'Filename: ' + game_filename + '\n'
+                      + 'Title id: ' + str(title_id) + '\n')
+
+                # add game to ps2 games
+                self.json_game_list_data[platform + '_games'].append({
+                    "title_id": title_id,
+                    "title": title,
+                    "platform": platform.upper(),
+                    "filename": game_filename,
+                    "path": platform_path,
+                    "meta_data_link": meta_data_link})
+
+                # reset game data for next iteration
+                title 			= null
+                title_id 		= null
+                meta_data_link 	= null
 
 
-        # write game list to files
-        with open(os.path.join(AppPaths.application_path, 'game_list.txt'), 'wb') as f:
-            f.write(self.ftp_game_list)
+        return self.json_game_list_data
 
-        with open(self.GAME_LIST_DATA_FILE, 'w') as newFile:
-            json_text = json.dumps(json_game_list_data, indent=4, separators=(",", ":"))
-            newFile.write(json_text)
+    def get_title_id_from_ps3(self, platform_path, game_filename):
+        game_filepath = os.path.join(platform_path, game_filename)
+
+        if self.ftp_chunk_dl is None:
+            raise Exception('ERROR: No instance of self.ftp_chunk_dl found.')
+
+        try:
+            title_id = self.ftp_chunk_dl.get_title_id(game_filepath, 0, self.chunk_size_kb)
+
+            # retry connection
+        except Exception as e:
+            print('Connection timed out when adding: ' + game_filename + '\nAuto retry in ' + str(self.ftp_timeout) + ' s...\n')
+
+            if '' is not e.message:
+                print('DEBUG in ftp_game_list execute: ' + e.message)
+
+            self.make_new_ftp()
+            self.ftp_chunk_dl = FTPChunkDownloader(self.ftp)
+
+            title_id = self.ftp_chunk_dl.get_title_id(game_filepath, 0, self.chunk_size_kb)
+
+        return title_id
+
+
+    def make_new_ftp(self):
+
+        if None is not self.ftp:
+            self.ftp.close()
+            time.sleep(self.ftp_timeout)
+
+        self.ftp = FTP(self.ps3_lan_ip, timeout=self.ftp_timeout)
+        self.ftp.set_pasv=self.ftp_passive_mode
+        self.ftp.login(user='', passwd='')
+
 
 
 

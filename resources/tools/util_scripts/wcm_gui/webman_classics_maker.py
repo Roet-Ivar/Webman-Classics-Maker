@@ -55,10 +55,10 @@ class Main():
 		self.title_id_maxlength = len('PKGLAUNCH')
 		self.tmp_title_id = ''
 
-		# setting defaults
-		self.state_drive_choice 	= 'dev_hdd0'
-		self.state_system_choice 	= 'PS2ISO'
+		self.drive_system_array = ['drive', 'system']
+
 		self.entry_field_iso_path 	= None
+
 		self.usb_port_number 		= 0
 
 		# images
@@ -127,7 +127,7 @@ class Main():
 		return password
 
 	def draw_game_listbox(self):
-		game_list = Gamelist(self.entry_field_title_id, self.entry_field_title, self.entry_field_filename)
+		game_list = Gamelist(self.entry_field_title_id, self.entry_field_title, self.entry_field_filename, self.entry_field_iso_path, self.drive_system_array)
 		game_list_frame = game_list.start()
 		game_list_box = game_list.get_game_listbox()
 		game_list_box.config(selectmode='SINGLE', activestyle='dotbox', borderwidth=0)
@@ -326,21 +326,21 @@ class Main():
 
 	def init_default_view(self, main):
 		# Constants
-		self.text_device = 'Device'
-		self.text_platform = 'Type'
+		self.text_device			= 'Device'
+		self.text_platform			= 'Type'
 
-		self.text_title_id = 'Title id'
-		self.text_title = 'Title'
-		self.text_filename = 'Filename'
-		self.text_iso_path = 'Path'
+		self.text_title_id			= 'Title id'
+		self.text_title				= 'Title'
+		self.text_filename			= 'Filename'
+		self.text_iso_path			= 'Path'
 
-		self.text_ftp_game_list = 'FTP Game list'
-		self.text_ps3_ip_label = 'PS3-ip'
-		self.text_ps3_usr_label = 'User'
-		self.text_ps3_pass_label = 'Pass'
+		self.text_ftp_game_list		= 'FTP Game list'
+		self.text_ps3_ip_label		= 'PS3-ip'
+		self.text_ps3_usr_label		= 'User'
+		self.text_ps3_pass_label	= 'Pass'
 
 		# Paddings
-		self.height_of_text = 15  # Font(font='Helvetica').metrics('linespace')
+		self.height_of_text		 = 15  # Font(font='Helvetica').metrics('linespace')
 		self.dark_side_x_padding = 20
 		self.dark_side_y_padding = 20
 
@@ -360,10 +360,20 @@ class Main():
 		self.iso_path_text_y_pos = self.dark_side_y_padding + self.filename_text_y_pos + self.height_of_text - 1
 
 		# entry fields
-		self.entry_field_title_id = Entry(main, validate='key', validatecommand=(self.vcmd, '%P'))
-		self.entry_field_title = Entry(main)
-		self.entry_field_filename = Entry(main)
-		self.entry_field_iso_path = Entry(main, state='readonly')
+		self.entry_field_title_id 	= Entry(main, validate='key', validatecommand=(self.vcmd, '%P'))
+		self.entry_field_title 		= Entry(main)
+		self.entry_field_filename 	= Entry(main)
+		self.entry_field_iso_path 	= Entry(main, state='readonly')
+
+		##########################################################################
+		# Adding an on_change-listener on 'entry_field_filename'
+		self.generate_on_change(self.entry_field_filename)
+		self.entry_field_filename.bind('<<Change>>', self.dynamic_filename_to_path)
+		###########################################################################
+		# Adding an on_change-listener on 'entry_field_title'
+		self.generate_on_change(self.entry_field_title)
+		self.entry_field_title.bind('<<Change>>', self.dynamic_title_to_pic1)
+		###########################################################################
 
 		self.entry_field_ftp_ip = Entry(main)
 		self.entry_field_ftp_ip.insert(0, self.get_ftp_ip_from_config())
@@ -382,28 +392,28 @@ class Main():
 		self.drive_path = self.selection_drive_list[0]  # drive should be toggled by buttons
 
 		self.button_HDD = Button(main, image=self.logo_drives[0], borderwidth=1,
-								 command=lambda: self.on_drive_button_push(self.selection_drive_list[0]))
+								 command=lambda: self.on_drive_button(self.selection_drive_list[0]))
 
 		self.button_USB = Button(main, image=self.logo_drives[1], borderwidth=1,
-								 command=lambda: self.on_drive_button_push(
+								 command=lambda: self.on_drive_button(
 									 self.selection_drive_list[self.usb_port_number + 1]))
 
 		self.button_PSP = Button(main, image=self.logo_systems[0], borderwidth=1,
-								 command=lambda: self.on_drive_and_system_button(self.state_drive_choice,
-																				 self.selection_system_list[0]))
+								 command=lambda: self.on_system_button(self.drive_system_array[0],
+																	   self.selection_system_list[0]))
 		self.button_PSP.config(state=DISABLED)
 
 		self.button_PSX = Button(main, image=self.logo_systems[1], borderwidth=1,
-								 command=lambda: self.on_drive_and_system_button(self.state_drive_choice,
-																				 self.selection_system_list[1]))
+								 command=lambda: self.on_system_button(self.drive_system_array[0],
+																	   self.selection_system_list[1]))
 
 		self.button_PS2 = Button(main, image=self.logo_systems[2], borderwidth=1,
-								 command=lambda: self.on_drive_and_system_button(self.state_drive_choice,
-																				 self.selection_system_list[2]))
+								 command=lambda: self.on_system_button(self.drive_system_array[0],
+																	   self.selection_system_list[2]))
 
 		self.button_PS3 = Button(main, image=self.logo_systems[3], borderwidth=1,
-								 command=lambda: self.on_drive_and_system_button(self.state_drive_choice,
-																				 self.selection_system_list[3]))
+								 command=lambda: self.on_system_button(self.drive_system_array[0],
+																	   self.selection_system_list[3]))
 
 		self.save_button = Button(main, image=self.function_buttons[0], borderwidth=0, command=self.validate_fields,
 								  bg="#FBFCFB")
@@ -482,16 +492,7 @@ class Main():
 			x=int((self.main_offset_x_pos + 80) * scaling),
 			y=int((self.main_offset_y_pos + 855) * scaling))
 
-		##########################################################################
-		# Adding an on_change-listener on 'entry_field_filename'
-		self.generate_on_change(self.entry_field_filename)
-		self.entry_field_filename.bind('<<Change>>', self.dynamic_filename_to_path)
-		###########################################################################
-		# Adding an on_change-listener on 'entry_field_title'
-		self.generate_on_change(self.entry_field_title)
-		self.entry_field_title.bind('<<Change>>', self.dynamic_title_to_pic1)
 
-	###########################################################################
 
 	def init_draw_images_on_canvas(self, main, *args, **kwargs):
 		img_name = kwargs.get('img_name', None)
@@ -596,7 +597,8 @@ class Main():
 
 		self.draw_background_on_canvas()
 
-	def on_drive_button_push(self, drive_choice):
+	def on_drive_button(self, drive_choice):
+		print('DEBUG on_drive_button')
 		# Check if same drive already set
 		if drive_choice in self.entry_field_iso_path.get():
 			print('DEBUG ' + '\'' + drive_choice + '\'' + ' already set')
@@ -610,65 +612,37 @@ class Main():
 				drive_choice = 'dev_usb00' + str(self.usb_port_number)
 
 		print('DEBUG drive_choice: ' + drive_choice)
-		self.state_drive_choice = drive_choice
+		self.drive_system_array[0] = drive_choice
 
-		current_iso_path = '/' + self.state_drive_choice + '/' + self.state_system_choice + '/' + self.entry_field_filename.get()
-		self.entry_field_iso_path.config(state=NORMAL)
-		self.entry_field_iso_path.delete(0, END)
-		self.entry_field_iso_path.insert(0, current_iso_path)
-		self.entry_field_iso_path.config(state='readonly')
-		print('DEBUG Default path set -> ' + self.entry_field_iso_path.get())
+		current_iso_path = '/' + self.drive_system_array[0] + '/' + self.drive_system_array[1] + '/' + self.entry_field_filename.get()
+		self.update_iso_path_entry_field(current_iso_path)
 
-	def on_drive_and_system_button(self, drive_choice, system_choice):
-		# # Check if same drive already set
-		# if drive_choice in self.entry_field_iso_path.get():
-		# 	print('DEBUG ' + '\'' + drive_choice + '\'' + ' already set')
-		# 	# if dev_usb### already set -> iterate port (0-3)
-		# 	if 'dev_usb00' in drive_choice:
-		# 		self.usb_port_number = self.usb_port_number +1
-		#
-		# 		if self.usb_port_number > 3:
-		# 			self.usb_port_number = 0
-		# 		print('DEBUG usb_port_number: ' + str(self.usb_port_number))
-		# 		drive_choice = 'dev_usb00' + str(self.usb_port_number)
-
+	def on_system_button(self, drive_choice, system_choice):
+		print('DEBUG on_system_button')
 		if system_choice in self.entry_field_iso_path.get():
 			print('DEBUG ' + '\'' + system_choice + '\'' + ' already set')
 
 		print('DEBUG system_choice: ' + system_choice)
-		# print('DEBUG drive_choice: ' + drive_choice)
+		self.drive_system_array[1] = system_choice
 
-		# self.state_drive_choice = drive_choice
-		self.state_system_choice = system_choice
-
-		current_iso_path = '/' + self.state_drive_choice + '/' + self.state_system_choice + '/' + self.entry_field_filename.get()
-		self.entry_field_iso_path.config(state=NORMAL)
-		self.entry_field_iso_path.delete(0, END)
-		self.entry_field_iso_path.insert(0, current_iso_path)
-		self.entry_field_iso_path.config(state='readonly')
-		print('DEBUG Default path set -> ' + self.entry_field_iso_path.get())
+		current_iso_path = '/' + str(self.drive_system_array[0]) + '/' + str(self.drive_system_array[1]) + '/' + self.entry_field_filename.get()
+		self.update_iso_path_entry_field(current_iso_path)
 
 		# Replace current drive
 		if drive_choice not in current_iso_path:
 			print('DEBUG drive_choice not in current_iso_path')
-			print('DEBUG ' + '\'' + self.state_drive_choice + '\'' + ' changed -> ' + '\'' + drive_choice + '\'')
-			current_iso_path = current_iso_path.replace(self.state_drive_choice, drive_choice)
-			self.entry_field_iso_path.config(state=NORMAL)
-			self.entry_field_iso_path.delete(0, END)
-			self.entry_field_iso_path.insert(0, current_iso_path)
-			self.entry_field_iso_path.config(state='readonly')
-			self.state_drive_choice = drive_choice
+			print('DEBUG ' + '\'' + self.drive_system_array[0] + '\'' + ' changed -> ' + '\'' + drive_choice + '\'')
+			current_iso_path = current_iso_path.replace(self.drive_system_array[0], drive_choice)
+			self.update_iso_path_entry_field(current_iso_path)
+			self.drive_system_array[0] = drive_choice
 
 		# Replace current system
 		if system_choice not in current_iso_path:
 			print('DEBUG system_choice not in current_iso_path')
-			print('DEBUG ' + '\'' + self.state_system_choice + '\'' + ' changed -> ' + '\'' + system_choice + '\'')
-			current_iso_path = current_iso_path.replace(self.state_system_choice, system_choice)
-			self.entry_field_iso_path.config(state=NORMAL)
-			self.entry_field_iso_path.delete(0, END)
-			self.entry_field_iso_path.insert(0, current_iso_path)
-			self.entry_field_iso_path.config(state='readonly')
-			self.state_system_choice = system_choice
+			print('DEBUG ' + '\'' + self.drive_system_array[1] + '\'' + ' changed -> ' + '\'' + system_choice + '\'')
+			current_iso_path = current_iso_path.replace(self.drive_system_array[1], system_choice)
+			self.update_iso_path_entry_field(current_iso_path)
+			self.drive_system_array[1] = system_choice
 
 	# Dynamic update of the 'entry_field_filename' into the 'entry_field_iso_path'
 	def dynamic_filename_to_path(self, event):
@@ -676,23 +650,23 @@ class Main():
 		system = ''
 		filename = event.widget.get()
 
-		if self.state_drive_choice is not '':
-			drive = '/' + self.state_drive_choice + '/'
-		if self.state_drive_choice is not '':
-			system = '/' + self.state_system_choice + '/'
+		if self.drive_system_array[0] is not None:
+			drive = '/' + self.drive_system_array[0] + '/'
+		if self.drive_system_array[1] is not None:
+			system = '/' + self.drive_system_array[1] + '/'
 
 		iso_path = drive + system + filename
 		iso_path = iso_path.replace('//', '/')
 
-		self.entry_field_iso_path.config(state=NORMAL)
+		self.entry_field_iso_path.xview_moveto(1)
+		self.update_iso_path_entry_field(iso_path)
+
+
+	def update_iso_path_entry_field(self, iso_path):
+		self.entry_field_iso_path.config(state='normal')
 		self.entry_field_iso_path.delete(0, END)
 		self.entry_field_iso_path.insert(0, iso_path)
-		self.entry_field_iso_path.xview_moveto(1)
 		self.entry_field_iso_path.config(state='readonly')
-
-		current_filename = self.entry_field_iso_path.get()
-
-	# print("entry_field_iso_path: " + current_filename)
 
 	# Dynamic update of the game title on to the PIC1 image
 	def dynamic_title_to_pic1(self, event):
@@ -925,9 +899,9 @@ class Main():
 
 	def save_ps3_ip_on_sync(self):
 		ip = str(self.entry_field_ftp_ip.get())
-
+		# save ip from entryfield to ftp_settings.py
 		if ip != '':
-			self.config_file['ps3_lan_ip'] = ip
+			self.ftp_se = ip
 			newFile = open(os.path.join(self.WCM_BASE_PATH, self.ftp_settings_path), "w")
 			json_text = json.dumps(self.config_file, indent=4, separators=(",", ":"))
 			newFile.write(json_text)
