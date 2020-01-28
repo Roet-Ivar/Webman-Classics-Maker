@@ -115,14 +115,15 @@ class FtpGameList():
             else:
                 print(self.PAUSE_MESSAGE)
 
-        # TODO clean this up
-        # iterate all platforms
         with open(self.GAME_LIST_DATA_FILE) as f:
-            test = json.load(f)
-        for platfrm in test:
-            print('DEBUG platfrm: ' + platfrm[0:3])
-            self.json_game_list_data = self.list_builder(platfrm[0:3])
+            self.json_game_list_data = json.load(f)
 
+        for platform in self.json_game_list_data:
+            print('DEBUG platfrm: ' + platform[0:3])
+            print('DEBUG platfrm: ' + platform)
+
+            platform_list_data = self.list_builder(platform[0:3])
+            self.json_game_list_data[platform].extend(platform_list_data[platform])
 
         with open(self.GAME_LIST_DATA_FILE, 'w') as newFile:
             json_text = json.dumps(self.json_game_list_data, indent=4, separators=(",", ":"))
@@ -161,13 +162,13 @@ class FtpGameList():
         meta_data_link = null
 
         with open(self.GAME_LIST_DATA_FILE) as f:
-            self.json_game_list_data = json.load(f)
+           json_game_list_data = json.load(f)
 
         for game_filename in filtered_lines:
             game_exist = False
 
             # check if game exist
-            for list_game in self.json_game_list_data[platform_list]:
+            for list_game in json_game_list_data[platform_list]:
                 if game_filename == list_game['filename']:
                     print('\nSkipping game: ' + game_filename + ' already exists\n')
                     game_exist = True
@@ -253,8 +254,8 @@ class FtpGameList():
                       + 'Filename: ' + game_filename + '\n'
                       + 'Title id: ' + str(title_id) + '\n')
 
-                # add game to ps2 games
-                self.json_game_list_data[platform + '_games'].append({
+                # add game
+                json_game_list_data[platform + '_games'].append({
                     "title_id": title_id,
                     "title": title,
                     "platform": platform.upper(),
@@ -268,7 +269,7 @@ class FtpGameList():
                 meta_data_link 	= null
 
 
-        return self.json_game_list_data
+        return json_game_list_data
 
     def get_title_id_from_ps3(self, platform_path, game_filename):
         game_filepath = os.path.join(platform_path, game_filename)
@@ -288,7 +289,6 @@ class FtpGameList():
 
             self.make_new_ftp()
             self.ftp_chunk_dl = FTPChunkDownloader(self.ftp)
-
             title_id = self.ftp_chunk_dl.get_title_id(game_filepath, 0, self.chunk_size_kb)
 
         return title_id
@@ -303,8 +303,6 @@ class FtpGameList():
         self.ftp = FTP(self.ps3_lan_ip, timeout=self.ftp_timeout)
         self.ftp.set_pasv=self.ftp_passive_mode
         self.ftp.login(user='', passwd='')
-
-
 
 
 class FTPChunkDownloader():

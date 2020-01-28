@@ -8,30 +8,31 @@ from global_paths import App as AppPaths
 
 class Gamelist():
 
-    def __init__(self, entry_field_title_id, entry_field_title, entry_field_filename, entry_field_iso_path, drive_system_array):
+    def __init__(self, platform):
         # makes sure there is a json_game_list file
         if os.path.isfile(os.path.join(AppPaths.util_scripts, 'game_list_data.json')) is False:
             copyfile(os.path.join(AppPaths.util_resources, 'game_list_data.json.BAK'), os.path.join(AppPaths.util_scripts, 'game_list_data.json'))
 
+        self.platform_to_show = platform.lower() + '_games'
+
+        with open(os.path.join(AppPaths.util_scripts, 'game_list_data.json')) as f:
+            self.json_game_list_data = json.load(f)
+
+
+        print('platform_to_show: ' + self.platform_to_show)
         self.WCM_BASE_PATH  = AppPaths.wcm_gui
-
-        self.entry_field_title_id         = entry_field_title_id
-        self.entry_field_title            = entry_field_title
-        self.entry_field_filename         = entry_field_filename
-        self.entry_field_iso_path         = entry_field_iso_path
-
-        self.drive_system_array = drive_system_array
-
         self.last_selection = (None, 0)
-        # self.platform = 'ps2'
         self.list_of_items = []
 
 
-    def start(self):
-        self.create_main_frame()
-        return self.main_frame
+    def create_main_frame(self, entry_field_title_id, entry_field_title, entry_field_filename, entry_field_iso_path, drive_system_array):
+        self.entry_field_title_id   = entry_field_title_id
+        self.entry_field_title      = entry_field_title
+        self.entry_field_filename   = entry_field_filename
+        self.entry_field_iso_path   = entry_field_iso_path
+        self.drive_system_array     = drive_system_array
 
-    def create_main_frame(self):
+
         self.corrected_index = []
         self.main_frame = Frame()
         s = Scrollbar(self.main_frame)
@@ -43,63 +44,74 @@ class Gamelist():
         s['command'] = self._listbox.yview
         self._listbox['yscrollcommand'] = s.set
 
-        with open(os.path.join(AppPaths.util_scripts, 'game_list_data.json')) as f:
-            self.json_game_list_data = json.load(f)
 
-        for platform in self.json_game_list_data:
-            for list_game in self.json_game_list_data[platform]:
+        if 'all_games' == self.platform_to_show:
+            for platform in self.json_game_list_data:
+                for list_game in self.json_game_list_data[platform]:
+                    self.add_item(list_game['title'])
+
+        else:
+            for list_game in self.json_game_list_data[self.platform_to_show]:
                 self.add_item(list_game['title'])
-        if self._listbox.size() == 0:
-            for x in range(21):
-                self.add_item('')
+
+        for x in range(19 - self._listbox.size()):
+            self.add_item('')
+
 
         # adding shade to every other row of the list
-        for x in range(0, len(self.list_of_items)+1):
+        for x in range(0, self._listbox.size()):
             if x % 2 == 0:
                 self._listbox.itemconfig(x, {'fg': 'white'}, background='#001738')
             else:
                 self._listbox.itemconfig(x, {'fg': 'white'}, background='#001F4C')
 
         self.label = Label(self.main_frame)
-        self.cursor_poller()
+        self.selection_poller()
 
-    def cursor_poller(self):
-        self.label.after(200, self.cursor_poller)
+        return self.main_frame
+
+    def selection_poller(self):
+        self.label.after(200, self.selection_poller)
         # cursor har been initiated
         if self._listbox.curselection() is not ():
             new_selection = self._listbox.curselection()
             if new_selection[0] is not self.last_selection[0]:
-                for platform in self.json_game_list_data:
-                    for list_game in self.json_game_list_data[platform]:
-                        selected_title = self._listbox.get(new_selection[0])
-                        tmp_title = list_game['title']
-                        if selected_title == str(tmp_title):
-                            selected_title_id   = str(list_game['title_id'])
-                            selected_title      = str(list_game['title'])
-                            selected_path       = str(list_game['path'])
-                            selected_filename   = str(list_game['filename'])
+                self.entry_fields_update(new_selection)
 
-                            # parse drive and system from json data
-                            path_array = filter(None, selected_path.split('/'))
-                            self.drive_system_array[0] = path_array[0]
-                            self.drive_system_array[1] = path_array[1]
-
-                            self.entry_field_title_id.delete(0, END)
-                            self.entry_field_title_id.insert(0, selected_title_id.replace('-', ''))
-
-                            self.entry_field_title.delete(0, END)
-                            self.entry_field_title.insert(0, selected_title)
-
-                            self.entry_field_filename.delete(0, END)
-                            self.entry_field_filename.insert(0, selected_filename)
-
-                            break
             self.last_selection = new_selection
 
-    def get_selceted_path(self):
+    def entry_fields_update(self, new_selection):
+        for platform in self.json_game_list_data:
+            for list_game in self.json_game_list_data[platform]:
+                selected_title = self._listbox.get(new_selection[0])
+                tmp_title = list_game['title']
+                if selected_title == str(tmp_title):
+                    selected_title_id   = str(list_game['title_id'])
+                    selected_title      = str(list_game['title'])
+                    selected_path       = str(list_game['path'])
+                    selected_filename   = str(list_game['filename'])
+
+                    # parse drive and system from json data
+                    path_array = filter(None, selected_path.split('/'))
+                    self.drive_system_array[0] = path_array[0]
+                    self.drive_system_array[1] = path_array[1]
+
+                    self.entry_field_title_id.delete(0, END)
+                    self.entry_field_title_id.insert(0, selected_title_id.replace('-', ''))
+
+                    self.entry_field_title.delete(0, END)
+                    self.entry_field_title.insert(0, selected_title)
+
+                    self.entry_field_filename.delete(0, END)
+                    self.entry_field_filename.insert(0, selected_filename)
+
+                    break
+
+
+    def get_selected_path(self):
         return self.current_iso_path
 
-    def get_game_listbox(self):
+    def get_listbox(self):
         return self._listbox
 
     def get_ascending_index(self, list_of_items, item, ignore_case=False):
@@ -126,11 +138,14 @@ class Gamelist():
         return lo
 
     def add_item(self, item):
-        self.list_of_items = self._listbox.get(0, END)
+        if item != '':
+            self.list_of_items = self._listbox.get(0, END)
 
-        # getting ascending index in order to sort alphabetically
-        index = self.get_ascending_index(self.list_of_items, item)
-        self._listbox.insert(index, item)
+            # getting ascending index in order to sort alphabetically
+            index = self.get_ascending_index(self.list_of_items, item)
+            self._listbox.insert(index, item)
+        else:
+            self._listbox.insert(END, item)
 
     def get_items(self):
         return self.list_of_items

@@ -67,95 +67,106 @@ class Main:
 		self.usb_port_number 		= 0
 
 		# images
-		self.logo_drives = []
-		self.logo_drives.append(PhotoImage(self.smaller_button_maker('HDD', font='conthrax-sb.ttf', x=-1, y=-2)))
-		self.logo_drives.append(PhotoImage(self.smaller_button_maker('USB', font='conthrax-sb.ttf', x=-1, y=-2)))
+		self.images_logo_drive = []
+		self.images_logo_drive.append(PhotoImage(self.smaller_button_maker('HDD', font='conthrax-sb.ttf', x=-1, y=-2)))
+		self.images_logo_drive.append(PhotoImage(self.smaller_button_maker('USB', font='conthrax-sb.ttf', x=-1, y=-2)))
 
-		self.logo_systems = []
-		self.logo_systems.append(PhotoImage(self.smaller_button_maker('PSP', font='conthrax-sb.ttf', x=-1, y=-2)))
-		self.logo_systems.append(PhotoImage(self.smaller_button_maker('PSX', font='conthrax-sb.ttf', x=-1, y=-2)))
-		self.logo_systems.append(PhotoImage(self.smaller_button_maker('PS2', font='conthrax-sb.ttf', x=-1, y=-2)))
-		self.logo_systems.append(PhotoImage(self.smaller_button_maker('PS3', font='conthrax-sb.ttf', x=-1, y=-2)))
+		self.images_logo_system = []
+		self.images_logo_system.append(PhotoImage(self.smaller_button_maker('PSP', font='conthrax-sb.ttf', x=-1, y=-2)))
+		self.images_logo_system.append(PhotoImage(self.smaller_button_maker('PSX', font='conthrax-sb.ttf', x=-1, y=-2)))
+		self.images_logo_system.append(PhotoImage(self.smaller_button_maker('PS2', font='conthrax-sb.ttf', x=-1, y=-2)))
+		self.images_logo_system.append(PhotoImage(self.smaller_button_maker('PS3', font='conthrax-sb.ttf', x=-1, y=-2)))
 
-		self.function_buttons = []
-		self.function_buttons.append(PhotoImage(self.small_button_maker('Save', font='arial.ttf', x=3, y=0)))
-		self.function_buttons.append(PhotoImage(self.small_button_maker('Build', font='arial.ttf', x=3, y=0)))
-		self.function_buttons.append(PhotoImage(self.small_button_maker('Quit', font='arial.ttf', x=3, y=0)))
-		self.function_buttons.append(PhotoImage(self.small_button_maker('Change', font='arial.ttf', x=-3, y=0)))
+		self.images_function_button = []
+		self.images_function_button.append(PhotoImage(self.small_button_maker('Save', font='arial.ttf', x=3, y=0)))
+		self.images_function_button.append(PhotoImage(self.small_button_maker('Build', font='arial.ttf', x=3, y=0)))
+		self.images_function_button.append(PhotoImage(self.small_button_maker('Quit', font='arial.ttf', x=3, y=0)))
+		self.images_function_button.append(PhotoImage(self.small_button_maker('Change', font='arial.ttf', x=-3, y=0)))
 
-		self.gamelist_buttons = []
-		self.gamelist_buttons.append(PhotoImage(self.small_button_maker('Sync', font='arial.ttf', x=3, y=0)))
-		self.gamelist_buttons.append(PhotoImage(self.small_button_maker('Refresh', font='arial.ttf', x=-1, y=0)))
+		self.images_gamelist_button = []
+		self.images_gamelist_button.append(PhotoImage(self.small_button_maker('Sync', font='arial.ttf', x=3, y=0)))
+		self.images_gamelist_button.append(PhotoImage(self.small_button_maker('Refresh', font='arial.ttf', x=-1, y=0)))
 
 		self.background_images = []
 		self.load_backgrounds()
 
+		# buttons
+		self.button_icon0	 = None
+		self.button_pic0 	 = None
+		self.button_pic1	 = None
+
+		self.button_HDD 	 = None
+		self.button_USB 	 = None
+
+		self.button_PSP 	 = None
+		self.button_PSX 	 = None
+		self.button_PS2 	 = None
+		self.button_PS3 	 = None
+
+		self.build_button 	 = None
+		self.save_button 	 = None
+
+		self.ftp_sync_button			= None
+		self.game_list_refresh_button	= None
+
+
 		# text messages
-		self.USB_BUTTON_TOOLTIP_MSG = "toggles the USB port (0-3)"
-		self.SAVE_BUTTON_TOOLTIP_MSG = "save to 'work_dir' folder"
+		self.USB_BUTTON_TOOLTIP_MSG = "toggle USB port (0-3)"
+		self.SAVE_BUTTON_TOOLTIP_MSG = "save 'work_dir' folder"
 		self.BUILD_BUTTON_TOOLTIP_MSG = "build and save the PKG"
-		self.SYNC_BUTTON_TOOLTIP_MSG = "syncs games over FTP"
-		self.REFRESH_BUTTON_TOOLTIP_MSG = "reloads gamelist from file"
+		self.SYNC_BUTTON_TOOLTIP_MSG = "sync games over FTP"
+		self.REFRESH_BUTTON_TOOLTIP_MSG = "reload gamelist from file"
+		self.ICON0_TOOLTIP_MSG = "Click to change ICON0"
+		self.PIC0_TOOLTIP_MSG = "Click to change  PIC0"
+		self.PIC1_TOOLTIP_MSG = "Click to change  PIC1"
 
 		# init definitions
 		self.init_pkg_images()
 		self.init_main_window_buttons(self.main)
 		self.init_default_view(self.main)
 		self.draw_background_on_canvas()
-		self.draw_game_listbox()
 
-
+		self.list_filter_platform = 'All'
+		self.display_game_listbox(self.list_filter_platform)
 
 	def get_ftp_ip_from_config(self):
-		with open(os.path.join(self.WCM_BASE_PATH, self.ftp_settings_path)) as f:
-			self.config_file = json.load(f)
-		ip = self.config_file['ps3_lan_ip']
+		return ftp_settings.ps3_lan_ip
 
-		if ip is None:
-			ip = ''
-		else:
-			ip = str(ip)
-		return ip
-
-	# TODO: read the ftp_settings.py instead
 	def get_ftp_user_from_config(self):
-		with open(os.path.join(self.WCM_BASE_PATH, self.ftp_settings_path)) as f:
-			self.config_file = json.load(f)
-		user = self.config_file['ftp_user']
-
-		user = ftp_settings.ftp_user
-
-		if user is None:
-			user = ''
-		else:
-			user = str(user)
-		return user
+		return ftp_settings.ftp_user
 
 	def get_ftp_pass_from_config(self):
-		with open(os.path.join(self.WCM_BASE_PATH, self.ftp_settings_path)) as f:
-			self.config_file = json.load(f)
-		password = self.config_file['ftp_password']
+		return ftp_settings.ftp_password
 
-		if password is None:
-			password = ''
-		else:
-			password = str(password)
-		return password
 
-	def draw_game_listbox(self):
-		game_list = Gamelist(self.entry_field_title_id, self.entry_field_title, self.entry_field_filename, self.entry_field_iso_path, self.drive_system_array)
-		game_list_frame = game_list.start()
-		game_list_box = game_list.get_game_listbox()
-		game_list_box.config(selectmode='SINGLE', activestyle='dotbox', borderwidth=0)
-		game_list_frame.place(x=int((self.main_offset_x_pos) * scaling), y=self.main_offset_y_pos + 220, width=270,
+	def display_game_listbox(self, platform):
+		# assemble game list
+		gamelist = Gamelist(platform)
+		game_list_frame = gamelist.create_main_frame(self.entry_field_title_id, self.entry_field_title, self.entry_field_filename, self.entry_field_iso_path, self.drive_system_array)
+		game_list_frame.place(x=int((self.main_offset_x_pos) * scaling),
+							  y=self.main_offset_y_pos + 220,
+							  width=270,
 							  height=300)
 
-		from combo_box import ComboBox
-		cb = ComboBox()
-		box = cb.make_combo_box(self.canvas, game_list_box, 1100, 247)
-		box.set('All')
-		box.config(width='4', state="readonly")
+		game_list_box = gamelist.get_listbox()
+		game_list_box.config(selectmode='SINGLE',
+							 activestyle='dotbox',
+							 borderwidth=0)
 
+
+
+		# render gamelist in combobox
+		from combo_box import ComboBox
+		self.box = ComboBox().make_combo_box(self.canvas, game_list_box, 1100, 247)
+		self.box.set('All')
+		self.box.config(width='4', state="readonly")
+		self.box.bind("<<ComboboxSelected>>", self.box_filter_callback)
+
+
+	def box_filter_callback(self, event):
+		self.list_filter_platform = event.widget.get()
+		self.display_game_listbox(self.list_filter_platform)
+		self.box.set(self.list_filter_platform)
 
 
 	def smaller_button_maker(self, text, **args):
@@ -409,18 +420,18 @@ class Main:
 		self.drive_path = self.selection_drive_list[0]  # drive should be toggled by buttons
 
 		self.button_HDD = Button(main,
-								 image=self.logo_drives[0],
+								 image=self.images_logo_drive[0],
 								 borderwidth=1,
 								 command=lambda: self.on_drive_button(self.selection_drive_list[0]))
 
 		self.button_USB = Button(main,
-								 image=self.logo_drives[1],
+								 image=self.images_logo_drive[1],
 								 borderwidth=1,
 								 command=lambda:
 								 self.on_drive_button(self.selection_drive_list[self.usb_port_number + 1]))
 
 		self.button_PSP = Button(main,
-								 image=self.logo_systems[0],
+								 image=self.images_logo_system[0],
 								 borderwidth=1,
 								 command=lambda:
 								 self.on_system_button(self.drive_system_array[0], self.selection_system_list[0]))
@@ -428,44 +439,44 @@ class Main:
 		self.button_PSP.config(state=DISABLED)
 
 		self.button_PSX = Button(main,
-								 image=self.logo_systems[1],
+								 image=self.images_logo_system[1],
 								 borderwidth=1,
 								 command=lambda:
 								 self.on_system_button(self.drive_system_array[0], self.selection_system_list[1]))
 
 		self.button_PS2 = Button(main,
-								 image=self.logo_systems[2],
+								 image=self.images_logo_system[2],
 								 borderwidth=1,
 								 command=lambda:
 								 self.on_system_button(self.drive_system_array[0], self.selection_system_list[2]))
 
 		self.button_PS3 = Button(main,
-								 image=self.logo_systems[3],
+								 image=self.images_logo_system[3],
 								 borderwidth=1,
 								 command=lambda:
 								 self.on_system_button(self.drive_system_array[0], self.selection_system_list[3]))
 
 		self.save_button = Button(main,
-								  image=self.function_buttons[0],
+								  image=self.images_function_button[0],
 								  borderwidth=0,
 								  command=self.validate_fields,
 								  bg="#FBFCFB")
 
 		self.build_button = Button(main,
-								   image=self.function_buttons[1],
+								   image=self.images_function_button[1],
 								   borderwidth=0,
 								   command=self.on_build_button,
 								   bg="#FBFCFB")
 
 		self.ftp_sync_button = Button(main,
-									  image=self.gamelist_buttons[0],
+									  image=self.images_gamelist_button[0],
 									  borderwidth=0,
 									  command=self.on_ftp_sync_button,
 									  bg="#FBFCFB")
 
 
 		self.game_list_refresh_button = Button(main,
-											   image=self.gamelist_buttons[1],
+											   image=self.images_gamelist_button[1],
 											   borderwidth=0,
 											   command=self.on_game_list_refresh,
 											   bg="#FBFCFB")
@@ -480,25 +491,32 @@ class Main:
 		# Entry placements
 		entry_field_width = 200
 		self.entry_field_title_id.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * scaling),
-										y=int(self.title_id_text_y_pos * scaling), width=entry_field_width)
+										y=int(self.title_id_text_y_pos * scaling),
+										width=entry_field_width)
 
 		self.entry_field_title.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * scaling),
-									 y=int(self.title_text_y_pos * scaling), width=entry_field_width)
+									 y=int(self.title_text_y_pos * scaling),
+									 width=entry_field_width)
 
 		self.entry_field_filename.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * scaling),
-										y=int(self.filename_text_y_pos * scaling), width=entry_field_width)
+										y=int(self.filename_text_y_pos * scaling),
+										width=entry_field_width)
 
 		self.entry_field_iso_path.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * scaling),
-										y=int(self.iso_path_text_y_pos * scaling), width=entry_field_width)
+										y=int(self.iso_path_text_y_pos * scaling),
+										width=entry_field_width)
 
 		self.entry_field_ftp_ip.place(x=int((self.main_offset_x_pos + 90) * scaling),
-									  y=int((self.main_offset_y_pos + 815) * scaling), width=90)
+									  y=int((self.main_offset_y_pos + 815) * scaling),
+									  width=90)
 
 		self.entry_field_ftp_user.place(x=int((self.main_offset_x_pos + 320) * scaling),
-										y=int((self.main_offset_y_pos + 815) * scaling), width=60)
+										y=int((self.main_offset_y_pos + 815) * scaling),
+										width=60)
 
 		self.entry_field_ftp_pass.place(x=int((self.main_offset_x_pos + 320) * scaling),
-										y=int((self.main_offset_y_pos + 850) * scaling), width=60)
+										y=int((self.main_offset_y_pos + 850) * scaling),
+										width=60)
 
 		# Button placements
 		self.button_HDD.place(x=int((self.text_box_spacing + self.main_offset_x_pos + 0 * 75) * scaling),
@@ -557,8 +575,12 @@ class Main:
 		self.photo_image_pic1 = PhotoImage(
 			self.image_pic1.resize((int(1280 * scaling), int(720 * scaling)), Image.ANTIALIAS))
 
-		self.button_pic1 = Button(main, image=self.photo_image_pic1, highlightthickness=0, bd=0,
+		self.button_pic1 = Button(main,
+								  image=self.photo_image_pic1,
+								  highlightthickness=0,
+								  bd=0,
 								  command=lambda: self.image_replace_browser(main))
+		CreateToolTip(self.button_pic1, self.PIC1_TOOLTIP_MSG)
 
 		# rezising and cropping 7 pixels from all sides (due to transparent borders)
 		icon0_x_scale = self.window_x_width / self.image_pic1.width * scaling
@@ -572,8 +594,13 @@ class Main:
 			(self.icon0_dimensions[0] - 7, self.icon0_dimensions[1] - 7), Image.ANTIALIAS)
 
 		self.photo_image_icon0 = PhotoImage(self.image_icon0_crop)
-		self.button_icon0 = Button(main, image=self.photo_image_icon0, highlightthickness=0, bd=0,
+		self.button_icon0 = Button(main,
+								   image=self.photo_image_icon0,
+								   highlightthickness=0,
+								   bd=0,
 								   command=lambda: self.image_replace_browser(main))
+		CreateToolTip(self.button_icon0, self.ICON0_TOOLTIP_MSG)
+
 
 		# finally placing PIC1 and ICON0 onto the canvas
 		self.button_pic1.place(x=75 * scaling, y=175 * scaling)
@@ -626,12 +653,11 @@ class Main:
 		return draw.text((text_x, text_y), text, fill=text_color, font=font)
 
 	def init_main_window_buttons(self, main):
-		# button to quit
-		self.quit_button = Button(main, borderwidth=0, image=self.function_buttons[2], command=main.quit, bd=1)
-		self.quit_button.place(x=0, y=1)
-
 		# button to change image
-		self.change_button = Button(main, borderwidth=0, image=self.function_buttons[3], command=self.on_change_button,
+		self.change_button = Button(main,
+									borderwidth=0,
+									image=self.images_function_button[3],
+									command=self.on_change_button,
 									bd=1)
 		self.change_button.place(x=40 + 13, y=1)
 
@@ -946,16 +972,7 @@ class Main:
 		self.on_game_list_refresh()
 
 	def save_ps3_ip_on_sync(self):
-		ip = str(self.entry_field_ftp_ip.get())
-		# save ip from entryfield to ftp_settings.py
-		if ip != '':
-			self.ftp_se = ip
-			newFile = open(os.path.join(self.WCM_BASE_PATH, self.ftp_settings_path), "w")
-			json_text = json.dumps(self.config_file, indent=4, separators=(",", ":"))
-			newFile.write(json_text)
-
-		# json.dumps
-		# 	f.write(json.dumps(self.config_file))
+		ftp_settings.ps3_lan_ip = str(self.entry_field_ftp_ip.get())
 
 	def save_preview_image(self):
 		# making a preview print of the game canvas
@@ -972,7 +989,7 @@ class Main:
 		preview_img.save(os.path.join(self.wcm_work_dir, 'preview.png'))
 
 	def on_game_list_refresh(self):
-		self.draw_game_listbox()
+		self.display_game_listbox(self.box.get())
 
 	def save_pkg_info_to_json(self):
 		with open(os.path.join(AppPaths.util_resources, 'pkg.json.BAK')) as f:
@@ -1000,7 +1017,7 @@ class CreateToolTip(object):
     create a tooltip for a given widget
     """
 	def __init__(self, widget, text='widget info'):
-		self.waittime = 500     #miliseconds
+		self.waittime = 350     #miliseconds
 		self.wraplength = 180   #pixels
 		self.widget = widget
 		self.text = text

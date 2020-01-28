@@ -15,9 +15,9 @@ class ComboBox:
         # disabled PSP for now
         self.root = root
         self.frame = frame
-        self.combobox = ttk.Combobox(root, values=["PSP", "PSX", "PS2", "PS3", "All"])
+        self.combobox = ttk.Combobox(root, values=["All", "PSP", "PSX", "PS2", "PS3"])
         self.combobox.place(x=x, y=y)
-        self.combobox.current(3)
+        self.combobox.current(4)
 
         frame.bind('<Enter>', self._bound_to_mousewheel)
         frame.bind('<Leave>', self._unbound_to_mousewheel)
