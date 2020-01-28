@@ -13,10 +13,9 @@ class ComboBox:
 
     def make_combo_box(self, root, frame, x, y):
         # disabled PSP for now
-        # combobox = ttk.Combobox(root, values=["All", "PSP", "PSX", "PS2", "PS3"])
         self.root = root
         self.frame = frame
-        self.combobox = ttk.Combobox(root, values=["All", "PSX", "PS2", "PS3"])
+        self.combobox = ttk.Combobox(root, values=["PSP", "PSX", "PS2", "PS3", "All"])
         self.combobox.place(x=x, y=y)
         self.combobox.current(3)
 

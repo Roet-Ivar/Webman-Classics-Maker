@@ -9,6 +9,9 @@ else:
 from global_paths import App as AppPaths
 from global_paths import Image as ImagePaths
 
+sys.path.append(AppPaths.settings)
+import ftp_settings
+
 from Tkinter import *
 from PIL import Image, ImageDraw, ImageFont
 from PIL.ImageTk import PhotoImage
@@ -27,8 +30,10 @@ else:
 	from build_all_scripts import Webman_PKG as Webman_PKG
 
 
-class Main():
-	def __init__(self, main):
+class Main:
+	def __init__(self):
+		self.main = main_window
+
 		# common paths
 		self.WCM_BASE_PATH 		= AppPaths.wcm_gui
 		self.pkg_dir 			= AppPaths.pkg
@@ -46,11 +51,11 @@ class Main():
 		self.window_y_width = 720.0
 
 		# canvas for image
-		self.canvas = Canvas(main, width=canvas_width, height=canvas_height, borderwidth=0, highlightthickness=0)
+		self.canvas = Canvas(self.main, width=canvas_width, height=canvas_height, borderwidth=0, highlightthickness=0)
 		self.canvas.pack(fill=BOTH, expand=YES)
 
-		self.vcmd = main.register(self.dynamic_validate_title_id)
-		self.vcmd2 = main.register(self.dynamic_validate_title_id)
+		self.vcmd = self.main.register(self.dynamic_validate_title_id)
+		self.vcmd2 = self.main.register(self.dynamic_validate_title_id)
 		self.canvas_image_number = 0
 		self.title_id_maxlength = len('PKGLAUNCH')
 		self.tmp_title_id = ''
@@ -85,12 +90,20 @@ class Main():
 		self.background_images = []
 		self.load_backgrounds()
 
+		# text messages
+		self.USB_BUTTON_TOOLTIP_MSG = "toggles the USB port (0-3)"
+		self.SAVE_BUTTON_TOOLTIP_MSG = "save to 'work_dir' folder"
+		self.BUILD_BUTTON_TOOLTIP_MSG = "build and save the PKG"
+		self.SYNC_BUTTON_TOOLTIP_MSG = "syncs games over FTP"
+		self.REFRESH_BUTTON_TOOLTIP_MSG = "reloads gamelist from file"
+
 		# init definitions
 		self.init_pkg_images()
-		self.init_main_window_buttons(main)
-		self.init_default_view(main)
+		self.init_main_window_buttons(self.main)
+		self.init_default_view(self.main)
 		self.draw_background_on_canvas()
 		self.draw_game_listbox()
+
 
 
 	def get_ftp_ip_from_config(self):
@@ -104,10 +117,13 @@ class Main():
 			ip = str(ip)
 		return ip
 
+	# TODO: read the ftp_settings.py instead
 	def get_ftp_user_from_config(self):
 		with open(os.path.join(self.WCM_BASE_PATH, self.ftp_settings_path)) as f:
 			self.config_file = json.load(f)
 		user = self.config_file['ftp_user']
+
+		user = ftp_settings.ftp_user
 
 		if user is None:
 			user = ''
@@ -137,6 +153,7 @@ class Main():
 		from combo_box import ComboBox
 		cb = ComboBox()
 		box = cb.make_combo_box(self.canvas, game_list_box, 1100, 247)
+		box.set('All')
 		box.config(width='4', state="readonly")
 
 
@@ -391,43 +408,74 @@ class Main():
 		self.selection_system_list = ['PSPISO', 'PSXISO', 'PS2ISO', 'PS3ISO']
 		self.drive_path = self.selection_drive_list[0]  # drive should be toggled by buttons
 
-		self.button_HDD = Button(main, image=self.logo_drives[0], borderwidth=1,
+		self.button_HDD = Button(main,
+								 image=self.logo_drives[0],
+								 borderwidth=1,
 								 command=lambda: self.on_drive_button(self.selection_drive_list[0]))
 
-		self.button_USB = Button(main, image=self.logo_drives[1], borderwidth=1,
-								 command=lambda: self.on_drive_button(
-									 self.selection_drive_list[self.usb_port_number + 1]))
+		self.button_USB = Button(main,
+								 image=self.logo_drives[1],
+								 borderwidth=1,
+								 command=lambda:
+								 self.on_drive_button(self.selection_drive_list[self.usb_port_number + 1]))
 
-		self.button_PSP = Button(main, image=self.logo_systems[0], borderwidth=1,
-								 command=lambda: self.on_system_button(self.drive_system_array[0],
-																	   self.selection_system_list[0]))
+		self.button_PSP = Button(main,
+								 image=self.logo_systems[0],
+								 borderwidth=1,
+								 command=lambda:
+								 self.on_system_button(self.drive_system_array[0], self.selection_system_list[0]))
+
 		self.button_PSP.config(state=DISABLED)
 
-		self.button_PSX = Button(main, image=self.logo_systems[1], borderwidth=1,
-								 command=lambda: self.on_system_button(self.drive_system_array[0],
-																	   self.selection_system_list[1]))
+		self.button_PSX = Button(main,
+								 image=self.logo_systems[1],
+								 borderwidth=1,
+								 command=lambda:
+								 self.on_system_button(self.drive_system_array[0], self.selection_system_list[1]))
 
-		self.button_PS2 = Button(main, image=self.logo_systems[2], borderwidth=1,
-								 command=lambda: self.on_system_button(self.drive_system_array[0],
-																	   self.selection_system_list[2]))
+		self.button_PS2 = Button(main,
+								 image=self.logo_systems[2],
+								 borderwidth=1,
+								 command=lambda:
+								 self.on_system_button(self.drive_system_array[0], self.selection_system_list[2]))
 
-		self.button_PS3 = Button(main, image=self.logo_systems[3], borderwidth=1,
-								 command=lambda: self.on_system_button(self.drive_system_array[0],
-																	   self.selection_system_list[3]))
+		self.button_PS3 = Button(main,
+								 image=self.logo_systems[3],
+								 borderwidth=1,
+								 command=lambda:
+								 self.on_system_button(self.drive_system_array[0], self.selection_system_list[3]))
 
-		self.save_button = Button(main, image=self.function_buttons[0], borderwidth=0, command=self.validate_fields,
+		self.save_button = Button(main,
+								  image=self.function_buttons[0],
+								  borderwidth=0,
+								  command=self.validate_fields,
 								  bg="#FBFCFB")
 
-		self.build_button = Button(main, image=self.function_buttons[1], borderwidth=0, command=self.on_build_button,
+		self.build_button = Button(main,
+								   image=self.function_buttons[1],
+								   borderwidth=0,
+								   command=self.on_build_button,
 								   bg="#FBFCFB")
 
-		self.ftp_sync_button = Button(main, image=self.gamelist_buttons[0], borderwidth=0,
+		self.ftp_sync_button = Button(main,
+									  image=self.gamelist_buttons[0],
+									  borderwidth=0,
 									  command=self.on_ftp_sync_button,
 									  bg="#FBFCFB")
 
-		self.game_list_refresh_button = Button(main, image=self.gamelist_buttons[1], borderwidth=0,
+
+		self.game_list_refresh_button = Button(main,
+											   image=self.gamelist_buttons[1],
+											   borderwidth=0,
 											   command=self.on_game_list_refresh,
 											   bg="#FBFCFB")
+
+		# button tooltips
+		CreateToolTip(self.button_USB, self.USB_BUTTON_TOOLTIP_MSG)
+		CreateToolTip(self.save_button, self.SAVE_BUTTON_TOOLTIP_MSG)
+		CreateToolTip(self.build_button, self.BUILD_BUTTON_TOOLTIP_MSG)
+		CreateToolTip(self.ftp_sync_button, self.SYNC_BUTTON_TOOLTIP_MSG)
+		CreateToolTip(self.game_list_refresh_button, self.REFRESH_BUTTON_TOOLTIP_MSG)
 
 		# Entry placements
 		entry_field_width = 200
@@ -943,8 +991,63 @@ class Main():
 			json_text = json.dumps(json_data, indent=4, separators=(",", ":"))
 			newFile.write(json_text)
 
-		except ValueError:
-			print('ERROR File write error or PKGLAUNCH not found/title-_d not a string')
+		except ValueError as e:
+			print("ERROR: File write error or 'PKGLAUNCH'/title-_d not found.")
+			print(e.message)
+
+class CreateToolTip(object):
+	"""
+    create a tooltip for a given widget
+    """
+	def __init__(self, widget, text='widget info'):
+		self.waittime = 500     #miliseconds
+		self.wraplength = 180   #pixels
+		self.widget = widget
+		self.text = text
+		self.widget.bind("<Enter>", self.enter)
+		self.widget.bind("<Leave>", self.leave)
+		self.widget.bind("<ButtonPress>", self.leave)
+		self.id = None
+		self.tw = None
+
+	def enter(self, event=None):
+		self.schedule()
+
+	def leave(self, event=None):
+		self.unschedule()
+		self.hidetip()
+
+	def schedule(self):
+		self.unschedule()
+		self.id = self.widget.after(self.waittime, self.showtip)
+
+	def unschedule(self):
+		id = self.id
+		self.id = None
+		if id:
+			self.widget.after_cancel(id)
+
+	def showtip(self, event=None):
+		import Tkinter as tk
+		x = y = 0
+		x, y, cx, cy = self.widget.bbox("insert")
+		x += self.widget.winfo_rootx() + 25
+		y += self.widget.winfo_rooty() + 20
+		# creates a toplevel window
+		self.tw = tk.Toplevel(self.widget)
+		# Leaves only the label and removes the app window
+		self.tw.wm_overrideredirect(True)
+		self.tw.wm_geometry("+%d+%d" % (x, y))
+		label = tk.Label(self.tw, text=self.text, justify='left',
+						 background="#ffffff", relief='solid', borderwidth=1,
+						 wraplength = self.wraplength)
+		label.pack(ipadx=1)
+
+	def hidetip(self):
+		tw = self.tw
+		self.tw= None
+		if tw:
+			tw.destroy()
 
 
 # setup properties
@@ -969,5 +1072,5 @@ canvas_height = int(1080 * scaling)
 main_window_width = int(1920 * scaling)
 main_window_height = int(1080 * scaling)
 
-Main(main_window)
+Main()
 main_window.mainloop()
