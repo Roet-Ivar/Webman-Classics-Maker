@@ -140,7 +140,7 @@ class Main:
 
 
 	def display_game_listbox(self, platform):
-		# assemble game list
+		# create the listbox (games list)
 		gamelist = Gamelist(platform)
 		game_list_frame = gamelist.create_main_frame(self.entry_field_title_id, self.entry_field_title, self.entry_field_filename, self.entry_field_iso_path, self.drive_system_array)
 		game_list_frame.place(x=int((self.main_offset_x_pos) * scaling),
@@ -148,25 +148,24 @@ class Main:
 							  width=270,
 							  height=300)
 
-		game_list_box = gamelist.get_listbox()
-		game_list_box.config(selectmode='SINGLE',
+		self.game_list_box = gamelist.get_listbox()
+		self.game_list_box.config(selectmode='SINGLE',
 							 activestyle='dotbox',
 							 borderwidth=0)
 
 
 
-		# render gamelist in combobox
-		from combo_box import ComboBox
-		self.box = ComboBox().make_combo_box(self.canvas, game_list_box, 1100, 247)
-		self.box.set('All')
-		self.box.config(width='4', state="readonly")
-		self.box.bind("<<ComboboxSelected>>", self.box_filter_callback)
+		# insert platform dropdown into the listbox
+		from platform_dropdown import Dropdown
+		self.dropdown = Dropdown(self.canvas, self.game_list_box, 1100, 247).get_box()
+		self.dropdown.bind("<<ComboboxSelected>>", self.box_filter_callback)
 
 
 	def box_filter_callback(self, event):
 		self.list_filter_platform = event.widget.get()
 		self.display_game_listbox(self.list_filter_platform)
-		self.box.set(self.list_filter_platform)
+		self.dropdown.set(self.list_filter_platform)
+		self.game_list_box.focus()
 
 
 	def smaller_button_maker(self, text, **args):

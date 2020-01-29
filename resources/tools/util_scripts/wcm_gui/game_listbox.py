@@ -13,13 +13,10 @@ class Gamelist():
         if os.path.isfile(os.path.join(AppPaths.util_scripts, 'game_list_data.json')) is False:
             copyfile(os.path.join(AppPaths.util_resources, 'game_list_data.json.BAK'), os.path.join(AppPaths.util_scripts, 'game_list_data.json'))
 
-        self.platform_to_show = platform.lower() + '_games'
-
         with open(os.path.join(AppPaths.util_scripts, 'game_list_data.json')) as f:
             self.json_game_list_data = json.load(f)
 
-
-        print('platform_to_show: ' + self.platform_to_show)
+        self.platform_to_show = platform.lower() + '_games'
         self.WCM_BASE_PATH  = AppPaths.wcm_gui
         self.last_selection = (None, 0)
         self.list_of_items = []
@@ -35,8 +32,12 @@ class Gamelist():
 
         self.corrected_index = []
         self.main_frame = Frame()
+
+
         s = Scrollbar(self.main_frame)
         self._listbox = Listbox(self.main_frame, width=465)
+        self._listbox.bind('<Enter>', self._bound_to_mousewheel)
+        self._listbox.bind('<Leave>', self._unbound_to_mousewheel)
 
         s.pack(side=RIGHT, fill=Y)
         self._listbox.pack(side=LEFT, fill=Y)
@@ -149,6 +150,16 @@ class Gamelist():
 
     def get_items(self):
         return self.list_of_items
+
+    def _bound_to_mousewheel(self, event):
+        self._listbox.bind_all("<MouseWheel>", self._on_mousewheel)
+
+    def _unbound_to_mousewheel(self, event):
+        self._listbox.unbind_all("<MouseWheel>")
+
+    def _on_mousewheel(self, event):
+        self._listbox.yview_scroll(int(-1*(event.delta/30)), "units")
+
 
     # TODO: not used yet
     def load_pkg_project(self, title_id, filename):
