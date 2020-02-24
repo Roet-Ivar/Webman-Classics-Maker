@@ -127,7 +127,7 @@ class Main:
 		self.draw_background_on_canvas()
 
 		self.list_filter_platform = 'All'
-		self.display_game_listbox(self.list_filter_platform)
+		self.create_list_combo_box(self.list_filter_platform)
 
 	def get_ftp_ip_from_config(self):
 		return ftp_settings.ps3_lan_ip
@@ -139,7 +139,7 @@ class Main:
 		return ftp_settings.ftp_password
 
 
-	def display_game_listbox(self, platform):
+	def create_list_combo_box(self, platform):
 		# create the listbox (games list)
 		gamelist = Gamelist(platform)
 		game_list_frame = gamelist.create_main_frame(self.entry_field_title_id, self.entry_field_title, self.entry_field_filename, self.entry_field_iso_path, self.drive_system_array)
@@ -153,9 +153,7 @@ class Main:
 							 activestyle='dotbox',
 							 borderwidth=0)
 
-
-
-		# insert platform dropdown into the listbox
+		# insert the dropdown into the listbox
 		from platform_dropdown import Dropdown
 		self.dropdown = Dropdown(self.canvas, self.game_list_box, 1100, 247).get_box()
 		self.dropdown.bind("<<ComboboxSelected>>", self.box_filter_callback)
@@ -163,7 +161,7 @@ class Main:
 
 	def box_filter_callback(self, event):
 		self.list_filter_platform = event.widget.get()
-		self.display_game_listbox(self.list_filter_platform)
+		self.create_list_combo_box(self.list_filter_platform)
 		self.dropdown.set(self.list_filter_platform)
 		self.game_list_box.focus()
 
@@ -988,7 +986,7 @@ class Main:
 		preview_img.save(os.path.join(self.wcm_work_dir, 'preview.png'))
 
 	def on_game_list_refresh(self):
-		self.display_game_listbox(self.box.get())
+		self.create_list_combo_box(self.box.get())
 
 	def save_pkg_info_to_json(self):
 		with open(os.path.join(AppPaths.util_resources, 'pkg.json.BAK')) as f:
