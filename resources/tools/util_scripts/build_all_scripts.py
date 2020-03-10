@@ -9,9 +9,8 @@ from webman_pkg import Webman_pkg
 current_path= os.getcwd()
 # print('current_path: ' + current_path)
 if 'util_scripts' not in os.getcwd():
-    os.chdir('./resources/tools/util_scripts/')
-    os.chdir(os.path.dirname(os.path.realpath(__file__)))
-
+	os.chdir('./resources/tools/util_scripts/')
+	
 # print('__file__:' + __file__)
 # print('real path:' + os.path.dirname(os.path.realpath(__file__)))
 
@@ -28,7 +27,6 @@ resign_eboot = Resign_eboot()
 resign_eboot.execute()
 
 webman_pkg = Webman_pkg()
-print('before execute')
 webman_pkg.execute()
 
-os.system("pause")
+# os.system("pause")
