@@ -1,5 +1,5 @@
 # ABOUT
-Webman Classics Maker is tool for the PS3 that makes PKG shortcuts for ISO files using webMAN-mod through web commands:
+Webman Classics Maker is tool for the PS3 that makes PKG shortcuts for ISO files straight to the home menu. It is using web commands  through webMAN-mod to mount and launch the ISOs automatically:
 http://www.psx-place.com/threads/webman-mod-web-commands.1508/
 
 This software is under GPLv2 license: https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html, not to be confused with the GPLv3 license.
@@ -61,14 +61,34 @@ Credits goes to all of you guys!
 * Sometimes at first boot the game hangs on blackscreen, reboot and start it again. This is mostly due to modifications of the same game w/o reboots.
 	
 ---------------------------------------------------------------------------------------------------
-# BUILD SCRIPTS: Windows
 
-1. Install python 2.7.x x86 + pyinstaller lib
+# Windows dev environment setup 
 
-2. Windows: Run the pyinstaller-scipts located in:
+* install python2.7.xx x86_64 (https://www.python.org/downloads/release/python-2715/)
+* pip install pillow
+* pip install pyinstaller
+
+**Building executables**
+
+Run the pyinstaller-scipts located in:
 /Webman-Classics-Maker/resources/tools/util_scripts/_pyinstaller_and_release_scripts/
 
-You now have a brand new **Build_Webman_PKG.exe** / **Edit_Param_SFO.exe** / **FTP_Game_List.exe** based on the changes you made in the scripts
+You now have a brand new executables based on the changes you made in the scripts:
 
-# BUILD SCRIPTS: Linux
-1. There are nothing to build, only edit and run the python scripts of your liking
+* **Build_Webman_PKG.exe**
+* **Edit_Param_SFO.exe** 
+* **FTP_Game_List.exe** 
+
+# Linux dev environment setup
+
+* sudo apt-get update
+* sudo apt-get install python2.7
+* sudo apt-get install python-tk
+* sudo apt-get install python-pip
+* pip install pillow
+* pip install pyinstaller
+
+**Building executables**
+
+Right now you can't build any executables for linux
+
