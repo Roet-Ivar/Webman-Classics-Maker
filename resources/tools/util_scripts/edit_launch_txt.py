@@ -11,9 +11,9 @@ class Edit_launch_txt:
 
 			# web_command = '/play.ps3'
 			pre_delay = 5
-			post_delay = 2
-			pre_cmd = '/wait.ps3?' + pre_delay + ';/mount_ps3'
-			post_cmd = ';/wait.ps3?' + post_delay + ';/play.ps3'
+			post_delay = 3
+			pre_cmd = '/wait.ps3?' + str(pre_delay) + ';/mount_ps3'
+			post_cmd = ';/wait.ps3?' + str(post_delay) + ';/play.ps3;'
 			web_command_string = pre_cmd + str(json_data['iso_filepath'] + post_cmd)
 			web_url_string = 'GET ' + urllib.quote(web_command_string) + ' HTTP/1.0'
 			
