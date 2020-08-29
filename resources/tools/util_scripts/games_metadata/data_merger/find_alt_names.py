@@ -3,12 +3,12 @@ from fuzzywuzzy import fuzz
 import json, re
 import xml.etree.ElementTree as Etree
 
-platform = 'PS3'
+platform = 'PSP'
 # with open(platform + '_not_migrated.json') as f:
 
 parser = Etree.XMLParser(encoding="utf-8")
 
-platform_tree = Etree.parse(platform + '_LaunchBox.xml', parser=parser)
+platform_tree = Etree.parse(platform + '_LaunchBox_Alt.xml', parser=parser)
 platform_root = platform_tree.getroot()
 
 alt_name_tree = Etree.parse('game_alternate_name.xml')
@@ -35,9 +35,10 @@ if True:
                 # print(alt_xml_element)
 
                 platform_root.append(y)
-    platform_tree.write(open('alt_' + platform + '_LaunchBox.xml', 'w'), encoding='utf-8')
+    # platform_tree.write(open('alt_' + platform + '_LaunchBox.xml', 'w'), encoding='utf-8')
 
-if True:
+# this loop finds image names
+if False:
     for x in platform_root.iter('Game'):
         platform_database_id = x.find('DatabaseID').text
 
@@ -49,7 +50,7 @@ if True:
                 print('\n')
                 print('IMAGE -> id: ' + platform_database_id + ', name: '  + z.find('FileName').text)
                 platform_root.append(z)
-    platform_tree.write(open('alt_' + platform + '_LaunchBox.xml', 'w'), encoding='utf-8')
+platform_tree.write(open('alt_' + platform + '_LaunchBox.xml', 'w'), encoding='utf-8')
 
 
 

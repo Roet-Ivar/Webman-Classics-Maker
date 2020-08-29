@@ -76401,4 +76401,644 @@ Capture their respective buildings and specialize your squads for additional ski
     <Type>Clear Logo</Type>
     <CRC32>2425848384</CRC32>
   </GameImage>
+  <GameAlternateName>
+    <AlternateName>Accel World: Kasoku no Chouten</AlternateName>
+    <DatabaseID>15272</DatabaseID>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Accel World: Ginyoku no Kakusei</AlternateName>
+    <DatabaseID>15271</DatabaseID>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>어둠 속에 나 홀로: 지옥의 화염</AlternateName>
+    <DatabaseID>35084</DatabaseID>
+    <Region>Korea</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>NPEB01127</AlternateName>
+    <DatabaseID>167842</DatabaseID>
+    <Region>Europe</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Batman: Arkham Asylum</AlternateName>
+    <DatabaseID>29340</DatabaseID>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Runner2</AlternateName>
+    <DatabaseID>17805</DatabaseID>
+    <Region>World</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Bleach: Soul Resurreccion</AlternateName>
+    <DatabaseID>13011</DatabaseID>
+    <Region>North America</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Blue Toad Murder Files: The Mysteries of Little Riddle</AlternateName>
+    <DatabaseID>15327</DatabaseID>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Canis Canem Edit</AlternateName>
+    <DatabaseID>167062</DatabaseID>
+    <Region>Europe</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Cabela's Dangerous Adventures</AlternateName>
+    <DatabaseID>23410</DatabaseID>
+    <Region>Europe</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Call of Duty</AlternateName>
+    <DatabaseID>17808</DatabaseID>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Castle of Illusion</AlternateName>
+    <DatabaseID>17804</DatabaseID>
+    <Region>World</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Akumajou Dracula: Harmony of Despair</AlternateName>
+    <DatabaseID>15349</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>El Chavo Kart</AlternateName>
+    <DatabaseID>148480</DatabaseID>
+    <Region>North America</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Chaos Breaker</AlternateName>
+    <DatabaseID>150794</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Dark Awake: The King Has No Name</AlternateName>
+    <DatabaseID>150794</DatabaseID>
+    <Region>World</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Deus Ex</AlternateName>
+    <DatabaseID>8309</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Dragon Ball: Ultimate Blast </AlternateName>
+    <DatabaseID>14843</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Drag-On Dragoon 3</AlternateName>
+    <DatabaseID>20708</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Dungeons and Dragons: Chronicles of Mystara</AlternateName>
+    <DatabaseID>17295</DatabaseID>
+    <Region>World</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Trusty Bell</AlternateName>
+    <DatabaseID>6599</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Final Fantasy 13</AlternateName>
+    <DatabaseID>21</DatabaseID>
+    <Region>World</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Final Fantasy 13-2</AlternateName>
+    <DatabaseID>2472</DatabaseID>
+    <Region>World</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>FolksSoul -Ushinawareta Denshō-</AlternateName>
+    <DatabaseID>6603</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>God of War 3</AlternateName>
+    <DatabaseID>843</DatabaseID>
+    <Region>World</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>God of War Collection – Volume II </AlternateName>
+    <DatabaseID>12553</DatabaseID>
+    <Region>Europe</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>God of War Collection – Volume II </AlternateName>
+    <DatabaseID>12553</DatabaseID>
+    <Region>Europe</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>ギルティギア イグザード</AlternateName>
+    <DatabaseID>30197</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Giruti Gia Iguzādo</AlternateName>
+    <DatabaseID>30197</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Hajime no Ippo: The Fighting!</AlternateName>
+    <DatabaseID>151044</DatabaseID>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Everybody's Golf 6</AlternateName>
+    <DatabaseID>158066</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Everybody's Golf</AlternateName>
+    <DatabaseID>158066</DatabaseID>
+    <Region>Europe</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Chōjigen Geimu Nepuchūnu</AlternateName>
+    <DatabaseID>12542</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Chōjigen Geimu Neputyūnu mk2</AlternateName>
+    <DatabaseID>12422</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Kami Jigen Game Neptune V</AlternateName>
+    <DatabaseID>16030</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>James Cameron's Avatar: El Videojuego</AlternateName>
+    <DatabaseID>15292</DatabaseID>
+    <Region>Spain</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>ジョジョの奇妙な冒険 アイズオブヘブン</AlternateName>
+    <DatabaseID>133430</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>仮面ライダー バトライド・ウォー プレミアムTVサウンドエディション</AlternateName>
+    <DatabaseID>160581</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Katamari Damacy Tribute</AlternateName>
+    <DatabaseID>6612</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Mobile Suit Gundam: Extreme VS. Full Boost</AlternateName>
+    <DatabaseID>32522</DatabaseID>
+    <Region>World</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Kingdom Hearts HD 1.5 ReMIX</AlternateName>
+    <DatabaseID>15745</DatabaseID>
+    <Region>World</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Kingdom Hearts HD 2.5 ReMIX</AlternateName>
+    <DatabaseID>22677</DatabaseID>
+    <Region>World</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>K-On! Houkago Live!! HD Version</AlternateName>
+    <DatabaseID>151828</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>LEGO Batman 3: Más allá de Gotham</AlternateName>
+    <DatabaseID>24960</DatabaseID>
+    <Region>Spain</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Lightning Returns: Final Fantasy 13</AlternateName>
+    <DatabaseID>15767</DatabaseID>
+    <Region>World</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Little League Baseball World Series 2010</AlternateName>
+    <DatabaseID>131563</DatabaseID>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Little League Baseball: World Series 2010</AlternateName>
+    <DatabaseID>131563</DatabaseID>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Magic 2014</AlternateName>
+    <DatabaseID>129505</DatabaseID>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Magic 2014: Duels of the Planeswalkers</AlternateName>
+    <DatabaseID>129505</DatabaseID>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Marvel vs. Capcom 2: New Age of Heroes</AlternateName>
+    <DatabaseID>6617</DatabaseID>
+    <Region>World</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Rockman 10: Uchu kara no Kyoi!!</AlternateName>
+    <DatabaseID>15871</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Rockman 9: Yabo no Fukkatsu!!</AlternateName>
+    <DatabaseID>20147</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Mortal Kombat 9</AlternateName>
+    <DatabaseID>6768</DatabaseID>
+    <Region>World</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Need for Speed: Most Wanted</AlternateName>
+    <DatabaseID>11688</DatabaseID>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ni no Kuni: Shiroki Seihai no Joou</AlternateName>
+    <DatabaseID>14536</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Nier Gestalt</AlternateName>
+    <DatabaseID>12000</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>ニーア レプリカント</AlternateName>
+    <DatabaseID>111726</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>No More Heroes: Red Zone Edition</AlternateName>
+    <DatabaseID>12430</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Qruton</AlternateName>
+    <DatabaseID>151573</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Okami HD</AlternateName>
+    <DatabaseID>15484</DatabaseID>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>One Piece: Kaizoku Musou</AlternateName>
+    <DatabaseID>16115</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>One Piece: Kaizoku Musou 2</AlternateName>
+    <DatabaseID>151916</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Papo and Yo</AlternateName>
+    <DatabaseID>16739</DatabaseID>
+    <Region>North America</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Saru Get You Fury! Fury!</AlternateName>
+    <DatabaseID>138557</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ape Escape On The Move</AlternateName>
+    <DatabaseID>138557</DatabaseID>
+    <Region>Asia</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Prince of Persia Trilogy HD</AlternateName>
+    <DatabaseID>9717</DatabaseID>
+    <Region>North America</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>World Soccer: Winning Eleven 2008</AlternateName>
+    <DatabaseID>14006</DatabaseID>
+    <Region>Asia</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Der Puppenspieler</AlternateName>
+    <DatabaseID>16242</DatabaseID>
+    <Region>Germany</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Raiden 4: Overkill</AlternateName>
+    <DatabaseID>131971</DatabaseID>
+    <Region>North America</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>The Ratchet &amp; Clank Trilogy</AlternateName>
+    <DatabaseID>11690</DatabaseID>
+    <Region>Europe</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ratchet &amp; Clank 1 + 2 + 3: Galaxy's☆Strongest Gorgeous Pack</AlternateName>
+    <DatabaseID>11690</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ratchet and Clank Collection</AlternateName>
+    <DatabaseID>11690</DatabaseID>
+    <Region>North America</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ratchet &amp; Clank: A Crack in Time</AlternateName>
+    <DatabaseID>6626</DatabaseID>
+    <Region>Europe</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ratchet and Clank Future: A Crack in Time</AlternateName>
+    <DatabaseID>6626</DatabaseID>
+    <Region>North America</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ratchet &amp; Clank: Quest for Booty</AlternateName>
+    <DatabaseID>13482</DatabaseID>
+    <Region>Europe</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ratchet &amp; Clank: Quest for Booty</AlternateName>
+    <DatabaseID>13482</DatabaseID>
+    <Region>Australia</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ratchet &amp; Clank Future Gaiden: Kaizoku Dark Water no Hihou</AlternateName>
+    <DatabaseID>13482</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ratchet and Clank Future: Quest For Booty</AlternateName>
+    <DatabaseID>13482</DatabaseID>
+    <Region>North America</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ratchet and Clank Future: Tools of Destruction</AlternateName>
+    <DatabaseID>6627</DatabaseID>
+    <Region>North America</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ratchet and Clank: All 4 One</AlternateName>
+    <DatabaseID>938</DatabaseID>
+    <Region>North America</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ratchet &amp; Clank: QForce</AlternateName>
+    <DatabaseID>11775</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ratchet and Clank: Full Frontal Assault</AlternateName>
+    <DatabaseID>11775</DatabaseID>
+    <Region>North America</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ratchet &amp; Clank: Nexus</AlternateName>
+    <DatabaseID>18224</DatabaseID>
+    <Region>Europe</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ratchet and Clank: Into the Nexus</AlternateName>
+    <DatabaseID>18224</DatabaseID>
+    <Region>North America</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ratchet: Gladiator HD</AlternateName>
+    <DatabaseID>127039</DatabaseID>
+    <Region>Europe</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Red Dead Redemption: Complete Edition</AlternateName>
+    <DatabaseID>161904</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Resident Evil 4 HD</AlternateName>
+    <DatabaseID>16326</DatabaseID>
+    <Region>North America</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>バイオハザード コード：ベロニカ</AlternateName>
+    <DatabaseID>16328</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ryu ga Gotoku 1&amp;2 HD Edition</AlternateName>
+    <DatabaseID>16394</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ryu ga Gotoku Ishin!	</AlternateName>
+    <DatabaseID>136072</DatabaseID>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>龍が如く 維新!</AlternateName>
+    <DatabaseID>136072</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ryu ga Gotoku Kenzan!</AlternateName>
+    <DatabaseID>16396</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Sam &amp; Max: Season Two</AlternateName>
+    <DatabaseID>16413</DatabaseID>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Shadō za Hejjihoggu</AlternateName>
+    <DatabaseID>167018</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Skullgirls Encore</AlternateName>
+    <DatabaseID>16612</DatabaseID>
+    <Region>World</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>The Sly Collection</AlternateName>
+    <DatabaseID>153667</DatabaseID>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>The Sly Collection</AlternateName>
+    <DatabaseID>153666</DatabaseID>
+    <Region>World</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Soldner-X 2: Final Prototype</AlternateName>
+    <DatabaseID>16659</DatabaseID>
+    <Region>World</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Soldner-X: Himmelssturmer</AlternateName>
+    <DatabaseID>16658</DatabaseID>
+    <Region>World</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Sonikku Adobencha</AlternateName>
+    <DatabaseID>16653</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Sonikku Hīrōzu</AlternateName>
+    <DatabaseID>167019</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Sonic 4: Episode 1</AlternateName>
+    <DatabaseID>16640</DatabaseID>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Sonic 4: Episode 2</AlternateName>
+    <DatabaseID>16638</DatabaseID>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Sonic 4: Episode 2</AlternateName>
+    <DatabaseID>16638</DatabaseID>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>SEGA Mega Drive: Ultimate Collection</AlternateName>
+    <DatabaseID>12004</DatabaseID>
+    <Region>Europe</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>South Park: La Vara De La Verdad</AlternateName>
+    <DatabaseID>19777</DatabaseID>
+    <Region>Spain</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>South Park: La Vara De La Verdad</AlternateName>
+    <DatabaseID>19777</DatabaseID>
+    <Region>South America</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Street Fighter 4</AlternateName>
+    <DatabaseID>6631</DatabaseID>
+    <Region>World</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Super Street Fighter 4</AlternateName>
+    <DatabaseID>2304</DatabaseID>
+    <Region>World</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Super Street Fighter 4: Arcade Edition</AlternateName>
+    <DatabaseID>10047</DatabaseID>
+    <Region>World</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Tekken 5: Dark Resurrection Online</AlternateName>
+    <DatabaseID>6632</DatabaseID>
+    <Region>North America</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>The Adventures of Tintin: The Secret of the Unicorn</AlternateName>
+    <DatabaseID>11488</DatabaseID>
+    <Region>Europe</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>The House of the Dead 3</AlternateName>
+    <DatabaseID>27021</DatabaseID>
+    <Region>World</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>The King of Fighters 12</AlternateName>
+    <DatabaseID>6613</DatabaseID>
+    <Region>World</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>The King of Fighters 13</AlternateName>
+    <DatabaseID>14056</DatabaseID>
+    <Region>World</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>UFC Undisputed 2</AlternateName>
+    <DatabaseID>12369</DatabaseID>
+    <Region>World</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>UFC Undisputed 2</AlternateName>
+    <DatabaseID>12369</DatabaseID>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ultra Street Fighter 4</AlternateName>
+    <DatabaseID>20739</DatabaseID>
+    <Region>World</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Uncharted 2: 황금도와 사라진 함대</AlternateName>
+    <DatabaseID>201</DatabaseID>
+    <Region>Korea</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>アンチャーテッド エル・ドラドの秘宝</AlternateName>
+    <DatabaseID>70</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Uncharted: 엘도라도의 보물</AlternateName>
+    <DatabaseID>70</DatabaseID>
+    <Region>Korea</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Watch Dogs</AlternateName>
+    <DatabaseID>20489</DatabaseID>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>White Knight Chronicles 2</AlternateName>
+    <DatabaseID>12491</DatabaseID>
+    <Region>World</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ryu ga Gotoku Zero: Chikai no Basho</AlternateName>
+    <DatabaseID>152183</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ryū ga Gotoku 3</AlternateName>
+    <DatabaseID>3922</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName> Ryu ga Gotoku 3</AlternateName>
+    <DatabaseID>3922</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ryū ga Gotoku 4: Densetsu o Tsugumono</AlternateName>
+    <DatabaseID>3923</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ryu ga Gotoku 4: Densetsu o Tsugumono</AlternateName>
+    <DatabaseID>3923</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ryū ga Gotoku 5: Yume Kanaeshi Mono</AlternateName>
+    <DatabaseID>12969</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ryu ga Gotoku 5: Yume Kanaeshi Mono</AlternateName>
+    <DatabaseID>12969</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Ryu ga Gotoku OF THE END</AlternateName>
+    <DatabaseID>3920</DatabaseID>
+    <Region>Japan</Region>
+  </GameAlternateName>
+  <GameAlternateName>
+    <AlternateName>Zeno Clash 2</AlternateName>
+    <DatabaseID>142724</DatabaseID>
+    <Region>World</Region>
+  </GameAlternateName>
   </Games>

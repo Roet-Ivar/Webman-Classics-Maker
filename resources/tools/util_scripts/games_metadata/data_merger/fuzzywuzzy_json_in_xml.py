@@ -5,11 +5,12 @@ import xml.etree.ElementTree as Etree
 
 platform = 'PSP'
 # with open(platform + '_not_migrated.json') as f:
-with open('psp_all_games_list.json') as f: # 6896
+with open('PSP_all_title_ids.json') as f: # 6896
     json_data = json.load(f)
 json_data_tmp = json_data
 
 parser = Etree.XMLParser(encoding="utf-8")
+# xml_tree = Etree.parse('alt_' + platform + '_LaunchBox.xml', parser=parser)
 xml_tree = Etree.parse(platform + '_LaunchBox.xml', parser=parser)
 xml_root = xml_tree.getroot()
 
@@ -47,6 +48,7 @@ if True:
     json_max_cnt = 6896
     xml_max_count = 1682
 
+    hasMatch = False
     match_cnt = 0
     non_match_cnt = 0
     potential_match_cnt = 0
@@ -96,7 +98,7 @@ if True:
 
             if json_cnt <= 9999999:
                 ratio = fuzz.WRatio(x_title, j_title)
-                if ratio > 89:
+                if ratio > 99:
                     match = True
                     match_cnt +=1
 
@@ -104,13 +106,12 @@ if True:
                     print('+ Match: ' + str(match_cnt) + ' of ' + str(json_max_cnt) + '\n')
 
 
-                elif ratio > 86:
-                    potential_match_cnt +=1
 
-                    match = False
-                    print('    - Ratio ' + str(ratio) + '% -> ' + ' [' + game['title_id'] + ']' + ' [' + json_title + ']' + ' vs [' + xml_title + ']')
-                    print('    - Match: ' + str(match_cnt) + ' of ' + str(json_max_cnt) + '\n')
+                if not match:
+                    non_migrated_games['games'].append(game)
 
+    with open(platform + '_not_migrated.json', "w") as newFile:
+        json_text = json.dumps(non_migrated_games, indent=4, separators=(",", ":"), ensure_ascii=False).encode('utf8')
+        newFile.write(json_text)
 
-                else:
-                    non_match_cnt +=1
+    xml_tree.write(open(platform + '_migrated.xml', 'w'), encoding='utf-8')
