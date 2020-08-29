@@ -1,0 +1,13 @@
+{
+	"ps3_lan_ip"	: "",
+	"ftp_user"		: "",
+	"ftp_password"	: "",
+	"ftp_timeout"	: 15,
+	"ftp_pasv_mode"	: false,
+	"chunk_size_kb"	: 750,
+	"show_psp_list"	: true,
+	"show_psx_list"	: true,
+	"show_ps2_list"	: true,
+	"show_ps3_list"	: true,
+	"show_psn_list"	: true
+}

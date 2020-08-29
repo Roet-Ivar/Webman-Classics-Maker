@@ -1,13 +1,14 @@
-import os
-import subprocess
+import os, subprocess
+from shutil import copyfile
 
-current_path= os.getcwd()
-print(current_path)
-if '\util_scripts' not in os.getcwd():
-	os.chdir('./resources/tools/util_scripts/_pyinstaller_and_release_scripts')
+import application_path
+from global_paths import App as AppPaths
+from global_paths import Build as BuildPaths
 
-app = './../../Param_SFO_Editor/PARAM.SFO.Editor.exe'
-args = './../../../pkg/PARAM.SFO'
+copyfile(os.path.join(AppPaths.util_resources, 'PARAM.SFO_MOD.BAK'), os.path.join(AppPaths.pkg, 'PARAM.SFO'))
+
+app = os.path.join(BuildPaths.Param_SFO_Editor, 'PARAM.SFO.Editor.exe')
+args = os.path.join(AppPaths.pkg, 'PARAM.SFO')
 
 p = subprocess.call(app + ' ' + args)
 

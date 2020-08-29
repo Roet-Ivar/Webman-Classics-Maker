@@ -1,1 +1,1 @@
-GET /play.ps3/dev_hdd0/PS3ISO/This%20Is%20The%20Iso%20Filename.iso HTTP/1.0
+GET /play.ps3/dev_hdd0/PS2ISO/Game_Name.ISO HTTP/1.0
