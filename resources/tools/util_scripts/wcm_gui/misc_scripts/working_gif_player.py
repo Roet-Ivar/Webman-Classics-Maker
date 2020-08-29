@@ -8,7 +8,7 @@ import time
 try:
 	import tkinter as tk  # for Python2
 except ImportError:
-	import tkinter as tk  # for Python3
+	import Tkinter as tk  # for Python3
 
 
 class AnimatedGif(tk.Label):
@@ -74,7 +74,7 @@ class AnimatedGif(tk.Label):
 				
 				
 root = tk.Tk()
-aGif = AnimatedGif(root, 'redish_opt.gif')
+aGif = AnimatedGif(root, 'window_55f_opt.gif', 0.01)
 aGif.pack()
 # aGif.start_thread()
 aGif.start()

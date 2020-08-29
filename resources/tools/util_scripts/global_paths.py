@@ -22,7 +22,7 @@ else:
         running_mode = 'Interactive'
 
 class App:
-    application_path= application_path
+    application_path = application_path
     # in application folder
     builds          = os.path.join(application_path, 'builds')
     release         = os.path.join(application_path, 'release')

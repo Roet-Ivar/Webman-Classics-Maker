@@ -1,4 +1,4 @@
-import tkinter as tk
+import Tkinter as tk
 # from PIL import Image, ImageTk
 from itertools import count, cycle
 from decimal import *
@@ -8,19 +8,19 @@ class ImageLabel(tk.Label):
 	def load(self, im):
 		if isinstance(im, str):
 			# im = Image.open(im)
-			im = tk.PhotoImage(file='bluish_opt.gif')
+			im = tk.PhotoImage(file='window_55f_opt.gif')
 		frames = []
 
 		try:
-			total_frames = 134
-			i = 0
+			total_frames = 55
+			i = 1
 			while i < total_frames:
-				percent = int(i/total_frames*100)
+				percent = int(100*i/total_frames)
 				print('Loading gif: ' + str(percent) + '%')
-				frames.append(tk.PhotoImage(file='bluish_opt.gif', format='gif -index {}'.format(total_frames-i)))
+				frames.append(tk.PhotoImage(file='window_55f_opt.gif', format='gif -index {}'.format(i)))
 				i += 1
-				
-							
+
+
 		except EOFError:
 			pass
 		self.frames = cycle(frames)
@@ -49,5 +49,5 @@ class ImageLabel(tk.Label):
 root = tk.Tk()
 lbl = ImageLabel(root)
 lbl.pack()
-lbl.load('ball-small.gif')
+lbl.load('window_55f_opt.gif')
 root.mainloop()

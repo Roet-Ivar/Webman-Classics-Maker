@@ -1,251 +1,240 @@
 {
-    "psp_games":[        {
-            "title":"Power Stone 1.iso",
-            "title_id":null,
-            "installed":null,
-            "platform":"PSP",
-            "meta_data_link":null,
-            "filename":"Power Stone 1.iso",
-			"path":"/dev_hdd0/PSPISO/"
-        },
+    "psx_games":[
         {
-            "title":"Power Stone 2.iso",
-            "title_id":null,
-            "installed":null,
-            "platform":"PSP",
-            "meta_data_link":null,
-            "filename":"Power Stone 2.iso",
-			"path":"/dev_hdd0/PSPISO/"
+            "title":"Tekken 3",
+            "title_id":"SLUS-00402",
+            "filename":"Tekken 3.bin",
+            "platform":"PSX",
+            "meta_data_link":"games/U/T/SLUS-00402.html",
+            "path":"/dev_hdd0/PSXISO/"
         }
-	],
+    ],
     "ps2_games":[
         {
             "title":"ELFLoader.iso",
             "title_id":null,
             "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
             "filename":"ELFLoader.iso",
-			"path":"/dev_hdd0/PS2ISO/"
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
         },
         {
             "title":"Spider-Man 2",
             "title_id":"SLUS-20776",
             "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
             "filename":"Spider-Man 2 (USA)_widescreen.iso",
-			"path":"/dev_hdd0/PS2ISO/"
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
         },
         {
             "title":"Burnout - Dominator",
             "title_id":"SLUS-21596",
             "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
             "filename":"Burnout Dominator.iso",
-			"path":"/dev_hdd0/PS2ISO/"
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
         },
         {
             "title":"Burnout Revenge",
             "title_id":"SLUS-21242",
             "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
             "filename":"Burnout Revenge.iso",
-			"path":"/dev_hdd0/PS2ISO/"
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
         },
         {
             "title":"Sega Rally Championship '95",
             "title_id":"SLPM-62703",
             "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
             "filename":"Sega Rally Championship 1995_widescreen.iso",
-			"path":"/dev_hdd0/PS2ISO/"
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
         },
         {
             "title":"Athens 2004",
             "title_id":"SCUS-97379",
             "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
             "filename":"Athens 2004 (USA).iso",
-			"path":"/dev_hdd0/PS2ISO/"
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
         },
         {
             "title":"ESPN International Track & Field",
             "title_id":"SLUS-20041",
             "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
             "filename":"ESPN International Track & Field (USA).iso",
-			"path":"/dev_hdd0/PS2ISO/"
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
         },
         {
             "title":"Gun",
             "title_id":"SLUS-21139",
             "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
             "filename":"Gun (USA).iso",
-			"path":"/dev_hdd0/PS2ISO/"
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
         },
         {
             "title":"Burnout 3 - Takedown",
             "title_id":"SLUS-21050",
             "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
             "filename":"Burnout 3 - Takedown (USA).iso",
-			"path":"/dev_hdd0/PS2ISO/"
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
         },
         {
             "title":"Escape from Monkey Island",
             "title_id":"SLUS-20181",
             "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
             "filename":"Escape from Monkey Island (USA).iso",
-			"path":"/dev_hdd0/PS2ISO/"
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
         },
         {
             "title":"Kingdom Hearts",
             "title_id":"SLUS-20370",
             "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
             "filename":"Kingdom Hearts (USA).iso",
-			"path":"/dev_hdd0/PS2ISO/"
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
         },
         {
             "title":"Kingdom Hearts II",
             "title_id":"SLUS-21005",
             "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
             "filename":"Kingdom Hearts II (USA).iso",
-			"path":"/dev_hdd0/PS2ISO/"
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
         },
         {
             "title":"Marvel - Ultimate Alliance 2",
             "title_id":"SLUS-21879",
             "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
             "filename":"Marvel - Ultimate Alliance 2 (USA).iso",
-			"path":"/dev_hdd0/PS2ISO/"
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
         },
         {
             "title":"Marvel vs. Capcom 2",
             "title_id":"SLUS-20486",
             "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
             "filename":"Marvel vs. Capcom 2 - New Age of Heroes (USA).iso",
-			"path":"/dev_hdd0/PS2ISO/"
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
         },
         {
             "title":"Time Crisis 3 ",
             "title_id":"SLUS-20645",
             "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
             "filename":"Time Crisis 3 (USA).iso",
-			"path":"/dev_hdd0/PS2ISO/"
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
         },
         {
             "title":"Need for Speed - Hot Pursuit 2",
             "title_id":"SLUS-20362",
             "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
             "filename":"Need for Speed - Hot Pursuit 2 (USA)_60fps_widescreen.iso",
-			"path":"/dev_hdd0/PS2ISO/"
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
         },
         {
             "title":"Soul Calibur 2",
             "title_id":"SLUS-20643",
             "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
             "filename":"Soulcalibur II (USA).iso",
-			"path":"/dev_hdd0/PS2ISO/"
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
         },
         {
             "title":"Soul Calibur III",
             "title_id":"SLUS-21216",
             "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
             "filename":"Soulcalibur III (USA).iso",
-			"path":"/dev_hdd0/PS2ISO/"
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
         },
         {
             "title":"Tekken Tag Tournament",
             "title_id":"SLUS-20001",
             "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
             "filename":"Tekken Tag Tournament (USA) (v2.00).iso",
-			"path":"/dev_hdd0/PS2ISO/"
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
         },
         {
             "title":"Time Crisis II",
             "title_id":"SLUS-20219",
             "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
             "filename":"Time Crisis II (USA).bin",
-			"path":"/dev_hdd0/PS2ISO/"
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
         },
         {
             "title":"Virtua Fighter 4 - Evolution",
             "title_id":"SLUS-20616",
             "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
             "filename":"Virtua Fighter 4 - Evolution (USA).iso",
-			"path":"/dev_hdd0/PS2ISO/"
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
         },
         {
             "title":"X-Men Legends II - Rise of Apocalypse",
             "title_id":"SLUS-21138",
             "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
             "filename":"X-Men Legends II - Rise of Apocalypse (USA).iso",
-			"path":"/dev_hdd0/PS2ISO/"
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
         },
         {
             "title":"Sega Ages 2500 Series Vol.15 - Decathlete Collection",
             "title_id":"SLPM-62444",
             "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
             "filename":"Decathlete Collection.iso",
-			"path":"/dev_hdd0/PS2ISO/"
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
         },
         {
             "title":"Drive to Survive",
             "title_id":"SLUS-21109",
             "game_type":"PS2",
-            "installed":null,
-            "meta_data_link":null,
             "filename":"Drive to Survive.iso",
-			"path":"/dev_hdd0/PS2ISO/"
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
         }
     ],
-    "ps3_games":[],
-	"psx_games":[
-	{
-		"title":"Tekken 3",
-		"title_id":"SLUS-00402",
-		"installed":null,
-		"platform":"PSX",
-		"meta_data_link":"games/U/T/SLUS-00402.html",
-		"filename":"Tekken 3.bin",
-		"path":"/dev_hdd0/PSXISO/"
-	}
+    "ps3_games":[        {
+            "title":"Virtua Tennis 3",
+            "title_id":null,
+            "filename":"Virtua Tennis 3.iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        },
+        {
+            "title":"SingStar Shitty Hits",
+            "title_id":null,
+            "filename":"SingStar Shitty Hits.iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        }],
+    "psp_games":[
+        {
+            "title":"Power Stone 1.iso",
+            "title_id":null,
+            "filename":"Power Stone 1.iso",
+            "platform":"PSP",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PSPISO/"
+        },
+        {
+            "title":"Power Stone 2.iso",
+            "title_id":null,
+            "filename":"Power Stone 2.iso",
+            "platform":"PSP",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PSPISO/"
+        }
     ]
 }

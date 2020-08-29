@@ -10,7 +10,6 @@ from global_paths import App as AppPaths
 from global_paths import Image as ImagePaths
 
 sys.path.append(AppPaths.settings)
-import ftp_settings
 
 from Tkinter import *
 from PIL import Image, ImageDraw, ImageFont
@@ -21,7 +20,8 @@ from ftp_game_list_v3 import FtpGameList
 
 # check python version less than 3
 if sys.version_info[0] > 2:
-	print('Error: Webman Classics Maker is only compatible with python 2.7 32/64')
+	print("""Error: Webman Classics Maker is only compatible with python 2.7 32/64.
+		  Reason: the pkgcrypt module hasn't been ported to python 3.x""")
 	sys.exit(1)
 
 if 'linux' in sys.platform:
@@ -40,7 +40,7 @@ class Main:
 		self.wcm_work_dir 		= AppPaths.wcm_work_dir
 		self.wcm_pkg_dir 		= os.path.join(self.wcm_work_dir, 'pkg')
 		self.builds_path 		= AppPaths.builds
-		self.ftp_settings_path 	= os.path.join(AppPaths.settings, 'ftp_settings.txt')
+		self.ftp_settings_path 	= os.path.join(AppPaths.settings, 'ftp_settings.cfg')
 		self.fonts_path 		= AppPaths.fonts
 
 		# self.main_offset_x_pos = 1325
@@ -84,7 +84,7 @@ class Main:
 		self.images_function_button.append(PhotoImage(self.small_button_maker('Change', font='arial.ttf', x=-3, y=0)))
 
 		self.images_gamelist_button = []
-		self.images_gamelist_button.append(PhotoImage(self.small_button_maker('Sync', font='arial.ttf', x=3, y=0)))
+		self.images_gamelist_button.append(PhotoImage(self.small_button_maker('Fetch', font='arial.ttf', x=3, y=0)))
 		self.images_gamelist_button.append(PhotoImage(self.small_button_maker('Refresh', font='arial.ttf', x=-1, y=0)))
 
 		self.background_images = []
@@ -110,17 +110,18 @@ class Main:
 		self.game_list_refresh_button	= None
 
 
-		# text messages
+		# text tooltip messages
 		self.USB_BUTTON_TOOLTIP_MSG = "toggle USB port (0-3)"
 		self.SAVE_BUTTON_TOOLTIP_MSG = "save 'work_dir' folder"
 		self.BUILD_BUTTON_TOOLTIP_MSG = "build and save the PKG"
-		self.SYNC_BUTTON_TOOLTIP_MSG = "sync games over FTP"
-		self.REFRESH_BUTTON_TOOLTIP_MSG = "reload gamelist from file"
+		self.SYNC_BUTTON_TOOLTIP_MSG = "fetch gamelist over FTP"
+		self.REFRESH_BUTTON_TOOLTIP_MSG = "reload gamelist from disk"
 		self.ICON0_TOOLTIP_MSG = "Click to change ICON0"
 		self.PIC0_TOOLTIP_MSG = "Click to change  PIC0"
 		self.PIC1_TOOLTIP_MSG = "Click to change  PIC1"
 
 		# init definitions
+		self.init_config_file()
 		self.init_pkg_images()
 		self.init_main_window_buttons(self.main)
 		self.init_default_view(self.main)
@@ -129,14 +130,22 @@ class Main:
 		self.list_filter_platform = 'All'
 		self.create_list_combo_box(self.list_filter_platform)
 
+	# definitions starts here
+	def init_config_file(self):
+		if not os.path.isfile(self.ftp_settings_path):
+			shutil.copyfile(os.path.join(AppPaths.util_resources, 'ftp_settings.cfg.BAK'), self.ftp_settings_path)
+
+		with open(self.ftp_settings_path, 'r') as settings_file:
+			self.ftp_settings_data = json.load(settings_file)
+
 	def get_ftp_ip_from_config(self):
-		return ftp_settings.ps3_lan_ip
+		return self.ftp_settings_data['ps3_lan_ip']
 
 	def get_ftp_user_from_config(self):
-		return ftp_settings.ftp_user
+		return self.ftp_settings_data['ftp_user']
 
 	def get_ftp_pass_from_config(self):
-		return ftp_settings.ftp_password
+		return self.ftp_settings_data['ftp_password']
 
 
 	def create_list_combo_box(self, platform):
@@ -468,7 +477,7 @@ class Main:
 		self.ftp_sync_button = Button(main,
 									  image=self.images_gamelist_button[0],
 									  borderwidth=0,
-									  command=self.on_ftp_sync_button,
+									  command=self.on_ftp_fetch_button,
 									  bg="#FBFCFB")
 
 
@@ -960,22 +969,36 @@ class Main:
 			except:
 				print('ERROR: Could open the pkg build dir from Windows explorer')
 
-	def on_ftp_sync_button(self):
+	def on_ftp_fetch_button(self):
 		# save the ps3-ip field to config file
-		self.save_ps3_ip_on_sync()
+		self.save_ps3_ip_on_fetch()
 		ftp_game_list = FtpGameList()
 		ftp_game_list.execute()
 
 		self.on_game_list_refresh()
 
-	def save_ps3_ip_on_sync(self):
-		ftp_settings.ps3_lan_ip = str(self.entry_field_ftp_ip.get())
+
+	def save_ps3_ip_on_fetch(self):
+
+		with open(self.ftp_settings_path, 'r') as settings_file:
+			json_settings_data = json.load(settings_file)
+			json_settings_data['ps3_lan_ip'] = str(self.entry_field_ftp_ip.get())
+			json_settings_data['ps3_user'] = str(self.entry_field_ftp_user.get())
+			json_settings_data['ps3_password'] = str(self.entry_field_ftp_pass.get())
+			settings_file.close()
+		# save to file
+		with open(self.ftp_settings_path, 'w') as save_settings_file:
+			new_json_data = json.dumps(json_settings_data, indent=4, separators=(",", ":"))
+			save_settings_file.write(new_json_data)
+			save_settings_file.close()
+
+
 
 	def save_preview_image(self):
 		# making a preview print of the game canvas
 		preview_img = Image.open(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG'))
 		icon_img = Image.open(os.path.join(self.wcm_pkg_dir, 'ICON0.PNG'))
-		print('DEBUG: ' + os.path.dirname(__file__))
+		# print('DEBUG: ' + os.path.dirname(__file__))
 		xmb_img_dir = os.path.join(ImagePaths.xmb, 'XMB_icons.png')
 		xmb_img = Image.open(xmb_img_dir)
 		preview_img.paste(icon_img, (425, 450), icon_img)
@@ -986,7 +1009,7 @@ class Main:
 		preview_img.save(os.path.join(self.wcm_work_dir, 'preview.png'))
 
 	def on_game_list_refresh(self):
-		self.create_list_combo_box(self.box.get())
+		self.create_list_combo_box(self.list_filter_platform)
 
 	def save_pkg_info_to_json(self):
 		with open(os.path.join(AppPaths.util_resources, 'pkg.json.BAK')) as f:

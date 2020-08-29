@@ -6,15 +6,23 @@ from global_paths import App as AppPaths
 class Edit_launch_txt:
 	def execute(self):
 		try:
+
 			with open(os.path.join(AppPaths.wcm_work_dir, 'pkg.json')) as f:
 				json_data = json.load(f)
 
-			# web_command = '/play.ps3'
-			pre_delay = 5
-			post_delay = 3
-			pre_cmd = '/wait.ps3?' + str(pre_delay) + ';/mount_ps3'
-			post_cmd = ';/wait.ps3?' + str(post_delay) + ';/play.ps3;'
-			web_command_string = pre_cmd + str(json_data['iso_filepath'] + post_cmd)
+			# webman-mod v.47.14 and older
+			if False:
+				web_command = '/play.ps3'
+				web_command_string = web_command + str(json_data['iso_filepath'])
+
+			# webman-mod v.47.15 and newer
+			if True:
+				pre_delay = 6
+				post_delay = 2
+				pre_cmd = '/wait.ps3?' + str(pre_delay) + ';/mount_ps3'
+				post_cmd = ';/wait.ps3?' + str(post_delay) + ';/play.ps3'
+				web_command_string = pre_cmd + str(json_data['iso_filepath'] + post_cmd)
+
 			web_url_string = 'GET ' + urllib.quote(web_command_string) + ' HTTP/1.0'
 			
 			launch_txt = open(os.path.join(AppPaths.USRDIR, 'launch.txt'), 'wb')
