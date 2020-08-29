@@ -1,11 +1,14 @@
 import os, json, copy, shutil, sys
 
-# if it's an executable or if it's running from the wcm_gui
+# if running the exe from root or if it's running from the wcm_gui
 if getattr(sys, 'frozen', False):
     sys.path.append(os.path.join(os.path.dirname(sys.executable), 'resources', 'tools', 'util_scripts'))
 else:
-	sys.path.append('..')
-
+	# running webman_classics_maker.py from root
+	app_full_path = os.path.realpath(__file__)
+	application_path = os.path.dirname(app_full_path)
+	sys.path.append(os.path.join(application_path,'resources', 'tools', 'util_scripts'))
+	sys.path.append(os.path.join(application_path,'resources', 'tools', 'util_scripts', 'wcm_gui'))
 from global_paths import App as AppPaths
 from global_paths import Image as ImagePaths
 

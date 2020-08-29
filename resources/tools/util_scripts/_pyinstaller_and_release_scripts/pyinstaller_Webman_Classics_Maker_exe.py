@@ -14,7 +14,7 @@ if not os.path.exists('build'):
     os.makedirs('build')
 
 script_filename='webman_classics_maker.py'
-script_folder_path=AppPaths.wcm_gui
+script_folder_path=AppPaths.application_path
 
 icon_path=ImagePaths.misc
 icon_name='webman.ico'
