@@ -1,26 +1,37 @@
 
 from __future__ import with_statement
 import struct, sys, os, shutil, json
+from global_paths import App as AppPaths
 
-CURRENT_DIR = os.path.dirname(__file__)
-PKGCRYPT_DIR = 'pkgcrypt'
 pkgcrypt_ver = 'py'
 
 # check python version less than 3
-if sys.version_info[0]<3:
+if sys.version_info[0] < 3:
 	pkgcrypt_ver += '27_'
+else:
+	print('Error: webMAN Classics Maker is only compatible with python 2.7 32/64')
+	sys.exit(1)
 # check if python runs as 32 or 64 bit
 if struct.calcsize('P') * 8 == 64:
 	pkgcrypt_ver += '64'
 else:
 	pkgcrypt_ver += '32'
 
-sys.path.append(os.path.join(CURRENT_DIR, PKGCRYPT_DIR, pkgcrypt_ver))
-
+sys.path.append(os.path.join(AppPaths.pkgcrypt, pkgcrypt_ver))
 try:
 	import pkgcrypt
-except Exception, e:
-	print(e)
+except:
+	print("""
+	-----------------
+	PKG BUILD ERROR
+	-----------------
+	Couldn't make PKG file. Go into the ps3py directory, and type the following:
+	
+	python2 setup.py build
+	
+	This should create a pkgcrypt.so file in the build/ directory. Move that file
+	over to the root of the ps3py directory and try running this script again.""")
+
 
 class StructType(tuple):
 	def __getitem__(self, value):
@@ -533,20 +544,6 @@ def setContextNum(key, tmpnum):
 	key[0x3e] = ord(tmpchrs[6])
 	key[0x3f] = ord(tmpchrs[7])
 
-try:
-	import pkgcrypt
-except:
-	print ""
-	print "-----------------"
-	print "PKG BUILD ERROR"
-	print "-----------------"
-	print "Couldn't make PKG file. Go into the ps3py directory, and type the following:"
-	print ""
-	print "python2 setup.py build"
-	print ""
-	print "This should create a pkgcrypt.so file in the build/ directory. Move that file"
-	print "over to the root of the ps3py directory and try running this script again."
-
 
 def crypt(key, inbuf, length):
 	if not isinstance(key, list):
@@ -664,28 +661,27 @@ def pack(folder, contentid, outname=None):
 	#0x00000019	WT (Web TV?)		/dev_hdd0/game/
 	
 	metaBlock = MetaHeader()
-	metaBlock.unk1 		= 1 #doesnt change output of --extract
-	metaBlock.unk2 		= 4 #doesnt change output of --extract
-	metaBlock.drmType 	= 3 #1 = Network, 2 = Local, 3 = Free, anything else = unknown
-	metaBlock.unk4 		= 2 
-	
-	metaBlock.unk21 	= 4
-	metaBlock.unk22 	= 0xB #content type = 5 == gameexec, 4 == gamedata
-	metaBlock.unk23 	= 3
-	metaBlock.unk24 	= 4
-	
-	metaBlock.unk31 	= 0xE   #packageType 0x10 == patch, 0x8 == Demo&Key, 0x0 == Demo&Key (AND UserFiles = NotOverWrite), 0xE == normal, use 0xE for gamexec, and 8 for gamedata
-	metaBlock.unk32 	= 4   #when this is 5 secondary version gets used??
-	metaBlock.unk33 	= 8   #doesnt change output of --extract
-	metaBlock.secondaryVersion 	= 0
-	metaBlock.unk34 	= 0
-	
-	metaBlock.dataSize 	= 0
-	metaBlock.unk42 	= 5
-	metaBlock.unk43 	= 4
-	metaBlock.packagedBy 	= 0x1061
-	metaBlock.packageVersion 	= 0
-	
+	metaBlock.unk1 = 1  # doesnt change output of --extract
+	metaBlock.unk2 = 4  # doesnt change output of --extract
+	metaBlock.drmType = 3  # 1 = Network, 2 = Local, 3 = Free, anything else = unknown
+	metaBlock.unk4 = 2
+
+	metaBlock.unk21 = 4
+	metaBlock.unk22 = 5  # content type = 5 == gameexec, 4 == gamedata
+	metaBlock.unk23 = 3
+	metaBlock.unk24 = 4
+
+	metaBlock.unk31 = 0xE  # packageType 0x10 == patch, 0x8 == Demo&Key, 0x0 == Demo&Key (AND UserFiles = NotOverWrite), 0xE == normal, use 0xE for gamexec, and 8 for gamedata
+	metaBlock.unk32 = 4  # when this is 5 secondary version gets used??
+	metaBlock.unk33 = 8  # doesnt change output of --extract
+	metaBlock.secondaryVersion = 0
+	metaBlock.unk34 = 0
+
+	metaBlock.dataSize = 0
+	metaBlock.unk42 = 5
+	metaBlock.unk43 = 4
+	metaBlock.packagedBy = 0x1061
+	metaBlock.packageVersion = 0
 	
 	files = []
 	getFiles(files, folder, folder)
@@ -829,7 +825,7 @@ class Webman_pkg:
 		extract = False
 		list = False
 		
-		with open('../util_generated_files/params.json') as f:
+		with open(os.path.join(AppPaths.wcm_work_dir, 'pkg.json')) as f:
 			json_data = json.load(f)
 
 		contentid = str(json_data['content_id'])
@@ -838,15 +834,14 @@ class Webman_pkg:
 		filepath = str(json_data['iso_filepath'])
 		filepath_arr = [x for x in filepath.split('/')]
 		
-		pkg_build_script='./webman_pkg.py'
+		pkg_build_script='webman_pkg.py'
 		pkg_flag='--contentid'
-		pkg_dir_path='../../pkg/'
+		pkg_dir_path=AppPaths.pkg + '/'
 		
-		pkg_name = titleid + '_' + filepath_arr[3][:-4] + '.pkg'
+		pkg_name = filepath_arr[3][:-4] + '_(' + titleid + ')' + '.pkg'
 		pkg_name = pkg_name.replace(' ', '_')
-		
-		build_dir_path='../../../builds/'
-		
+		build_dir_path = os.path.join(AppPaths.builds, pkg_name.replace('.pkg', ''))
+
 		arg_list = [pkg_build_script, pkg_flag, contentid, pkg_dir_path, pkg_name]	
 		try:
 			opts, args = getopt.getopt(arg_list[1:], "hx:dvl:c:", ["help", "extract=", "version", "list=", "contentid="])
@@ -881,20 +876,12 @@ class Webman_pkg:
 				
 				if not os.path.exists(build_dir_path):
 					os.makedirs(build_dir_path)
-				
-				shutil.move(pkg_name, build_dir_path + pkg_name)
-				
-				for root, dirs, files in os.walk('..'):
-					for file in files:
-						if file.endswith('.pyc') is True:
-							os.remove(file)
 
-				print('Execution of \'webman_pkg.py\':             Done')
+				shutil.move(pkg_name, os.path.join(build_dir_path, pkg_name))
+				print('Execution of \'webman_pkg.py\':              Done')
 				print('-----------------------------------------------\n')
-				print('Package created: ' + '/builds/' + pkg_name + '\n')
+				print('Package created in: ' + build_dir_path + pkg_name + '\n')
+				return pkg_name
 			else:
 				usage()
 				sys.exit(2)
-# if __name__ == "__main__":
-# 	webman = Webman_pkg()
-# 	webman.execute()

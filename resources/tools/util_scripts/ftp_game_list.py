@@ -2,17 +2,12 @@ import json
 import os
 import sys
 from ftplib import FTP
-
-
-current_path= os.getcwd()
-# print('current_path: ' + current_path)
-if '\util_scripts' not in os.getcwd():
-	os.chdir('./resources/tools/util_scripts/')
+from global_paths import App as AppPaths
 
 #Constants
 pause_message		= 'Press ENTER to continue...'
-mock_data_file		= '../util_resources/mock_ftp_game_list_response.txt'
-user_settings_file	= '../../../settings/ftp_settings.txt'
+mock_data_file		= os.path.join(AppPaths.util_resources, 'mock_ftp_game_list_response.txt')
+user_settings_file	= os.path.join(AppPaths.settings, 'ftp_settings.txt')
 
 pspiso_path 		= '/dev_hdd0/PSPISO/'
 psxiso_path 		= '/dev_hdd0/PSISO/'
@@ -40,13 +35,13 @@ try:
 		show_ps3_list 	= json_data['show_ps3_list']
 		show_psn_list 	= json_data['show_psn_list']
 		
-except Exception, e:
+except Exception as e:
 	print('Error: ' + str(e))
 	raw_input(pause_message)
 	sys.exit()
 	
 try:
-	print('Connecting to PS3 at: ' + ps3_lan_ip)
+	print('Connecting to PS3 at: ' + ps3_lan_ip + ', with timeout: ' + str(ftp_timeout) + 's')
 	ftp = FTP(ps3_lan_ip, timeout=ftp_timeout)
 	ftp.login(user='', passwd = '')
 
@@ -56,7 +51,7 @@ try:
 	ftp.retrlines('NLST ' + ps3iso_path, ps3lines.append)
 	ftp.retrlines('NLST ' + hdgame_path, psnlines.append)
 	
-except Exception, e:
+except Exception as e:
 	error_message = str(e)
 	if 'Errno 10061' in error_message:
 		print('Error: ' + error_message)
@@ -169,7 +164,7 @@ if(show_psn_list):
 		psn_list = psn_list + ('No PSN games found.\n')
 	ftp_game_list = ftp_game_list + psn_list + '\n'
 
-with open("../../../game_list.txt", "wb") as f:
+with open(os.path.join(AppPaths.resources, 'game_list.txt'), 'wb') as f:
 	f.write(ftp_game_list)
 	f.close()
 
