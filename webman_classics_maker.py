@@ -1,8 +1,9 @@
 import os, json, copy, shutil, sys
 
-# if running the exe from root or if it's running from the wcm_gui
+# if running the webman_classics_maker.exe from root
 if getattr(sys, 'frozen', False):
-    sys.path.append(os.path.join(os.path.dirname(sys.executable), 'resources', 'tools', 'util_scripts'))
+	sys.path.append(os.path.join(os.path.dirname(sys.executable), 'resources', 'tools', 'util_scripts'))
+	sys.path.append(os.path.join(os.path.dirname(sys.executable),'resources', 'tools', 'util_scripts', 'wcm_gui'))
 else:
 	# running webman_classics_maker.py from root
 	app_full_path = os.path.realpath(__file__)
@@ -14,12 +15,24 @@ from global_paths import Image as ImagePaths
 
 sys.path.append(AppPaths.settings)
 
-from Tkinter import *
+try:
+	# Python2
+	from Tkinter import *
+	import Tkinter as tk
+	import ttk
+except ImportError as e:
+	print("Tkinter import error: " + e.message)
+	# Python3
+	from tkinter import *
+	import tkinter as tk
+	import ttk
+
+
 from PIL import Image, ImageDraw, ImageFont
 from PIL.ImageTk import PhotoImage
 from tkFileDialog import askopenfile
 from game_listbox import Gamelist
-from ftp_game_list_v3 import FtpGameList
+from ftp_game_list_fetcher import FtpGameList
 
 # check python version less than 3
 if sys.version_info[0] > 2:
@@ -136,7 +149,10 @@ class Main:
 	# definitions starts here
 	def init_config_file(self):
 		if not os.path.isfile(self.ftp_settings_path):
-			shutil.copyfile(os.path.join(AppPaths.util_resources, 'ftp_settings.cfg.BAK'), self.ftp_settings_path)
+			if os.path.isfile(os.path.join(AppPaths.util_resources, 'ftp_settings.cfg.BAK')):
+				shutil.copyfile(os.path.join(AppPaths.util_resources, 'ftp_settings.cfg.BAK'), self.ftp_settings_path)
+			else:
+				print('Error: ' + os.path.join(AppPaths.util_resources, 'ftp_settings.cfg.BAK') + ' could not be find.')
 
 		with open(self.ftp_settings_path, 'r') as settings_file:
 			self.ftp_settings_data = json.load(settings_file)
@@ -162,8 +178,8 @@ class Main:
 
 		self.game_list_box = gamelist.get_listbox()
 		self.game_list_box.config(selectmode='SINGLE',
-							 activestyle='dotbox',
-							 borderwidth=0)
+								  activestyle='dotbox',
+								  borderwidth=0)
 
 		# insert the dropdown into the listbox
 		from platform_dropdown import Dropdown

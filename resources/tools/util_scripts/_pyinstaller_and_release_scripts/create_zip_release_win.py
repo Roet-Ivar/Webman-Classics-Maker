@@ -8,7 +8,7 @@ from global_paths import Build as BuildPaths
 import pyinstaller_Webman_Classics_Maker_exe
 
 def zipdir(path, ziph):
-    # ziph is zipfile handle
+	# ziph is zipfile handle
 	webman_classics_maker_exist = False
 	webman_classic_exe = 'Webman_Classics_Maker.exe'
 
@@ -75,23 +75,24 @@ def zipdir(path, ziph):
 			files.remove('FTP_Game_List.exe')
 
 		for file in files:
+			# add all files that aren't zip or pyc
 			if file.endswith('.zip') is not True and file.endswith('.pyc') is not True:
 				ziph.write(os.path.join(root, file))
-			elif file == webman_classic_exe:
+			if file == webman_classic_exe:
 				webman_classics_maker_exist = True
-				
+
 	if((webman_classics_maker_exist) == False):
-		print("Warning: Couldn't find webman_classics_maker.exe")
+		print("Warning: Couldn't find Webman_Classics_Maker.exe")
 		print('Try rebuilding binaries using the included pyinstaller scripts.')
 		sys.exit()
-		
+
 if __name__ == '__main__':
 
 	# windows release
 	zip_archive_name = 'webman_classics_maker_v2.0_win.zip'
 	zip_dir_path = BuildPaths.zip_dir
 	release_dir = BuildPaths.release
-	
+
 	if not os.path.exists(os.path.join(zip_dir_path, 'release')):
 		os.makedirs(os.path.join(zip_dir_path, 'release'))
 
@@ -100,7 +101,7 @@ if __name__ == '__main__':
 	zipf.close()
 
 	print('The release archive has sucessfully been package and distributed to:\n' + '/release/' + zip_archive_name)
-	try: 
+	try:
 		input = raw_input
 	except NameError: pass
 	input('\npress ENTER to continue...')

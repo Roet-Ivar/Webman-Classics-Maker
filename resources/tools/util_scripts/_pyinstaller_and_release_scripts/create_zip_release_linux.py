@@ -1,10 +1,9 @@
 import sys, os, zipfile
 import application_path
 from global_paths import Build as BuildPaths
-import pyinstaller_Webman_Classics_Maker_exe
 
 def zipdir(path, ziph):
-    # ziph is zipfile handle
+	# ziph is zipfile handle
 
 	# TODO: No more CHDIR plz!
 	# files folders to exclude
@@ -67,6 +66,8 @@ def zipdir(path, ziph):
 			files.remove('Edit_Param_SFO.exe')
 		if 'FTP_Game_List.exe' in files:
 			files.remove('FTP_Game_List.exe')
+		if 'Webman_Classics_Maker.exe' in files:
+			files.remove('Webman_Classics_Maker.exe')
 
 		for file in files:
 			if file.endswith('.zip') is not True and file.endswith('.pyc') is not True:
@@ -88,7 +89,7 @@ if __name__ == '__main__':
 
 
 	print('The release archive has sucessfully been package and distributed to:\n' + '/release/' + zip_archive_name)
-	try: 
+	try:
 		input = raw_input
 	except NameError: pass
 	input('\npress ENTER to continue...')

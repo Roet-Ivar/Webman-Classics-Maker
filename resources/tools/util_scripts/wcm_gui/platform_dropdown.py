@@ -2,7 +2,8 @@ try:
     # Python2
     import Tkinter as tk
     import ttk
-except ImportError:
+except ImportError as e:
+    print("Tkinter import error: " + e.message)
     # Python3
     import tkinter as tk
     import ttk

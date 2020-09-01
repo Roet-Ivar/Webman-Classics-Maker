@@ -133,7 +133,7 @@ class FtpGameList():
             # if len(self.json_game_list_data[platform]) == 0:
             self.json_game_list_data[platform].extend(self.new_platform_list_data[platform])
             # else:
-                 # replace platform
+            # replace platform
 
 
         # save updated gamelist to disk
@@ -288,7 +288,7 @@ class FtpGameList():
         try:
             title_id = self.ftp_chunk_dl.get_title_id(game_filepath, 0, self.chunk_size_kb)
 
-         # retry connection
+        # retry connection
         except Exception as e:
             print('Connection timed out when parsing: ' + game_filename + '\nAuto retry in ' + str(self.ftp_timeout) + 's...\n')
 
@@ -381,9 +381,9 @@ def get_id_from_buffer(self, platform, buffer_data):
                     game_id = game_id.replace('.', '')
 
         elif platform == 'ps3':
-                for m in re.finditer("""\w{4}-\d{5} """, buffer_data):
-                    if m is not None:
-                        game_id = str(m.group(0)).strip()
+            for m in re.finditer("""\w{4}-\d{5} """, buffer_data):
+                if m is not None:
+                    game_id = str(m.group(0)).strip()
 
         elif platform == 'psp':
             for m in re.finditer("""\w{4}-\d{5}\|""", buffer_data):
@@ -401,12 +401,3 @@ class GameMetadataFetcher():
 
         game_data = game_json_data
 
-    # get gamedata from 'psx data center' local file
-    def get_title_from_pdc(self):
-        print()
-    # get metadata from pcsx2 wiki
-    def get_title_from_pcsx2(self):
-        print()
-    # get metadata from launchbox local file
-    def get_title_from_pcsx2(self):
-        print()
