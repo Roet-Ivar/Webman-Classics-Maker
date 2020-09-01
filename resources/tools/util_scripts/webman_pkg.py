@@ -17,7 +17,13 @@ if struct.calcsize('P') * 8 == 64:
 else:
 	pkgcrypt_ver += '32'
 
-sys.path.append(os.path.join(AppPaths.pkgcrypt, pkgcrypt_ver))
+# if running the webman_classics_maker.exe from root
+if getattr(sys, 'frozen', False):
+	sys.path.append(os.path.join(os.path.dirname(sys.executable),'resources', 'tools', 'util_scripts', 'pkgcrypt', pkgcrypt_ver))
+else:
+	# running webman_classics_maker.py from root
+	sys.path.append(os.path.join(AppPaths.pkgcrypt, pkgcrypt_ver))
+
 try:
 	import pkgcrypt
 except:
