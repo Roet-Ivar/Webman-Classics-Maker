@@ -1,0 +1,466 @@
+{
+    "psp_games":[
+        {
+            "title":"Power Stone Collection",
+            "title_id":"ULUS-10171",
+            "filename":"Power Stone 1.iso",
+            "platform":"PSP",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PSPISO/"
+        },
+        {
+            "title":"Power Stone Collection",
+            "title_id":"ULUS-10171",
+            "filename":"Power Stone 2.iso",
+            "platform":"PSP",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PSPISO/"
+        }
+    ],
+    "ps2_games":[
+        {
+            "title":"Soul Calibur 2",
+            "title_id":"SLUS-20643",
+            "filename":"Soulcalibur II (USA).iso",
+            "platform":"PS2",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
+        },
+        {
+            "title":"Gun",
+            "title_id":"SLUS-21139",
+            "filename":"Gun (USA).iso",
+            "platform":"PS2",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
+        },
+        {
+            "title":"Athens 2004",
+            "title_id":"SCUS-97379",
+            "filename":"Athens 2004 (USA).iso",
+            "platform":"PS2",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
+        },
+        {
+            "title":"Burnout 3 - Takedown",
+            "title_id":"SLUS-21050",
+            "filename":"Burnout 3 - Takedown (USA).iso",
+            "platform":"PS2",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
+        },
+        {
+            "title":"Burnout - Dominator",
+            "title_id":"SLUS-21596",
+            "filename":"Burnout Dominator.iso",
+            "platform":"PS2",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
+        },
+        {
+            "title":"Burnout Revenge",
+            "title_id":"SLUS-21242",
+            "filename":"Burnout Revenge.iso",
+            "platform":"PS2",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
+        },
+        {
+            "title":"Sega Ages 2500 Series Vol.15 - Decathlete Collection",
+            "title_id":"SLPM-62444",
+            "filename":"Decathlete Collection.iso",
+            "platform":"PS2",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
+        },
+        {
+            "title":"Drive to Survive",
+            "title_id":"SLUS-21109",
+            "filename":"Drive to Survive.iso",
+            "platform":"PS2",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
+        },
+        {
+            "title":"ELFLoader.iso",
+            "title_id":null,
+            "filename":"ELFLoader.iso",
+            "platform":"PS2",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
+        },
+        {
+            "title":"Escape from Monkey Island",
+            "title_id":"SLUS-20181",
+            "filename":"Escape from Monkey Island (USA).iso",
+            "platform":"PS2",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
+        },
+        {
+            "title":"ESPN International Track & Field",
+            "title_id":"SLUS-20041",
+            "filename":"ESPN International Track & Field (USA).iso",
+            "platform":"PS2",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
+        },
+        {
+            "title":"Kingdom Hearts",
+            "title_id":"SLUS-20370",
+            "filename":"Kingdom Hearts (USA).iso",
+            "platform":"PS2",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
+        },
+        {
+            "title":"Kingdom Hearts II",
+            "title_id":"SLUS-21005",
+            "filename":"Kingdom Hearts II (USA).iso",
+            "platform":"PS2",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
+        },
+        {
+            "title":"Marvel - Ultimate Alliance 2",
+            "title_id":"SLUS-21879",
+            "filename":"Marvel - Ultimate Alliance 2 (USA).iso",
+            "platform":"PS2",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
+        },
+        {
+            "title":"Marvel vs. Capcom 2",
+            "title_id":"SLUS-20486",
+            "filename":"Marvel vs. Capcom 2 - New Age of Heroes (USA).iso",
+            "platform":"PS2",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
+        },
+        {
+            "title":"Need for Speed - Hot Pursuit 2",
+            "title_id":"SLUS-20362",
+            "filename":"Need for Speed - Hot Pursuit 2 (USA)_60fps_widescreen.iso",
+            "platform":"PS2",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
+        },
+        {
+            "title":"Sega Rally Championship '95",
+            "title_id":"SLPM-62703",
+            "filename":"Sega Rally Championship 1995_widescreen.iso",
+            "platform":"PS2",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
+        },
+        {
+            "title":"Soul Calibur III",
+            "title_id":"SLUS-21216",
+            "filename":"Soulcalibur III (USA).iso",
+            "platform":"PS2",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
+        },
+        {
+            "title":"Spider-Man 2",
+            "title_id":"SLUS-20776",
+            "filename":"Spider-Man 2 (USA)_widescreen.iso",
+            "platform":"PS2",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
+        },
+        {
+            "title":"Tekken Tag Tournament",
+            "title_id":"SLUS-20001",
+            "filename":"Tekken Tag Tournament (USA) (v2.00).iso",
+            "platform":"PS2",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
+        },
+        {
+            "title":"Time Crisis 3 ",
+            "title_id":"SLUS-20645",
+            "filename":"Time Crisis 3 (USA).iso",
+            "platform":"PS2",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
+        },
+        {
+            "title":"Time Crisis II",
+            "title_id":"SLUS-20219",
+            "filename":"Time Crisis II (USA).bin",
+            "platform":"PS2",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
+        },
+        {
+            "title":"Virtua Fighter 4 - Evolution",
+            "title_id":"SLUS-20616",
+            "filename":"Virtua Fighter 4 - Evolution (USA).iso",
+            "platform":"PS2",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
+        },
+        {
+            "title":"X-Men Legends II - Rise of Apocalypse",
+            "title_id":"SLUS-21138",
+            "filename":"X-Men Legends II - Rise of Apocalypse (USA).iso",
+            "platform":"PS2",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
+        },
+        {
+            "title":"Sega Ages 2500 Series Vol.26 - Dynamite Deka",
+            "title_id":"SLPM-62717",
+            "filename":"Dynamite Deka.iso",
+            "platform":"PS2",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
+        },
+        {
+            "title":"Sega Rally 2006",
+            "title_id":"SLPM-66212",
+            "filename":"Sega Rally 2006_widescreen.iso",
+            "platform":"PS2",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
+        },
+        {
+            "title":"Sega Ages 2500 Series Vol.16 - Virtua Fighter 2",
+            "title_id":"SLPM-62547",
+            "filename":"Virtua Fighter 2_widescreen.iso",
+            "platform":"PS2",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS2ISO/"
+        }
+    ],
+    "ps3_games":[
+        {
+            "title":"Buzz! Quiz TV   ",
+            "title_id":"BCUS98145",
+            "filename":"Buzz! Quiz TV USA.iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        },
+        {
+            "title":"Buzz! Quiz World  ",
+            "title_id":"BCES00440",
+            "filename":"Buzz! Quiz World EU.iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        },
+        {
+            "title":"FIFA 19  ",
+            "title_id":"BLES02258",
+            "filename":"FIFA 19.iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        },
+        {
+            "title":"Guitar Hero: Warriors Of Rock  ",
+            "title_id":"BLUS30487",
+            "filename":"Guitar Hero - Warriors of Rock.iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        },
+        {
+            "title":"Guitar Hero 5  ",
+            "title_id":"BLUS30292",
+            "filename":"Guitar Hero 5.iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        },
+        {
+            "title":"Guitar Hero III: Legends of Rock  ",
+            "title_id":"BLES00134",
+            "filename":"Guitar Hero III Legends of Rock.iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        },
+        {
+            "title":"Guitar Hero Live  ",
+            "title_id":"BLES02180",
+            "filename":"Guitar Hero Live.iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        },
+        {
+            "title":"Guitar Hero: Metallica  ",
+            "title_id":"BLUS30257",
+            "filename":"Guitar Hero Metallica.iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        },
+        {
+            "title":"Guitar Hero: Smash Hits  ",
+            "title_id":"BLUS30290",
+            "filename":"Guitar Hero Smash Hits.iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        },
+        {
+            "title":"Guitar Hero: World Tour  ",
+            "title_id":"BLES00299",
+            "filename":"Guitar Hero World Tour.iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        },
+        {
+            "title":"Jak & Daxter  Collection  ",
+            "title_id":"BCUS98281",
+            "filename":"Jak and Daxter Collection [BCUS98281].iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        },
+        {
+            "title":"Marvel vs. Capcom 3 : Fate of Two Worlds  ",
+            "title_id":"BLUS30410",
+            "filename":"Marvel.Vs.Capcom.3[BLUS30410].iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        },
+        {
+            "title":"SingStar: ABBA  ",
+            "title_id":"BCES00381",
+            "filename":"SingStar Abba.iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        },
+        {
+            "title":"SingStar: Back to the 80s  ",
+            "title_id":"BCES01257",
+            "filename":"SingStar Back to the 80s.iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        },
+        {
+            "title":"SingStar: Chartbreaker  ",
+            "title_id":"BCES00640",
+            "filename":"SingStar Chartbreaker.iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        },
+        {
+            "title":"SingStar Frozen  ",
+            "title_id":"BCES02112",
+            "filename":"SingStar Frozen.iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        },
+        {
+            "title":"SingStar Hits  ",
+            "title_id":"BCES00264",
+            "filename":"SingStar Hits.iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        },
+        {
+            "title":"SingStar  ",
+            "title_id":"BCES00622",
+            "filename":"SingStar Intro.iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        },
+        {
+            "title":"SingStar: Mallorca Party  ",
+            "title_id":"BCES00519",
+            "filename":"SingStar Mallorca Party.iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        },
+        {
+            "title":"SingStar Motown  ",
+            "title_id":"BCES00596",
+            "filename":"Singstar Motown.iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        },
+        {
+            "title":"SingStar: Queen  ",
+            "title_id":"BCES00494",
+            "filename":"SingStar Queen.iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        },
+        {
+            "title":"SingStar: Take That  ",
+            "title_id":"BCES00607",
+            "filename":"SingStar Take That.iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        },
+        {
+            "title":"SingStar: Ultimate Party  ",
+            "title_id":"BCES02025",
+            "filename":"SingStar Ultimate Party.iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        },
+        {
+            "title":"SingStar  ",
+            "title_id":"BCES00031",
+            "filename":"SingStar Vol 1.iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        },
+        {
+            "title":"SingStar Vol. 2  ",
+            "title_id":"BCES00235",
+            "filename":"SingStar Vol 2.iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        },
+        {
+            "title":"SingStar Vol. 3  ",
+            "title_id":"BCES00265",
+            "filename":"SingStar Vol 3.iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        },
+        {
+            "title":"Summer Stars 2012  ",
+            "title_id":"BLES01528",
+            "filename":"Summer.Stars.2012[BLES01528].iso",
+            "platform":"PS3",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PS3ISO/"
+        }
+    ],
+    "psx_games":[
+        {
+            "title":"Tekken 3",
+            "title_id":"SLUS-00402",
+            "filename":"Tekken 3.bin",
+            "platform":"PSX",
+            "meta_data_link":null,
+            "path":"/dev_hdd0/PSXISO/"
+        }
+    ]
+}

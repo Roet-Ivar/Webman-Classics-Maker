@@ -1,1 +1,1 @@
-GET /play.ps3/dev_hdd0/PS2ISO/Game_Name.ISO HTTP/1.0
+GET /wait.ps3%3F6%3B/mount_ps3/dev_hdd0/PS2ISO/Drive%20to%20Survive.iso%3B/wait.ps3%3F2%3B/play.ps3 HTTP/1.0
