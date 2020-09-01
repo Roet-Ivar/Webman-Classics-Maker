@@ -102,6 +102,7 @@ if __name__ == '__main__':
 
 	print('The release archive has sucessfully been package and distributed to:\n' + '/release/' + zip_archive_name)
 	try:
+		# pause
 		input = raw_input
 	except NameError: pass
 	input('\npress ENTER to continue...')

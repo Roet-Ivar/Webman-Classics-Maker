@@ -1,1 +1,1 @@
-/play.ps3/dev_hdd0/PS3ISO/This Is The Iso Filename.iso
+/wait.ps3?6;/mount_ps3/dev_hdd0/PS2ISO/Drive to Survive.iso;/wait.ps3?2;/play.ps3

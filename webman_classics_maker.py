@@ -32,9 +32,10 @@ from PIL import Image, ImageDraw, ImageFont
 from PIL.ImageTk import PhotoImage
 from tkFileDialog import askopenfile
 from game_listbox import Gamelist
-from ftp_game_list_fetcher import FtpGameList
+# from ftp_game_list_fetcher import FtpGameList
+from ftp_image_fetcher import FtpGameList
 
-# check python version less than 3
+# check python version higher than 2
 if sys.version_info[0] > 2:
 	print("""Error: Webman Classics Maker is only compatible with python 2.7 32/64.
 		  Reason: the pkgcrypt module hasn't been ported to python 3.x""")
