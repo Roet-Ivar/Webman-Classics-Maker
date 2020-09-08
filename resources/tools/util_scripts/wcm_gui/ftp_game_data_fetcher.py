@@ -17,7 +17,7 @@ class FtpGameList():
         self.PAUSE_MESSAGE              = 'Press ENTER to continue...'
         self.CONNECTION_ERROR_MESSAGE   = "Check your PS3 ip-address in webMan VSH menu (hold SELECT on the XMB), then update your 'settings/ftp_settings.py' accordingly"
         self.MOCK_DATA_MESSAGE          = 'DEBUG: Using PS2 ISO mock data for test purposes!'
-        self.TITLE_ID_EXCEPTION_MESSAGE = """Exception: 'get_title_id' failed during regex operation."""
+        self.TITLE_ID_EXCEPTION_MESSAGE = """Exception: 'get_image' failed during regex operation."""
 
         # constants
         self.MOCK_DATA_FILE         = os.path.join(AppPaths.util_resources, 'mock_ftp_game_list_response.txt')
@@ -55,7 +55,7 @@ class FtpGameList():
             ftp_settings_file = json.load(f)
             f.close()
 
-        self.chunk_size_kb          = ftp_settings_file['chunk_size_kb']
+        self.chunk_size_kb          = ftp_settings_file['ftp_chunk_size_kb'] #psp images are arounf 20MB into the ISO
         self.ps3_lan_ip             = ftp_settings_file['ps3_lan_ip']
         self.ftp_timeout            = ftp_settings_file['ftp_timeout']
         self.ftp_pasv_mode          = ftp_settings_file['ftp_pasv_mode']
@@ -74,7 +74,7 @@ class FtpGameList():
 
         # singular instances
         self.ftp = None
-        self.ftp_chunk_dl = None
+        self.data_chunk = None
 
     def execute(self):
         try:
@@ -82,6 +82,7 @@ class FtpGameList():
             self.ftp = FTP(self.ps3_lan_ip, timeout=self.ftp_timeout)
             self.ftp.set_pasv = self.ftp_pasv_mode
             self.ftp.login(user=self.ftp_user, passwd=self.ftp_password)
+            self.ftp.voidcmd('TYPE I')
 
             self.ftp.retrlines('NLST ' + self.PSP_ISO_PATH, self.psplines.append)
             self.ftp.retrlines('NLST ' + self.PSX_ISO_PATH, self.psxlines.append)
@@ -93,7 +94,7 @@ class FtpGameList():
             self.all_lines.append(self.ps2lines)
             self.all_lines.append(self.ps3lines)
 
-            self.ftp_chunk_dl = FTPChunkDownloader(self.ftp)
+            self.data_chunk = FTPChunkDownloader(self.ftp)
 
         except Exception as e:
             error_message = str(e)
@@ -103,26 +104,11 @@ class FtpGameList():
 
             return
 
-
-            if self.use_mock_data is True:
-                print('\n')
-                print(self.MOCK_DATA_MESSAGE)
-                raw_input(self.PAUSE_MESSAGE)
-
-                with open(self.MOCK_DATA_FILE, 'rb') as f:
-                    file = f.read()
-                    f.close()
-
-                    self.ps2lines = file.split(', ')
-            else:
-                print(self.PAUSE_MESSAGE)
-
-
         # open a copy of the current gamelist from disk
         with open(self.GAME_LIST_DATA_FILE) as f:
             self.json_game_list_data = json.load(f)
 
-            # open a copy of the current gamelist from disk
+            # open a copy of an empty gamelist from disk
         with open(self.NEW_LIST_DATA_FILE) as f:
             self.new_json_game_list_data = json.load(f)
 
@@ -132,9 +118,6 @@ class FtpGameList():
 
             # if len(self.json_game_list_data[platform]) == 0:
             self.json_game_list_data[platform].extend(self.new_platform_list_data[platform])
-            # else:
-            # replace platform
-
 
         # save updated gamelist to disk
         with open(self.GAME_LIST_DATA_FILE, 'w') as newFile:
@@ -187,9 +170,9 @@ class FtpGameList():
             if not game_exist:
 
                 # get title_id from the ISO using ftp
-                title_id = self.get_title_id_from_ps3(platform_path, game_filename)
+                title_id = self.get_game_data(platform_path, game_filename)
 
-                if title_id is not None:
+                if title_id is not None and title_id != '':
                     platform_db_file = platform + '_all_title_ids.json'
 
                     with open(os.path.join(AppPaths.games_metadata, platform_db_file)) as f:
@@ -208,8 +191,8 @@ class FtpGameList():
                             if platform == 'psp' or platform == 'psx' or platform == 'ps2':
                                 title = str(game['title'])
 
-                                # if game['meta_data_link'] is not null:
-                                #     meta_data_link = str(game['meta_data_link'])
+                                if game['meta_data_link'] is not null:
+                                    meta_data_link = str(game['meta_data_link'])
 
                             elif platform == 'ps3':
                                 title = str(game['name'])
@@ -221,9 +204,9 @@ class FtpGameList():
                             title = re.sub(r'\([^)]*\)', '', title)
                             title = re.sub(r'\[[^)]*\]', '', title)
 
-                            # if str(title).isupper() and str(meta_data_link) == null:
-                            #     # if no meta_data_link, capitalize titles with all upper-case
-                            #     title = title.title()
+                            #if str(title).isupper() and str(meta_data_link) == null:
+                            #   #if no meta_data_link, capitalize titles with all upper-case
+                            #   title = title.title()
                             break
 
                 # if no title_id is found, use filename as title
@@ -232,11 +215,13 @@ class FtpGameList():
 
                     if game_filepath.lower().endswith('iso'):
                         m_filename = re.search('ISO.*', game_filepath)
-                        title = m_filename.group(0).replace('ISO/', '')
+                        if m_filename is not None:
+                            title = m_filename.group(0).replace('ISO/', '')
 
                     elif game_filepath.lower().endswith('bin'):
                         m_filename = re.search('BIN.*', game_filepath)
-                        title = m_filename.group(0).replace('BIN/', '')
+                        if m_filename is not None:
+                            title = m_filename.group(0).replace('BIN/', '')
 
                 # check for duplicates of the same title in the list
                 for game in self.json_game_list_data[platform_list]:
@@ -254,50 +239,45 @@ class FtpGameList():
                         else:
                             title = str(title) + ' (1)'
 
-
-                print("Added '" + str(title) + "' to the list:\n"
+                print("Added '" + str(title).strip() + "' to the list:\n"
                       + 'Platform: ' + platform.upper() + '\n'
                       + 'Filename: ' + game_filename + '\n'
                       + 'Title id: ' + str(title_id) + '\n')
 
-                # add game
+                # add game to list of new games
                 self.new_json_game_list_data[platform + '_games'].append({
                     "title_id": title_id,
-                    "title": title,
+                    "title": title.strip(),
                     "platform": platform.upper(),
                     "filename": game_filename,
                     "path": platform_path,
                     "meta_data_link": meta_data_link})
 
-                # reset game data for next iterationF
+                # reset game data for next iteration
                 title 			= null
-                title_id 		= null
                 meta_data_link 	= null
 
-        print('DEBUG: new games added:')
-        print(str(self.new_json_game_list_data))
+        # print('DEBUG - new games added:')
+        # print(str(self.new_json_game_list_data))
 
         return self.new_json_game_list_data
 
-    def get_title_id_from_ps3(self, platform_path, game_filename):
+    def get_game_data(self, platform_path, game_filename):
         game_filepath = os.path.join(platform_path, game_filename)
 
-        if self.ftp_chunk_dl is None:
+        if self.data_chunk is None:
             raise Exception('ERROR in ftp_chunk_dl: No instance of self.ftp_chunk_dl found.')
 
         try:
-            title_id = self.ftp_chunk_dl.get_title_id(game_filepath, 0, self.chunk_size_kb)
+            title_id = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb)
 
         # retry connection
         except Exception as e:
-            print('Connection timed out when parsing: ' + game_filename + '\nAuto retry in ' + str(self.ftp_timeout) + 's...\n')
-
-            if '' is not e.message:
-                print('DEBUG - ftp_game_list execute: ' + e.message)
+            print('Connection ' + e.message + ' when parsing ' + game_filename + '\nAuto retry in ' + str(self.ftp_timeout) + 's...\n')
 
             self.make_new_ftp()
-            self.ftp_chunk_dl = FTPChunkDownloader(self.ftp)
-            title_id = self.ftp_chunk_dl.get_title_id(game_filepath, 0, self.chunk_size_kb)
+            self.data_chunk = FTPChunkDownloader(self.ftp)
+            title_id = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb)
 
         return title_id
 
@@ -313,41 +293,30 @@ class FtpGameList():
         self.ftp.login(user='', passwd='')
 
 
-class FTPChunkDownloader():
+class FTPChunkDownloader:
     def __init__(self, ftp):
         self.ftp_instance = ftp
         self.null = None
 
-    def get_title_id(self, ftp_filename, rest, cnt):
+    def ftp_buffer_data(self, ftp_filename, chunk_size):
+
         def fill_buffer(self, received):
-            tmp_arr = ''
-            for char in received:
-
-                # buffer data clean-up
-                if ord(char) < 32 or ord(char) > 126:
-                    tmp_arr = tmp_arr + ' '
-                else:
-                    if char == ';':
-                        char = '\n'
-
-                    tmp_arr = tmp_arr + str(char)
-
-            if self.cnt <= 0:
+            if self.chunk_size <= 0:
                 return True
-
             else:
-                self.sio.write(tmp_arr)
-            self.cnt -= len(received)
-
+                self.sio.write(received)
+            self.chunk_size -= len(received)
 
         self.sio = StringIO.StringIO()
-        self.cnt = cnt * 1024
+        self.chunk_size = chunk_size * 1024
+
         self.ftp_instance.voidcmd('TYPE I')
 
-        conn = self.ftp_instance.transfercmd('RETR ' + ftp_filename, rest)
+        conn = self.ftp_instance.transfercmd('RETR ' + ftp_filename)
         game_id = None
 
         while 1:
+            # the buffer size seems a bit random, can't remember why
             data = conn.recv(1460)
             if not data:
                 break
@@ -358,18 +327,111 @@ class FTPChunkDownloader():
 
                 # intended exception: this is thrown when the data chunk been stored in buffer
                 except Exception as e:
-                    iso_index = ftp_filename.index('ISO', 0, len(ftp_filename))
+                    iso_index = ftp_filename.index('ISO/', 0, len(ftp_filename))
                     platform = ftp_filename[iso_index-3: iso_index].lower()
+                    game_name = ftp_filename[iso_index+4: len(ftp_filename)-4]
 
-                    game_id = get_id_from_buffer(self, platform, self.sio.getvalue())
+                    self.data_chunk = self.sio.getvalue()
                     self.sio.close()
-                    # conn.close()
+
+                    # do stuff here
+                    game_id = get_title_id_from_buffer(self, platform, self.data_chunk)
+
+                    # PS3 and PSP ISOs is the only type that has images embedded
+                    if platform == 'psp' or platform == 'ps3':
+                        get_png_from_buffer(self, platform, game_name, self.data_chunk)
+
                     if '451' not in e.message:
-                        print('DEBUG - fill_buffer error: ' + e.message)
+                        print('DEBUG - connection' + e.message + ' when parsing ' + game_name)
                     break
+        if game_id == None:
+            game_id = ''
         return game_id
 
-def get_id_from_buffer(self, platform, buffer_data):
+def get_png_from_buffer(self, platform, game_name, buffer_data):
+    self.platform = platform
+    self.data = buffer_data
+    self.image_name = None
+    try:
+        self.has_icon0 = False
+        self.has_pic0 = False
+        self.has_pic1 = False
+
+        # these byte sequences are standard start and end of PNGs
+        def png_finder(data, image_name):
+            index_png_start = data.find(b'\x89\x50\x4E\x47\x0D\x0A\x1A\x0A')
+            index_png_end = data.find(b'\x00\x00\x00\x00\x49\x45\x4E\x44', index_png_start)
+
+            self.image_name = image_name
+
+            if index_png_start != -1:
+                if index_png_end != -1:
+                    import PIL.Image as Image
+                    import io
+
+                    png_byte_array = data[index_png_start:index_png_end+8]
+                    image = Image.open(io.BytesIO(png_byte_array))
+
+                    self.img_name = None
+                    img_exist = False
+
+                    if self.platform == 'psp':
+                        # icon image PSP
+                        if image.size == (144, 80):
+                            self.img_name = 'ICON0.PNG'
+                            if self.has_icon0:
+                                img_exist = True
+                            self.has_icon0 = True
+
+                        # this is background image PSP
+                        elif image.size == (480, 272):
+                            self.img_name = 'PIC1.PNG'
+                            if self.has_pic1:
+                                img_exist = True
+                            self.has_pic1 = True
+
+                    elif self.platform == 'ps3':
+                        # icon image PS3
+                        if image.size == (320, 176):
+                            self.img_name = 'ICON0.PNG'
+                            if self.has_icon0:
+                                img_exist = True
+                            self.has_icon0 = True
+
+                        # when multiple pic0 the first seem to be English
+                        elif image.size == (1000, 560):
+                            self.img_name = 'PIC0.PNG'
+                            if self.has_pic0:
+                                img_exist = True
+                            self.has_pic0 = True
+
+                        # this is background image PS3
+                        elif image.size == (1920, 1080):
+                            self.img_name = 'PIC1.PNG'
+                            if self.has_pic1:
+                                img_exist = True
+                            self.has_pic1 = True
+
+                    # exclude that data for next iteration
+                    self.data = data[index_png_end:len(data)-1]
+
+                    # save image
+                    if self.img_name is not None and not img_exist:
+                        return True
+                return False
+
+        while png_finder(self.data, self.image_name):
+            print('DEBUG Found ' + self.img_name + ' for ' + "\'" + game_name + "\'")
+            # image.show()
+
+            # save images
+            # newFile = open(os.path.join(AppPaths.application_path, img_name), 'wb')
+            # newFile.write(png_byte_array)
+
+    except Exception as e:
+        print('ERROR: get_png_from_buffer - ' + e.message)
+
+def get_title_id_from_buffer(self, platform, buffer_data):
     game_id = None
     try:
         # psx and ps2
@@ -394,10 +456,3 @@ def get_id_from_buffer(self, platform, buffer_data):
         print('get_id_from_buffer_exception: ' + self.TITLE_ID_EXCEPTION_MESSAGE)
     finally:
         return game_id
-
-# TODO: different sources for meta data
-class GameMetadataFetcher():
-    def __init__(self, game_json_data):
-
-        game_data = game_json_data
-

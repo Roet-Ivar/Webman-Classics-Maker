@@ -33,7 +33,7 @@ from PIL.ImageTk import PhotoImage
 from tkFileDialog import askopenfile
 from game_listbox import Gamelist
 # from ftp_game_list_fetcher import FtpGameList
-from ftp_image_fetcher import FtpGameList
+from ftp_game_data_fetcher import FtpGameList
 
 # check python version higher than 2
 if sys.version_info[0] > 2:
