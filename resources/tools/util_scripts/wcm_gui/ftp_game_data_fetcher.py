@@ -174,8 +174,8 @@ class FtpGameList():
                 # get title_id from the ISO using ftp
                 title_id = ''
                 # if 'ELFLoader.iso' not in game_filename:
-                   # print()
-                title_id = self.get_game_data(platform_path, game_filename)
+                # print()
+                title_id, icon, pic0, pic1 = self.get_game_data(platform_path, game_filename)
 
                 if title_id is not None and title_id != '':
                     platform_db_file = platform + '_all_title_ids.json'
@@ -260,6 +260,9 @@ class FtpGameList():
                 title 			= None
                 meta_data_link 	= None
 
+            # save game build folder data here
+
+
         # print('DEBUG - new games added:')
         # print(str(self.new_json_game_list_data))
 
@@ -271,11 +274,11 @@ class FtpGameList():
         platform = game_filepath[iso_index-3: iso_index].lower()
 
         try:
-            title_id = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, 0)
+            title_id, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, 0)
 
             # use rest offset for PSP to find the images
             if platform == 'psp':
-                self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, self.ftp_psp_png_offset_kb)
+                not_used, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, self.ftp_psp_png_offset_kb)
 
         # retry connection
         except Exception as e:
@@ -284,13 +287,13 @@ class FtpGameList():
             self.make_new_ftp()
             self.data_chunk = FTPDataHandler(self.ftp)
 
-            title_id = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, 0)
+            title_id, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, 0)
 
             # use rest offset for PSP to find the images
             if platform == 'psp':
-                self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, self.ftp_psp_png_offset_kb)
+                title_id, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, self.ftp_psp_png_offset_kb)
 
-        return title_id
+        return title_id, icon, pic0, pic1
 
 
     def make_new_ftp(self):
@@ -346,32 +349,40 @@ class FTPDataHandler:
 
                 # intended exception: this is thrown when the data chunk been stored in buffer
                 except Exception as e:
+                    icon0 = None
+                    pic0 = None
+                    pic1 = None
 
                     self.data_chunk = self.sio.getvalue()
                     self.sio.close()
 
-                    # find title_id from beginning of file
+                    # find title_id from beginning of file for all platforms
                     if rest == 0:
                         game_title_id = get_title_id_from_buffer(self, platform, self.data_chunk)
 
                     # PS3 and PSP ISOs is the only type that has images embedded
                     if platform == 'psp' or platform == 'ps3':
-                        get_png_from_buffer(self, platform, game_title, self.data_chunk)
+                        icon0, pic0, pic1 = get_png_from_buffer(self, platform, game_title, self.data_chunk)
 
                     if '451' not in e.message:
                         print('DEBUG - connection' + e.message + ' when parsing ' + game_title)
                     break
 
-        return game_title_id
+        return game_title_id, icon0, pic0, pic1
 
 def get_png_from_buffer(self, platform, game_name, buffer_data):
     self.platform = platform
     self.data = buffer_data
-    self.image_name = None
+
     try:
         self.has_icon0 = False
         self.has_pic0 = False
         self.has_pic1 = False
+
+        self.icon0_image = None
+        self.pic0_image = None
+        self.pic1_image = None
+        self.image_name = None
 
         # these byte sequences are standard start and end of PNGs
         def png_finder(data, image_name):
@@ -379,60 +390,64 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
             index_png_end = data.find(b'\x00\x00\x00\x00\x49\x45\x4E\x44', index_png_start)
 
             self.image_name = image_name
-
             if index_png_start != -1:
                 if index_png_end != -1:
                     import PIL.Image as Image
                     import io
 
                     png_byte_array = data[index_png_start:index_png_end+8]
-                    image = Image.open(io.BytesIO(png_byte_array))
+                    tmp_image = Image.open(io.BytesIO(png_byte_array))
 
                     self.img_name = None
-                    img_exist = False
+                    image_duplicate = False
 
                     if self.platform == 'psp':
                         # icon image PSP
-                        if image.size == (144, 80):
+                        if tmp_image.size == (144, 80):
                             self.img_name = 'ICON0.PNG'
                             if self.has_icon0:
-                                img_exist = True
+                                image_duplicate = True
                             self.has_icon0 = True
+                            self.icon0_image = tmp_image
 
                         # this is background image PSP
-                        elif image.size == (480, 272):
+                        elif tmp_image.size == (480, 272):
                             self.img_name = 'PIC1.PNG'
                             if self.has_pic1:
-                                img_exist = True
+                                image_duplicate = True
                             self.has_pic1 = True
+                            self.pic1_image = tmp_image
 
                     elif self.platform == 'ps3':
                         # icon image PS3
-                        if image.size == (320, 176):
+                        if tmp_image.size == (320, 176):
                             self.img_name = 'ICON0.PNG'
-                            if self.has_icon0:
-                                img_exist = True
+                            # if self.has_icon0:
+                            #     image_duplicate = True
                             self.has_icon0 = True
+                            self.icon0_image = tmp_image
 
                         # when multiple pic0 the first seem to be English
-                        elif image.size == (1000, 560):
+                        elif tmp_image.size == (1000, 560):
                             self.img_name = 'PIC0.PNG'
-                            if self.has_pic0:
-                                img_exist = True
+                            # if self.has_pic0:
+                            #     image_duplicate = True
                             self.has_pic0 = True
+                            self.pic0_image = tmp_image
 
                         # this is background image PS3
-                        elif image.size == (1920, 1080):
+                        elif tmp_image.size == (1920, 1080):
                             self.img_name = 'PIC1.PNG'
                             if self.has_pic1:
-                                img_exist = True
+                                image_duplicate = True
                             self.has_pic1 = True
+                            self.pic1_image = tmp_image
 
-                    # exclude that data for next iteration
+                    # crop data for next iteration
                     self.data = data[index_png_end:len(data)-1]
 
-                    # save image
-                    if self.img_name is not None and not img_exist:
+                    # stops searching images if we, in this case, finds a PIC1 duplicates
+                    if self.img_name is not None and not image_duplicate:
                         return True
                 return False
 
@@ -443,9 +458,12 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
             # save images
             # newFile = open(os.path.join(AppPaths.application_path, img_name), 'wb')
             # newFile.write(png_byte_array)
+        return self.icon0_image, self.pic0_image, self.pic1_image
 
     except Exception as e:
         print('ERROR: get_png_from_buffer - ' + e.message)
+        return self.icon0_image, self.pic0_image, self.pic1_image
+
 
 def get_title_id_from_buffer(self, platform, buffer_data):
     game_id = None
@@ -469,6 +487,6 @@ def get_title_id_from_buffer(self, platform, buffer_data):
                 game_id = game_id[0:len(game_id)-1]
 
     except Exception:
-        print('get_id_from_buffer_exception: ' + self.TITLE_ID_EXCEPTION_MESSAGE)
+        print('Error in get_id_from_buffer: ' + self.TITLE_ID_EXCEPTION_MESSAGE)
     finally:
         return game_id
