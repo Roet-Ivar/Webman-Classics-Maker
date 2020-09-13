@@ -3,13 +3,13 @@ import os, json, copy, shutil, sys
 # if running the webman_classics_maker.exe from root
 if getattr(sys, 'frozen', False):
 	sys.path.append(os.path.join(os.path.dirname(sys.executable), 'resources', 'tools', 'util_scripts'))
-	sys.path.append(os.path.join(os.path.dirname(sys.executable),'resources', 'tools', 'util_scripts', 'wcm_gui'))
+	sys.path.append(os.path.join(os.path.dirname(sys.executable), 'resources', 'tools', 'util_scripts', 'wcm_gui'))
 else:
 	# running webman_classics_maker.py from root
 	app_full_path = os.path.realpath(__file__)
 	application_path = os.path.dirname(app_full_path)
-	sys.path.append(os.path.join(application_path,'resources', 'tools', 'util_scripts'))
-	sys.path.append(os.path.join(application_path,'resources', 'tools', 'util_scripts', 'wcm_gui'))
+	sys.path.append(os.path.join(application_path, 'resources', 'tools', 'util_scripts'))
+	sys.path.append(os.path.join(application_path, 'resources', 'tools', 'util_scripts', 'wcm_gui'))
 from global_paths import App as AppPaths
 from global_paths import Image as ImagePaths
 
@@ -170,14 +170,14 @@ class Main:
 
 	def create_list_combo_box(self, platform):
 		# create the listbox (games list)
-		gamelist = Gamelist(platform)
-		game_list_frame = gamelist.create_main_frame(self.entry_field_title_id, self.entry_field_title, self.entry_field_filename, self.entry_field_iso_path, self.drive_system_array)
+		self.gamelist = Gamelist(platform)
+		game_list_frame = self.gamelist.create_main_frame(self.entry_field_title_id, self.entry_field_title, self.entry_field_filename, self.entry_field_iso_path, self.drive_system_array)
 		game_list_frame.place(x=int((self.main_offset_x_pos) * scaling),
 							  y=self.main_offset_y_pos + 220,
 							  width=270,
 							  height=300)
 
-		self.game_list_box = gamelist.get_listbox()
+		self.game_list_box = self.gamelist.get_listbox()
 		self.game_list_box.config(selectmode='SINGLE',
 								  activestyle='dotbox',
 								  borderwidth=0)
@@ -276,6 +276,10 @@ class Main:
 		self.image_pic0 = self.load_pkg_images(pic0_filename)
 		self.image_pic1 = self.load_pkg_images(pic1_filename)
 		self.image_icon0 = self.load_pkg_images(icon0_filename)
+
+		self.pkg_icon0 = None
+		self.pkg_pic0 = None
+		self.pkg_pic1= None
 
 		self.image_xmb_icons = Image.open(os.path.join(ImagePaths.xmb, 'XMB_icons.png'))
 		self.ps3_system_logo = Image.open(os.path.join(ImagePaths.xmb, 'ps3_type_logo.png'))
@@ -422,6 +426,7 @@ class Main:
 		##########################################################################
 		# Adding an on_change-listener on 'entry_field_filename'
 		self.generate_on_change(self.entry_field_filename)
+		# self.entry_field_filename.bind('<<Change>>', self.dynamic_img_path)
 		self.entry_field_filename.bind('<<Change>>', self.dynamic_filename_to_path)
 		###########################################################################
 		# Adding an on_change-listener on 'entry_field_title'
@@ -588,12 +593,28 @@ class Main:
 
 	def init_draw_images_on_canvas(self, main, *args, **kwargs):
 		img_name = kwargs.get('img_name', None)
+		pkg_build_path = kwargs.get('pkg_build_path', None)
 
 		# check if xmb_icons needs to be re-drawn
-		if img_name is None or 'pic1' in img_name:
+		if (img_name is None or 'pic1' in img_name) and pkg_build_path is None:
 			# draw xmb icons and system logo onto the background
 			self.image_pic1.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
 			self.image_pic1.paste(self.ps3_system_logo, (1180, 525), self.ps3_system_logo)
+		elif pkg_build_path is not None:
+			if os.path.exists(pkg_build_path):
+				# draw PIC1 from pkg_dir and then xmb icons and system logo onto the pkg  background
+				if os.path.isfile(os.path.join(pkg_build_path, 'ICON0.PNG')):
+					self.image_icon0 = Image.open(os.path.join(pkg_build_path, 'ICON0.PNG'))
+				else:
+					self.image_icon0 = Image.open(os.path.join(self.wcm_pkg_dir, 'ICON0.PNG'))
+
+				if os.path.isfile(os.path.join(pkg_build_path, 'PIC1.PNG')):
+					self.image_pic1 = Image.open(os.path.join(pkg_build_path, 'PIC1.PNG'))
+				else:
+					self.image_pic1 = Image.open(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG'))
+
+				self.image_pic1.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
+				self.image_pic1.paste(self.ps3_system_logo, (1180, 525), self.ps3_system_logo)
 
 		# draw launch-date and clock beside ICON0
 		self.draw_text_on_image_w_shadow(self.image_pic1, "11/11/2006 00:00", 760, 522, 20, 1, 'white', 'black')
@@ -744,8 +765,18 @@ class Main:
 			self.update_iso_path_entry_field(current_iso_path)
 			self.drive_system_array[1] = system_choice
 
+	# Dynamic update of the pkg path for showing fetched images
+	def dynamic_img_path(self):
+		build_dir_pkg_path = os.path.join(self.gamelist.get_selected_build_dir_path(), 'work_dir', 'pkg')
+		if os.path.exists(build_dir_pkg_path):
+			# self.wcm_pkg_dir = build_dir_pkg_path
+			# update images
+			self.init_draw_images_on_canvas(self.main, pkg_build_path=build_dir_pkg_path)
+			# self.init_draw_images_on_canvas(self.main, img_name='pic1')
+
 	# Dynamic update of the 'entry_field_filename' into the 'entry_field_iso_path'
 	def dynamic_filename_to_path(self, event):
+		self.dynamic_img_path()
 		drive = ''
 		system = ''
 		filename = event.widget.get()
@@ -791,7 +822,7 @@ class Main:
 				self.image_pic1 = Image.open(image)
 				img_name = 'pic1'
 
-			# re-draw image on canvas
+			# re-draw work_dir image on canvas
 			self.init_draw_images_on_canvas(main, img_name=img_name)
 
 	def generate_on_change(self, obj):
@@ -946,18 +977,26 @@ class Main:
 		game_folder_name = filename[:-4] + '_(' + title_id + ')'
 		game_build_dir = os.path.join(self.builds_path, game_folder_name)
 
-		# copy pkg images to pkg_dir before build (PIC0 should be optional later on)
-		shutil.copyfile(os.path.join(self.wcm_pkg_dir, 'ICON0.PNG'), os.path.join(self.pkg_dir, 'ICON0.PNG'))
-		# shutil.copyfile(os.path.join(self.wcm_pkg_dir,'PIC0.PNG'), os.path.join(self.pkg_dir, 'PIC0.PNG'))
-		shutil.copyfile(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG'), os.path.join(self.pkg_dir, 'PIC1.PNG'))
+		# check if there is a ICON0 in the pkg_dir, if not copy a stock one
+		if not (os.path.isfile(os.path.join(self.pkg_dir, 'ICON0.PNG'))):
+			if(os.path.isfile(os.path.join(self.wcm_pkg_dir, 'ICON0.PNG'))):
+				shutil.copyfile(os.path.join(self.wcm_pkg_dir, 'ICON0.PNG'), os.path.join(self.pkg_dir, 'ICON0.PNG'))
+
+		# PIC1 is optional, so if there isn't one already one, skip it
+		if not (os.path.isfile(os.path.join(self.pkg_dir, 'PIC0.PNG'))):
+			if(os.path.isfile(os.path.join(self.wcm_pkg_dir, 'PIC0.PNG'))):
+				shutil.copyfile(os.path.join(self.wcm_pkg_dir, 'PIC0.PNG'), os.path.join(self.pkg_dir, 'PIC0.PNG'))
+
+		# check if there is a ICON0 in the pkg_dir, if not copy a stock one
+		if not (os.path.isfile(os.path.join(self.pkg_dir, 'PIC1.PNG'))):
+			if(os.path.isfile(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG'))):
+				shutil.copyfile(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG'), os.path.join(self.pkg_dir, 'PIC1.PNG'))
 
 		# builds pkg and reads the pkg filename
 		webman_pkg = Webman_PKG()
 		pkg_name = webman_pkg.build()
 
-
-
-		# making sure the workdir and pkg diretories exists
+		# making sure the work_dir and pkg directories exists
 		if not os.path.exists(os.path.join(game_build_dir, 'work_dir', 'pkg')):
 			os.makedirs(os.path.join(game_build_dir, 'work_dir', 'pkg'))
 
@@ -999,7 +1038,6 @@ class Main:
 
 
 	def save_ps3_ip_on_fetch(self):
-
 		with open(self.ftp_settings_path, 'r') as settings_file:
 			json_settings_data = json.load(settings_file)
 			json_settings_data['ps3_lan_ip'] = str(self.entry_field_ftp_ip.get())

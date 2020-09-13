@@ -1,4 +1,4 @@
-import json, os, re, StringIO, sys, time
+import json, os, re, StringIO, sys, time, shutil
 from ftplib import FTP
 from shutil import copyfile
 
@@ -156,6 +156,7 @@ class FtpGameList():
         # game_exist = False
 
         title = None
+        title_id = None
         meta_data_link = None
 
         for game_filename in filtered_lines:
@@ -170,12 +171,7 @@ class FtpGameList():
 
             # if not, add it
             if not game_exist:
-
-                # get title_id from the ISO using ftp
-                title_id = ''
-                # if 'ELFLoader.iso' not in game_filename:
-                # print()
-                title_id, icon, pic0, pic1 = self.get_game_data(platform_path, game_filename)
+                title_id, icon0, pic0, pic1 = self.get_game_data(platform_path, game_filename)
 
                 if title_id is not None and title_id != '':
                     platform_db_file = platform + '_all_title_ids.json'
@@ -260,7 +256,26 @@ class FtpGameList():
                 title 			= None
                 meta_data_link 	= None
 
-            # save game build folder data here
+            if platform == 'psp' or 'ps3':
+                # save game build folder data here
+                if title_id is None:
+                    title_id = ''
+                game_folder_name = game_filename[:-4] + '_(' + title_id + ')'
+                game_build_dir = os.path.join(AppPaths.builds, game_folder_name)
+
+                # making sure the work_dir and pkg directories exists
+                if not os.path.exists(os.path.join(game_build_dir, 'work_dir', 'pkg')):
+                    os.makedirs(os.path.join(game_build_dir, 'work_dir', 'pkg'))
+
+                if(icon0 is not None):
+                    icon0.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON0.PNG'))
+
+                if(pic0 is not None):
+                    pic0.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC0.PNG'))
+
+                if(pic1 is not None):
+                    pic1.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC1.PNG'))
+
 
 
         # print('DEBUG - new games added:')
@@ -422,16 +437,16 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
                         # icon image PS3
                         if tmp_image.size == (320, 176):
                             self.img_name = 'ICON0.PNG'
-                            # if self.has_icon0:
-                            #     image_duplicate = True
+                            if self.has_icon0:
+                                image_duplicate = True
                             self.has_icon0 = True
                             self.icon0_image = tmp_image
 
                         # when multiple pic0 the first seem to be English
                         elif tmp_image.size == (1000, 560):
                             self.img_name = 'PIC0.PNG'
-                            # if self.has_pic0:
-                            #     image_duplicate = True
+                            if self.has_pic0:
+                                image_duplicate = True
                             self.has_pic0 = True
                             self.pic0_image = tmp_image
 
@@ -453,11 +468,7 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
 
         while png_finder(self.data, self.image_name):
             print('DEBUG Found ' + self.img_name + ' for ' + "\'" + game_name + "\'")
-            # image.show()
 
-            # save images
-            # newFile = open(os.path.join(AppPaths.application_path, img_name), 'wb')
-            # newFile.write(png_byte_array)
         return self.icon0_image, self.pic0_image, self.pic1_image
 
     except Exception as e:
