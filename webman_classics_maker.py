@@ -140,7 +140,7 @@ class Main:
 		# init definitions
 		self.init_config_file()
 		self.init_pkg_images()
-		self.init_main_window_buttons(self.main)
+		# self.init_main_window_buttons(self.main)
 		self.init_default_view(self.main)
 		self.draw_background_on_canvas()
 
@@ -276,6 +276,7 @@ class Main:
 		self.image_pic0 = self.load_pkg_images(pic0_filename)
 		self.image_pic1 = self.load_pkg_images(pic1_filename)
 		self.image_icon0 = self.load_pkg_images(icon0_filename)
+		self.image_icon0_ref = copy.copy(self.image_icon0)
 
 		self.pkg_icon0 = None
 		self.pkg_pic0 = None
@@ -289,10 +290,10 @@ class Main:
 		png_path = os.path.join(self.wcm_pkg_dir, filename)
 
 		if '.png' in png_path.lower() and os.path.isfile(png_path):
-			return Image.open(png_path)
+			return Image.open(png_path).convert("RGBA")
 		else:
 			shutil.copyfile(os.path.join(default_pkg_img_dir, filename), png_path)
-			return Image.open(png_path)
+			return Image.open(png_path).convert("RGBA")
 
 	def draw_background_on_canvas(self):
 		self.current_img = self.background_images[self.canvas_image_number]
@@ -467,8 +468,6 @@ class Main:
 								 command=lambda:
 								 self.on_system_button(self.drive_system_array[0], self.selection_system_list[0]))
 
-		self.button_PSP.config(state=DISABLED)
-
 		self.button_PSX = Button(main,
 								 image=self.images_logo_system[1],
 								 borderwidth=1,
@@ -592,29 +591,57 @@ class Main:
 
 
 	def init_draw_images_on_canvas(self, main, *args, **kwargs):
-		img_name = kwargs.get('img_name', None)
+		img_to_be_changed = kwargs.get('img_to_be_changed', None)
 		pkg_build_path = kwargs.get('pkg_build_path', None)
 
+		pic1_changed = False
+		# image replace browser: add title text
+		if img_to_be_changed is not None:
+			if img_to_be_changed.lower() == 'pic1':
+				pic1_changed = True
+				self.draw_text_on_image_w_shadow(self.image_pic1, self.entry_field_title.get(), 760, 487, 32, 2, 'white', 'black')
+				self.photo_image_pic1_xmb = PhotoImage(
+					self.image_pic1.resize((int(1280 * scaling), int(720 * scaling)), Image.ANTIALIAS))
+				self.button_pic1.config(image=self.photo_image_pic1_xmb)
+				self.image_icon0 = self.image_icon0_ref
+
+
 		# check if xmb_icons needs to be re-drawn
-		if (img_name is None or 'pic1' in img_name) and pkg_build_path is None:
-			# draw xmb icons and system logo onto the background
-			self.image_pic1.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
-			self.image_pic1.paste(self.ps3_system_logo, (1180, 525), self.ps3_system_logo)
 		elif pkg_build_path is not None:
 			if os.path.exists(pkg_build_path):
 				# draw PIC1 from pkg_dir and then xmb icons and system logo onto the pkg  background
 				if os.path.isfile(os.path.join(pkg_build_path, 'ICON0.PNG')):
-					self.image_icon0 = Image.open(os.path.join(pkg_build_path, 'ICON0.PNG'))
+					self.image_icon0 = Image.open(os.path.join(pkg_build_path, 'ICON0.PNG')).convert("RGBA")
 				else:
-					self.image_icon0 = Image.open(os.path.join(self.wcm_pkg_dir, 'ICON0.PNG'))
+					self.image_icon0 = Image.open(os.path.join(self.wcm_pkg_dir, 'ICON0.PNG')).convert("RGBA")
 
 				if os.path.isfile(os.path.join(pkg_build_path, 'PIC1.PNG')):
-					self.image_pic1 = Image.open(os.path.join(pkg_build_path, 'PIC1.PNG'))
+					self.image_pic1 = Image.open(os.path.join(pkg_build_path, 'PIC1.PNG')).convert("RGBA")
+					pic1_changed = True
 				else:
-					self.image_pic1 = Image.open(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG'))
+					self.image_pic1 = Image.open(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG')).convert("RGBA")
+					pic1_changed = True
+		else:
+			self.image_pic1 = Image.open(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG')).convert("RGBA")
+			pic1_changed = True
 
-				self.image_pic1.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
-				self.image_pic1.paste(self.ps3_system_logo, (1180, 525), self.ps3_system_logo)
+		if pic1_changed:
+			# draw xmb icons and system logo onto the background
+			self.image_pic1.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
+			self.image_pic1.paste(self.ps3_system_logo, (1180, 525), self.ps3_system_logo)
+
+		# blend and crop ICON0 to background
+		tmp_bg = copy.copy(self.image_pic1)
+		tmp_bg.paste(self.image_icon0.convert("RGBA"), (425, 450), self.image_icon0.convert("RGBA"))
+		# ICON0 dimensions
+		ps3_icon_width = 320
+		ps3_icon_heigth = 176
+		# compenstaion pixels
+		x_comp = 14
+		y_comp = 30
+
+		# image.crop((left, top, right, bottom))
+		self.image_icon0 = tmp_bg.crop((425-x_comp, 450-y_comp, 425+ps3_icon_width, 450+ps3_icon_heigth))
 
 		# draw launch-date and clock beside ICON0
 		self.draw_text_on_image_w_shadow(self.image_pic1, "11/11/2006 00:00", 760, 522, 20, 1, 'white', 'black')
@@ -699,14 +726,14 @@ class Main:
 			draw.text((text_x + adj, text_y - adj), text, font=font, fill=shadow_color)
 		return draw.text((text_x, text_y), text, fill=text_color, font=font)
 
-	def init_main_window_buttons(self, main):
+	# def init_main_window_buttons(self, main):
 		# button to change image
-		self.change_button = Button(main,
-									borderwidth=0,
-									image=self.images_function_button[3],
-									command=self.on_change_button,
-									bd=1)
-		self.change_button.place(x=40 + 13, y=1)
+		# self.change_button = Button(main,
+		# 							borderwidth=0,
+		# 							image=self.images_function_button[3],
+		# 							command=self.on_change_button,
+		# 							bd=1)
+		# self.change_button.place(x=40 + 13, y=1)
 
 	def on_change_button(self):
 		# next image
@@ -769,14 +796,11 @@ class Main:
 	def dynamic_img_path(self):
 		build_dir_pkg_path = os.path.join(self.gamelist.get_selected_build_dir_path(), 'work_dir', 'pkg')
 		if os.path.exists(build_dir_pkg_path):
-			# self.wcm_pkg_dir = build_dir_pkg_path
 			# update images
 			self.init_draw_images_on_canvas(self.main, pkg_build_path=build_dir_pkg_path)
-			# self.init_draw_images_on_canvas(self.main, img_name='pic1')
 
 	# Dynamic update of the 'entry_field_filename' into the 'entry_field_iso_path'
 	def dynamic_filename_to_path(self, event):
-		self.dynamic_img_path()
 		drive = ''
 		system = ''
 		filename = event.widget.get()
@@ -801,6 +825,7 @@ class Main:
 
 	# Dynamic update of the game title on to the PIC1 image
 	def dynamic_title_to_pic1(self, event):
+		self.dynamic_img_path()
 		tmp_img = copy.copy(self.image_pic1)
 		# self, image, text, text_x, text_y, text_size, text_outline, text_color,
 		self.draw_text_on_image_w_shadow(tmp_img, event.widget.get(), 760, 487, 32, 2, 'white', 'black')
@@ -811,19 +836,20 @@ class Main:
 	def image_replace_browser(self, main):
 		image = askopenfile(mode='rb', title='Browse an image', filetypes=[('PNG images', '.PNG')])
 		if image is not None:
-			img_name = None
+			img_to_be_changed = None
 			print('DEBUG image content:' + image.name)
 
 			# Clear and replace image
 			if 'icon0' in image.name.lower():
 				self.image_icon0 = Image.open(image)
-				img_name = 'icon0'
+				self.image_icon0_ref = copy.copy(self.image_icon0)
+				img_to_be_changed = 'icon0'
 			elif 'pic1' in image.name.lower():
 				self.image_pic1 = Image.open(image)
-				img_name = 'pic1'
+				img_to_be_changed = 'pic1'
 
-			# re-draw work_dir image on canvas
-			self.init_draw_images_on_canvas(main, img_name=img_name)
+			# # re-draw work_dir image on canvas
+			self.init_draw_images_on_canvas(main, img_to_be_changed=img_to_be_changed)
 
 	def generate_on_change(self, obj):
 		obj.tk.eval('''
@@ -854,14 +880,17 @@ class Main:
 
 	# Dynamic validation of title id
 	def dynamic_validate_title_id(self, P):
-		P = P.upper()
-		P = P.replace('-', '')
-		P = re.sub(r'[^a-zA-Z0-9 -]', '', P)
+		if len(P) > 0:
+			P = P.upper()
+			P = P.replace('-', '')
+			P = re.sub(r'[^a-zA-Z0-9 -]', '', P)
 
-		self.entry_field_title_id.delete(0, END)
-		self.entry_field_title_id.insert(0, P[0:self.title_id_maxlength])
-		main_window.after_idle(lambda: self.entry_field_title_id.config(validate='key'))
-		return True
+			self.entry_field_title_id.delete(0, END)
+			self.entry_field_title_id.insert(0, P[0:self.title_id_maxlength])
+			main_window.after_idle(lambda: self.entry_field_title_id.config(validate='key'))
+			return True
+		else:
+			return False
 
 	# Ensures title id is exactly 9 characters during save
 	def validate_title_id_on_save(self):
@@ -944,6 +973,10 @@ class Main:
 			self.save_preview_image()
 			self.save_pkg_info_to_json()
 
+			return True
+		else:
+			return False
+
 	def copytree(self, src, dst, symlinks=False, ignore=None):
 		if not os.path.exists(dst):
 			os.makedirs(dst)
@@ -971,62 +1004,62 @@ class Main:
 				shutil.copy2(s, d)
 
 	def on_build_button(self):
-		self.save_work_dir()
-		title_id = str(self.entry_field_title_id.get())
-		filename = str(self.entry_field_filename.get()).replace(' ', '_')
-		game_folder_name = filename[:-4] + '_(' + title_id + ')'
-		game_build_dir = os.path.join(self.builds_path, game_folder_name)
+		if self.save_work_dir():
+			title_id = str(self.entry_field_title_id.get()).replace('-', '')
+			filename = str(self.entry_field_filename.get()).replace(' ', '_')
+			game_folder_name = filename[:-4] + '_(' + title_id + ')'
+			game_build_dir = os.path.join(self.builds_path, game_folder_name)
 
-		# check if there is a ICON0 in the pkg_dir, if not copy a stock one
-		if not (os.path.isfile(os.path.join(self.pkg_dir, 'ICON0.PNG'))):
-			if(os.path.isfile(os.path.join(self.wcm_pkg_dir, 'ICON0.PNG'))):
-				shutil.copyfile(os.path.join(self.wcm_pkg_dir, 'ICON0.PNG'), os.path.join(self.pkg_dir, 'ICON0.PNG'))
+			# check if there is a ICON0 in the pkg_dir, if not copy a stock one
+			if not (os.path.isfile(os.path.join(self.pkg_dir, 'ICON0.PNG'))):
+				if(os.path.isfile(os.path.join(self.wcm_pkg_dir, 'ICON0.PNG'))):
+					shutil.copyfile(os.path.join(self.wcm_pkg_dir, 'ICON0.PNG'), os.path.join(self.pkg_dir, 'ICON0.PNG'))
 
-		# PIC1 is optional, so if there isn't one already one, skip it
-		if not (os.path.isfile(os.path.join(self.pkg_dir, 'PIC0.PNG'))):
-			if(os.path.isfile(os.path.join(self.wcm_pkg_dir, 'PIC0.PNG'))):
-				shutil.copyfile(os.path.join(self.wcm_pkg_dir, 'PIC0.PNG'), os.path.join(self.pkg_dir, 'PIC0.PNG'))
+			# PIC1 is optional, so if there isn't one already one, skip it
+			if not (os.path.isfile(os.path.join(self.pkg_dir, 'PIC0.PNG'))):
+				if(os.path.isfile(os.path.join(self.wcm_pkg_dir, 'PIC0.PNG'))):
+					shutil.copyfile(os.path.join(self.wcm_pkg_dir, 'PIC0.PNG'), os.path.join(self.pkg_dir, 'PIC0.PNG'))
 
-		# check if there is a ICON0 in the pkg_dir, if not copy a stock one
-		if not (os.path.isfile(os.path.join(self.pkg_dir, 'PIC1.PNG'))):
-			if(os.path.isfile(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG'))):
-				shutil.copyfile(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG'), os.path.join(self.pkg_dir, 'PIC1.PNG'))
+			# check if there is a ICON0 in the pkg_dir, if not copy a stock one
+			if not (os.path.isfile(os.path.join(self.pkg_dir, 'PIC1.PNG'))):
+				if(os.path.isfile(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG'))):
+					shutil.copyfile(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG'), os.path.join(self.pkg_dir, 'PIC1.PNG'))
 
-		# builds pkg and reads the pkg filename
-		webman_pkg = Webman_PKG()
-		pkg_name = webman_pkg.build()
+			# builds pkg and reads the pkg filename
+			webman_pkg = Webman_PKG()
+			pkg_name = webman_pkg.build()
 
-		# making sure the work_dir and pkg directories exists
-		if not os.path.exists(os.path.join(game_build_dir, 'work_dir', 'pkg')):
-			os.makedirs(os.path.join(game_build_dir, 'work_dir', 'pkg'))
+			# making sure the work_dir and pkg directories exists
+			if not os.path.exists(os.path.join(game_build_dir, 'work_dir', 'pkg')):
+				os.makedirs(os.path.join(game_build_dir, 'work_dir', 'pkg'))
 
-		self.copytree(self.pkg_dir, os.path.join(game_build_dir, 'work_dir', 'pkg'))
+			self.copytree(self.pkg_dir, os.path.join(game_build_dir, 'work_dir', 'pkg'))
 
-		shutil.copyfile(os.path.join(self.wcm_work_dir, 'pkg.json'),
-						os.path.join(game_build_dir, 'work_dir', 'pkg.json'))
+			shutil.copyfile(os.path.join(self.wcm_work_dir, 'pkg.json'),
+							os.path.join(game_build_dir, 'work_dir', 'pkg.json'))
 
-		shutil.copyfile(os.path.join(self.wcm_work_dir, 'preview.png'),
-						os.path.join(game_build_dir + '/' + filename[:-4] + '_preview.png'))
+			shutil.copyfile(os.path.join(self.wcm_work_dir, 'preview.png'),
+							os.path.join(game_build_dir + '/' + filename[:-4] + '_preview.png'))
 
-		if pkg_name is not None:
-			import tkMessageBox
-			def popup():
-				msgBox = tkMessageBox.showinfo("Build status", "Build successful!")
+			if pkg_name is not None:
+				import tkMessageBox
+				def popup():
+					msgBox = tkMessageBox.showinfo("Build status", "Build successful!")
 
-			popup()
+				popup()
 
-		else:
-			import tkMessageBox
-			tkMessageBox.showinfo("Build status", "Build failed!")
+			else:
+				import tkMessageBox
+				tkMessageBox.showinfo("Build status", "Build failed!")
 
-		# open builds folder in windows explorer
-		if 'win' in sys.platform:
-			print('DEBUG openig folder: ' + os.path.join(AppPaths.builds, pkg_name.replace('.pkg', '')))
-			pkg_build_dir = os.path.join(AppPaths.builds, pkg_name.replace('.pkg', ''))
-			try:
-				os.startfile(pkg_build_dir)
-			except:
-				print('ERROR: Could open the pkg build dir from Windows explorer')
+			# open builds folder in windows explorer
+			if 'win' in sys.platform:
+				print('DEBUG openig folder: ' + os.path.join(AppPaths.builds, pkg_name.replace('.pkg', '')))
+				pkg_build_dir = os.path.join(AppPaths.builds, pkg_name.replace('.pkg', ''))
+				try:
+					os.startfile(pkg_build_dir)
+				except:
+					print('ERROR: Could open the pkg build dir from Windows explorer')
 
 	def on_ftp_fetch_button(self):
 		# save the ps3-ip field to config file
@@ -1143,7 +1176,6 @@ class CreateToolTip(object):
 		self.tw= None
 		if tw:
 			tw.destroy()
-
 
 # setup properties
 main_window = Tk()

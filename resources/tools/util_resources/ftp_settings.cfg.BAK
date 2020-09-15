@@ -8,7 +8,7 @@
     "show_ps3_list":true,
     "ftp_password":"",
     "ps3_lan_ip":"",
-    "ftp_chunk_size_kb":3000,
+    "ftp_chunk_size_kb":4000,
 	"ftp_psp_png_offset_kb":20000,
     "show_psn_list":true,
     "show_psp_list":true,

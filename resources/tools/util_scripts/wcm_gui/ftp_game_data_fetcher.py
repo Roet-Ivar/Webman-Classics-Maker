@@ -1,4 +1,5 @@
-import json, os, re, StringIO, sys, time, shutil
+import json, os, re, StringIO, sys, time
+import PIL.Image as Image
 from ftplib import FTP
 from shutil import copyfile
 
@@ -111,7 +112,7 @@ class FtpGameList():
         with open(self.GAME_LIST_DATA_FILE) as f:
             self.json_game_list_data = json.load(f)
 
-            # open a copy of an empty gamelist from disk
+        # open a copy of an empty gamelist from disk
         with open(self.NEW_LIST_DATA_FILE) as f:
             self.new_json_game_list_data = json.load(f)
 
@@ -156,8 +157,11 @@ class FtpGameList():
         # game_exist = False
 
         title = None
-        title_id = None
+        title_id = ''
         meta_data_link = None
+        icon0 = None
+        pic0 = None
+        pic1 = None
 
         for game_filename in filtered_lines:
             game_exist = False
@@ -173,7 +177,7 @@ class FtpGameList():
             if not game_exist:
                 title_id, icon0, pic0, pic1 = self.get_game_data(platform_path, game_filename)
 
-                if title_id is not None and title_id != '':
+                if title_id is not '':
                     platform_db_file = platform + '_all_title_ids.json'
 
                     with open(os.path.join(AppPaths.games_metadata, platform_db_file)) as f:
@@ -253,30 +257,41 @@ class FtpGameList():
                       + 'Title id: ' + str(title_id) + '\n')
 
                 # reset game data for next iteration
-                title 			= None
-                meta_data_link 	= None
+                title = None
+                title_id = ''
+                meta_data_link = None
 
-            if platform == 'psp' or 'ps3':
+
+            if title_id is not None:
                 # save game build folder data here
-                if title_id is None:
-                    title_id = ''
-                game_folder_name = game_filename[:-4] + '_(' + title_id + ')'
+                game_folder_name = game_filename[:-4] + '_(' + title_id.replace('-', '') + ')'
                 game_build_dir = os.path.join(AppPaths.builds, game_folder_name)
 
                 # making sure the work_dir and pkg directories exists
                 if not os.path.exists(os.path.join(game_build_dir, 'work_dir', 'pkg')):
                     os.makedirs(os.path.join(game_build_dir, 'work_dir', 'pkg'))
 
+               # platforms such as PSP and PS3 will most likely hit the first statement
                 if(icon0 is not None):
+                    icon0.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON0.PNG'))
+                else:
+                    icon0 = Image.open(os.path.join(AppPaths.application_path, 'resources', 'images', 'pkg', 'default', platform.upper(), 'ICON0.PNG'))
                     icon0.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON0.PNG'))
 
                 if(pic0 is not None):
                     pic0.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC0.PNG'))
+                # else:
+                #     pic0 = Image.open(os.path.join(AppPaths.application_path, 'resources', 'images', 'pkg', 'default', 'PIC0.PNG'))
+                #     pic0.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC0.PNG'))
 
                 if(pic1 is not None):
                     pic1.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC1.PNG'))
+                # else:
+                #     pic1 = Image.open(os.path.join(AppPaths.application_path, 'resources', 'images', 'pkg', 'default', 'PIC1.PNG'))
+                #     pic1.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC1.PNG'))
 
-
+            # if title_id is None:
+            #     title_id = ''
 
         # print('DEBUG - new games added:')
         # print(str(self.new_json_game_list_data))
@@ -291,20 +306,24 @@ class FtpGameList():
         try:
             title_id, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, 0)
 
-            # use rest offset for PSP to find the images
+            # make another fetch with rest offset for PSP images
             if platform == 'psp':
                 not_used, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, self.ftp_psp_png_offset_kb)
 
+            # some guitar hero games seems to need a larger chunk to find the last PIC1
+            if platform == 'ps3' and 'guitar' in game_filename.lower():
+                not_used, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, 6000, 0)
+
         # retry connection
         except Exception as e:
-            print('Connection timed out' + '\nAuto retry in ' + str(self.ftp_timeout) + 's...\n')
+            print('Connection timed out, re-connecting in ' + str(self.ftp_timeout) + 's...\n')
 
             self.make_new_ftp()
             self.data_chunk = FTPDataHandler(self.ftp)
 
             title_id, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, 0)
 
-            # use rest offset for PSP to find the images
+            # make another fetch with rest offset for PSP images
             if platform == 'psp':
                 title_id, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, self.ftp_psp_png_offset_kb)
 
@@ -375,12 +394,12 @@ class FTPDataHandler:
                     if rest == 0:
                         game_title_id = get_title_id_from_buffer(self, platform, self.data_chunk)
 
-                    # PS3 and PSP ISOs is the only type that has images embedded
+                    # PS3 and PSP are the only type of ISOs that has game art embedded
                     if platform == 'psp' or platform == 'ps3':
                         icon0, pic0, pic1 = get_png_from_buffer(self, platform, game_title, self.data_chunk)
 
                     if '451' not in e.message:
-                        print('DEBUG - connection' + e.message + ' when parsing ' + game_title)
+                        print('DEBUG - connection ' + e.message + ' during parsing of ' + game_title)
                     break
 
         return game_title_id, icon0, pic0, pic1
@@ -393,6 +412,7 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
         self.has_icon0 = False
         self.has_pic0 = False
         self.has_pic1 = False
+        self.image_duplicate = False
 
         self.icon0_image = None
         self.pic0_image = None
@@ -404,6 +424,7 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
             index_png_start = data.find(b'\x89\x50\x4E\x47\x0D\x0A\x1A\x0A')
             index_png_end = data.find(b'\x00\x00\x00\x00\x49\x45\x4E\x44', index_png_start)
 
+            self.image_duplicate = False
             self.image_name = image_name
             if index_png_start != -1:
                 if index_png_end != -1:
@@ -412,58 +433,54 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
 
                     png_byte_array = data[index_png_start:index_png_end+8]
                     tmp_image = Image.open(io.BytesIO(png_byte_array))
-
                     self.img_name = None
-                    image_duplicate = False
+
 
                     if self.platform == 'psp':
                         # icon image PSP
                         if tmp_image.size == (144, 80):
                             self.img_name = 'ICON0.PNG'
-                            if self.has_icon0:
-                                image_duplicate = True
-                            self.has_icon0 = True
-                            self.icon0_image = tmp_image
+                            if not self.has_icon0:
+                                self.icon0_image = tmp_image
+                                self.has_icon0 = True
 
                         # this is background image PSP
                         elif tmp_image.size == (480, 272):
                             self.img_name = 'PIC1.PNG'
-                            if self.has_pic1:
-                                image_duplicate = True
-                            self.has_pic1 = True
-                            self.pic1_image = tmp_image
+                            if not self.has_pic1:
+                                self.pic1_image = tmp_image
+                                self.has_pic1 = True
+
 
                     elif self.platform == 'ps3':
                         # icon image PS3
                         if tmp_image.size == (320, 176):
                             self.img_name = 'ICON0.PNG'
-                            if self.has_icon0:
-                                image_duplicate = True
-                            self.has_icon0 = True
-                            self.icon0_image = tmp_image
+                            if not self.has_icon0:
+                                self.icon0_image = tmp_image
+                                self.has_icon0 = True
+
 
                         # when multiple pic0 the first seem to be English
                         elif tmp_image.size == (1000, 560):
                             self.img_name = 'PIC0.PNG'
-                            if self.has_pic0:
-                                image_duplicate = True
-                            self.has_pic0 = True
-                            self.pic0_image = tmp_image
+                            if not self.has_pic0:
+                                self.pic0_image = tmp_image
+                                self.has_pic0 = True
+
 
                         # this is background image PS3
                         elif tmp_image.size == (1920, 1080):
                             self.img_name = 'PIC1.PNG'
-                            if self.has_pic1:
-                                image_duplicate = True
-                            self.has_pic1 = True
-                            self.pic1_image = tmp_image
+                            if not self.has_pic1:
+                                self.pic1_image = tmp_image
+                                self.has_pic1 = True
 
-                    # crop data for next iteration
-                    self.data = data[index_png_end:len(data)-1]
-
-                    # stops searching images if we, in this case, finds a PIC1 duplicates
-                    if self.img_name is not None and not image_duplicate:
+                    if self.img_name is not None:
+                        # crop data for next iteration
+                        self.data = data[index_png_end:len(data)-1]
                         return True
+
                 return False
 
         while png_finder(self.data, self.image_name):
@@ -477,7 +494,7 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
 
 
 def get_title_id_from_buffer(self, platform, buffer_data):
-    game_id = None
+    game_id = ''
     try:
         # psx and ps2
         if platform == 'psx' or platform == 'ps2':

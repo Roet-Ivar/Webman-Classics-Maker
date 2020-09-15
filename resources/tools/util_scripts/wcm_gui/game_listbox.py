@@ -168,7 +168,7 @@ class Gamelist():
 
     def get_selected_build_dir_path(self):
         filename = self.selected_filename
-        title_id = self.selected_title_id
+        title_id = self.selected_title_id.replace('-', '')
 
         build_base_path = AppPaths.builds
         pkg_project_name = filename[0:len(filename)-4] + '_(' + title_id + ')'
