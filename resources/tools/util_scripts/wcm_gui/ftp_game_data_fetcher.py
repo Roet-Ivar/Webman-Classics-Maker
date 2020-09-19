@@ -178,7 +178,7 @@ class FtpGameList():
                 title_id, icon0, pic0, pic1 = self.get_game_data(platform_path, game_filename)
 
                 if title_id is not '':
-                    platform_db_file = platform + '_all_title_ids.json'
+                    platform_db_file = platform.upper() + '_all_title_ids.json'
 
                     with open(os.path.join(AppPaths.games_metadata, platform_db_file)) as f:
                         self.json_platform_data_list = json.load(f)
@@ -191,7 +191,7 @@ class FtpGameList():
                         if platform == 'ps3':
                             title_id = title_id.replace('-', '')
 
-                        if title_id == game['title_id']:
+                        if title_id == game['title_id'].encode('utf-8').strip():
 
                             if platform == 'psp' or platform == 'psx' or platform == 'ps2':
                                 title = game['title']
@@ -217,14 +217,14 @@ class FtpGameList():
                     game_filepath = os.path.join(platform_path, game_filename)
 
                     if game_filepath.lower().endswith('iso'):
-                        m_filename = re.search('ISO.*', game_filepath)
+                        m_filename = re.search('ISO.*', game_filepath, re.IGNORECASE)
                         if m_filename is not None:
-                            title = m_filename.group(0).replace('ISO/', '')
+                            title = m_filename.group(0).replace('ISO/', '', re.IGNORECASE)
 
                     elif game_filepath.lower().endswith('bin'):
-                        m_filename = re.search('BIN.*', game_filepath)
+                        m_filename = re.search('BIN.*', game_filepath, re.IGNORECASE)
                         if m_filename is not None:
-                            title = m_filename.group(0).replace('BIN/', '')
+                            title = m_filename.group(0).replace('BIN/', '', re.IGNORECASE)
 
                 # check for duplicates of the same title in the list
                 for game in self.json_game_list_data[platform_list]:
