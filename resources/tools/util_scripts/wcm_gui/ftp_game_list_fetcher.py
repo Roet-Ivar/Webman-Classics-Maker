@@ -190,7 +190,7 @@ class FtpGameList():
                 title_id = self.get_title_id_from_ps3(platform_path, game_filename)
 
                 if title_id is not None:
-                    platform_db_file = platform + '_all_title_ids.json'
+                    platform_db_file = platform.upper() + '_all_title_ids.json'
 
                     with open(os.path.join(AppPaths.games_metadata, platform_db_file)) as f:
                         self.json_platform_data_list = json.load(f)
@@ -203,7 +203,7 @@ class FtpGameList():
                         if platform == 'ps3':
                             title_id = title_id.replace('-', '')
 
-                        if title_id == str(game['title_id']):
+                        if title_id == game['title_id'].encode('utf-8').strip():
 
                             if platform == 'psp' or platform == 'psx' or platform == 'ps2':
                                 title = str(game['title'])
