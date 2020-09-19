@@ -190,7 +190,7 @@ class FtpGameList():
                 title_id = self.get_title_id_from_ps3(platform_path, game_filename)
 
                 if title_id is not None:
-                    platform_db_file = platform + '_all_title_ids.json'
+                    platform_db_file = platform.upper() + '_all_title_ids.json'
 
                     with open(os.path.join(AppPaths.games_metadata, platform_db_file)) as f:
                         self.json_platform_data_list = json.load(f)
@@ -203,7 +203,7 @@ class FtpGameList():
                         if platform == 'ps3':
                             title_id = title_id.replace('-', '')
 
-                        if title_id == str(game['title_id']):
+                        if title_id == game['title_id'].encode('utf-8').strip():
 
                             if platform == 'psp' or platform == 'psx' or platform == 'ps2':
                                 title = str(game['title'])
@@ -231,12 +231,12 @@ class FtpGameList():
                     game_filepath = os.path.join(platform_path, game_filename)
 
                     if game_filepath.lower().endswith('iso'):
-                        m_filename = re.search('ISO.*', game_filepath)
-                        title = m_filename.group(0).replace('ISO/', '')
+                        m_filename = re.search('ISO.*', game_filepath, re.IGNORECASE)
+                        title = m_filename.group(0).replace('ISO/', '', re.IGNORECASE)
 
                     elif game_filepath.lower().endswith('bin'):
-                        m_filename = re.search('BIN.*', game_filepath)
-                        title = m_filename.group(0).replace('BIN/', '')
+                        m_filename = re.search('BIN.*', game_filepath, re.IGNORECASE)
+                        title = m_filename.group(0).replace('BIN/', '', re.IGNORECASE)
 
                 # check for duplicates of the same title in the list
                 for game in self.json_game_list_data[platform_list]:
