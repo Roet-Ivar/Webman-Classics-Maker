@@ -231,12 +231,12 @@ class FtpGameList():
                     game_filepath = os.path.join(platform_path, game_filename)
 
                     if game_filepath.lower().endswith('iso'):
-                        m_filename = re.search('ISO.*', game_filepath)
-                        title = m_filename.group(0).replace('ISO/', '')
+                        m_filename = re.search('ISO.*', game_filepath, re.IGNORECASE)
+                        title = m_filename.group(0).replace('ISO/', '', re.IGNORECASE)
 
                     elif game_filepath.lower().endswith('bin'):
-                        m_filename = re.search('BIN.*', game_filepath)
-                        title = m_filename.group(0).replace('BIN/', '')
+                        m_filename = re.search('BIN.*', game_filepath, re.IGNORECASE)
+                        title = m_filename.group(0).replace('BIN/', '', re.IGNORECASE)
 
                 # check for duplicates of the same title in the list
                 for game in self.json_game_list_data[platform_list]:
