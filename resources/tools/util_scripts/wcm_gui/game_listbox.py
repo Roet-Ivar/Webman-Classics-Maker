@@ -171,10 +171,8 @@ class Gamelist():
         title_id = self.selected_title_id.replace('-', '')
 
         build_base_path = AppPaths.builds
-        pkg_project_name = filename[0:len(filename)-4] + '_(' + title_id + ')'
+        pkg_project_name = filename[:-4].replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
 
         build_dir_path = os.path.join(build_base_path, pkg_project_name)
-        if os.path.exists(build_dir_path):
-            print(filename + ' project exist')
         return build_dir_path
 

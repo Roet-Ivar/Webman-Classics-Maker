@@ -5,9 +5,15 @@ from global_paths import App as AppPaths
 
 class Edit_launch_txt:
 	def execute(self):
-		try:
+		if os.path.exists(AppPaths.game_work_dir):
+			work_dir = AppPaths.game_work_dir
+			USRDIR = os.path.join(AppPaths.game_work_dir, 'pkg', 'USRDIR')
+		else:
+			work_dir = AppPaths.wcm_work_dir
+			USRDIR = AppPaths.USRDIR
 
-			with open(os.path.join(AppPaths.wcm_work_dir, 'pkg.json')) as f:
+		try:
+			with open(os.path.join(work_dir, 'pkg.json')) as f:
 				json_data = json.load(f)
 
 			# webman-mod v.47.14 and older
@@ -24,12 +30,12 @@ class Edit_launch_txt:
 				web_command_string = pre_cmd + str(json_data['iso_filepath'] + post_cmd)
 
 			web_url_string = 'GET ' + urllib.quote(web_command_string) + ' HTTP/1.0'
-			
-			launch_txt = open(os.path.join(AppPaths.USRDIR, 'launch.txt'), 'wb')
+
+			launch_txt = open(os.path.join(USRDIR, 'launch.txt'), 'wb')
 			launch_txt_byteArray = bytearray(web_command_string) + os.linesep
 			launch_txt.write(launch_txt_byteArray)
 
-			url_txt = open(os.path.join(AppPaths.USRDIR, 'url.txt'), 'wb')
+			url_txt = open(os.path.join(USRDIR, 'url.txt'), 'wb')
 			url_txt_byteArray = bytearray(web_url_string) + os.linesep
 			url_txt.write(url_txt_byteArray)
 

@@ -178,7 +178,7 @@ class FtpGameList():
                 title_id, icon0, pic0, pic1 = self.get_game_data(platform_path, game_filename)
 
                 if title_id is not '':
-                    platform_db_file = platform + '_all_title_ids.json'
+                    platform_db_file = platform.upper() + '_all_title_ids.json'
 
                     with open(os.path.join(AppPaths.games_metadata, platform_db_file)) as f:
                         self.json_platform_data_list = json.load(f)
@@ -194,13 +194,13 @@ class FtpGameList():
                         if title_id == game['title_id']:
 
                             if platform == 'psp' or platform == 'psx' or platform == 'ps2':
-                                title = game['title']
+                                title = game['title'].encode('utf-8').strip()
 
                                 if game['meta_data_link'] is not null:
                                     meta_data_link = game['meta_data_link']
 
                             elif platform == 'ps3':
-                                title = game['name']
+                                title = game['name'].encode('utf-8').strip()
 
                             # removes parenthesis including content of title
                             title = re.sub(r'\([^)]*\)', '', title)
@@ -217,14 +217,14 @@ class FtpGameList():
                     game_filepath = os.path.join(platform_path, game_filename)
 
                     if game_filepath.lower().endswith('iso'):
-                        m_filename = re.search('ISO.*', game_filepath)
+                        m_filename = re.search('ISO.*', game_filepath, re.IGNORECASE)
                         if m_filename is not None:
-                            title = m_filename.group(0).replace('ISO/', '')
+                            title = m_filename.group(0).replace('ISO/', '', re.IGNORECASE)
 
                     elif game_filepath.lower().endswith('bin'):
-                        m_filename = re.search('BIN.*', game_filepath)
+                        m_filename = re.search('BIN.*', game_filepath, re.IGNORECASE)
                         if m_filename is not None:
-                            title = m_filename.group(0).replace('BIN/', '')
+                            title = m_filename.group(0).replace('BIN/', '', re.IGNORECASE)
 
                 # check for duplicates of the same title in the list
                 for game in self.json_game_list_data[platform_list]:
@@ -256,15 +256,9 @@ class FtpGameList():
                       + 'Filename: ' + game_filename + '\n'
                       + 'Title id: ' + str(title_id) + '\n')
 
-                # reset game data for next iteration
-                title = None
-                title_id = ''
-                meta_data_link = None
-
-
             if title_id is not None:
                 # save game build folder data here
-                game_folder_name = game_filename[:-4] + '_(' + title_id.replace('-', '') + ')'
+                game_folder_name = game_filename[:-4].replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
                 game_build_dir = os.path.join(AppPaths.builds, game_folder_name)
 
                 # making sure the work_dir and pkg directories exists
@@ -286,15 +280,11 @@ class FtpGameList():
 
                 if(pic1 is not None):
                     pic1.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC1.PNG'))
-                # else:
-                #     pic1 = Image.open(os.path.join(AppPaths.application_path, 'resources', 'images', 'pkg', 'default', 'PIC1.PNG'))
-                #     pic1.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC1.PNG'))
 
-            # if title_id is None:
-            #     title_id = ''
-
-        # print('DEBUG - new games added:')
-        # print(str(self.new_json_game_list_data))
+                # reset game data for next iteration
+                title = None
+                title_id = None
+                meta_data_link = None
 
         return self.new_json_game_list_data
 

@@ -828,10 +828,15 @@ def version():
 
 class Webman_pkg:
 	def execute(self):
+		if os.path.exists(AppPaths.game_work_dir):
+			work_dir = AppPaths.game_work_dir
+		else:
+			work_dir = AppPaths.wcm_work_dir
+
 		extract = False
 		list = False
 		
-		with open(os.path.join(AppPaths.wcm_work_dir, 'pkg.json')) as f:
+		with open(os.path.join(work_dir, 'pkg.json')) as f:
 			json_data = json.load(f)
 
 		contentid = str(json_data['content_id'])
@@ -845,7 +850,6 @@ class Webman_pkg:
 		pkg_dir_path=AppPaths.pkg + '/'
 		
 		pkg_name = filepath_arr[3][:-4] + '_(' + titleid + ')' + '.pkg'
-		pkg_name = pkg_name.replace(' ', '_')
 		build_dir_path = os.path.join(AppPaths.builds, pkg_name.replace('.pkg', ''))
 
 		arg_list = [pkg_build_script, pkg_flag, contentid, pkg_dir_path, pkg_name]	

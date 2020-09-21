@@ -273,10 +273,10 @@ class Main:
 		pic1_filename = 'PIC1.PNG'
 		icon0_filename = 'ICON0.PNG'
 
-		self.image_pic0 = self.load_pkg_images(pic0_filename)
-		self.image_pic1 = self.load_pkg_images(pic1_filename)
 		self.image_icon0 = self.load_pkg_images(icon0_filename)
 		self.image_icon0_ref = copy.copy(self.image_icon0)
+		self.image_pic0 = self.load_pkg_images(pic0_filename)
+		self.image_pic1 = self.load_pkg_images(pic1_filename)
 
 		self.pkg_icon0 = None
 		self.pkg_pic0 = None
@@ -427,7 +427,6 @@ class Main:
 		##########################################################################
 		# Adding an on_change-listener on 'entry_field_filename'
 		self.generate_on_change(self.entry_field_filename)
-		# self.entry_field_filename.bind('<<Change>>', self.dynamic_img_path)
 		self.entry_field_filename.bind('<<Change>>', self.dynamic_filename_to_path)
 		###########################################################################
 		# Adding an on_change-listener on 'entry_field_title'
@@ -632,16 +631,19 @@ class Main:
 
 		# blend and crop ICON0 to background
 		tmp_bg = copy.copy(self.image_pic1)
+		left_comp = 14
+		top_comp = 30
 		tmp_bg.paste(self.image_icon0.convert("RGBA"), (425, 450), self.image_icon0.convert("RGBA"))
 		# ICON0 dimensions
 		ps3_icon_width = 320
 		ps3_icon_heigth = 176
 		# compenstaion pixels
-		x_comp = 14
-		y_comp = 30
+
+		right_comp = 0
+		bottom_comp = 0
 
 		# image.crop((left, top, right, bottom))
-		self.image_icon0 = tmp_bg.crop((425-x_comp, 450-y_comp, 425+ps3_icon_width, 450+ps3_icon_heigth))
+		tmp_image_icon0 = tmp_bg.crop((425-left_comp-9, 450-top_comp-3, 425+ps3_icon_width-4, 450+ps3_icon_heigth-2))
 
 		# draw launch-date and clock beside ICON0
 		self.draw_text_on_image_w_shadow(self.image_pic1, "11/11/2006 00:00", 760, 522, 20, 1, 'white', 'black')
@@ -661,9 +663,9 @@ class Main:
 		icon0_y_scale = self.window_y_width / self.image_pic1.height * scaling
 
 		self.icon0_dimensions = (
-			int(icon0_x_scale * self.image_icon0.width), int(icon0_y_scale * self.image_icon0.height))
+			int(icon0_x_scale * tmp_image_icon0.width), int(icon0_y_scale * tmp_image_icon0.height))
 
-		self.image_icon0_crop = self.image_icon0.crop((7, 7, self.image_icon0.width - 7, self.image_icon0.height - 7))
+		self.image_icon0_crop = tmp_image_icon0.crop((7, 7, tmp_image_icon0.width - 7, tmp_image_icon0.height - 7))
 		self.image_icon0_crop = self.image_icon0_crop.resize(
 			(self.icon0_dimensions[0] - 7, self.icon0_dimensions[1] - 7), Image.ANTIALIAS)
 
@@ -793,8 +795,9 @@ class Main:
 			self.drive_system_array[1] = system_choice
 
 	# Dynamic update of the pkg path for showing fetched images
-	def dynamic_img_path(self):
-		build_dir_pkg_path = os.path.join(self.gamelist.get_selected_build_dir_path(), 'work_dir', 'pkg')
+	def dynamic_game_build_path(self):
+		AppPaths.game_work_dir = os.path.join(self.gamelist.get_selected_build_dir_path(), 'work_dir')
+		build_dir_pkg_path = os.path.join(AppPaths.game_work_dir, 'pkg')
 		if os.path.exists(build_dir_pkg_path):
 			# update images
 			self.init_draw_images_on_canvas(self.main, pkg_build_path=build_dir_pkg_path)
@@ -825,7 +828,7 @@ class Main:
 
 	# Dynamic update of the game title on to the PIC1 image
 	def dynamic_title_to_pic1(self, event):
-		self.dynamic_img_path()
+		self.dynamic_game_build_path()
 		tmp_img = copy.copy(self.image_pic1)
 		# self, image, text, text_x, text_y, text_size, text_outline, text_color,
 		self.draw_text_on_image_w_shadow(tmp_img, event.widget.get(), 760, 487, 32, 2, 'white', 'black')
@@ -1004,39 +1007,47 @@ class Main:
 				shutil.copy2(s, d)
 
 	def on_build_button(self):
+		if os.path.isdir(os.path.join(AppPaths.resources, 'pkg')):
+			shutil.rmtree(os.path.join(AppPaths.resources, 'pkg'))
+		self.copytree(os.path.join(AppPaths.util_resources, 'pkg_dir_bak'), os.path.join(AppPaths.resources, 'pkg'))
+
 		if self.save_work_dir():
 			title_id = str(self.entry_field_title_id.get()).replace('-', '')
-			filename = str(self.entry_field_filename.get()).replace(' ', '_')
-			game_folder_name = filename[:-4] + '_(' + title_id + ')'
+			filename = str(self.entry_field_filename.get())
+			game_folder_name = filename[:-4].replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
 			game_build_dir = os.path.join(self.builds_path, game_folder_name)
+			game_work_dir = os.path.join(game_build_dir, 'work_dir')
+			game_pkg_dir = os.path.join(game_work_dir, 'pkg')
 
-			# check if there is a ICON0 in the pkg_dir, if not copy a stock one
-			if not (os.path.isfile(os.path.join(self.pkg_dir, 'ICON0.PNG'))):
-				if(os.path.isfile(os.path.join(self.wcm_pkg_dir, 'ICON0.PNG'))):
-					shutil.copyfile(os.path.join(self.wcm_pkg_dir, 'ICON0.PNG'), os.path.join(self.pkg_dir, 'ICON0.PNG'))
+			# AppPaths.game_work_dir = game_work_dir
+			game_pkg_dir = os.path.join(AppPaths.game_work_dir, 'pkg')
 
-			# PIC1 is optional, so if there isn't one already one, skip it
-			if not (os.path.isfile(os.path.join(self.pkg_dir, 'PIC0.PNG'))):
-				if(os.path.isfile(os.path.join(self.wcm_pkg_dir, 'PIC0.PNG'))):
-					shutil.copyfile(os.path.join(self.wcm_pkg_dir, 'PIC0.PNG'), os.path.join(self.pkg_dir, 'PIC0.PNG'))
+			if not os.path.exists(self.pkg_dir):
+				os.makedirs(self.pkg_dir)
 
-			# check if there is a ICON0 in the pkg_dir, if not copy a stock one
-			if not (os.path.isfile(os.path.join(self.pkg_dir, 'PIC1.PNG'))):
-				if(os.path.isfile(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG'))):
-					shutil.copyfile(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG'), os.path.join(self.pkg_dir, 'PIC1.PNG'))
+			if os.path.isfile(os.path.join(game_pkg_dir, 'ICON0.PNG')):
+				shutil.copyfile(os.path.join(game_pkg_dir, 'ICON0.PNG'), os.path.join(self.pkg_dir, 'ICON0.PNG'))
+
+			if os.path.isfile(os.path.join(game_pkg_dir, 'PIC0.PNG')):
+				shutil.copyfile(os.path.join(game_pkg_dir, 'PIC0.PNG'), os.path.join(self.pkg_dir, 'PIC0.PNG'))
+
+			if os.path.isfile(os.path.join(game_pkg_dir, 'PIC1.PNG')):
+				shutil.copyfile(os.path.join(game_pkg_dir, 'PIC1.PNG'), os.path.join(self.pkg_dir, 'PIC1.PNG'))
 
 			# builds pkg and reads the pkg filename
 			webman_pkg = Webman_PKG()
 			pkg_name = webman_pkg.build()
 
-			# making sure the work_dir and pkg directories exists
-			if not os.path.exists(os.path.join(game_build_dir, 'work_dir', 'pkg')):
-				os.makedirs(os.path.join(game_build_dir, 'work_dir', 'pkg'))
+			# making sure default work_dir and pkg directories exists
+			if not os.path.exists(game_pkg_dir):
+				os.makedirs(game_pkg_dir)
 
-			self.copytree(self.pkg_dir, os.path.join(game_build_dir, 'work_dir', 'pkg'))
+			# saving the build content in the game build folder
+			self.copytree(self.pkg_dir, game_pkg_dir)
 
-			shutil.copyfile(os.path.join(self.wcm_work_dir, 'pkg.json'),
-							os.path.join(game_build_dir, 'work_dir', 'pkg.json'))
+
+			# shutil.copyfile(os.path.join(self.wcm_work_dir, 'pkg.json'),
+			# 				os.path.join(game_build_dir, 'work_dir', 'pkg.json'))
 
 			shutil.copyfile(os.path.join(self.wcm_work_dir, 'preview.png'),
 							os.path.join(game_build_dir + '/' + filename[:-4] + '_preview.png'))
@@ -1097,7 +1108,7 @@ class Main:
 		self.draw_text_on_image_w_shadow(preview_img, "11/11/2006 00:00", 760, 522, 20, 1, 'white', 'black')
 		self.draw_text_on_image_w_shadow(preview_img, str(self.entry_field_title.get()), 760, 487, 32, 2, 'white',
 										 'black')
-		preview_img.save(os.path.join(self.wcm_work_dir, 'preview.png'))
+		preview_img.save(os.path.join(AppPaths.game_work_dir, 'preview.png'))
 
 	def on_game_list_refresh(self):
 		self.create_list_combo_box(self.list_filter_platform)
@@ -1112,10 +1123,10 @@ class Main:
 			json_data['content_id'] = 'UP0001-' + self.entry_field_title_id.get() + '_00-0000000000000000'
 			json_data['iso_filepath'] = str(self.entry_field_iso_path.get())
 
-			pkg_json_path = os.path.join(AppPaths.wcm_work_dir, 'pkg.json')
-			if (os.path.isfile(pkg_json_path)):
-				os.remove(pkg_json_path)
-			newFile = open(os.path.join(self.wcm_work_dir, 'pkg.json'), "w")
+			pkg_json_path = os.path.join(AppPaths.game_work_dir, 'pkg.json')
+			# if (os.path.isfile(pkg_json_path)):
+			# 	os.remove(pkg_json_path)
+			newFile = open(pkg_json_path, "w")
 			json_text = json.dumps(json_data, indent=4, separators=(",", ":"))
 			newFile.write(json_text)
 

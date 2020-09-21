@@ -4,6 +4,12 @@ from global_paths import App as AppPaths
 
 class Param_to_json:
 	def execute(self):
+		# common paths
+		if os.path.exists(AppPaths.game_work_dir):
+			work_dir = AppPaths.game_work_dir
+		else:
+			work_dir = AppPaths.wcm_work_dir
+
 		with open(os.path.join(AppPaths.util_resources, 'pkg.json.BAK')) as f:
 			json_data = json.load(f)
 
@@ -24,7 +30,7 @@ class Param_to_json:
 				json_data['content_id']='UP0001-'+ params_arr[1] + '_00-0000000000000000'
 				json_data['iso_filepath']=params_arr[3]
 
-				newFile = open(os.path.join(AppPaths.wcm_work_dir, 'pkg.json'), 'wb')
+				newFile = open(os.path.join(work_dir, 'pkg.json'), 'wb')
 				json_text = json.dumps(json_data, indent=4, separators=(",", ":"))
 				
 				newFile.write(json_text)

@@ -5,7 +5,12 @@ from global_paths import App as AppPaths
 
 class Resign_eboot:
 	def execute(self):
-		with open(os.path.join(AppPaths.wcm_work_dir, 'pkg.json')) as f:
+		if os.path.exists(AppPaths.game_work_dir):
+			work_dir = AppPaths.game_work_dir
+		else:
+			work_dir = AppPaths.wcm_work_dir
+
+		with open(os.path.join(work_dir, 'pkg.json')) as f:
 			json_data = json.load(f)
 			
 		content_id = json_data['content_id']
