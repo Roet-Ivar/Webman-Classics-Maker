@@ -1014,12 +1014,6 @@ class Main:
 		if self.save_work_dir():
 			title_id = str(self.entry_field_title_id.get()).replace('-', '')
 			filename = str(self.entry_field_filename.get())
-			game_folder_name = filename[:-4].replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
-			game_build_dir = os.path.join(self.builds_path, game_folder_name)
-			game_work_dir = os.path.join(game_build_dir, 'work_dir')
-			game_pkg_dir = os.path.join(game_work_dir, 'pkg')
-
-			# AppPaths.game_work_dir = game_work_dir
 			game_pkg_dir = os.path.join(AppPaths.game_work_dir, 'pkg')
 
 			if not os.path.exists(self.pkg_dir):
@@ -1049,8 +1043,9 @@ class Main:
 			# shutil.copyfile(os.path.join(self.wcm_work_dir, 'pkg.json'),
 			# 				os.path.join(game_build_dir, 'work_dir', 'pkg.json'))
 
-			shutil.copyfile(os.path.join(self.wcm_work_dir, 'preview.png'),
-							os.path.join(game_build_dir + '/' + filename[:-4] + '_preview.png'))
+			# TODO fix preview
+			# shutil.copyfile(os.path.join(self.wcm_work_dir, 'preview.png'),
+			# 				os.path.join(AppPaths.game_work_dir, '..', filename[:-4] + '_preview.png'))
 
 			if pkg_name is not None:
 				import tkMessageBox
@@ -1065,10 +1060,9 @@ class Main:
 
 			# open builds folder in windows explorer
 			if 'win' in sys.platform:
-				print('DEBUG openig folder: ' + os.path.join(AppPaths.builds, pkg_name.replace('.pkg', '')))
-				pkg_build_dir = os.path.join(AppPaths.builds, pkg_name.replace('.pkg', ''))
+				print('DEBUG openig folder: ' + os.path.join(AppPaths.game_work_dir, '..'))
 				try:
-					os.startfile(pkg_build_dir)
+					os.startfile(os.path.join(AppPaths.game_work_dir, '../'))
 				except:
 					print('ERROR: Could open the pkg build dir from Windows explorer')
 
@@ -1098,17 +1092,17 @@ class Main:
 
 	def save_preview_image(self):
 		# making a preview print of the game canvas
-		preview_img = Image.open(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG'))
-		icon_img = Image.open(os.path.join(self.wcm_pkg_dir, 'ICON0.PNG'))
+		preview_img = Image.open(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC1.PNG'))
+		icon0_img = Image.open(os.path.join(AppPaths.game_work_dir, 'pkg', 'ICON0.PNG'))
 		# print('DEBUG: ' + os.path.dirname(__file__))
 		xmb_img_dir = os.path.join(ImagePaths.xmb, 'XMB_icons.png')
 		xmb_img = Image.open(xmb_img_dir)
-		preview_img.paste(icon_img, (425, 450), icon_img)
+		preview_img.paste(icon0_img, (425, 450), icon0_img)
 		preview_img.paste(xmb_img, (0, 0), xmb_img)
 		self.draw_text_on_image_w_shadow(preview_img, "11/11/2006 00:00", 760, 522, 20, 1, 'white', 'black')
 		self.draw_text_on_image_w_shadow(preview_img, str(self.entry_field_title.get()), 760, 487, 32, 2, 'white',
 										 'black')
-		preview_img.save(os.path.join(AppPaths.game_work_dir, 'preview.png'))
+		preview_img.save(os.path.join(AppPaths.game_work_dir, '..', 'preview.png'))
 
 	def on_game_list_refresh(self):
 		self.create_list_combo_box(self.list_filter_platform)
