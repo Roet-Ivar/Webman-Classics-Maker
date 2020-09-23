@@ -156,6 +156,8 @@ class Main:
 			shutil.rmtree(AppPaths.wcm_work_dir)
 			os.makedirs(os.path.join(AppPaths.wcm_work_dir, 'pkg'))
 
+			self.init_pkg_images()
+
 	def init_config_file(self):
 		if not os.path.isfile(self.ftp_settings_path):
 			if os.path.isfile(os.path.join(AppPaths.util_resources, 'ftp_settings.cfg.BAK')):
@@ -289,6 +291,8 @@ class Main:
 
 		self.image_pic1 = self.load_pkg_images(pic1_filename)
 		self.image_pic1_ref = copy.copy(self.image_pic0)
+		# self.photo_image_pic1_xmb = copy.copy(self.image_pic1)
+		self.image_pic1_w_title = copy.copy(self.image_pic1)
 
 		self.pkg_icon0 = None
 		self.pkg_pic0 = None
@@ -426,14 +430,18 @@ class Main:
 		self.iso_path_text_y_pos = self.dark_side_y_padding + self.filename_text_y_pos + self.height_of_text - 1
 
 		# image buttons coordinates (w/o res scaling)
-		self.pic1_x_pos = 75
-		self.pic1_y_pos = 175
-		# self.pic0_x_pos = 600
-		# self.pic0_y_pos = 480
-		self.pic0_x_pos = 580
-		self.pic0_y_pos = 455
-		self.icon0_x_pos = 350
-		self.icon0_y_pos = 460
+		self.pic1_button_x_pos = 75
+		self.pic1_button_y_pos = 175
+		self.pic0_button_x_pos = 573
+		self.pic0_button_y_pos = 450
+		self.icon0_button_x_pos = 344
+		self.icon0_button_y_pos = 454
+
+		# image coordinates for the gui
+		self.icon0_x_pos = 405
+		self.icon0_y_pos = 412
+		self.pic0_x_pos = 750
+		self.pic0_y_pos = 412
 
 		# entry fields
 		self.entry_field_title_id 	= Entry(main, validate='key', validatecommand=(self.vcmd, '%P'))
@@ -660,72 +668,70 @@ class Main:
 
 		# crop and blend ICON0 to the background
 		tmp_icon0_bg = copy.copy(self.image_pic1_ref)
-		tmp_icon0_bg.paste(self.image_icon0.convert("RGBA"), (410, 420), self.image_icon0.convert("RGBA"))
-		# ICON0 dimensions
-		icon0_width = 320
-		icon0_heigth = 176
+		tmp_icon0_bg.paste(self.image_icon0.convert("RGBA"), (self.icon0_x_pos, self.icon0_y_pos), self.image_icon0.convert("RGBA"))
 		# Image.crop((left, top, right, bottom))
-		tmp_image_icon0 = tmp_icon0_bg.crop((402, 418, 421+icon0_width, 448+icon0_heigth))
-		# scaling * icon_x_pos = 402
-		# scaling (720/1080) * icon_y_pos = 320
+		tmp_image_icon0 = tmp_icon0_bg.crop((self.icon0_x_pos, self.icon0_y_pos,
+											 self.icon0_x_pos + self.image_icon0.width,
+											 self.icon0_y_pos + self.image_icon0.height))
 
 
 		# crop and blend PIC0 to the background
-		tmp_pic0_bg = copy.copy(self.image_pic1_ref)
-		tmp_pic0_bg.paste(self.image_pic0.convert("RGBA"), (410+380-35, 420+32-38), self.image_pic0.convert("RGBA"))
-		# PIC0 dimensions
-		pic0_width = 1000
-		pic0_heigth = 560
-		pic0_left_comp = 23
-		pic0_top_comp = 33
+		if os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC0.PNG')):
+			tmp_pic0_bg = copy.copy(self.image_pic1_ref)
+		else:
+			tmp_pic0_bg = copy.copy(self.image_pic1_w_title)
+		# Image.paste(im1, (left, top, right, bottom), im1)
+		tmp_pic0_bg.paste(self.image_pic0, (self.pic0_x_pos, self.pic0_y_pos), self.image_pic0)
 		# Image.crop((left, top, right, bottom))
-		tmp_image_pic0 = tmp_pic0_bg.crop((425-pic0_left_comp+380-35, 450-pic0_top_comp+32-38, 800+pic0_width, 455+pic0_heigth))
-
+		tmp_image_pic0 = tmp_pic0_bg.crop((self.pic0_x_pos, self.pic0_y_pos,
+										   self.pic0_x_pos + self.image_pic0.width,
+										   self.pic0_y_pos + self.image_pic0.height))
 
 		# draw launch-date and clock beside ICON0
 		self.draw_text_on_image_w_shadow(self.image_pic1, "11/11/2006 00:00", 760, 522, 20, 1, 'white', 'black')
 
-		self.photo_image_pic1 = PhotoImage(
+		# resize: ->853, ->480
+		self.photoimage_pic1 = PhotoImage(
 			self.image_pic1.resize((int(1280 * scaling), int(720 * scaling)), Image.ANTIALIAS))
 
 		self.button_pic1 = Button(main,
-								  image=self.photo_image_pic1,
+								  image=self.photoimage_pic1,
 								  highlightthickness=0,
 								  bd=0,
 								  command=lambda: self.image_replace_browser(main))
 		CreateToolTip(self.button_pic1, self.PIC1_TOOLTIP_MSG)
 
-		# ICON0 rezising and cropping 7 pixels from all sides (due to transparent borders)
+		# ICON0 resizing
 		icon0_x_scale = self.window_x_width / self.image_pic1.width * scaling
 		icon0_y_scale = self.window_y_width / self.image_pic1.height * scaling
 
 		self.icon0_new_dim = (
 			int(icon0_x_scale * tmp_image_icon0.width), int(icon0_y_scale * tmp_image_icon0.height))
 
-		self.image_icon0_crop = tmp_image_icon0.crop((7, 7, tmp_image_icon0.width - 7, tmp_image_icon0.height - 7))
-		self.image_icon0_crop = self.image_icon0_crop.resize(
-			(self.icon0_new_dim[0] - 7, self.icon0_new_dim[1] - 7), Image.ANTIALIAS)
+		self.image_icon0_resize = copy.copy(tmp_image_icon0)
+		self.image_icon0_resize = self.image_icon0_resize.resize(
+			(self.icon0_new_dim[0], self.icon0_new_dim[1]), Image.ANTIALIAS)
 
-		self.photo_image_icon0 = PhotoImage(self.image_icon0_crop)
+		self.photoimage_icon0 = PhotoImage(self.image_icon0_resize)
 		self.button_icon0 = Button(main,
-								   image=self.photo_image_icon0,
+								   image=self.photoimage_icon0,
 								   highlightthickness=0,
 								   bd=0,
 								   command=lambda: self.image_replace_browser(main))
 		CreateToolTip(self.button_icon0, self.ICON0_TOOLTIP_MSG)
 
-		# PIC0 rezising and cropping 7 pixels from all sides (due to transparent borders)
+		# PIC0 resizing
 		pic0_x_scale = self.window_x_width / self.image_pic1.width * scaling
 		pic0_y_scale = self.window_y_width / self.image_pic1.height * scaling
 
 		self.pic0_new_dim = (
 			int(pic0_x_scale * tmp_image_pic0.width), int(pic0_y_scale * tmp_image_pic0.height))
 
-		self.image_pic0_crop = tmp_image_pic0.crop((7, 7, tmp_image_pic0.width - 7, tmp_image_pic0.height - 7))
-		self.image_pic0_crop = self.image_pic0_crop.resize(
-			(self.pic0_new_dim[0] - 7, self.pic0_new_dim[1] - 7), Image.ANTIALIAS)
+		self.image_pic0_resize = copy.copy(tmp_image_pic0)
+		self.image_pic0_resize = self.image_pic0_resize.resize(
+			(self.pic0_new_dim[0], self.pic0_new_dim[1]), Image.ANTIALIAS)
 
-		self.photo_image_pic0 = PhotoImage(self.image_pic0_crop)
+		self.photo_image_pic0 = PhotoImage(self.image_pic0_resize)
 		self.button_pic0 = Button(main,
 								   image=self.photo_image_pic0,
 								   highlightthickness=0,
@@ -735,9 +741,9 @@ class Main:
 
 
 		# finally placing ICON0, PIC0 and PIC1 onto the canvas
-		self.button_pic1.place(x=self.pic1_x_pos * scaling, y=self.pic1_y_pos * scaling)
-		self.button_pic0.place(x=int(self.pic0_x_pos * scaling), y=int(self.pic0_y_pos * scaling))
-		self.button_icon0.place(x=int(self.icon0_x_pos * scaling), y=int(self.icon0_y_pos * scaling))
+		self.button_pic1.place(x=self.pic1_button_x_pos * scaling, y=self.pic1_button_y_pos * scaling)
+		self.button_pic0.place(x=int(self.pic0_button_x_pos * scaling), y=int(self.pic0_button_y_pos * scaling))
+		self.button_icon0.place(x=int(self.icon0_button_x_pos * scaling), y=int(self.icon0_button_y_pos * scaling))
 
 	def draw_text_on_image(self, image, text, text_x, text_y, text_size, text_color):
 		font = ImageFont.truetype(os.path.join(self.fonts_path, 'SCE-PS3.ttf'), text_size)
@@ -889,8 +895,9 @@ class Main:
 		tmp_img = copy.copy(self.image_pic1)
 		# self, image, text, text_x, text_y, text_size, text_outline, text_color,
 		self.draw_text_on_image_w_shadow(tmp_img, event.widget.get(), 760, 487, 32, 2, 'white', 'black')
-		self.photo_image_pic1_xmb = PhotoImage(
-			tmp_img.resize((int(1280 * scaling), int(720 * scaling)), Image.ANTIALIAS))
+		self.image_pic1_w_title = copy.copy(tmp_img)
+		tmp_img = tmp_img.resize((int(1280 * scaling), int(720 * scaling)), Image.ANTIALIAS)
+		self.photo_image_pic1_xmb = PhotoImage(tmp_img)
 		self.button_pic1.config(image=self.photo_image_pic1_xmb)
 
 	def image_replace_browser(self, main):
@@ -1097,13 +1104,9 @@ class Main:
 			# saving the build content in the game build folder
 			self.copytree(self.pkg_dir, game_pkg_dir)
 
-
-			# shutil.copyfile(os.path.join(self.wcm_work_dir, 'pkg.json'),
-			# 				os.path.join(game_build_dir, 'work_dir', 'pkg.json'))
-
-			# TODO fix preview
-			# shutil.copyfile(os.path.join(self.wcm_work_dir, 'preview.png'),
-			# 				os.path.join(AppPaths.game_work_dir, '..', filename[:-4] + '_preview.png'))
+			# clean up the temp work dir
+			if os.path.isdir(AppPaths.game_work_dir):
+				self.init_wcm_work_dir()
 
 			if pkg_name is not None:
 				import tkMessageBox
@@ -1151,15 +1154,19 @@ class Main:
 	def save_preview_image(self):
 		# making a preview print of the game canvas
 		preview_img = Image.open(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC1.PNG')).convert("RGBA")
+		pic0_img = Image.open(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC0.PNG')).convert("RGBA")
 		icon0_img = Image.open(os.path.join(AppPaths.game_work_dir, 'pkg', 'ICON0.PNG')).convert("RGBA")
 		# print('DEBUG: ' + os.path.dirname(__file__))
 		xmb_img_dir = os.path.join(ImagePaths.xmb, 'XMB_icons.png')
 		xmb_img = Image.open(xmb_img_dir).convert("RGBA")
-		preview_img.paste(icon0_img, (425, 450), icon0_img)
-		preview_img.paste(xmb_img, (0, 0), xmb_img)
+
 		self.draw_text_on_image_w_shadow(preview_img, "11/11/2006 00:00", 760, 522, 20, 1, 'white', 'black')
 		self.draw_text_on_image_w_shadow(preview_img, str(self.entry_field_title.get()), 760, 487, 32, 2, 'white',
 										 'black')
+		preview_img.paste(icon0_img, (self.icon0_x_pos, self.icon0_y_pos+5), icon0_img)
+		preview_img.paste(pic0_img, (self.pic0_x_pos, self.pic0_y_pos+5), pic0_img)
+		preview_img.paste(xmb_img, (0, 0), xmb_img)
+
 		preview_img.save(os.path.join(AppPaths.game_work_dir, '..', 'preview.png'))
 
 	def on_game_list_refresh(self):
