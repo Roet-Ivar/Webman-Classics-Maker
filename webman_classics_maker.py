@@ -141,6 +141,7 @@ class Main:
 		self.init_config_file()
 		self.init_wcm_work_dir()
 		self.init_pkg_images()
+
 		# self.init_main_window_buttons(self.main)
 		self.init_default_view(self.main)
 		self.draw_background_on_canvas()
@@ -276,14 +277,18 @@ class Main:
 		return copy.copy(icon_bg_img)
 
 	def init_pkg_images(self):
+		icon0_filename = 'ICON0.PNG'
 		pic0_filename = 'PIC0.PNG'
 		pic1_filename = 'PIC1.PNG'
-		icon0_filename = 'ICON0.PNG'
 
 		self.image_icon0 = self.load_pkg_images(icon0_filename)
 		self.image_icon0_ref = copy.copy(self.image_icon0)
+
 		self.image_pic0 = self.load_pkg_images(pic0_filename)
+		self.image_pic0_ref = copy.copy(self.image_pic0)
+
 		self.image_pic1 = self.load_pkg_images(pic1_filename)
+		self.image_pic1_ref = copy.copy(self.image_pic0)
 
 		self.pkg_icon0 = None
 		self.pkg_pic0 = None
@@ -412,18 +417,23 @@ class Main:
 
 		self.text_box_spacing = 7 * self.dark_side_x_padding
 
-		# coordinates
+		# gui text coordinates
 		self.device_text_y_pos = self.main_offset_y_pos + self.height_of_text
-
 		self.type_text_y_pos = self.dark_side_y_padding + self.device_text_y_pos + self.height_of_text
-
 		self.title_id_text_y_pos = self.dark_side_y_padding + 7 + self.type_text_y_pos + self.height_of_text + 2
-
 		self.title_text_y_pos = self.dark_side_y_padding + self.title_id_text_y_pos + self.height_of_text
-
 		self.filename_text_y_pos = self.dark_side_y_padding + self.title_text_y_pos + self.height_of_text
-
 		self.iso_path_text_y_pos = self.dark_side_y_padding + self.filename_text_y_pos + self.height_of_text - 1
+
+		# image buttons coordinates (w/o res scaling)
+		self.pic1_x_pos = 75
+		self.pic1_y_pos = 175
+		# self.pic0_x_pos = 600
+		# self.pic0_y_pos = 480
+		self.pic0_x_pos = 580
+		self.pic0_y_pos = 455
+		self.icon0_x_pos = 350
+		self.icon0_y_pos = 460
 
 		# entry fields
 		self.entry_field_title_id 	= Entry(main, validate='key', validatecommand=(self.vcmd, '%P'))
@@ -573,7 +583,7 @@ class Main:
 		self.button_PS3.place(x=int((self.text_box_spacing + self.main_offset_x_pos + 3 * 75) * scaling),
 							  y=int(self.type_text_y_pos * scaling))
 
-		# draws PIC1 and ICON0 on the canvas
+		# draws ICON0, PIC0 and PIC1 on the canvas
 		self.init_draw_images_on_canvas(main)
 
 		self.button_spacing = 70
@@ -601,14 +611,17 @@ class Main:
 		pkg_build_path = kwargs.get('pkg_build_path', None)
 
 		pic1_changed = False
-		# image replace browser: add title text
+		# TODO image replace browser: missing the title text!
 		if img_to_be_changed is not None:
 			if img_to_be_changed.lower() == 'pic1':
 				pic1_changed = True
 				self.draw_text_on_image_w_shadow(self.image_pic1, self.entry_field_title.get(), 745, 457, 32, 2, 'white', 'black')
+
 				self.photo_image_pic1_xmb = PhotoImage(
 					self.image_pic1.resize((int(1280 * scaling), int(720 * scaling)), Image.ANTIALIAS))
+
 				self.button_pic1.config(image=self.photo_image_pic1_xmb)
+				self.image_pic0 = self.image_pic0_ref
 				self.image_icon0 = self.image_icon0_ref
 
 
@@ -621,14 +634,22 @@ class Main:
 				else:
 					self.image_icon0 = Image.open(os.path.join(self.wcm_pkg_dir, 'ICON0.PNG')).convert("RGBA")
 
+				if os.path.isfile(os.path.join(pkg_build_path, 'PIC0.PNG')):
+					self.image_pic0 = Image.open(os.path.join(pkg_build_path, 'PIC0.PNG')).convert("RGBA")
+				else:
+					self.image_pic0 = Image.open(os.path.join(self.wcm_pkg_dir, 'PIC0.PNG')).convert("RGBA")
+
 				if os.path.isfile(os.path.join(pkg_build_path, 'PIC1.PNG')):
 					self.image_pic1 = Image.open(os.path.join(pkg_build_path, 'PIC1.PNG')).convert("RGBA")
+					self.image_pic1_ref = Image.open(os.path.join(pkg_build_path, 'PIC1.PNG')).convert("RGBA")
 					pic1_changed = True
 				else:
 					self.image_pic1 = Image.open(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG')).convert("RGBA")
+					self.image_pic1_ref = Image.open(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG')).convert("RGBA")
 					pic1_changed = True
 		else:
 			self.image_pic1 = Image.open(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG')).convert("RGBA")
+			self.image_pic1_ref = Image.open(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG')).convert("RGBA")
 			pic1_changed = True
 
 		if pic1_changed:
@@ -636,21 +657,30 @@ class Main:
 			self.image_pic1.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
 			self.image_pic1.paste(self.ps3_system_logo, (1180, 525), self.ps3_system_logo)
 
-		# blend and crop ICON0 to background
-		tmp_bg = copy.copy(self.image_pic1)
-		left_comp = 14
-		top_comp = 30
-		tmp_bg.paste(self.image_icon0.convert("RGBA"), (410, 420), self.image_icon0.convert("RGBA"))
+
+		# crop and blend ICON0 to the background
+		tmp_icon0_bg = copy.copy(self.image_pic1_ref)
+		tmp_icon0_bg.paste(self.image_icon0.convert("RGBA"), (410, 420), self.image_icon0.convert("RGBA"))
 		# ICON0 dimensions
-		ps3_icon_width = 320
-		ps3_icon_heigth = 176
-		# compenstaion pixels
+		icon0_width = 320
+		icon0_heigth = 176
+		# Image.crop((left, top, right, bottom))
+		tmp_image_icon0 = tmp_icon0_bg.crop((402, 418, 421+icon0_width, 448+icon0_heigth))
+		# scaling * icon_x_pos = 402
+		# scaling (720/1080) * icon_y_pos = 320
 
-		right_comp = 0
-		bottom_comp = 0
 
-		# image.crop((left, top, right, bottom))
-		tmp_image_icon0 = tmp_bg.crop((425-left_comp-9, 450-top_comp-3, 425+ps3_icon_width-4, 450+ps3_icon_heigth-2))
+		# crop and blend PIC0 to the background
+		tmp_pic0_bg = copy.copy(self.image_pic1_ref)
+		tmp_pic0_bg.paste(self.image_pic0.convert("RGBA"), (410+380-35, 420+32-38), self.image_pic0.convert("RGBA"))
+		# PIC0 dimensions
+		pic0_width = 1000
+		pic0_heigth = 560
+		pic0_left_comp = 23
+		pic0_top_comp = 33
+		# Image.crop((left, top, right, bottom))
+		tmp_image_pic0 = tmp_pic0_bg.crop((425-pic0_left_comp+380-35, 450-pic0_top_comp+32-38, 800+pic0_width, 455+pic0_heigth))
+
 
 		# draw launch-date and clock beside ICON0
 		self.draw_text_on_image_w_shadow(self.image_pic1, "11/11/2006 00:00", 760, 522, 20, 1, 'white', 'black')
@@ -665,16 +695,16 @@ class Main:
 								  command=lambda: self.image_replace_browser(main))
 		CreateToolTip(self.button_pic1, self.PIC1_TOOLTIP_MSG)
 
-		# rezising and cropping 7 pixels from all sides (due to transparent borders)
+		# ICON0 rezising and cropping 7 pixels from all sides (due to transparent borders)
 		icon0_x_scale = self.window_x_width / self.image_pic1.width * scaling
 		icon0_y_scale = self.window_y_width / self.image_pic1.height * scaling
 
-		self.icon0_dimensions = (
+		self.icon0_new_dim = (
 			int(icon0_x_scale * tmp_image_icon0.width), int(icon0_y_scale * tmp_image_icon0.height))
 
 		self.image_icon0_crop = tmp_image_icon0.crop((7, 7, tmp_image_icon0.width - 7, tmp_image_icon0.height - 7))
 		self.image_icon0_crop = self.image_icon0_crop.resize(
-			(self.icon0_dimensions[0] - 7, self.icon0_dimensions[1] - 7), Image.ANTIALIAS)
+			(self.icon0_new_dim[0] - 7, self.icon0_new_dim[1] - 7), Image.ANTIALIAS)
 
 		self.photo_image_icon0 = PhotoImage(self.image_icon0_crop)
 		self.button_icon0 = Button(main,
@@ -684,10 +714,30 @@ class Main:
 								   command=lambda: self.image_replace_browser(main))
 		CreateToolTip(self.button_icon0, self.ICON0_TOOLTIP_MSG)
 
+		# PIC0 rezising and cropping 7 pixels from all sides (due to transparent borders)
+		pic0_x_scale = self.window_x_width / self.image_pic1.width * scaling
+		pic0_y_scale = self.window_y_width / self.image_pic1.height * scaling
 
-		# finally placing PIC1 and ICON0 onto the canvas
-		self.button_pic1.place(x=75 * scaling, y=175 * scaling)
-		self.button_icon0.place(x=int(350 * scaling), y=int(460 * scaling))
+		self.pic0_new_dim = (
+			int(pic0_x_scale * tmp_image_pic0.width), int(pic0_y_scale * tmp_image_pic0.height))
+
+		self.image_pic0_crop = tmp_image_pic0.crop((7, 7, tmp_image_pic0.width - 7, tmp_image_pic0.height - 7))
+		self.image_pic0_crop = self.image_pic0_crop.resize(
+			(self.pic0_new_dim[0] - 7, self.pic0_new_dim[1] - 7), Image.ANTIALIAS)
+
+		self.photo_image_pic0 = PhotoImage(self.image_pic0_crop)
+		self.button_pic0 = Button(main,
+								   image=self.photo_image_pic0,
+								   highlightthickness=0,
+								   bd=0,
+								   command=lambda: self.image_replace_browser(main))
+		CreateToolTip(self.button_pic0, self.PIC0_TOOLTIP_MSG)
+
+
+		# finally placing ICON0, PIC0 and PIC1 onto the canvas
+		self.button_pic1.place(x=self.pic1_x_pos * scaling, y=self.pic1_y_pos * scaling)
+		self.button_pic0.place(x=int(self.pic0_x_pos * scaling), y=int(self.pic0_y_pos * scaling))
+		self.button_icon0.place(x=int(self.icon0_x_pos * scaling), y=int(self.icon0_y_pos * scaling))
 
 	def draw_text_on_image(self, image, text, text_x, text_y, text_size, text_color):
 		font = ImageFont.truetype(os.path.join(self.fonts_path, 'SCE-PS3.ttf'), text_size)
@@ -856,6 +906,7 @@ class Main:
 				img_to_be_changed = 'icon0'
 			elif 'pic1' in image.name.lower():
 				self.image_pic1 = Image.open(image)
+				self.image_pic1_ref = Image.open(image)
 				img_to_be_changed = 'pic1'
 
 			# # re-draw work_dir image on canvas
@@ -1205,7 +1256,7 @@ elif 'win' in sys.platform:
 else:
 	print('DEBUG Running ' + str(sys.platform))
 
-scaling = 1280.0 / 1920.0
+scaling = 720.0 / 1080.0
 canvas_width = int(1920 * scaling)
 canvas_height = int(1080 * scaling)
 main_window_width = int(1920 * scaling)
