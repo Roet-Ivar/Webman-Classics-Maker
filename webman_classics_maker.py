@@ -139,6 +139,7 @@ class Main:
 
 		# init definitions
 		self.init_config_file()
+		self.init_wcm_work_dir()
 		self.init_pkg_images()
 		# self.init_main_window_buttons(self.main)
 		self.init_default_view(self.main)
@@ -148,6 +149,12 @@ class Main:
 		self.create_list_combo_box(self.list_filter_platform)
 
 	# definitions starts here
+	def init_wcm_work_dir(self):
+		# clean and init wcm_work_dir in startup
+		if os.path.isdir(AppPaths.wcm_work_dir):
+			shutil.rmtree(AppPaths.wcm_work_dir)
+			os.makedirs(os.path.join(AppPaths.wcm_work_dir, 'pkg'))
+
 	def init_config_file(self):
 		if not os.path.isfile(self.ftp_settings_path):
 			if os.path.isfile(os.path.join(AppPaths.util_resources, 'ftp_settings.cfg.BAK')):
@@ -517,7 +524,7 @@ class Main:
 		CreateToolTip(self.ftp_sync_button, self.SYNC_BUTTON_TOOLTIP_MSG)
 		CreateToolTip(self.game_list_refresh_button, self.REFRESH_BUTTON_TOOLTIP_MSG)
 
-		# Entry placements
+		# Entry field placements
 		entry_field_width = 200
 		self.entry_field_title_id.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * scaling),
 										y=int(self.title_id_text_y_pos * scaling),
@@ -598,7 +605,7 @@ class Main:
 		if img_to_be_changed is not None:
 			if img_to_be_changed.lower() == 'pic1':
 				pic1_changed = True
-				self.draw_text_on_image_w_shadow(self.image_pic1, self.entry_field_title.get(), 760, 487, 32, 2, 'white', 'black')
+				self.draw_text_on_image_w_shadow(self.image_pic1, self.entry_field_title.get(), 745, 457, 32, 2, 'white', 'black')
 				self.photo_image_pic1_xmb = PhotoImage(
 					self.image_pic1.resize((int(1280 * scaling), int(720 * scaling)), Image.ANTIALIAS))
 				self.button_pic1.config(image=self.photo_image_pic1_xmb)
@@ -633,7 +640,7 @@ class Main:
 		tmp_bg = copy.copy(self.image_pic1)
 		left_comp = 14
 		top_comp = 30
-		tmp_bg.paste(self.image_icon0.convert("RGBA"), (425, 450), self.image_icon0.convert("RGBA"))
+		tmp_bg.paste(self.image_icon0.convert("RGBA"), (410, 420), self.image_icon0.convert("RGBA"))
 		# ICON0 dimensions
 		ps3_icon_width = 320
 		ps3_icon_heigth = 176
@@ -1092,11 +1099,11 @@ class Main:
 
 	def save_preview_image(self):
 		# making a preview print of the game canvas
-		preview_img = Image.open(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC1.PNG'))
-		icon0_img = Image.open(os.path.join(AppPaths.game_work_dir, 'pkg', 'ICON0.PNG'))
+		preview_img = Image.open(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC1.PNG')).convert("RGBA")
+		icon0_img = Image.open(os.path.join(AppPaths.game_work_dir, 'pkg', 'ICON0.PNG')).convert("RGBA")
 		# print('DEBUG: ' + os.path.dirname(__file__))
 		xmb_img_dir = os.path.join(ImagePaths.xmb, 'XMB_icons.png')
-		xmb_img = Image.open(xmb_img_dir)
+		xmb_img = Image.open(xmb_img_dir).convert("RGBA")
 		preview_img.paste(icon0_img, (425, 450), icon0_img)
 		preview_img.paste(xmb_img, (0, 0), xmb_img)
 		self.draw_text_on_image_w_shadow(preview_img, "11/11/2006 00:00", 760, 522, 20, 1, 'white', 'black')
