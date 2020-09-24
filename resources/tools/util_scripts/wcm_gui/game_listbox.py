@@ -12,14 +12,22 @@ class Gamelist():
         # makes sure there is a json_game_list file
         if os.path.isfile(os.path.join(AppPaths.application_path, 'game_list_data.json')) is False:
             copyfile(os.path.join(AppPaths.util_resources, 'game_list_data.json.BAK'), os.path.join(AppPaths.application_path, 'game_list_data.json'))
-
-        with open(os.path.join(AppPaths.application_path, 'game_list_data.json')) as f:
-            self.json_game_list_data = json.load(f)
+        try:
+            with open(os.path.join(AppPaths.application_path, 'game_list_data.json')) as f:
+                self.json_game_list_data = json.load(f)
+        except Exception as e:
+            print("""Error in 'game_list_data.json' contains incorrect json-syntax. Either remove it or find the error using json lint""")
+            print("Details: " + e.message)
 
         self.platform_to_show = platform.lower() + '_games'
         self.WCM_BASE_PATH  = AppPaths.wcm_gui
         self.last_selection = (None, 0)
         self.list_of_items = []
+
+        self.selected_title_id   = None
+        self.selected_title      = None
+        self.selected_path       = None
+        self.selected_filename   = None
 
 
     def create_main_frame(self, entry_field_title_id, entry_field_title, entry_field_filename, entry_field_iso_path, drive_system_array):
@@ -84,27 +92,27 @@ class Gamelist():
     def entry_fields_update(self, new_selection):
         for platform in self.json_game_list_data:
             for list_game in self.json_game_list_data[platform]:
-                selected_title = self._listbox.get(new_selection[0])
+                self.selected_title = self._listbox.get(new_selection[0])
                 tmp_title = list_game['title']
-                if selected_title == str(tmp_title):
-                    selected_title_id   = str(list_game['title_id'])
-                    selected_title      = str(list_game['title'])
-                    selected_path       = str(list_game['path'])
-                    selected_filename   = str(list_game['filename'])
+                if self.selected_title == str(tmp_title):
+                    self.selected_title_id   = str(list_game['title_id'])
+                    self.selected_title      = str(list_game['title'])
+                    self.selected_path       = str(list_game['path'])
+                    self.selected_filename   = str(list_game['filename'])
 
                     # parse drive and system from json data
-                    path_array = filter(None, selected_path.split('/'))
+                    path_array = filter(None, self.selected_path.split('/'))
                     self.drive_system_array[0] = path_array[0]
                     self.drive_system_array[1] = path_array[1]
 
                     self.entry_field_title_id.delete(0, END)
-                    self.entry_field_title_id.insert(0, selected_title_id.replace('-', ''))
+                    self.entry_field_title_id.insert(0, self.selected_title_id.replace('-', ''))
 
                     self.entry_field_title.delete(0, END)
-                    self.entry_field_title.insert(0, selected_title)
+                    self.entry_field_title.insert(0, self.selected_title)
 
                     self.entry_field_filename.delete(0, END)
-                    self.entry_field_filename.insert(0, selected_filename)
+                    self.entry_field_filename.insert(0, self.selected_filename)
 
                     break
 
@@ -161,12 +169,13 @@ class Gamelist():
         self._listbox.yview_scroll(int(-1*(event.delta/30)), "units")
 
 
-    # TODO: not used yet
-    def load_pkg_project(self, title_id, filename):
-        _filename = filename.replace(' ', '_')
-        build_base_path = os.path.join(AppPaths.builds, 'builds')
-        pkg_project_name = title_id + '_' + _filename[:-4]
+    def get_selected_build_dir_path(self):
+        filename = self.selected_filename
+        title_id = self.selected_title_id.replace('-', '')
+
+        build_base_path = AppPaths.builds
+        pkg_project_name = filename[:-4].replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
 
         build_dir_path = os.path.join(build_base_path, pkg_project_name)
-        if os.path.exists(build_dir_path):
-            print(_filename + ' project exist')
+        return build_dir_path
+

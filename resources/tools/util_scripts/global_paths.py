@@ -50,6 +50,9 @@ class App:
     # in wcm_gui
     wcm_work_dir    = os.path.join(wcm_gui, 'work_dir')
 
+    # variable game work dir
+    game_work_dir   = ''
+
 class Image:
     launchbox_base_image_url = 'https://gamesdb.launchbox-app.com/games/images/'
     images          = os.path.join(App.resources, 'images')

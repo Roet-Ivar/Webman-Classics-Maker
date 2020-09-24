@@ -4,7 +4,7 @@ from global_paths import App as AppPaths
 
 class Elf_replace:
 	def execute(self):
-		with open(os.path.join(AppPaths.wcm_work_dir, 'pkg.json')) as f:
+		with open(os.path.join(AppPaths.game_work_dir, 'pkg.json')) as f:
 			json_data = json.load(f)
 
 		# load it
@@ -12,7 +12,7 @@ class Elf_replace:
 			file = f.read()
 			
 			try:
-				file=file.replace('PKGLAUNCH', str(json_data['title_id']))
+				file = file.replace('PKGLAUNCH', str(json_data['title_id']))
 
 				newFile = open(os.path.join(AppPaths.scetool, 'EBOOT.ELF'), 'wb')
 				newFileByteArray = bytearray(file)
