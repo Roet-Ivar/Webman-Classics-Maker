@@ -6,7 +6,7 @@ class Write_param_sfo():
 	def execute(self):
 		# common paths
 		try:
-			with open(os.path.join(AppPaths.wcm_work_dir, 'pkg.json')) as f:
+			with open(os.path.join(AppPaths.game_work_dir, 'pkg.json')) as f:
 				json_data = json.load(f)
 
 			title = json_data['title']
@@ -17,7 +17,7 @@ class Write_param_sfo():
 
 			dummy_title='PKG/ROM Launcher'
 
-			# load backup
+			# load backup and edit it
 			with open(os.path.join(AppPaths.util_resources, 'PARAM.SFO.BAK'), 'rb') as f:
 				file = f.read()
 				f.close()

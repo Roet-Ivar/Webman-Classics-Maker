@@ -17,7 +17,13 @@ if struct.calcsize('P') * 8 == 64:
 else:
 	pkgcrypt_ver += '32'
 
-sys.path.append(os.path.join(AppPaths.pkgcrypt, pkgcrypt_ver))
+# if running the webman_classics_maker.exe from root
+if getattr(sys, 'frozen', False):
+	sys.path.append(os.path.join(os.path.dirname(sys.executable),'resources', 'tools', 'util_scripts', 'pkgcrypt', pkgcrypt_ver))
+else:
+	# running webman_classics_maker.py from root
+	sys.path.append(os.path.join(AppPaths.pkgcrypt, pkgcrypt_ver))
+
 try:
 	import pkgcrypt
 except:
@@ -824,8 +830,8 @@ class Webman_pkg:
 	def execute(self):
 		extract = False
 		list = False
-		
-		with open(os.path.join(AppPaths.wcm_work_dir, 'pkg.json')) as f:
+
+		with open(os.path.join(AppPaths.game_work_dir, 'pkg.json')) as f:
 			json_data = json.load(f)
 
 		contentid = str(json_data['content_id'])
@@ -838,9 +844,9 @@ class Webman_pkg:
 		pkg_flag='--contentid'
 		pkg_dir_path=AppPaths.pkg + '/'
 		
-		pkg_name = filepath_arr[3][:-4] + '_(' + titleid + ')' + '.pkg'
-		pkg_name = pkg_name.replace(' ', '_')
-		build_dir_path = os.path.join(AppPaths.builds, pkg_name.replace('.pkg', ''))
+		pkg_name = (filepath_arr[3][:-4]).replace(' ', '_') + '_(' + titleid + ')' + '.pkg'
+		# build_dir_path = os.path.join(AppPaths.builds, pkg_name.replace('.pkg', ''))
+		build_dir_path = os.path.join(AppPaths.game_work_dir, '..')
 
 		arg_list = [pkg_build_script, pkg_flag, contentid, pkg_dir_path, pkg_name]	
 		try:
@@ -874,13 +880,13 @@ class Webman_pkg:
 			elif len(args) == 2 and contentid != None:
 				pack(args[0], contentid, args[1])
 				
-				if not os.path.exists(build_dir_path):
-					os.makedirs(build_dir_path)
+				if os.path.isfile(os.path.join(build_dir_path, pkg_name)):
+					os.remove(os.path.join(build_dir_path, pkg_name))
 
-				shutil.move(pkg_name, os.path.join(build_dir_path, pkg_name))
+				shutil.move(pkg_name, build_dir_path)
 				print('Execution of \'webman_pkg.py\':              Done')
 				print('-----------------------------------------------\n')
-				print('Package created in: ' + build_dir_path + pkg_name + '\n')
+				print('Package created in: ' + build_dir_path + '/' + pkg_name + '\n')
 				return pkg_name
 			else:
 				usage()
