@@ -12,9 +12,12 @@ class Gamelist():
         # makes sure there is a json_game_list file
         if os.path.isfile(os.path.join(AppPaths.application_path, 'game_list_data.json')) is False:
             copyfile(os.path.join(AppPaths.util_resources, 'game_list_data.json.BAK'), os.path.join(AppPaths.application_path, 'game_list_data.json'))
-
-        with open(os.path.join(AppPaths.application_path, 'game_list_data.json')) as f:
-            self.json_game_list_data = json.load(f)
+        try:
+            with open(os.path.join(AppPaths.application_path, 'game_list_data.json')) as f:
+                self.json_game_list_data = json.load(f)
+        except Exception as e:
+            print("""Error in 'game_list_data.json' contains incorrect json-syntax. Either remove it or find the error using json lint""")
+            print("Details: " + e.message)
 
         self.platform_to_show = platform.lower() + '_games'
         self.WCM_BASE_PATH  = AppPaths.wcm_gui

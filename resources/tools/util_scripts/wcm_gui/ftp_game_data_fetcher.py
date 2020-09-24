@@ -265,21 +265,8 @@ class FtpGameList():
                 if not os.path.exists(os.path.join(game_build_dir, 'work_dir', 'pkg')):
                     os.makedirs(os.path.join(game_build_dir, 'work_dir', 'pkg'))
 
-               # platforms such as PSP and PS3 will most likely hit the first statement
-                if(icon0 is not None):
-                    icon0.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON0.PNG'))
-                else:
-                    icon0 = Image.open(os.path.join(AppPaths.application_path, 'resources', 'images', 'pkg', 'default', platform.upper(), 'ICON0.PNG'))
-                    icon0.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON0.PNG'))
-
-                if(pic0 is not None):
-                    pic0.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC0.PNG'))
-                # else:
-                #     pic0 = Image.open(os.path.join(AppPaths.application_path, 'resources', 'images', 'pkg', 'default', 'PIC0.PNG'))
-                #     pic0.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC0.PNG'))
-
-                if(pic1 is not None):
-                    pic1.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC1.PNG'))
+                # save images to game work folders
+                self.image_saver(platform, game_build_dir, [icon0, pic0, pic1])
 
                 # reset game data for next iteration
                 title = None
@@ -329,6 +316,51 @@ class FtpGameList():
         self.ftp = FTP(self.ps3_lan_ip, timeout=self.ftp_timeout)
         self.ftp.set_pasv=self.ftp_pasv_mode
         self.ftp.login(user='', passwd='')
+
+    def image_saver(self, platform, game_build_dir, images):
+        icon0 = images[0]
+        pic0 = images[1]
+        pic1 = images[2]
+
+        # platforms such as PSP needs rescaling of images
+        if(icon0 is not None):
+            if platform.upper() == 'PSP':
+                t_icon0 = Image.open(os.path.join(AppPaths.application_path, 'resources', 'images', 'pkg', 'default', 'transparent_ICON0.PNG')).convert("RGBA")
+                icon0 = icon0.resize((int(icon0.width*2), int(icon0.height*2)), Image.ANTIALIAS)
+                x_pos = (t_icon0.width - icon0.width)/2
+                y_pos = (t_icon0.height - icon0.height)/2
+                t_icon0.paste(icon0, (x_pos, y_pos), icon0)
+
+                t_icon0.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON0.PNG'))
+            else:
+                icon0.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON0.PNG'))
+
+        else:
+            icon0 = Image.open(os.path.join(AppPaths.application_path, 'resources', 'images', 'pkg', 'default', platform.upper(), 'ICON0.PNG')).convert("RGBA")
+            icon0.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON0.PNG'))
+
+        if(pic0 is not None):
+            if platform.upper() == 'PSP':
+                t_pic0 = Image.open(os.path.join(AppPaths.application_path, 'resources', 'images', 'pkg', 'default', 'transparent_PIC0.PNG')).convert("RGBA")
+                x_pos = (t_pic0.width - pic0.width)/2
+                y_pos = (t_pic0.height - pic0.height)/2
+                t_pic0.paste(icon0, (x_pos, y_pos), pic0)
+
+                t_pic0.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC0.PNG'))
+            else:
+                pic0.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC0.PNG'))
+
+        if(pic1 is not None):
+            if platform.upper() == 'PSP':
+                t_pic1 = Image.open(os.path.join(AppPaths.application_path, 'resources', 'images', 'pkg', 'default', 'transparent_PIC1.PNG')).convert("RGBA")
+                pic1 = pic1.resize((int(pic1.width*3), int(pic1.height*3)), Image.ANTIALIAS)
+                x_pos = (t_pic1.width - pic1.width)/2
+                y_pos = (t_pic1.height - pic1.height)/2
+                t_pic1.paste(pic1, (x_pos, y_pos), pic1)
+
+                t_pic1.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC1.PNG'))
+            else:
+                pic1.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC1.PNG'))
 
 
 class FTPDataHandler:
@@ -422,7 +454,7 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
                     import io
 
                     png_byte_array = data[index_png_start:index_png_end+8]
-                    tmp_image = Image.open(io.BytesIO(png_byte_array))
+                    tmp_image = Image.open(io.BytesIO(png_byte_array)).convert("RGBA")
                     self.img_name = None
 
 

@@ -439,7 +439,7 @@ class Main:
 
 		# image coordinates for the gui
 		self.icon0_x_pos = 405
-		self.icon0_y_pos = 412
+		self.icon0_y_pos = 416
 		self.pic0_x_pos = 750
 		self.pic0_y_pos = 412
 
@@ -1153,9 +1153,21 @@ class Main:
 
 	def save_preview_image(self):
 		# making a preview print of the game canvas
-		preview_img = Image.open(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC1.PNG')).convert("RGBA")
-		pic0_img = Image.open(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC0.PNG')).convert("RGBA")
-		icon0_img = Image.open(os.path.join(AppPaths.game_work_dir, 'pkg', 'ICON0.PNG')).convert("RGBA")
+		if os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC1.PNG')):
+			pic1_img = Image.open(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC1.PNG')).convert("RGBA")
+			preview_img = Image.open(os.path.join(AppPaths.resources, 'images', 'pkg', 'default', 'PIC1.PNG')).convert("RGBA")
+			preview_img.paste(pic1_img, (0, 0), pic1_img)
+		else:
+			preview_img = Image.open(os.path.join(AppPaths.resources, 'images', 'pkg', 'default', 'PIC1.PNG')).convert("RGBA")
+
+		if os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC0.PNG')):
+			pic0_img = Image.open(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC0.PNG')).convert("RGBA")
+			preview_img.paste(pic0_img, (self.pic0_x_pos, self.pic0_y_pos+5), pic0_img)
+
+		if os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'ICON0.PNG')):
+			icon0_img = Image.open(os.path.join(AppPaths.game_work_dir, 'pkg', 'ICON0.PNG')).convert("RGBA")
+			preview_img.paste(icon0_img, (self.icon0_x_pos, self.icon0_y_pos+5), icon0_img)
+
 		# print('DEBUG: ' + os.path.dirname(__file__))
 		xmb_img_dir = os.path.join(ImagePaths.xmb, 'XMB_icons.png')
 		xmb_img = Image.open(xmb_img_dir).convert("RGBA")
@@ -1163,8 +1175,8 @@ class Main:
 		self.draw_text_on_image_w_shadow(preview_img, "11/11/2006 00:00", 760, 522, 20, 1, 'white', 'black')
 		self.draw_text_on_image_w_shadow(preview_img, str(self.entry_field_title.get()), 760, 487, 32, 2, 'white',
 										 'black')
-		preview_img.paste(icon0_img, (self.icon0_x_pos, self.icon0_y_pos+5), icon0_img)
-		preview_img.paste(pic0_img, (self.pic0_x_pos, self.pic0_y_pos+5), pic0_img)
+
+
 		preview_img.paste(xmb_img, (0, 0), xmb_img)
 
 		preview_img.save(os.path.join(AppPaths.game_work_dir, '..', 'preview.png'))
