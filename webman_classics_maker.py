@@ -159,7 +159,8 @@ class Main:
 			self.init_pkg_images()
 
 	def init_config_file(self):
-		if not os.path.isfile(self.ftp_settings_path):
+		if not os.path.isdir(AppPaths.settings):
+			os.mkdir(AppPaths.settings)
 			if os.path.isfile(os.path.join(AppPaths.util_resources, 'ftp_settings.cfg.BAK')):
 				shutil.copyfile(os.path.join(AppPaths.util_resources, 'ftp_settings.cfg.BAK'), self.ftp_settings_path)
 			else:
