@@ -1141,8 +1141,9 @@ class Main:
 		with open(self.ftp_settings_path, 'r') as settings_file:
 			json_settings_data = json.load(settings_file)
 			json_settings_data['ps3_lan_ip'] = str(self.entry_field_ftp_ip.get())
-			json_settings_data['ps3_user'] = str(self.entry_field_ftp_user.get())
-			json_settings_data['ps3_password'] = str(self.entry_field_ftp_pass.get())
+			json_settings_data['ftp_lan_ip'] = str(self.entry_field_ftp_ip.get())
+			json_settings_data['ftp_user'] = str(self.entry_field_ftp_user.get())
+			json_settings_data['ftp_password'] = str(self.entry_field_ftp_pass.get())
 			settings_file.close()
 		# save to file
 		with open(self.ftp_settings_path, 'w') as save_settings_file:

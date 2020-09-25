@@ -9,13 +9,28 @@ class Edit_launch_txt:
 			with open(os.path.join(AppPaths.game_work_dir, 'pkg.json')) as f:
 				json_data = json.load(f)
 
-			# webman-mod v.47.14 and older
-			if False:
-				web_command = '/play.ps3'
-				web_command_string = web_command + str(json_data['iso_filepath'])
+
+			with open(self.ftp_settings_path, 'r') as settings_file:
+				json_settings_data = json.load(settings_file)
+				cfg_webcommand = json_settings_data['webcommand']
+				settings_file.close()
+
+			# check if the user has added a custom webcommand in the config file
+			web_command_string = ''
+			if len(cfg_webcommand) > len('[filepath_var]'):
+				if '[filepath_var]' in cfg_webcommand:
+					web_command_string = cfg_webcommand.replace('[filepath_var]', str(json_data['iso_filepath']))
+				else:
+					print("""Error: make sure the string [filepath_var] (including brackets) is present in webcommand of settings.cfg""")
+					print("""Will revert back to the default webcommand""")
+
+
+			# # webman-mod v.47.14 and older
+			# web_command = '/play.ps3'
+			# web_command_string = web_command + str(json_data['iso_filepath'])
 
 			# webman-mod v.47.15 and newer
-			if True:
+			if web_command_string == '':
 				pre_delay = 6
 				post_delay = 3
 				pre_cmd = '/wait.ps3?' + str(pre_delay) + ';/mount_ps3'
@@ -37,5 +52,6 @@ class Edit_launch_txt:
 
 			print('Execution of \'edit_launch_txt.py\':         Done')
 			print('-----------------------------------------------')
+
 		except Exception as e:
-			print('Error: ' + str(e))
+			print('Error: ' + e.message)
