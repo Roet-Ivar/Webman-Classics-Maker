@@ -1164,11 +1164,11 @@ class Main:
 
 		if os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC0.PNG')):
 			pic0_img = Image.open(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC0.PNG')).convert("RGBA")
-			preview_img.paste(pic0_img, (self.pic0_x_pos, self.pic0_y_pos+5), pic0_img)
+			preview_img.paste(pic0_img, (self.pic0_x_pos, self.pic0_y_pos), pic0_img)
 
 		if os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'ICON0.PNG')):
 			icon0_img = Image.open(os.path.join(AppPaths.game_work_dir, 'pkg', 'ICON0.PNG')).convert("RGBA")
-			preview_img.paste(icon0_img, (self.icon0_x_pos, self.icon0_y_pos+5), icon0_img)
+			preview_img.paste(icon0_img, (self.icon0_x_pos, self.icon0_y_pos), icon0_img)
 
 		# print('DEBUG: ' + os.path.dirname(__file__))
 		xmb_img_dir = os.path.join(ImagePaths.xmb, 'XMB_icons.png')
