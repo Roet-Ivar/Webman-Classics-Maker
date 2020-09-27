@@ -10,7 +10,7 @@ class Edit_launch_txt:
 				json_data = json.load(f)
 
 
-			with open(self.ftp_settings_path, 'r') as settings_file:
+			with open(os.path.join(AppPaths.settings, 'ftp_settings.cfg'), 'r') as settings_file:
 				json_settings_data = json.load(settings_file)
 				cfg_webcommand = json_settings_data['webcommand']
 				settings_file.close()
@@ -20,6 +20,7 @@ class Edit_launch_txt:
 			if len(cfg_webcommand) > len('[filepath_var]'):
 				if '[filepath_var]' in cfg_webcommand:
 					web_command_string = cfg_webcommand.replace('[filepath_var]', str(json_data['iso_filepath']))
+					web_command_string = web_command_string.replace('//', '/')
 				else:
 					print("""Error: make sure the string [filepath_var] (including brackets) is present in webcommand of settings.cfg""")
 					print("""Will revert back to the default webcommand""")
@@ -32,7 +33,7 @@ class Edit_launch_txt:
 			# webman-mod v.47.15 and newer
 			if web_command_string == '':
 				pre_delay = 6
-				post_delay = 3
+				post_delay = 4
 				pre_cmd = '/wait.ps3?' + str(pre_delay) + ';/mount_ps3'
 				post_cmd = ';/wait.ps3?' + str(post_delay) + ';/play.ps3'
 				web_command_string = pre_cmd + str(json_data['iso_filepath'] + post_cmd)
@@ -43,7 +44,7 @@ class Edit_launch_txt:
 				os.makedirs(os.path.join(AppPaths.game_work_dir, 'pkg', 'USRDIR'))
 
 			launch_txt = open(os.path.join(AppPaths.pkg, 'USRDIR', 'launch.txt'), 'wb')
-			launch_txt_byteArray = bytearray(web_command_string) + os.linesep
+			launch_txt_byteArray = bytearray(web_command_string, 'utf8') + os.linesep
 			launch_txt.write(launch_txt_byteArray)
 
 			url_txt = open(os.path.join(AppPaths.pkg, 'USRDIR', 'url.txt'), 'wb')
@@ -52,6 +53,10 @@ class Edit_launch_txt:
 
 			print('Execution of \'edit_launch_txt.py\':         Done')
 			print('-----------------------------------------------')
+			return True
 
 		except Exception as e:
+			print('Execution of \'edit_launch_txt.py\':         Failed')
 			print('Error: ' + e.message)
+			print('-----------------------------------------------')
+			return False
