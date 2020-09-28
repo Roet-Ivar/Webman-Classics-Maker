@@ -51,7 +51,7 @@ Credits goes to all of you guys!
 
 **BUILD PKG -> game.pkg'**
 
-	1. Run "Build_Webman_PKG.exe", or "build_all_scripts_linux.py" for linux
+	1. Run "Build_Webman_PKG.exe", or "build_all_scripts.py" for linux
 	2. Get your built package in the "builds"-folder
 	3. Install the PKG on your PS3
 	

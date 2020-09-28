@@ -38,10 +38,17 @@ class Write_param_sfo():
 					newFileByteArray = bytearray(file)
 					newFile.write(newFileByteArray)
 
-					print('\n\nExecution of \'write_json_to_param_sfo.py\': Done')
+					print('\n\nExecution of \'write_json_to_param_sfo.py\': DONE')
 					print('-----------------------------------------------')
+					return True
 
-				except ValueError:
-					print('File write error / \'PKGLAUNCH\' not found / \'title_id\' not a string')
+				except Exception as e:
+					print('\n\nExecution of \'write_json_to_param_sfo.py\': FAILED')
+					print(e.message)
+					print('-----------------------------------------------')
+					return False
 		except Exception as e:
-			print(e)
+			print('\n\nExecution of \'write_json_to_param_sfo.py\': FAILED')
+			print(e.message)
+			print('-----------------------------------------------')
+			return False

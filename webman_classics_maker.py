@@ -41,10 +41,7 @@ if sys.version_info[0] > 2:
 		  Reason: the pkgcrypt module hasn't been ported to python 3.x""")
 	sys.exit(1)
 
-if 'linux' in sys.platform:
-	from build_all_scripts_linux import Webman_PKG as Webman_PKG
-else:
-	from build_all_scripts import Webman_PKG as Webman_PKG
+from build_all_scripts import Webman_PKG as Webman_PKG
 
 
 class Main:
@@ -1096,37 +1093,37 @@ class Main:
 
 			# builds pkg and reads the pkg filename
 			webman_pkg = Webman_PKG()
+
 			pkg_name = webman_pkg.build()
-
-			# making sure default work_dir and pkg directories exists
-			if not os.path.exists(game_pkg_dir):
-				os.makedirs(game_pkg_dir)
-
-			# saving the build content in the game build folder
-			self.copytree(self.pkg_dir, game_pkg_dir)
-
-			# clean up the temp work dir
-			if os.path.isdir(AppPaths.game_work_dir):
-				self.init_wcm_work_dir()
-
 			if pkg_name is not None:
-				import tkMessageBox
-				def popup():
-					msgBox = tkMessageBox.showinfo("Build status", "Build successful!")
+				# making sure default work_dir and pkg directories exists
+				if not os.path.exists(game_pkg_dir):
+					os.makedirs(game_pkg_dir)
 
-				popup()
+				# saving the build content in the game build folder
+				self.copytree(self.pkg_dir, game_pkg_dir)
+
+				# clean up the temp work dir
+				if os.path.isdir(AppPaths.game_work_dir):
+					self.init_wcm_work_dir()
+					import tkMessageBox
+					def popup():
+						msgBox = tkMessageBox.showinfo("Build status", "Build successful!")
+					popup()
+
+					# open builds folder in windows explorer
+					if 'win' in sys.platform:
+						print('DEBUG openig folder: ' + os.path.join(AppPaths.game_work_dir, '..'))
+						try:
+							os.startfile(os.path.join(AppPaths.game_work_dir, '../'))
+						except:
+							print('ERROR: Could open the pkg build dir from Windows explorer')
 
 			else:
 				import tkMessageBox
 				tkMessageBox.showinfo("Build status", "Build failed!")
 
-			# open builds folder in windows explorer
-			if 'win' in sys.platform:
-				print('DEBUG openig folder: ' + os.path.join(AppPaths.game_work_dir, '..'))
-				try:
-					os.startfile(os.path.join(AppPaths.game_work_dir, '../'))
-				except:
-					print('ERROR: Could open the pkg build dir from Windows explorer')
+
 
 	def on_ftp_fetch_button(self):
 		# save the ps3-ip field to config file

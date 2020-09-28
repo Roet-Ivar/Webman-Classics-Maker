@@ -25,18 +25,18 @@ class Edit_launch_txt:
 					print("""Error: make sure the string [filepath_var] (including brackets) is present in webcommand of settings.cfg""")
 					print("""Will revert back to the default webcommand""")
 
-
-			# # webman-mod v.47.14 and older
-			# web_command = '/play.ps3'
-			# web_command_string = web_command + str(json_data['iso_filepath'])
-
-			# webman-mod v.47.15 and newer
+			# webman-mod v.47.30 and older
 			if web_command_string == '':
 				pre_delay = 6
 				post_delay = 4
 				pre_cmd = '/wait.ps3?' + str(pre_delay) + ';/mount_ps3'
 				post_cmd = ';/wait.ps3?' + str(post_delay) + ';/play.ps3'
 				web_command_string = pre_cmd + str(json_data['iso_filepath'] + post_cmd)
+
+			# # webman-mod v.47.31 and newer
+			# if web_command_string == '':
+			# 	pre_cmd = '/wait.ps3?xmb;/play.ps3'
+			# 	web_command_string = pre_cmd + str(json_data['iso_filepath'])
 
 			web_url_string = 'GET ' + urllib.quote(web_command_string) + ' HTTP/1.0'
 
@@ -51,12 +51,12 @@ class Edit_launch_txt:
 			url_txt_byteArray = bytearray(web_url_string) + os.linesep
 			url_txt.write(url_txt_byteArray)
 
-			print('Execution of \'edit_launch_txt.py\':         Done')
+			print('Execution of \'edit_launch_txt.py\':         DONE')
 			print('-----------------------------------------------')
 			return True
 
 		except Exception as e:
-			print('Execution of \'edit_launch_txt.py\':         Failed')
+			print('Execution of \'edit_launch_txt.py\':         FAILED')
 			print('Error: ' + e.message)
 			print('-----------------------------------------------')
 			return False
