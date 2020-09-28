@@ -884,10 +884,14 @@ class Webman_pkg:
 					os.remove(os.path.join(build_dir_path, pkg_name))
 
 				shutil.move(pkg_name, build_dir_path)
-				print('Execution of \'webman_pkg.py\':              DONE')
-				print('-----------------------------------------------\n')
+				print('[5/5] Execution of \'webman_pkg.py\':              DONE')
+				print('-----------------------------------------------------')
 				print('Package created in: ' + build_dir_path + '/' + pkg_name + '\n')
 				return pkg_name
 			else:
+				print('[5/5] Execution of \'webman_pkg.py\':              FAILED')
+				print('-----------------------------------------------------')
+				print('Package created in: ' + build_dir_path + '/' + pkg_name + '\n')
+				return pkg_name
 				usage()
 				sys.exit(2)

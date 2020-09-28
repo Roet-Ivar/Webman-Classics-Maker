@@ -51,12 +51,12 @@ class Edit_launch_txt:
 			url_txt_byteArray = bytearray(web_url_string) + os.linesep
 			url_txt.write(url_txt_byteArray)
 
-			print('Execution of \'edit_launch_txt.py\':         DONE')
-			print('-----------------------------------------------')
+			print('[3/5] Execution of \'edit_launch_txt.py\':         DONE')
+			print('-----------------------------------------------------')
 			return True
 
 		except Exception as e:
-			print('Execution of \'edit_launch_txt.py\':         FAILED')
+			print('[3/5] Execution of \'edit_launch_txt.py\':         FAILED')
 			print('Error: ' + e.message)
-			print('-----------------------------------------------')
+			print('-----------------------------------------------------')
 			return False

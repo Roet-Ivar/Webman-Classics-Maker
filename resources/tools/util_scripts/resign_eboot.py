@@ -23,11 +23,11 @@ class Resign_eboot:
 			copyfile(os.path.join(scetool_dir, 'EBOOT.BIN'), os.path.join(AppPaths.USRDIR, 'EBOOT.BIN'))
 			# TODO: No more CHDIR!
 			os.chdir(AppPaths.wcm_gui)
-			print('\nExecution of \'resign_eboot.py\':            DONE')
-			print('-----------------------------------------------')
+			print('\n[4/5] Execution of \'resign_eboot.py\':            DONE')
+			print('-----------------------------------------------------')
 			return True
 		except Exception as e:
-			print('\nExecution of \'resign_eboot.py\':            FAILED')
+			print('\n[4/5] Execution of \'resign_eboot.py\':            FAILED')
 			print(e.message)
-			print('-----------------------------------------------')
+			print('-----------------------------------------------------')
 			return False

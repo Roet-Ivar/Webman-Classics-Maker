@@ -1113,7 +1113,7 @@ class Main:
 
 					# open builds folder in windows explorer
 					if 'win' in sys.platform:
-						print('DEBUG openig folder: ' + os.path.join(AppPaths.game_work_dir, '..'))
+						print('DEBUG opening folder: ' + os.path.join(AppPaths.game_work_dir, '..'))
 						try:
 							os.startfile(os.path.join(AppPaths.game_work_dir, '../'))
 						except:

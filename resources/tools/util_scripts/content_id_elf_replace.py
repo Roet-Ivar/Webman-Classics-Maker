@@ -18,11 +18,11 @@ class Elf_replace:
 				newFileByteArray = bytearray(file)
 				newFile.write(newFileByteArray)
 
-				print('Execution of \'content_id_elf_replace.py\':  DONE')
-				print('-----------------------------------------------')
+				print('[2/5] Execution of \'content_id_elf_replace.py\':  DONE')
+				print('-----------------------------------------------------')
 				return True
 			except Exception as e:
-				print('Execution of \'content_id_elf_replace.py\':  FAILED')
+				print('[2/5] Execution of \'content_id_elf_replace.py\':  FAILED')
 				print(e.message)
-				print('-----------------------------------------------')
+				print('-----------------------------------------------------')
 				return False

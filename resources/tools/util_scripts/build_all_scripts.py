@@ -1,7 +1,7 @@
 from write_json_to_param_sfo import Write_param_sfo
 from content_id_elf_replace import Elf_replace
-from resign_eboot import Resign_eboot
 from edit_launch_txt import Edit_launch_txt
+from resign_eboot import Resign_eboot
 from webman_pkg import Webman_pkg
 
 from global_paths import App as AppPaths
