@@ -1183,6 +1183,8 @@ class Main:
 	def on_game_list_refresh(self):
 		if not self.dropdown:
 			self.list_filter_platform = 'ALL'
+		else:
+			self.list_filter_platform = self.dropdown.get()
 		self.create_list_combo_box(self.list_filter_platform)
 
 	def save_pkg_info_to_json(self):
