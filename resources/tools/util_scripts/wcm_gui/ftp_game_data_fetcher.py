@@ -13,7 +13,10 @@ from global_paths import App as AppPaths
 sys.path.append(AppPaths.settings)
 
 class FtpGameList():
-    def __init__(self):
+    def __init__(self, platform_filter):
+        # platform filter to fetch
+        self.platform_filter = platform_filter
+
         # messages
         self.PAUSE_MESSAGE              = 'Press ENTER to continue...'
         self.CONNECTION_ERROR_MESSAGE   = "Check your PS3 ip-address in webMan VSH menu (hold SELECT on the XMB), then update your 'settings/ftp_settings.py' accordingly"
@@ -88,15 +91,33 @@ class FtpGameList():
             self.ftp.login(user=self.ftp_user, passwd=self.ftp_password)
             self.ftp.voidcmd('TYPE I')
 
-            self.ftp.retrlines('NLST ' + self.PSP_ISO_PATH, self.psplines.append)
-            self.ftp.retrlines('NLST ' + self.PSX_ISO_PATH, self.psxlines.append)
-            self.ftp.retrlines('NLST ' + self.PS2_ISO_PATH, self.ps2lines.append)
-            self.ftp.retrlines('NLST ' + self.PS3_ISO_PATH, self.ps3lines.append)
+            if self.platform_filter.lower() == 'all':
+                self.ftp.retrlines('NLST ' + self.PSP_ISO_PATH, self.psplines.append)
+                self.ftp.retrlines('NLST ' + self.PSX_ISO_PATH, self.psxlines.append)
+                self.ftp.retrlines('NLST ' + self.PS2_ISO_PATH, self.ps2lines.append)
+                self.ftp.retrlines('NLST ' + self.PS3_ISO_PATH, self.ps3lines.append)
 
-            self.all_lines.append(self.psplines)
-            self.all_lines.append(self.psxlines)
-            self.all_lines.append(self.ps2lines)
-            self.all_lines.append(self.ps3lines)
+                self.all_lines.append(self.psplines)
+                self.all_lines.append(self.psxlines)
+                self.all_lines.append(self.ps2lines)
+                self.all_lines.append(self.ps3lines)
+
+            elif self.platform_filter.lower() == 'psp':
+                self.ftp.retrlines('NLST ' + self.PSP_ISO_PATH, self.psplines.append)
+                self.all_lines.append(self.psplines)
+
+            elif self.platform_filter.lower() == 'psx':
+                self.ftp.retrlines('NLST ' + self.PSX_ISO_PATH, self.psxlines.append)
+                self.all_lines.append(self.psxlines)
+
+            elif self.platform_filter.lower() == 'ps2':
+                self.ftp.retrlines('NLST ' + self.PS2_ISO_PATH, self.ps2lines.append)
+                self.all_lines.append(self.ps2lines)
+
+            elif self.platform_filter.lower() == 'ps3':
+                self.ftp.retrlines('NLST ' + self.PS3_ISO_PATH, self.ps3lines.append)
+                self.all_lines.append(self.ps3lines)
+
 
             self.data_chunk = FTPDataHandler(self.ftp)
 
@@ -117,10 +138,15 @@ class FtpGameList():
             self.new_json_game_list_data = json.load(f)
 
         # append the platform lists
-        for platform in self.json_game_list_data:
-            self.new_platform_list_data = self.list_builder(platform[0:3])
 
-            # if len(self.json_game_list_data[platform]) == 0:
+        if self.platform_filter.lower() == 'all':
+            for platform in self.json_game_list_data:
+                self.new_platform_list_data = self.list_builder(platform[0:3])
+                self.json_game_list_data[platform].extend(self.new_platform_list_data[platform])
+
+        else:
+            platform = self.platform_filter.lower() + '_games'
+            self.new_platform_list_data = self.list_builder(platform[0:3])
             self.json_game_list_data[platform].extend(self.new_platform_list_data[platform])
 
         # save updated gamelist to disk

@@ -32,7 +32,6 @@ from PIL import Image, ImageDraw, ImageFont
 from PIL.ImageTk import PhotoImage
 from tkFileDialog import askopenfile
 from game_listbox import Gamelist
-# from ftp_game_list_fetcher import FtpGameList
 from ftp_game_data_fetcher import FtpGameList
 
 # check python version higher than 2
@@ -122,13 +121,14 @@ class Main:
 
 		self.ftp_sync_button			= None
 		self.game_list_refresh_button	= None
+		self.dropdown = None
 
 
 		# text tooltip messages
 		self.USB_BUTTON_TOOLTIP_MSG = "toggle USB port (0-3)"
-		self.SAVE_BUTTON_TOOLTIP_MSG = "save 'work_dir' folder"
+		self.SAVE_BUTTON_TOOLTIP_MSG = "save current 'work_dir' folder"
 		self.BUILD_BUTTON_TOOLTIP_MSG = "build and save the PKG"
-		self.SYNC_BUTTON_TOOLTIP_MSG = "fetch gamelist over FTP"
+		self.SYNC_BUTTON_TOOLTIP_MSG = "fetch gamelist and pictures over FTP"
 		self.REFRESH_BUTTON_TOOLTIP_MSG = "reload gamelist from disk"
 		self.ICON0_TOOLTIP_MSG = "Click to change ICON0"
 		self.PIC0_TOOLTIP_MSG = "Click to change  PIC0"
@@ -143,8 +143,7 @@ class Main:
 		self.init_default_view(self.main)
 		self.draw_background_on_canvas()
 
-		self.list_filter_platform = 'All'
-		self.create_list_combo_box(self.list_filter_platform)
+		self.create_list_combo_box('ALL')
 
 	# definitions starts here
 	def init_wcm_work_dir(self):
@@ -192,7 +191,8 @@ class Main:
 
 		# insert the dropdown into the listbox
 		from platform_dropdown import Dropdown
-		self.dropdown = Dropdown(self.canvas, self.game_list_box, 1100, 247).get_box()
+		if self.dropdown is None:
+			self.dropdown = Dropdown(self.canvas, self.game_list_box, 1100, 247).get_box()
 		self.dropdown.bind("<<ComboboxSelected>>", self.box_filter_callback)
 
 
@@ -1128,7 +1128,7 @@ class Main:
 	def on_ftp_fetch_button(self):
 		# save the ps3-ip field to config file
 		self.save_ps3_ip_on_fetch()
-		ftp_game_list = FtpGameList()
+		ftp_game_list = FtpGameList(self.dropdown.get())
 		ftp_game_list.execute()
 
 		self.on_game_list_refresh()
@@ -1181,6 +1181,8 @@ class Main:
 		preview_img.save(os.path.join(AppPaths.game_work_dir, '..', 'preview.png'))
 
 	def on_game_list_refresh(self):
+		if not self.dropdown:
+			self.list_filter_platform = 'ALL'
 		self.create_list_combo_box(self.list_filter_platform)
 
 	def save_pkg_info_to_json(self):

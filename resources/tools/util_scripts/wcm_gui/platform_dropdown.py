@@ -13,7 +13,7 @@ class Dropdown:
         # disabled PSP for now
         self.root = root
         self.frame = frame
-        self.combobox = ttk.Combobox(root, values=["All", "PSP", "PSX", "PS2", "PS3"])
+        self.combobox = ttk.Combobox(root, values=["ALL", "PSP", "PSX", "PS2", "PS3"])
         self.combobox.place(x=x, y=y)
         self.combobox.current(0)
         self.combobox.config(width='4', state="readonly")
