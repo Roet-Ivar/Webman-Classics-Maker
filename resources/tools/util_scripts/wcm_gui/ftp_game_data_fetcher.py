@@ -395,7 +395,14 @@ class FTPDataHandler:
         conn = self.ftp_instance.transfercmd('RETR ' + ftp_filename, rest=offset)
         while 1:
             # the buffer size seems a bit random, can't remember why
-            data = conn.recv(1460)
+            data = None
+            try:
+                data = conn.recv(1460)
+            except Exception as e:
+                print('DEBUG error while reading data.\nskipping game ' + game_title)
+                print('DEBUG ' + e.message)
+                break
+
             if not data:
                 break
             if fill_buffer(self, data):

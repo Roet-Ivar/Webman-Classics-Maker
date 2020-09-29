@@ -91,11 +91,14 @@ class Gamelist():
 
     def entry_fields_update(self, new_selection):
         for platform in self.json_game_list_data:
+
             for list_game in self.json_game_list_data[platform]:
                 self.selected_title = self._listbox.get(new_selection[0])
                 tmp_title = list_game['title']
-                if self.selected_title == str(tmp_title):
-                    self.selected_title_id   = str(list_game['title_id'])
+
+                match = self.selected_title == str(tmp_title)
+                if match:
+                    self.selected_title_id   = str(list_game['title_id']).replace('-', '')
                     self.selected_title      = str(list_game['title'])
                     self.selected_path       = str(list_game['path'])
                     self.selected_filename   = str(list_game['filename'])
@@ -105,8 +108,12 @@ class Gamelist():
                     self.drive_system_array[0] = path_array[0]
                     self.drive_system_array[1] = path_array[1]
 
+
+                    self.entry_field_title_id.delete(0, len(self.entry_field_title_id.get())-1)
                     self.entry_field_title_id.delete(0, END)
-                    self.entry_field_title_id.insert(0, self.selected_title_id.replace('-', ''))
+                    self.entry_field_title_id.insert(0, self.selected_title_id)
+
+
 
                     self.entry_field_title.delete(0, END)
                     self.entry_field_title.insert(0, self.selected_title)
@@ -114,7 +121,8 @@ class Gamelist():
                     self.entry_field_filename.delete(0, END)
                     self.entry_field_filename.insert(0, self.selected_filename)
 
-                    break
+                    return True
+
 
 
     def get_selected_path(self):
