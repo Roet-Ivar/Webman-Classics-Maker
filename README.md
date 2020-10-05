@@ -24,7 +24,8 @@ https://github.com/HACKERCHANNEL/PSL1GHT/tree/master/tools/PS3Py
 * PARAM_SFO_EDITOR (Aldos PS3 tool collection)
 https://www.aldostools.org/
 
-Credits goes to all of you guys!
+
+**Credits goes to all of you guys!**
 
 ------------------------------------------------------------------------
 # HOW TO USE
