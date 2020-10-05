@@ -52,7 +52,7 @@ your HDD read speeds, see the forum thread for mor info!
 
 * Run the pyinstaller-scipts located in:
 /Webman-Classics-Maker/resources/tools/util_scripts/_pyinstaller_and_release_scripts/
-* Run your new **webman-classics-maker.exe** based on your new changes:
+* Run your new **webman-classics-maker.exe** based on your new changes
 
 
 # Linux dev environment setup
