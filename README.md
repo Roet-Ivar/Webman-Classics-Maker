@@ -32,12 +32,12 @@ https://github.com/aldostools/webMAN-MOD
 
 ------------------------------------------------------------------------
 # HOW TO USE
-1. Dump your disc-based games (multiman is great for this)
-2. Make sure webMan-mod from aldostools is installed
-3. Start Webman Classics Maker application
-4. Fetch games-list over FTP
-5. Build PKG forwarder for the game you like
-6. Install PKG on PS3 and enjoy disc-images straight from XMB	
+1. PS3: Dump your disc-based games (multiman is great for this)
+2. PS3: Make sure webMan-mod from aldostools is installed
+3. PC: Start Webman Classics Maker application
+4. PC: Fetch games-list over FTP
+5. PC: Build PKG forwarder for the game you like
+6. PS3: Install PKG on PS3 and enjoy disc-images straight from XMB	
 ---------------------------------------------------------------------------------------------------	
 # TROUBLESHOOTING
 	
