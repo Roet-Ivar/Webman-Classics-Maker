@@ -45,19 +45,15 @@ your HDD read speeds, see the forum thread for mor info!
 # Windows dev environment setup 
 
 * install python2.7.xx x86_64 (https://www.python.org/downloads/release/python-2715/)
-* pip install pillow
+* pip install pillow (often bundled in the windows version)
 * pip install pyinstaller
 
-**Building executables**
+**Building the executable**
 
-Run the pyinstaller-scipts located in:
+* Run the pyinstaller-scipts located in:
 /Webman-Classics-Maker/resources/tools/util_scripts/_pyinstaller_and_release_scripts/
+* Run your new **webman-classics-maker.exe** based on your new changes:
 
-You now have a brand new executables based on the changes you made in the scripts:
-
-* **Build_Webman_PKG.exe**
-* **Edit_Param_SFO.exe** 
-* **FTP_Game_List.exe** 
 
 # Linux dev environment setup
 
