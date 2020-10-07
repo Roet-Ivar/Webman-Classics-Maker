@@ -182,8 +182,7 @@ class FtpGameList():
         null = None     # to comply with json syntax
         # game_exist = False
 
-        title = None
-        title_id = ''
+        title_id = None
         meta_data_link = None
         icon0 = None
         pic0 = None
@@ -195,7 +194,7 @@ class FtpGameList():
             # check if game exist
             for list_game in self.json_game_list_data[platform_list]:
                 if game_filename == list_game['filename']:
-                    print('\nSkipped ' + game_filename + ', it already exists\n')
+                    print('\nDEBUG skipped ' + game_filename + ', it already exists\n')
                     game_exist = True
                     pass
 
@@ -203,54 +202,57 @@ class FtpGameList():
             if not game_exist:
                 title_id, icon0, pic0, pic1 = self.get_game_data(platform_path, game_filename)
 
-                if title_id is not '':
-                    platform_db_file = platform.upper() + '_all_title_ids.json'
+                title = game_filename[0:len(game_filename)-4]
+                # removes parenthesis/brackets including content of title
+                title = re.sub(r'\([^)]*\)', '', title).strip()
+                title = re.sub(r'\[[^)]*\]', '', title).strip()
 
-                    with open(os.path.join(AppPaths.games_metadata, platform_db_file)) as f:
-                        self.json_platform_data_list = json.load(f)
+                platform_db_file = platform.upper() + '_all_title_ids.json'
+                with open(os.path.join(AppPaths.games_metadata, platform_db_file)) as f:
+                    self.json_platform_data_list = json.load(f)
 
-                    # check for for match the platform game database
-                    games = self.json_platform_data_list['games']
-                    for game in games:
+                # check for for match the platform game database
+                games = self.json_platform_data_list['games']
+                for game in games:
 
-                        # find a match in of title_id
-                        if platform == 'ps3':
-                            title_id = title_id.replace('-', '')
+                    # find a match in of title_id
+                    if platform == 'ps3':
+                        title_id = title_id.replace('-', '')
 
-                        if title_id == game['title_id']:
+                    if title_id == game['title_id']:
 
-                            if platform == 'psp' or platform == 'psx' or platform == 'ps2':
-                                title = game['title'].encode('utf-8').strip()
+                        if platform == 'psp' or platform == 'psx' or platform == 'ps2':
+                            title = game['title'].encode('utf-8').strip()
 
-                                if game['meta_data_link'] is not null:
-                                    meta_data_link = game['meta_data_link']
+                            if game['meta_data_link'] is not null:
+                                meta_data_link = game['meta_data_link']
 
-                            elif platform == 'ps3':
-                                title = game['name'].encode('utf-8').strip()
+                        elif platform == 'ps3':
+                            title = game['name'].encode('utf-8').strip()
 
-                            # removes parenthesis including content of title
-                            title = re.sub(r'\([^)]*\)', '', title)
-                            title = re.sub(r'\[[^)]*\]', '', title)
+                        # removes parenthesis including content of title
+                        title = re.sub(r'\([^)]*\)', '', title)
+                        title = re.sub(r'\[[^)]*\]', '', title)
 
-                            #if str(title).isupper() and str(meta_data_link) == null:
-                            #   #if no meta_data_link, capitalize titles with all upper-case
-                            #   title = title.title()
-                            break
+                        #if str(title).isupper() and str(meta_data_link) == null:
+                        #   #if no meta_data_link, capitalize titles with all upper-case
+                        #   title = title.title()
+                        break
 
 
-                # if no title_id is found, use filename as title
-                else:
-                    game_filepath = os.path.join(platform_path, game_filename)
-
-                    if game_filepath.lower().endswith('iso'):
-                        m_filename = re.search('ISO.*', game_filepath, re.IGNORECASE)
-                        if m_filename is not None:
-                            title = m_filename.group(0).replace('ISO/', '', re.IGNORECASE)
-
-                    elif game_filepath.lower().endswith('bin'):
-                        m_filename = re.search('BIN.*', game_filepath, re.IGNORECASE)
-                        if m_filename is not None:
-                            title = m_filename.group(0).replace('BIN/', '', re.IGNORECASE)
+                # # if no title_id is found, use filename as title
+                # else:
+                #     game_filepath = os.path.join(platform_path, game_filename)
+                #
+                #     if game_filepath.lower().endswith('iso'):
+                #         m_filename = re.search('ISO.*', game_filepath, re.IGNORECASE)
+                #         if m_filename is not None:
+                #             title = m_filename.group(0).replace('ISO/', '', re.IGNORECASE)
+                #
+                #     elif game_filepath.lower().endswith('bin'):
+                #         m_filename = re.search('BIN.*', game_filepath, re.IGNORECASE)
+                #         if m_filename is not None:
+                #             title = m_filename.group(0).replace('BIN/', '', re.IGNORECASE)
 
                 # check for duplicates of the same title in the list
                 for game in self.json_game_list_data[platform_list]:
@@ -302,6 +304,11 @@ class FtpGameList():
         return self.new_json_game_list_data
 
     def get_game_data(self, platform_path, game_filename):
+        title_id = None
+        icon = None
+        pic0 = None
+        pic1 = None
+
         game_filepath = os.path.join(platform_path, game_filename)
         iso_index = game_filepath.index('ISO/', 0, len(game_filepath))
         platform = game_filepath[iso_index-3: iso_index].lower()
@@ -396,6 +403,9 @@ class FTPDataHandler:
         self.null = None
 
     def ftp_buffer_data(self, ftp_filename, chunk_size, rest):
+        icon0 = None
+        pic0 = None
+        pic1 = None
 
         file_size_bytes = self.ftp_instance.size(ftp_filename)
         if file_size_bytes > 0 and file_size_bytes < (chunk_size * 1024):
@@ -421,41 +431,44 @@ class FTPDataHandler:
         conn = self.ftp_instance.transfercmd('RETR ' + ftp_filename, rest=offset)
         while 1:
             # the buffer size seems a bit random, can't remember why
-            data = None
             try:
                 data = conn.recv(1460)
             except Exception as e:
-                print('DEBUG error while reading data.\nskipping game ' + game_title)
+                print('DEBUG error while reading data.\nskipping metadata for ' + game_title)
                 print('DEBUG ' + e.message)
-                break
+
+                data = None
 
             if not data:
                 break
-            if fill_buffer(self, data):
-                try:
-                    conn.close()
-                    self.ftp_instance.voidresp()
+            else:
+                if fill_buffer(self, data):
+                    try:
+                        conn.close()
+                        self.ftp_instance.voidresp()
 
-                # intended exception: this is thrown when the data chunk been stored in buffer
-                except Exception as e:
-                    icon0 = None
-                    pic0 = None
-                    pic1 = None
+                    # intended exception: this is thrown when the full data chunk been stored in buffer
+                    except Exception as e:
 
-                    self.data_chunk = self.sio.getvalue()
-                    self.sio.close()
+                        # reset values for next round
+                        icon0 = None
+                        pic0 = None
+                        pic1 = None
 
-                    # find title_id from beginning of file for all platforms
-                    if rest == 0:
-                        game_title_id = get_title_id_from_buffer(self, platform, self.data_chunk)
+                        self.data_chunk = self.sio.getvalue()
+                        self.sio.close()
 
-                    # PS3 and PSP are the only type of ISOs that has game art embedded
-                    if platform == 'psp' or platform == 'ps3':
-                        icon0, pic0, pic1 = get_png_from_buffer(self, platform, game_title, self.data_chunk)
+                        # try find title_id from beginning of file for all platforms
+                        if rest == 0:
+                            game_title_id = get_title_id_from_buffer(self, platform, self.data_chunk)
 
-                    if '451' not in e.message:
-                        print('DEBUG - connection ' + e.message + ' during parsing of ' + game_title)
-                    break
+                        # PS3 and PSP are the only platforms that has game art embedded
+                        if platform == 'psp' or platform == 'ps3':
+                            icon0, pic0, pic1 = get_png_from_buffer(self, platform, game_title, self.data_chunk)
+
+                        if '451' not in e.message:
+                            print('DEBUG - connection ' + e.message + ' during parsing of ' + game_title)
+                        break
 
         return game_title_id, icon0, pic0, pic1
 
@@ -516,7 +529,7 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
                                 self.has_icon0 = True
 
 
-                        # when multiple pic0 the first seem to be English
+                        # when multiple pic0 we pic the first for English
                         elif tmp_image.size == (1000, 560):
                             self.img_name = 'PIC0.PNG'
                             if not self.has_pic0:
