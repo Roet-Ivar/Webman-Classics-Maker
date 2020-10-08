@@ -987,27 +987,28 @@ class Main:
 	def validate_filename_on_save(self):
 		filename = self.entry_field_filename.get()
 		tmp_name = filename.lower()
+		file_endings = ('.bin', '.iso', '.bin.enc')
 
 		if len(tmp_name) < 1:
-			self.filename_error_msg = 'The file must have a name and \'iso\' / \'bin\' extension'
+			self.filename_error_msg = 'DEBUG The file must have a name and ' + str(file_endings) + ' extension'
 			print(self.filename_error_msg)
 			self.entry_field_filename.focus_set()
 			self.entry_field_filename.icursor(0)
 			return False
 
-		if str(tmp_name).endswith('.iso') or str(tmp_name).endswith('.bin') and len(tmp_name) > 4:
+		if str(tmp_name).endswith(file_endings) and len(tmp_name) > 4:
 			main_window.focus()
 			return True
 
 
-		elif str(tmp_name).endswith('.iso') or str(tmp_name).endswith('.bin'):
-			self.filename_error_msg = 'The image file must have a name'
+		elif str(tmp_name).endswith(file_endings):
+			self.filename_error_msg = 'DEBUG The image file must have a name'
 			print(self.filename_error_msg)
 			self.entry_field_filename.focus_set()
 			self.entry_field_filename.icursor(0)
 			return False
 		else:
-			self.filename_error_msg = 'Filename \'' + filename + '\' must end on \'.iso\' or \'.bin\''
+			self.filename_error_msg = 'DEBUG Filename \'' + filename + '\'' + ' must end on ' + str(file_endings)
 			print(self.filename_error_msg)
 			self.entry_field_filename.focus_set()
 			self.entry_field_filename.icursor(0)

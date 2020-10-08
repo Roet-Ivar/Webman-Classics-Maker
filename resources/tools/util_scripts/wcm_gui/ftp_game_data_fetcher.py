@@ -49,10 +49,11 @@ class FtpGameList():
         self.psn_list       = ''
 
         # filters
-        self.psp_filter = lambda x: x.endswith('.bin') or x.endswith('.iso')
-        self.psx_filter = lambda x: x.endswith('.bin') or x.endswith('.iso')
-        self.ps2_filter = lambda x: x.endswith('.bin') or x.endswith('.iso')
-        self.ps3_filter = lambda x: x.endswith('.bin') or x.endswith('.iso')
+        self.file_endings = ('.BIN', '.ISO', '.BIN.ENC')
+        self.psp_filter = lambda x: x.upper().endswith(self.file_endings)
+        self.psx_filter = lambda x: x.upper().endswith(self.file_endings)
+        self.ps2_filter = lambda x: x.upper().endswith(self.file_endings)
+        self.ps3_filter = lambda x: x.upper().endswith(self.file_endings)
 
         # ftp settings
         with open(os.path.join(AppPaths.settings, 'ftp_settings.cfg')) as f:
@@ -202,7 +203,10 @@ class FtpGameList():
             if not game_exist:
                 title_id, icon0, pic0, pic1 = self.get_game_data(platform_path, game_filename)
 
-                title = game_filename[0:len(game_filename)-4]
+                if '.bin.enc' in game_filename.lower():
+                    title = game_filename[0:len(game_filename)-8]
+                else:
+                    title = game_filename[0:len(game_filename)-4]
                 # removes parenthesis/brackets including content of title
                 title = re.sub(r'\([^)]*\)', '', title).strip()
                 title = re.sub(r'\[[^)]*\]', '', title).strip()
@@ -261,7 +265,7 @@ class FtpGameList():
                     "title": str(title).strip(),
                     "platform": platform.upper(),
                     "filename": game_filename,
-                    "path": platform_path,  
+                    "path": platform_path,
                     "meta_data_link": meta_data_link})
 
                 print('DEBUG \'' + game_filename + '\' got the title ' + str(title).strip() + '\n')
