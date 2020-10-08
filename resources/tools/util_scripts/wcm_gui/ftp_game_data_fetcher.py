@@ -1,4 +1,4 @@
-import json, os, re, StringIO, sys, time
+import json, os, re, StringIO, sys, time, traceback
 import PIL.Image as Image
 from ftplib import FTP
 from shutil import copyfile
@@ -194,7 +194,7 @@ class FtpGameList():
             # check if game exist
             for list_game in self.json_game_list_data[platform_list]:
                 if game_filename == list_game['filename']:
-                    print('\nDEBUG skipped ' + game_filename + ', it already exists\n')
+                    print('\nDEBUG skipping ' + game_filename + ' since it\'s already fetched\n')
                     game_exist = True
                     pass
 
@@ -239,21 +239,6 @@ class FtpGameList():
                         #   title = title.title()
                         break
 
-
-                # # if no title_id is found, use filename as title
-                # else:
-                #     game_filepath = os.path.join(platform_path, game_filename)
-                #
-                #     if game_filepath.lower().endswith('iso'):
-                #         m_filename = re.search('ISO.*', game_filepath, re.IGNORECASE)
-                #         if m_filename is not None:
-                #             title = m_filename.group(0).replace('ISO/', '', re.IGNORECASE)
-                #
-                #     elif game_filepath.lower().endswith('bin'):
-                #         m_filename = re.search('BIN.*', game_filepath, re.IGNORECASE)
-                #         if m_filename is not None:
-                #             title = m_filename.group(0).replace('BIN/', '', re.IGNORECASE)
-
                 # check for duplicates of the same title in the list
                 for game in self.json_game_list_data[platform_list]:
                     if str(title) == str(game['title']):
@@ -276,9 +261,10 @@ class FtpGameList():
                     "title": str(title).strip(),
                     "platform": platform.upper(),
                     "filename": game_filename,
-                    "path": platform_path,
+                    "path": platform_path,  
                     "meta_data_link": meta_data_link})
 
+                print('DEBUG \'' + game_filename + '\' got the title ' + str(title).strip() + '\n')
                 print("Added '" + str(title).strip() + "' to the list:\n"
                       + 'Platform: ' + platform.upper() + '\n'
                       + 'Filename: ' + game_filename + '\n'
@@ -413,6 +399,7 @@ class FTPDataHandler:
 
         iso_index = ftp_filename.index('ISO/', 0, len(ftp_filename))
         platform = ftp_filename[iso_index-3: iso_index].lower()
+        filename = ftp_filename[iso_index+4: len(ftp_filename)]
         game_title = ftp_filename[iso_index+4: len(ftp_filename)-4]
 
         def fill_buffer(self, received):
@@ -433,13 +420,25 @@ class FTPDataHandler:
             # the buffer size seems a bit random, can't remember why
             try:
                 data = conn.recv(1460)
-            except Exception as e:
-                print('DEBUG error while reading data.\nskipping metadata for ' + game_title)
-                print('DEBUG ' + e.message)
+            except Exception as e1:
+                error_msg = ''
+                if e1.message is not '':
+                    error_msg = e1.message
+                else:
+                    error_msg = repr(e1)
+                    # print('DEBUG ERROR traceback: ' + str(traceback.print_exc()))
+                    # offset = max(rest*1024, 0)
+                print('ERROR when fetching \'' + filename + '\', reason: ' + error_msg)
+                print('DEBUG Re-trying fetching of \'' + filename + '\'')
+                # re-try fetching
+                try:
+                    conn = self.ftp_instance.transfercmd('RETR ' + ftp_filename, rest=offset)
+                except Exception  as e2:
+                    print('ERROR could not re-fetch, verdict: skipping ' + filename)
+                    data = None
 
-                data = None
-
-            if not data:
+            # if None skipping game
+            if data is None:
                 break
             else:
                 if fill_buffer(self, data):
@@ -464,10 +463,10 @@ class FTPDataHandler:
 
                         # PS3 and PSP are the only platforms that has game art embedded
                         if platform == 'psp' or platform == 'ps3':
-                            icon0, pic0, pic1 = get_png_from_buffer(self, platform, game_title, self.data_chunk)
+                            icon0, pic0, pic1 = get_png_from_buffer(self, platform, filename, self.data_chunk)
 
                         if '451' not in e.message:
-                            print('DEBUG - connection ' + e.message + ' during parsing of ' + game_title)
+                            print('DEBUG - connection ' + e.message + ' during data fetching of ' + game_title)
                         break
 
         return game_title_id, icon0, pic0, pic1
@@ -552,7 +551,7 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
                 return False
 
         while png_finder(self.data, self.image_name):
-            print('DEBUG Found ' + self.img_name + ' for ' + "\'" + game_name + "\'")
+            print('DEBUG Found ' + self.img_name + ' for  \'' + game_name + '\'')
 
         return self.icon0_image, self.pic0_image, self.pic1_image
 
