@@ -432,7 +432,7 @@ class FTPDataHandler:
                 # re-try fetching
                 try:
                     conn = self.ftp_instance.transfercmd('RETR ' + ftp_filename, rest=offset)
-                except Exception  as e2:
+                except:
                     print('ERROR could not re-fetch, verdict: skipping ' + filename)
                     data = None
 
