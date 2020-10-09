@@ -33,7 +33,7 @@ class FtpGameList():
         self.PS2_ISO_PATH           = '/dev_hdd0/PS2ISO/'
         self.PS3_ISO_PATH           = '/dev_hdd0/PS3ISO/'
 
-        # system specifict FTP data
+        # system specific variables
         self.psplines   = []
         self.psxlines   = []
         self.ps2lines   = []
@@ -41,28 +41,21 @@ class FtpGameList():
         self.psnlines   = []
         self.all_lines  = []
 
-        self.ftp_game_list  = ''
-        self.psp_list       = ''
-        self.psx_list       = ''
-        self.ps2_list       = ''
-        self.ps3_list       = ''
-        self.psn_list       = ''
-
-        # filters
-        self.file_endings = ('.BIN', '.ISO', '.BIN.ENC')
-        self.psp_filter = lambda x: x.upper().endswith(self.file_endings)
-        self.psx_filter = lambda x: x.upper().endswith(self.file_endings)
-        self.ps2_filter = lambda x: x.upper().endswith(self.file_endings)
-        self.ps3_filter = lambda x: x.upper().endswith(self.file_endings)
+        # filters and file extensions
+        self.file_extensions = ('.BIN', '.BIN.ENC', '.MDF', '.NTFS', '.IMG', '.ISO', '.ISO.0')
+        self.psp_filter = lambda x: x.upper().endswith(self.file_extensions)
+        self.psx_filter = lambda x: x.upper().endswith(self.file_extensions)
+        self.ps2_filter = lambda x: x.upper().endswith(self.file_extensions)
+        self.ps3_filter = lambda x: x.upper().endswith(self.file_extensions)
 
         # ftp settings
         with open(os.path.join(AppPaths.settings, 'ftp_settings.cfg')) as f:
             ftp_settings_file = json.load(f)
             f.close()
 
-        #psp images are arounf 20MB into the ISO
-        self.chunk_size_kb          = ftp_settings_file['ftp_chunk_size_kb']
+        # some PSP-images is found around 20MB into the ISO
         self.ftp_psp_png_offset_kb  = ftp_settings_file['ftp_psp_png_offset_kb']
+        self.chunk_size_kb          = ftp_settings_file['ftp_chunk_size_kb']
         self.chunk_size_kb          = ftp_settings_file['ftp_chunk_size_kb']
         self.ps3_lan_ip             = ftp_settings_file['ps3_lan_ip']
         self.ftp_timeout            = ftp_settings_file['ftp_timeout']
@@ -70,15 +63,6 @@ class FtpGameList():
         self.ftp_user               = ftp_settings_file['ftp_user']
         self.ftp_password           = ftp_settings_file['ftp_password']
         self.use_mock_data          = False
-
-        # platforms to handle
-        self.show_psp_list  = ftp_settings_file['show_psx_list']
-        self.show_psx_list  = ftp_settings_file['show_psx_list']
-        self.show_ps2_list  = ftp_settings_file['show_ps2_list']
-        self.show_ps3_list  = ftp_settings_file['show_ps3_list']
-        self.show_psn_list  = ftp_settings_file['show_psn_list']
-
-
 
         # singular instances
         self.ftp = None
@@ -203,10 +187,17 @@ class FtpGameList():
             if not game_exist:
                 title_id, icon0, pic0, pic1 = self.get_game_data(platform_path, game_filename)
 
-                if '.bin.enc' in game_filename.lower():
-                    title = game_filename[0:len(game_filename)-8]
-                else:
-                    title = game_filename[0:len(game_filename)-4]
+                title = game_filename
+                for file_ext in self.file_extensions:
+                    if game_filename.upper().endswith(file_ext):
+                        title = title[0:len(title)-len(file_ext)]
+                        break
+
+                #
+                # if '.bin.enc' in game_filename.lower():
+                #     title = game_filename[0:len(game_filename)-8]
+                # else:
+                #     title = game_filename[0:len(game_filename)-4]
                 # removes parenthesis/brackets including content of title
                 title = re.sub(r'\([^)]*\)', '', title).strip()
                 title = re.sub(r'\[[^)]*\]', '', title).strip()
