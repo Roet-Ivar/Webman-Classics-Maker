@@ -433,7 +433,7 @@ class FTPDataHandler:
                 try:
                     conn = self.ftp_instance.transfercmd('RETR ' + ftp_filename, rest=offset)
                 except:
-                    print('ERROR could not refetch ' + filename + ' skipping')
+                    print('ERROR could not refetch ' + filename + ', skipping')
                     data = None
 
             # if None skip game by breaking the loop

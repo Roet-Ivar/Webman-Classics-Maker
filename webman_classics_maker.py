@@ -1152,17 +1152,28 @@ class Main:
 
     def save_preview_image(self):
         # making a preview print of the game canvas
+
+        # check for PIC1 as background for the preview
         if os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC1.PNG')):
             pic1_img = Image.open(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC1.PNG')).convert("RGBA")
             preview_img = Image.open(os.path.join(AppPaths.resources, 'images', 'pkg', 'default', 'PIC1.PNG')).convert("RGBA")
             preview_img.paste(pic1_img, (0, 0), pic1_img)
+
         else:
+            # if not, use a default background as PIC1
             preview_img = Image.open(os.path.join(AppPaths.resources, 'images', 'pkg', 'default', 'PIC1.PNG')).convert("RGBA")
 
+        # check for PIC0 as background for the preview
         if os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC0.PNG')):
             pic0_img = Image.open(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC0.PNG')).convert("RGBA")
             preview_img.paste(pic0_img, (self.pic0_x_pos, self.pic0_y_pos), pic0_img)
+        else:
+            # if no PIC0, use texts
+            self.draw_text_on_image_w_shadow(preview_img, "11/11/2006 00:00", 760, 522, 20, 1, 'white', 'black')
+            self.draw_text_on_image_w_shadow(preview_img, str(self.entry_field_title.get()), 760, 487, 32, 2, 'white',
+                                             'black')
 
+        # check for ICON0 as background for the preview
         if os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'ICON0.PNG')):
             icon0_img = Image.open(os.path.join(AppPaths.game_work_dir, 'pkg', 'ICON0.PNG')).convert("RGBA")
             preview_img.paste(icon0_img, (self.icon0_x_pos, self.icon0_y_pos), icon0_img)
@@ -1171,13 +1182,8 @@ class Main:
         xmb_img_dir = os.path.join(ImagePaths.xmb, 'XMB_icons.png')
         xmb_img = Image.open(xmb_img_dir).convert("RGBA")
 
-        self.draw_text_on_image_w_shadow(preview_img, "11/11/2006 00:00", 760, 522, 20, 1, 'white', 'black')
-        self.draw_text_on_image_w_shadow(preview_img, str(self.entry_field_title.get()), 760, 487, 32, 2, 'white',
-                                         'black')
-
 
         preview_img.paste(xmb_img, (0, 0), xmb_img)
-
         preview_img.save(os.path.join(AppPaths.game_work_dir, '..', 'preview.png'))
 
     def on_game_list_refresh(self):
