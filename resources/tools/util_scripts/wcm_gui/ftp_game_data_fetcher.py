@@ -1,6 +1,7 @@
 import json, os, re, StringIO, sys, time, traceback
 import PIL.Image as Image
 from ftplib import FTP
+from global_paths import GlobalVar
 from shutil import copyfile
 
 # adding util_scripts depending on if it's an executable or if it's running from the wcm_gui
@@ -20,33 +21,11 @@ class FtpGameList():
         # messages
         self.PAUSE_MESSAGE              = 'Press ENTER to continue...'
         self.CONNECTION_ERROR_MESSAGE   = "Check your PS3 ip-address in webMan VSH menu (hold SELECT on the XMB), then update your 'settings/ftp_settings.py' accordingly"
-        self.MOCK_DATA_MESSAGE          = 'DEBUG: Using PS2 ISO mock data for test purposes!'
         self.TITLE_ID_EXCEPTION_MESSAGE = """Exception: 'get_image' failed during regex operation."""
 
         # constants
-        self.MOCK_DATA_FILE         = os.path.join(AppPaths.util_resources, 'mock_ftp_game_list_response.txt')
         self.GAME_LIST_DATA_FILE    = os.path.join(AppPaths.application_path, 'game_list_data.json')
         self.NEW_LIST_DATA_FILE     = os.path.join(AppPaths.util_resources, 'game_list_data.json.BAK')
-
-        self.PSP_ISO_PATH           = '/dev_hdd0/PSPISO/'
-        self.PSX_ISO_PATH           = '/dev_hdd0/PSXISO/'
-        self.PS2_ISO_PATH           = '/dev_hdd0/PS2ISO/'
-        self.PS3_ISO_PATH           = '/dev_hdd0/PS3ISO/'
-
-        # system specific variables
-        self.psplines   = []
-        self.psxlines   = []
-        self.ps2lines   = []
-        self.ps3lines   = []
-        self.psnlines   = []
-        self.all_lines  = []
-
-        # filters and file extensions
-        self.file_extensions = ('.BIN', '.BIN.ENC', '.MDF', '.NTFS', '.IMG', '.ISO', '.ISO.0')
-        self.psp_filter = lambda x: x.upper().endswith(self.file_extensions)
-        self.psx_filter = lambda x: x.upper().endswith(self.file_extensions)
-        self.ps2_filter = lambda x: x.upper().endswith(self.file_extensions)
-        self.ps3_filter = lambda x: x.upper().endswith(self.file_extensions)
 
         # ftp settings
         with open(os.path.join(AppPaths.settings, 'ftp_settings.cfg')) as f:
@@ -64,7 +43,26 @@ class FtpGameList():
         self.ftp_password           = ftp_settings_file['ftp_password']
         self.use_mock_data          = False
 
+        self.PSP_ISO_PATH           = '/dev_hdd0/PSPISO/'
+        self.PSX_ISO_PATH           = '/dev_hdd0/PSXISO/'
+        self.PS2_ISO_PATH           = '/dev_hdd0/PS2ISO/'
+        self.PS3_ISO_PATH           = '/dev_hdd0/PS3ISO/'
+
+        # system specific variables
+        self.psp_lines   = []
+        self.psx_lines   = []
+        self.ps2_lines   = []
+        self.ps3_lines   = []
+        self.all_lines  = []
+
+        # filters and file extensions
+        self.psp_filter = lambda x: x.upper().endswith(GlobalVar.file_extensions)
+        self.psx_filter = lambda x: x.upper().endswith(GlobalVar.file_extensions)
+        self.ps2_filter = lambda x: x.upper().endswith(GlobalVar.file_extensions)
+        self.ps3_filter = lambda x: x.upper().endswith(GlobalVar.file_extensions)
+
         # singular instances
+        self.total_lines_count = 0
         self.ftp = None
         self.data_chunk = None
 
@@ -77,33 +75,34 @@ class FtpGameList():
             self.ftp.voidcmd('TYPE I')
 
             if self.platform_filter.lower() == 'all':
-                self.ftp.retrlines('NLST ' + self.PSP_ISO_PATH, self.psplines.append)
-                self.ftp.retrlines('NLST ' + self.PSX_ISO_PATH, self.psxlines.append)
-                self.ftp.retrlines('NLST ' + self.PS2_ISO_PATH, self.ps2lines.append)
-                self.ftp.retrlines('NLST ' + self.PS3_ISO_PATH, self.ps3lines.append)
+                self.ftp.retrlines('NLST ' + self.PSP_ISO_PATH, self.psp_lines.append)
+                self.ftp.retrlines('NLST ' + self.PSX_ISO_PATH, self.psx_lines.append)
+                self.ftp.retrlines('NLST ' + self.PS2_ISO_PATH, self.ps2_lines.append)
+                self.ftp.retrlines('NLST ' + self.PS3_ISO_PATH, self.ps3_lines.append)
 
-                self.all_lines.append(self.psplines)
-                self.all_lines.append(self.psxlines)
-                self.all_lines.append(self.ps2lines)
-                self.all_lines.append(self.ps3lines)
+                self.all_lines.append(self.psp_lines)
+                self.all_lines.append(self.psx_lines)
+                self.all_lines.append(self.ps2_lines)
+                self.all_lines.append(self.ps3_lines)
 
             elif self.platform_filter.lower() == 'psp':
-                self.ftp.retrlines('NLST ' + self.PSP_ISO_PATH, self.psplines.append)
-                self.all_lines.append(self.psplines)
+                self.ftp.retrlines('NLST ' + self.PSP_ISO_PATH, self.psp_lines.append)
+                self.all_lines.append(self.psp_lines)
 
             elif self.platform_filter.lower() == 'psx':
-                self.ftp.retrlines('NLST ' + self.PSX_ISO_PATH, self.psxlines.append)
-                self.all_lines.append(self.psxlines)
+                self.ftp.retrlines('NLST ' + self.PSX_ISO_PATH, self.psx_lines.append)
+                self.all_lines.append(self.psx_lines)
 
             elif self.platform_filter.lower() == 'ps2':
-                self.ftp.retrlines('NLST ' + self.PS2_ISO_PATH, self.ps2lines.append)
-                self.all_lines.append(self.ps2lines)
+                self.ftp.retrlines('NLST ' + self.PS2_ISO_PATH, self.ps2_lines.append)
+                self.all_lines.append(self.ps2_lines)
 
             elif self.platform_filter.lower() == 'ps3':
-                self.ftp.retrlines('NLST ' + self.PS3_ISO_PATH, self.ps3lines.append)
-                self.all_lines.append(self.ps3lines)
+                self.ftp.retrlines('NLST ' + self.PS3_ISO_PATH, self.ps3_lines.append)
+                self.all_lines.append(self.ps3_lines)
 
-
+            # after retreiving the list of file paths we fetch the actual data
+            self.total_lines_count = self.all_lines.count()
             self.data_chunk = FTPDataHandler(self.ftp)
 
         except Exception as e:
@@ -145,22 +144,22 @@ class FtpGameList():
             platform_list   = 'psp_games'
             platform_path   = self.PSP_ISO_PATH
             platform_filter = self.psp_filter
-            platform_lines  = self.psplines
+            platform_lines  = self.psp_lines
         elif 'psx' == platform.lower():
             platform_list   = 'psx_games'
             platform_path   = self.PSX_ISO_PATH
             platform_filter = self.psx_filter
-            platform_lines  = self.psxlines
+            platform_lines  = self.psx_lines
         elif 'ps2' == platform.lower():
             platform_list   = 'ps2_games'
             platform_path   = self.PS2_ISO_PATH
             platform_filter = self.ps2_filter
-            platform_lines  = self.ps2lines
+            platform_lines  = self.ps2_lines
         elif 'ps3' == platform.lower():
             platform_list   = 'ps3_games'
             platform_path   = self.PS3_ISO_PATH
             platform_filter = self.ps3_filter
-            platform_lines  = self.ps3lines
+            platform_lines  = self.ps3_lines
 
         # filer the lines using the platform filter
         filtered_lines = filter(platform_filter, platform_lines)
@@ -186,18 +185,13 @@ class FtpGameList():
             # if not, add it
             if not game_exist:
                 title_id, icon0, pic0, pic1 = self.get_game_data(platform_path, game_filename)
-
                 title = game_filename
-                for file_ext in self.file_extensions:
+                # removes the file extension
+                for file_ext in GlobalVar.file_extensions:
                     if game_filename.upper().endswith(file_ext):
                         title = title[0:len(title)-len(file_ext)]
                         break
 
-                #
-                # if '.bin.enc' in game_filename.lower():
-                #     title = game_filename[0:len(game_filename)-8]
-                # else:
-                #     title = game_filename[0:len(game_filename)-4]
                 # removes parenthesis/brackets including content of title
                 title = re.sub(r'\([^)]*\)', '', title).strip()
                 title = re.sub(r'\[[^)]*\]', '', title).strip()

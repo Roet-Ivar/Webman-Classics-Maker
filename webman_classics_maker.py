@@ -12,6 +12,7 @@ else:
     sys.path.append(os.path.join(application_path, 'resources', 'tools', 'util_scripts', 'wcm_gui'))
 from global_paths import App as AppPaths
 from global_paths import Image as ImagePaths
+from global_paths import GlobalVar
 
 sys.path.append(AppPaths.settings)
 
@@ -987,14 +988,12 @@ class Main:
     def validate_filename_on_save(self):
         filename = self.entry_field_filename.get()
         tmp_name = filename.lower()
-        file_extensions = ('.BIN', '.BIN.ENC', '.MDF', '.NTFS', '.IMG', '.ISO', '.ISO.0')
-
-        if str(tmp_name).upper().endswith(file_extensions) and len(tmp_name) > 4:
+        if str(tmp_name).upper().endswith(GlobalVar.file_extensions) and len(tmp_name) > 4:
             main_window.focus()
             return True
 
         if len(tmp_name) < 1:
-            self.filename_error_msg = 'DEBUG The file must have a name and any of the following extensions' + str(file_extensions)
+            self.filename_error_msg = 'DEBUG The file must have a name and any of the following extensions' + str(GlobalVar.file_extensions)
             print(self.filename_error_msg)
             self.entry_field_filename.focus_set()
             self.entry_field_filename.icursor(0)
@@ -1008,7 +1007,7 @@ class Main:
             return False
 
         else:
-            self.filename_error_msg = 'DEBUG Filename \'' + filename + '\'' + ' must end on ' + str(file_extensions)
+            self.filename_error_msg = 'DEBUG Filename \'' + filename + '\'' + ' must end on ' + str(GlobalVar.file_extensions)
             print(self.filename_error_msg)
             self.entry_field_filename.focus_set()
             self.entry_field_filename.icursor(0)

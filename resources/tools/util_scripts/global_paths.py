@@ -70,5 +70,8 @@ class Build:
 
     Param_SFO_Editor = os.path.join(App.tools, 'Param_SFO_Editor')
 
+class GlobalVar:
+    file_extensions = ('.BIN', '.BIN.ENC', '.MDF', '.NTFS', '.IMG', '.ISO', '.ISO.0')
+
 if not os.path.exists(os.path.join(App.wcm_work_dir, 'pkg')):
     os.makedirs(os.path.join(App.wcm_work_dir, 'pkg'))

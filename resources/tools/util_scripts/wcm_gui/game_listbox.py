@@ -3,11 +3,9 @@ import json, os, sys
 from shutil import copyfile
 sys.path.append('..')
 from global_paths import App as AppPaths
-
-
+from global_paths import GlobalVar
 
 class Gamelist():
-
     def __init__(self, platform):
         # makes sure there is a json_game_list file
         if os.path.isfile(os.path.join(AppPaths.application_path, 'game_list_data.json')) is False:
@@ -178,11 +176,17 @@ class Gamelist():
 
 
     def get_selected_build_dir_path(self):
+        pkg_project_name = ''
         filename = self.selected_filename
         title_id = self.selected_title_id.replace('-', '')
-
         build_base_path = AppPaths.builds
-        pkg_project_name = filename[:-4].replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
+
+        # removes the file extension
+        for file_ext in GlobalVar.file_extensions:
+            if filename.upper().endswith(file_ext):
+                pkg_project_name = filename[0:len(filename)-len(file_ext)]
+                pkg_project_name = pkg_project_name.replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
+                break
 
         build_dir_path = os.path.join(build_base_path, pkg_project_name)
         return build_dir_path
