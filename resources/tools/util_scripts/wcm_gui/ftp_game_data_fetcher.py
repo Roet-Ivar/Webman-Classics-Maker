@@ -20,7 +20,7 @@ class FtpGameList():
 
         # messages
         self.PAUSE_MESSAGE              = 'Press ENTER to continue...'
-        self.CONNECTION_ERROR_MESSAGE   = "Check your PS3 ip-address in webMan VSH menu (hold SELECT on the XMB), then update your 'settings/ftp_settings.py' accordingly"
+        self.CONNECTION_ERROR_MESSAGE   = "TIPS: Check your PS3 ip-address in webMan VSH menu (hold SELECT on the XMB)"
         self.TITLE_ID_EXCEPTION_MESSAGE = """Exception: 'get_image' failed during regex operation."""
 
         # constants
@@ -62,7 +62,8 @@ class FtpGameList():
         self.ps3_filter = lambda x: x.upper().endswith(GlobalVar.file_extensions)
 
         # singular instances
-        self.total_lines_count = 0
+        self.total_lines_count = None
+        self.game_count = None
         self.ftp = None
         self.data_chunk = None
 
@@ -103,7 +104,7 @@ class FtpGameList():
 
             # after retreiving the list of file paths we fetch the actual data
             self.total_lines_count = self.all_lines.count()
-            self.data_chunk = FTPDataHandler(self.ftp)
+            self.data_chunk = FTPDataHandler(self.ftp, self.total_lines_count, self.game_count)
 
         except Exception as e:
             error_message = str(e)
@@ -125,12 +126,12 @@ class FtpGameList():
 
         if self.platform_filter.lower() == 'all':
             for platform in self.json_game_list_data:
-                self.new_platform_list_data = self.list_builder(platform[0:3])
+                self.new_platform_list_data = self.list_builder(platform[0:3], self.count_down)
                 self.json_game_list_data[platform].extend(self.new_platform_list_data[platform])
 
         else:
             platform = self.platform_filter.lower() + '_games'
-            self.new_platform_list_data = self.list_builder(platform[0:3])
+            self.new_platform_list_data = self.list_builder(platform[0:3], self.count_down)
             self.json_game_list_data[platform].extend(self.new_platform_list_data[platform])
 
         # save updated gamelist to disk
@@ -178,7 +179,10 @@ class FtpGameList():
             # check if game exist
             for list_game in self.json_game_list_data[platform_list]:
                 if game_filename == list_game['filename']:
-                    print('\nDEBUG skipping ' + game_filename + ' since it\'s already fetched\n')
+                    self.game_count += 1
+                    print('DEBUG PROGRESS ' + self.game_count + ' of ' + self.total_lines_count)
+
+                    print('\nDEBUG skipping ' + game_filename + ', already fetched\n')
                     game_exist = True
                     pass
 
@@ -245,6 +249,9 @@ class FtpGameList():
                             title = str(title) + ' (1)'
 
                 # add game to list of new games
+                self.game_count += 1
+                print('DEBUG PROGRESS ' + self.game_count + ' of ' + self.total_lines_count)
+
                 self.new_json_game_list_data[platform + '_games'].append({
                     "title_id": title_id,
                     "title": str(title).strip(),
@@ -304,7 +311,7 @@ class FtpGameList():
             print('Connection timed out, re-connecting in ' + str(self.ftp_timeout) + 's...\n')
 
             self.make_new_ftp()
-            self.data_chunk = FTPDataHandler(self.ftp)
+            self.data_chunk = FTPDataHandler(self.ftp, self.total_lines_count, self.game_count)
 
             title_id, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, 0)
 
@@ -372,10 +379,12 @@ class FtpGameList():
 
 
 class FTPDataHandler:
-    def __init__(self, ftp):
+    def __init__(self, ftp, total_lines, game_count):
         self.ftp_instance = ftp
         self.ftp_instance.voidcmd('TYPE I')
         self.null = None
+        self.total_lines = total_lines
+        self.game_count = game_count
 
     def ftp_buffer_data(self, ftp_filename, chunk_size, rest):
         icon0 = None
@@ -406,7 +415,7 @@ class FTPDataHandler:
         offset = max(rest*1024, 0)
         conn = self.ftp_instance.transfercmd('RETR ' + ftp_filename, rest=offset)
         while 1:
-            # the buffer size seems a bit random, can't remember why
+            # the buffer size seems a bit random, can't remember why(?)
             try:
                 data = conn.recv(1460)
             except Exception as e1:
@@ -417,6 +426,7 @@ class FTPDataHandler:
                     error_msg = repr(e1)
                     # print('DEBUG ERROR traceback: ' + str(traceback.print_exc()))
                     # offset = max(rest*1024, 0)
+
                 print('ERROR when fetching \'' + filename + '\', reason: ' + error_msg)
                 print('DEBUG Re-trying fetching of \'' + filename + '\'')
                 # re-try fetching
@@ -426,8 +436,10 @@ class FTPDataHandler:
                     print('ERROR could not re-fetch, verdict: skipping ' + filename)
                     data = None
 
-            # if None skipping game
+            # if None skip game by breaking the loop
             if data is None:
+                self.game_count += 1
+                print('DEBUG PROGRESS ' + self.game_count + ' of ' + self.total_lines)
                 break
             else:
                 if fill_buffer(self, data):
@@ -437,7 +449,6 @@ class FTPDataHandler:
 
                     # intended exception: this is thrown when the full data chunk been stored in buffer
                     except Exception as e:
-
                         # reset values for next round
                         icon0 = None
                         pic0 = None
