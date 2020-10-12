@@ -888,11 +888,14 @@ class Main:
 
     # Dynamic update of the pkg path for showing fetched images
     def dynamic_game_build_path(self):
-        AppPaths.game_work_dir = os.path.join(self.gamelist.get_selected_build_dir_path(), 'work_dir')
-        build_dir_pkg_path = os.path.join(AppPaths.game_work_dir, 'pkg')
-        if os.path.exists(build_dir_pkg_path):
-            # update images
-            self.init_draw_images_on_canvas(self.main, pkg_build_path=build_dir_pkg_path)
+        if str(self.entry_field_iso_path.get()) != '' and str(self.entry_field_title_id.get()) != '':
+            AppPaths.game_work_dir = os.path.join(self.gamelist.get_selected_build_dir_path(), 'work_dir')
+            build_dir_pkg_path = os.path.join(AppPaths.game_work_dir, 'pkg')
+            if os.path.exists(build_dir_pkg_path):
+                # update images
+                self.init_draw_images_on_canvas(self.main, pkg_build_path=build_dir_pkg_path)
+        else:
+            self.init_draw_images_on_canvas(self.main)
 
     # Dynamic update of the 'entry_field_filename' into the 'entry_field_iso_path'
     def dynamic_filename_to_path(self, event):
@@ -930,7 +933,7 @@ class Main:
         self.button_pic1.config(image=self.photo_image_pic1_xmb)
 
     def image_replace_browser(self, main):
-        image = askopenfile(mode='rb', title='Browse an image', filetypes=[('PNG images', '.PNG')])
+        image = askopenfile(mode='rb', title='Browse an image', filetypes=[('PNG image', '.PNG')])
         if image is not None:
             img_to_be_changed = None
             print('DEBUG image content:' + image.name)
