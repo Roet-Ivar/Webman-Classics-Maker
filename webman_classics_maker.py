@@ -894,8 +894,6 @@ class Main:
             if os.path.exists(build_dir_pkg_path):
                 # update images
                 self.init_draw_images_on_canvas(self.main, pkg_build_path=build_dir_pkg_path)
-        else:
-            self.init_draw_images_on_canvas(self.main)
 
     # Dynamic update of the 'entry_field_filename' into the 'entry_field_iso_path'
     def dynamic_filename_to_path(self, event):
@@ -920,6 +918,8 @@ class Main:
         self.entry_field_iso_path.delete(0, END)
         self.entry_field_iso_path.insert(0, iso_path)
         self.entry_field_iso_path.config(state='readonly')
+        #TODO: this might be more optimized somewhere else
+        self.dynamic_game_build_path()
 
     # Dynamic update of the game title on to the PIC1 image
     def dynamic_title_to_pic1(self, event):
@@ -930,8 +930,8 @@ class Main:
         tmp_img = tmp_img.resize((int(1280 * scaling), int(720 * scaling)), Image.ANTIALIAS)
         self.photo_image_pic1_xmb = PhotoImage(tmp_img)
         self.button_pic1.config(image=self.photo_image_pic1_xmb)
-        #TODO: this should prob be moved to somewhere more optimized place
-        self.dynamic_game_build_path()
+
+        self.init_draw_images_on_canvas(self.main)
 
     def image_replace_browser(self, main):
         image = askopenfile(mode='rb', title='Browse an image', filetypes=[('PNG image', '.PNG')])
