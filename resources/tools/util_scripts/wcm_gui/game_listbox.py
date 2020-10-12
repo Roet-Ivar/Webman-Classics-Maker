@@ -94,7 +94,7 @@ class Gamelist():
                 self.selected_title = self._listbox.get(new_selection[0])
                 tmp_title = list_game['title']
 
-                match = self.selected_title == str(tmp_title)
+                match = (self.selected_title == str(tmp_title) and tmp_title is not None)
                 if match:
                     self.selected_title_id   = str(list_game['title_id']).replace('-', '')
                     self.selected_title      = str(list_game['title'])
@@ -177,8 +177,12 @@ class Gamelist():
 
     def get_selected_build_dir_path(self):
         pkg_project_name = ''
-        filename = self.selected_filename
-        title_id = self.selected_title_id.replace('-', '')
+        filename = ''
+        title_id = ''
+        if self.selected_filename is not None:
+            filename = self.selected_filename
+        if self.selected_title_id is not None:
+            title_id = self.selected_title_id.replace('-', '')
         build_base_path = AppPaths.builds
 
         # removes the file extension
