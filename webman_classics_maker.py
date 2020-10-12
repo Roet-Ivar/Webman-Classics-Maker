@@ -923,7 +923,6 @@ class Main:
 
     # Dynamic update of the game title on to the PIC1 image
     def dynamic_title_to_pic1(self, event):
-        self.dynamic_game_build_path()
         tmp_img = copy.copy(self.image_pic1)
         # self, image, text, text_x, text_y, text_size, text_outline, text_color,
         self.draw_text_on_image_w_shadow(tmp_img, event.widget.get(), 760, 487, 32, 2, 'white', 'black')
@@ -931,6 +930,8 @@ class Main:
         tmp_img = tmp_img.resize((int(1280 * scaling), int(720 * scaling)), Image.ANTIALIAS)
         self.photo_image_pic1_xmb = PhotoImage(tmp_img)
         self.button_pic1.config(image=self.photo_image_pic1_xmb)
+        #TODO: this should prob be moved to somewhere more optimized place
+        self.dynamic_game_build_path()
 
     def image_replace_browser(self, main):
         image = askopenfile(mode='rb', title='Browse an image', filetypes=[('PNG image', '.PNG')])
