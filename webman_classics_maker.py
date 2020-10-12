@@ -92,10 +92,11 @@ class Main:
         self.images_logo_system.append(PhotoImage(self.smaller_button_maker('PS3', font='conthrax-sb.ttf', x=-1, y=-2)))
 
         self.images_function_button = []
-        self.images_function_button.append(PhotoImage(self.small_button_maker('Save', font='arial.ttf', x=3, y=0)))
         self.images_function_button.append(PhotoImage(self.small_button_maker('Build', font='arial.ttf', x=3, y=0)))
-        self.images_function_button.append(PhotoImage(self.small_button_maker('Quit', font='arial.ttf', x=3, y=0)))
-        self.images_function_button.append(PhotoImage(self.small_button_maker('Change', font='arial.ttf', x=-3, y=0)))
+        self.images_function_button.append(PhotoImage(self.small_button_maker('Add', font='arial.ttf', x=3, y=0)))
+        self.images_function_button.append(PhotoImage(self.small_button_maker('Remove', font='arial.ttf', x=-3, y=0)))
+        # self.images_function_button.append(PhotoImage(self.small_button_maker('Quit', font='arial.ttf', x=3, y=0)))
+        # self.images_function_button.append(PhotoImage(self.small_button_maker('Change', font='arial.ttf', x=-3, y=0)))
 
         self.images_gamelist_button = []
         self.images_gamelist_button.append(PhotoImage(self.small_button_maker('Fetch', font='arial.ttf', x=3, y=0)))
@@ -118,7 +119,7 @@ class Main:
         self.button_PS3 	 = None
 
         self.build_button 	 = None
-        self.save_button 	 = None
+        self.add_button 	 = None
 
         self.ftp_sync_button			= None
         self.game_list_refresh_button	= None
@@ -126,11 +127,14 @@ class Main:
 
 
         # text tooltip messages
-        self.USB_BUTTON_TOOLTIP_MSG = "toggle USB port (0-3)"
-        self.SAVE_BUTTON_TOOLTIP_MSG = "save current 'work_dir' folder"
-        self.BUILD_BUTTON_TOOLTIP_MSG = "build and save the PKG"
-        self.SYNC_BUTTON_TOOLTIP_MSG = "fetch gamelist and pictures over FTP"
-        self.REFRESH_BUTTON_TOOLTIP_MSG = "reload gamelist from disk"
+        self.USB_BUTTON_TOOLTIP_MSG = "Toggle USB port (0-3)"
+
+        self.BUILD_BUTTON_TOOLTIP_MSG = "Save & Build pkg"
+        self.ADD_BUTTON_TOOLTIP_MSG = "Add game & save data"
+        self.REMOVE_BUTTON_TOOLTIP_MSG = "Remove game & data"
+
+        self.SYNC_BUTTON_TOOLTIP_MSG = "Fetch gamelist and pictures over FTP"
+        self.REFRESH_BUTTON_TOOLTIP_MSG = "Refresh gamelist from disk"
         self.ICON0_TOOLTIP_MSG = "Click to change ICON0"
         self.PIC0_TOOLTIP_MSG = "Click to change  PIC0"
         self.PIC1_TOOLTIP_MSG = "Click to change  PIC1"
@@ -509,18 +513,31 @@ class Main:
                                  command=lambda:
                                  self.on_system_button(self.drive_system_array[0], self.selection_system_list[3]))
 
-        self.save_button = Button(main,
-                                  image=self.images_function_button[0],
-                                  borderwidth=0,
-                                  command=self.validate_fields,
-                                  bg="#FBFCFB")
 
+
+        # build, save and remove buttons
         self.build_button = Button(main,
-                                   image=self.images_function_button[1],
+                                   image=self.images_function_button[0],
                                    borderwidth=0,
                                    command=self.on_build_button,
                                    bg="#FBFCFB")
 
+
+        self.add_button = Button(main,
+                                 image=self.images_function_button[1],
+                                 borderwidth=0,
+                                 command=self.save_work_dir,
+                                 bg="#FBFCFB")
+
+        self.remove_button = Button(main,
+                                  image=self.images_function_button[2],
+                                  borderwidth=0,
+                                  command=self.validate_fields,
+                                  bg="#FBFCFB")
+
+
+
+        # ftp list buttons
         self.ftp_sync_button = Button(main,
                                       image=self.images_gamelist_button[0],
                                       borderwidth=0,
@@ -536,8 +553,11 @@ class Main:
 
         # button tooltips
         CreateToolTip(self.button_USB, self.USB_BUTTON_TOOLTIP_MSG)
-        CreateToolTip(self.save_button, self.SAVE_BUTTON_TOOLTIP_MSG)
+
         CreateToolTip(self.build_button, self.BUILD_BUTTON_TOOLTIP_MSG)
+        CreateToolTip(self.add_button, self.ADD_BUTTON_TOOLTIP_MSG)
+        CreateToolTip(self.remove_button, self.REMOVE_BUTTON_TOOLTIP_MSG)
+
         CreateToolTip(self.ftp_sync_button, self.SYNC_BUTTON_TOOLTIP_MSG)
         CreateToolTip(self.game_list_refresh_button, self.REFRESH_BUTTON_TOOLTIP_MSG)
 
@@ -595,13 +615,23 @@ class Main:
 
         self.button_spacing = 70
 
-        self.save_button.place(
-            x=int((self.text_box_spacing + self.main_offset_x_pos) * scaling),
-            y=int((self.iso_path_text_y_pos + 40) * scaling))
+
+        # self.save_button.place(
+        #     x=int((self.text_box_spacing + self.main_offset_x_pos) * scaling),
+        #     y=int((self.iso_path_text_y_pos + 40) * scaling))
+
 
         self.build_button.place(
-            x=int((self.button_spacing + 10 + self.text_box_spacing + self.main_offset_x_pos) * scaling),
+            x=int((self.text_box_spacing + self.main_offset_x_pos + 0 * 85) * scaling),
             y=int((self.iso_path_text_y_pos + 40) * scaling))
+
+        # self.add_button.place(
+        #     x=int((self.text_box_spacing + self.main_offset_x_pos + 1 * 85) * scaling),
+        #     y=int((self.iso_path_text_y_pos + 40) * scaling))
+
+        # self.remove_button.place(
+        #     x=int((self.text_box_spacing + self.main_offset_x_pos + 2 * 85) * scaling),
+        #     y=int((self.iso_path_text_y_pos + 40) * scaling))
 
         self.ftp_sync_button.place(
             x=int((self.main_offset_x_pos) * scaling),
@@ -1032,12 +1062,23 @@ class Main:
 
     def save_work_dir(self):
         if self.validate_fields():
-            self.image_icon0.save(os.path.join(self.wcm_pkg_dir, 'ICON0.PNG'))
-            self.image_pic0.save(os.path.join(self.wcm_pkg_dir, 'PIC0.PNG'))
-            self.image_pic1.save(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG'))
+            if not os.path.exists(AppPaths.game_work_dir):
+                os.makedirs(os.path.join(AppPaths.game_work_dir, 'pkg'))
+
+
+            # make sure we have the mandatory ICON0 in the build_dir
+            if not os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'ICON0.PNG')):
+                file_path = str(self.entry_field_iso_path.get())
+                iso_str_index = file_path.index('ISO/', 0, len(file_path))
+                platform = file_path[iso_str_index-3: iso_str_index].lower()
+
+                icon0 = Image.open(os.path.join(AppPaths.application_path, 'resources', 'images', 'pkg', 'default', platform.upper(), 'ICON0.PNG')).convert("RGBA")
+                icon0.save(os.path.join(AppPaths.game_work_dir, 'pkg', 'ICON0.PNG'))
 
             self.save_preview_image()
             self.save_pkg_info_to_json()
+            # clean up the temp work dir
+            self.init_wcm_work_dir()
 
             return True
         else:
@@ -1070,11 +1111,11 @@ class Main:
                 shutil.copy2(s, d)
 
     def on_build_button(self):
-        if os.path.isdir(os.path.join(AppPaths.resources, 'pkg')):
-            shutil.rmtree(os.path.join(AppPaths.resources, 'pkg'))
         self.copytree(os.path.join(AppPaths.util_resources, 'pkg_dir_bak'), os.path.join(AppPaths.resources, 'pkg'))
 
         if self.save_work_dir():
+            if not os.path.exists(AppPaths.game_work_dir):
+                os.makedirs(AppPaths.game_work_dir)
             title_id = str(self.entry_field_title_id.get()).replace('-', '')
             filename = str(self.entry_field_filename.get())
             game_pkg_dir = os.path.join(AppPaths.game_work_dir, 'pkg')
@@ -1103,9 +1144,8 @@ class Main:
                 # saving the build content in the game build folder
                 self.copytree(self.pkg_dir, game_pkg_dir)
 
-                # clean up the temp work dir
+
                 if os.path.isdir(AppPaths.game_work_dir):
-                    self.init_wcm_work_dir()
                     import tkMessageBox
                     def popup():
                         msgBox = tkMessageBox.showinfo("Build status", "Build successful!")
@@ -1127,14 +1167,14 @@ class Main:
 
     def on_ftp_fetch_button(self):
         # save the ps3-ip field to config file
-        self.save_ps3_ip_on_fetch()
+        self.save_ftp_fields_on_fetch()
         ftp_game_list = FtpGameList(self.dropdown.get())
         ftp_game_list.execute()
 
         self.on_game_list_refresh()
 
 
-    def save_ps3_ip_on_fetch(self):
+    def save_ftp_fields_on_fetch(self):
         with open(self.ftp_settings_path, 'r') as settings_file:
             json_settings_data = json.load(settings_file)
             json_settings_data['ps3_lan_ip'] = str(self.entry_field_ftp_ip.get())
@@ -1178,10 +1218,8 @@ class Main:
             icon0_img = Image.open(os.path.join(AppPaths.game_work_dir, 'pkg', 'ICON0.PNG')).convert("RGBA")
             preview_img.paste(icon0_img, (self.icon0_x_pos, self.icon0_y_pos), icon0_img)
 
-        # print('DEBUG: ' + os.path.dirname(__file__))
         xmb_img_dir = os.path.join(ImagePaths.xmb, 'XMB_icons.png')
         xmb_img = Image.open(xmb_img_dir).convert("RGBA")
-
 
         preview_img.paste(xmb_img, (0, 0), xmb_img)
         preview_img.save(os.path.join(AppPaths.game_work_dir, '..', 'preview.png'))

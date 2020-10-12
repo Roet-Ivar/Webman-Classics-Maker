@@ -31,11 +31,12 @@ class App:
 
     # in resources
     fonts           = os.path.join(resources, 'fonts')
+    images          = os.path.join(resources, 'images')
     pkg             = os.path.join(resources, 'pkg')
+    tools           = os.path.join(resources, 'tools')
 
     # in pkg
     USRDIR          = os.path.join(pkg, 'USRDIR')
-    tools           = os.path.join(resources, 'tools')
 
     # in tools
     scetool         = os.path.join(tools, 'scetool')
