@@ -293,7 +293,7 @@ class Main:
         self.image_pic0_ref = copy.copy(self.image_pic0)
 
         self.image_pic1 = self.load_pkg_images(pic1_filename)
-        self.image_pic1_ref = copy.copy(self.image_pic0)
+        self.image_pic1_ref = copy.copy(self.image_pic1)
         # self.photo_image_pic1_xmb = copy.copy(self.image_pic1)
         self.image_pic1_w_title = copy.copy(self.image_pic1)
 
@@ -648,6 +648,9 @@ class Main:
         pkg_build_path = kwargs.get('pkg_build_path', None)
 
         pic1_changed = False
+        pic0_changed = False
+        icon0_changed = False
+
         # TODO image replace browser: missing the title text!
         if img_to_be_changed is not None:
             if img_to_be_changed.lower() == 'pic1':
@@ -667,54 +670,61 @@ class Main:
             if os.path.exists(pkg_build_path):
                 # draw PIC1 from pkg_dir and then xmb icons and system logo onto the pkg  background
                 if os.path.isfile(os.path.join(pkg_build_path, 'ICON0.PNG')):
+                    icon0_changed = True
                     self.image_icon0 = Image.open(os.path.join(pkg_build_path, 'ICON0.PNG')).convert("RGBA")
                 else:
+                    icon0_changed = True
                     self.image_icon0 = Image.open(os.path.join(self.wcm_pkg_dir, 'ICON0.PNG')).convert("RGBA")
 
                 if os.path.isfile(os.path.join(pkg_build_path, 'PIC0.PNG')):
+                    pic0_changed = True
                     self.image_pic0 = Image.open(os.path.join(pkg_build_path, 'PIC0.PNG')).convert("RGBA")
-                else:
+                elif os.path.isfile(os.path.join(self.wcm_pkg_dir, 'PIC0.PNG')):
+                    pic0_changed = True
                     self.image_pic0 = Image.open(os.path.join(self.wcm_pkg_dir, 'PIC0.PNG')).convert("RGBA")
 
                 if os.path.isfile(os.path.join(pkg_build_path, 'PIC1.PNG')):
                     self.image_pic1 = Image.open(os.path.join(pkg_build_path, 'PIC1.PNG')).convert("RGBA")
                     self.image_pic1_ref = Image.open(os.path.join(pkg_build_path, 'PIC1.PNG')).convert("RGBA")
                     pic1_changed = True
-                else:
+                elif os.path.isfile(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG')):
                     self.image_pic1 = Image.open(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG')).convert("RGBA")
                     self.image_pic1_ref = Image.open(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG')).convert("RGBA")
                     pic1_changed = True
-        else:
+        elif os.path.isfile(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG')):
             self.image_pic1 = Image.open(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG')).convert("RGBA")
             self.image_pic1_ref = Image.open(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG')).convert("RGBA")
             pic1_changed = True
+
 
         if pic1_changed:
             # draw xmb icons and system logo onto the background
             self.image_pic1.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
             self.image_pic1.paste(self.ps3_system_logo, (1180, 525), self.ps3_system_logo)
 
+        if pic1_changed or icon0_changed:
+            # crop and blend ICON0 to the background
+            tmp_icon0_bg = copy.copy(self.image_pic1_ref)
+            tmp_icon0_bg.paste(self.image_icon0.convert("RGBA"), (self.icon0_x_pos, self.icon0_y_pos), self.image_icon0.convert("RGBA"))
+            # Image.crop((left, top, right, bottom))
+            tmp_image_icon0 = tmp_icon0_bg.crop((self.icon0_x_pos, self.icon0_y_pos,
+                                                 self.icon0_x_pos + self.image_icon0.width,
+                                                 self.icon0_y_pos + self.image_icon0.height))
 
-        # crop and blend ICON0 to the background
-        tmp_icon0_bg = copy.copy(self.image_pic1_ref)
-        tmp_icon0_bg.paste(self.image_icon0.convert("RGBA"), (self.icon0_x_pos, self.icon0_y_pos), self.image_icon0.convert("RGBA"))
-        # Image.crop((left, top, right, bottom))
-        tmp_image_icon0 = tmp_icon0_bg.crop((self.icon0_x_pos, self.icon0_y_pos,
-                                             self.icon0_x_pos + self.image_icon0.width,
-                                             self.icon0_y_pos + self.image_icon0.height))
-
-
-        # crop and blend PIC0 to the background
-        if os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC0.PNG')):
-            tmp_pic0_bg = copy.copy(self.image_pic1_ref)
-        else:
-            tmp_pic0_bg = copy.copy(self.image_pic1_w_title)
-        # Image.paste(im1, (left, top, right, bottom), im1)
-        tmp_pic0_bg.paste(self.image_pic0, (self.pic0_x_pos, self.pic0_y_pos), self.image_pic0)
-        # Image.crop((left, top, right, bottom))
-        tmp_image_pic0 = tmp_pic0_bg.crop((self.pic0_x_pos, self.pic0_y_pos,
-                                           self.pic0_x_pos + self.image_pic0.width,
-                                           self.pic0_y_pos + self.image_pic0.height))
+        if pic1_changed or pic0_changed:
+            # TODO: here's a problem with PIC1 and no PIC0
+            # crop and blend PIC0 to the background
+            if os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC0.PNG')):
+                tmp_pic0_bg = copy.copy(self.image_pic1)
+            # else use backgrounf w/ title
+            else:
+                tmp_pic0_bg = copy.copy(self.image_pic1_w_title)
+            # Image.paste(im1, (left, top, right, bottom), im1)
+            tmp_pic0_bg.paste(self.image_pic0, (self.pic0_x_pos, self.pic0_y_pos), self.image_pic0)
+            # Image.crop((left, top, right, bottom))
+            tmp_image_pic0 = tmp_pic0_bg.crop((self.pic0_x_pos, self.pic0_y_pos,
+                                               self.pic0_x_pos + self.image_pic0.width,
+                                               self.pic0_y_pos + self.image_pic0.height))
 
         # draw launch-date and clock beside ICON0
         self.draw_text_on_image_w_shadow(self.image_pic1, "11/11/2006 00:00", 760, 522, 20, 1, 'white', 'black')
@@ -918,12 +928,11 @@ class Main:
         self.entry_field_iso_path.delete(0, END)
         self.entry_field_iso_path.insert(0, iso_path)
         self.entry_field_iso_path.config(state='readonly')
-        #TODO: this might be more optimized somewhere else
-        self.dynamic_game_build_path()
+
 
     # Dynamic update of the game title on to the PIC1 image
     def dynamic_title_to_pic1(self, event):
-        tmp_img = copy.copy(self.image_pic1)
+        tmp_img = self.image_pic1
         # self, image, text, text_x, text_y, text_size, text_outline, text_color,
         self.draw_text_on_image_w_shadow(tmp_img, event.widget.get(), 760, 487, 32, 2, 'white', 'black')
         self.image_pic1_w_title = copy.copy(tmp_img)
@@ -932,6 +941,8 @@ class Main:
         self.button_pic1.config(image=self.photo_image_pic1_xmb)
 
         self.init_draw_images_on_canvas(self.main)
+        #TODO: this might be more optimized somewhere else
+        self.dynamic_game_build_path()
 
     def image_replace_browser(self, main):
         image = askopenfile(mode='rb', title='Browse an image', filetypes=[('PNG image', '.PNG')])

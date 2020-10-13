@@ -174,7 +174,7 @@ class FtpGameList():
             for list_game in self.json_game_list_data[platform_list]:
                 if game_filename == list_game['filename']:
                     self.game_count += 1
-                    print('DEBUG PROGRESS: ' + "{:.0%}".format(float(self.game_count).__div__(float(self.total_lines_count))) + '% (' + str(self.game_count) + '/' + str(self.total_lines_count) + ')')
+                    print('DEBUG PROGRESS: ' + "{:.0%}".format(float(self.game_count).__div__(float(self.total_lines_count))) + ' (' + str(self.game_count) + '/' + str(self.total_lines_count) + ')')
                     print('\nDEBUG skipping ' + game_filename + ', already fetched\n')
                     game_exist = True
                     pass
@@ -245,7 +245,7 @@ class FtpGameList():
 
                 # add game to list of new games
                 self.game_count += 1
-                print('DEBUG PROGRESS: ' + "{:.0%}".format(float(self.game_count).__div__(float(self.total_lines_count))) + '% (' + str(self.game_count) + '/' + str(self.total_lines_count) + ')')
+                print('DEBUG PROGRESS: ' + "{:.0%}".format(float(self.game_count).__div__(float(self.total_lines_count))) + ' (' + str(self.game_count) + '/' + str(self.total_lines_count) + ')')
 
                 self.new_json_game_list_data[platform_list].append({
                     "title_id": title_id,
@@ -445,7 +445,7 @@ class FTPDataHandler:
             # if None: refetch has failed => skip game by breaking the loop
             if data is None:
                 game_count += 1
-                print('DEBUG PROGRESS: ' + "{:.0%}".format(float(game_count).__div__(float(self.total_lines))) + '% (' + str(game_count) + '/' + str(self.total_lines) + ')')
+                print('DEBUG PROGRESS: ' + "{:.0%}".format(float(game_count).__div__(float(self.total_lines))) + ' (' + str(game_count) + '/' + str(self.total_lines) + ')')
                 break
             else:
                 if fill_buffer(self, data):
