@@ -61,6 +61,7 @@ class FtpGameList():
         # singular instances
         self.total_lines_count = 0
         self.game_count = 0
+
         self.ftp = None
         self.data_chunk = None
 
@@ -78,30 +79,37 @@ class FtpGameList():
                 self.ftp.retrlines('NLST ' + self.PS2_ISO_PATH, self.ps2_lines.append)
                 self.ftp.retrlines('NLST ' + self.PS3_ISO_PATH, self.ps3_lines.append)
 
-                # TODO: make a filter that removes empty entries
-                self.all_lines.append(self.psp_lines)
-                self.all_lines.append(self.psx_lines)
-                self.all_lines.append(self.ps2_lines)
-                self.all_lines.append(self.ps3_lines)
-
             elif self.platform_filter.lower() == 'psp':
                 self.ftp.retrlines('NLST ' + self.PSP_ISO_PATH, self.psp_lines.append)
-                self.all_lines.append(self.psp_lines)
 
             elif self.platform_filter.lower() == 'psx':
                 self.ftp.retrlines('NLST ' + self.PSX_ISO_PATH, self.psx_lines.append)
-                self.all_lines.append(self.psx_lines)
 
             elif self.platform_filter.lower() == 'ps2':
                 self.ftp.retrlines('NLST ' + self.PS2_ISO_PATH, self.ps2_lines.append)
-                self.all_lines.append(self.ps2_lines)
 
             elif self.platform_filter.lower() == 'ps3':
                 self.ftp.retrlines('NLST ' + self.PS3_ISO_PATH, self.ps3_lines.append)
-                self.all_lines.append(self.ps3_lines)
+
+            # filter out any empty entries
+            self.all_lines.append(self.psp_lines)
+            self.all_lines.append(self.psx_lines)
+            self.all_lines.append(self.ps2_lines)
+            self.all_lines.append(self.ps3_lines)
+
+            filtered_platform_list = []
+            for p in self.all_lines:
+                # filer the lines using the platform filter
+                filtered_lines = filter(self.file_ext_filter, p)
+                filtered_platform_list.append(filtered_lines)
+                self.total_lines_count += len(filtered_lines)
+
+            self.psp_lines = filtered_platform_list[0]
+            self.psx_lines = filtered_platform_list[1]
+            self.ps2_lines = filtered_platform_list[2]
+            self.ps3_lines = filtered_platform_list[3]
 
             # after retrieving the list of file paths we fetch the actual data
-            self.total_lines_count = len(self.psp_lines) + len(self.psx_lines) + len(self.ps2_lines) + len(self.ps3_lines)
             self.data_chunk = FTPDataHandler(self.ftp, self.total_lines_count)
 
         except Exception as e:
@@ -121,16 +129,12 @@ class FtpGameList():
             self.new_json_game_list_data = json.load(f)
 
         # append the platform lists
-
         if self.platform_filter.lower() == 'all':
             for platform in self.json_game_list_data:
-                self.new_platform_list_data = self.list_builder(platform[0:3], self.game_count)
-                # self.json_game_list_data[platform].extend(self.new_platform_list_data[platform])
-
+                self.new_platform_list_data = self.list_builder(platform[0:3])
         else:
-            platform = self.platform_filter.lower() + '_games'
-            self.new_platform_list_data = self.list_builder(platform[0:3], self.game_count)
-            # self.json_game_list_data[platform].extend(self.new_platform_list_data[platform])
+            platform = self.platform_filter.lower()
+            self.new_platform_list_data = self.list_builder(platform)
 
         # save updated gamelist to disk
         with open(self.GAME_LIST_DATA_FILE, 'w') as newFile:
@@ -138,40 +142,32 @@ class FtpGameList():
             newFile.write(json_text)
 
 
-    def list_builder(self, platform, game_count):
+    def list_builder(self, platform):
         if 'psp' == platform.lower():
             platform_list   = 'psp_games'
             platform_path   = self.PSP_ISO_PATH
-            platform_filter = self.file_ext_filter
-            platform_lines  = self.psp_lines
+            filtered_platform  = self.psp_lines
         elif 'psx' == platform.lower():
             platform_list   = 'psx_games'
             platform_path   = self.PSX_ISO_PATH
-            platform_filter = self.file_ext_filter
-            platform_lines  = self.psx_lines
+            filtered_platform  = self.psx_lines
         elif 'ps2' == platform.lower():
             platform_list   = 'ps2_games'
             platform_path   = self.PS2_ISO_PATH
-            platform_filter = self.file_ext_filter
-            platform_lines  = self.ps2_lines
+            filtered_platform  = self.ps2_lines
         elif 'ps3' == platform.lower():
             platform_list   = 'ps3_games'
             platform_path   = self.PS3_ISO_PATH
-            platform_filter = self.file_ext_filter
-            platform_lines  = self.ps3_lines
+            filtered_platform  = self.ps3_lines
 
-        # filer the lines using the platform filter
-        filtered_lines = filter(platform_filter, platform_lines)
-        null = None     # to comply with json syntax
-        # game_exist = False
-
+        # instantiate variables
         title_id = None
         meta_data_link = None
         icon0 = None
         pic0 = None
         pic1 = None
 
-        for game_filename in filtered_lines:
+        for game_filename in filtered_platform:
             game_exist = False
 
             # check if game exist
@@ -218,7 +214,7 @@ class FtpGameList():
                         if platform == 'psp' or platform == 'psx' or platform == 'ps2':
                             title = game['title'].encode('utf-8').strip()
 
-                            if game['meta_data_link'] is not null:
+                            if game['meta_data_link'] is not None:
                                 meta_data_link = game['meta_data_link']
 
                         elif platform == 'ps3':
@@ -226,7 +222,7 @@ class FtpGameList():
                             title = game['locale'][0]['title'].encode('utf-8').strip()
 
 
-                        #if str(title).isupper() and str(meta_data_link) == null:
+                        #if str(title).isupper() and str(meta_data_link) == None:
                         #   #if no meta_data_link, capitalize titles with all upper-case
                         #   title = title.title()
                         break
@@ -248,8 +244,8 @@ class FtpGameList():
                 title = title.strip()
 
                 # add game to list of new games
-                game_count += 1
-                print('DEBUG PROGRESS ' + str(game_count) + ' of ' + str(self.total_lines_count))
+                self.game_count += 1
+                print('DEBUG PROGRESS ' + str(self.game_count) + ' of ' + str(self.total_lines_count))
 
                 self.new_json_game_list_data[platform_list].append({
                     "title_id": title_id,
