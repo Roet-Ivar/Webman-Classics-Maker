@@ -174,7 +174,7 @@ class FtpGameList():
             for list_game in self.json_game_list_data[platform_list]:
                 if game_filename == list_game['filename']:
                     self.game_count += 1
-                    print('DEBUG PROGRESS ' + str(self.game_count) + ' of ' + str(self.total_lines_count))
+                    print('DEBUG PROGRESS: ' + "{:.0%}".format(float(self.game_count).__div__(float(self.total_lines_count))) + '% (' + str(self.game_count) + '/' + str(self.total_lines_count) + ')')
                     print('\nDEBUG skipping ' + game_filename + ', already fetched\n')
                     game_exist = True
                     pass
@@ -245,7 +245,7 @@ class FtpGameList():
 
                 # add game to list of new games
                 self.game_count += 1
-                print('DEBUG PROGRESS ' + str(self.game_count) + ' of ' + str(self.total_lines_count))
+                print('DEBUG PROGRESS: ' + "{:.0%}".format(float(self.game_count).__div__(float(self.total_lines_count))) + '% (' + str(self.game_count) + '/' + str(self.total_lines_count) + ')')
 
                 self.new_json_game_list_data[platform_list].append({
                     "title_id": title_id,
@@ -306,7 +306,7 @@ class FtpGameList():
             if platform == 'psp':
                 not_used, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, self.ftp_psp_png_offset_kb, self.game_count)
 
-            # some guitar hero games seems to need a larger chunk to find the last PIC1
+            # PS3 guitar hero games needs a larger chunk to find the PIC1
             if platform == 'ps3' and 'guitar' in game_filename.lower():
                 not_used, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, 6000, 0, self.game_count)
 
@@ -395,14 +395,16 @@ class FTPDataHandler:
         pic0 = None
         pic1 = None
 
-        file_size_bytes = self.ftp_instance.size(ftp_filename)
-        if file_size_bytes > 0 and file_size_bytes < (chunk_size * 1024):
-            chunk_size = (file_size_bytes / 1024) * 0.95
-
         iso_index = ftp_filename.index('ISO/', 0, len(ftp_filename))
         platform = ftp_filename[iso_index-3: iso_index].lower()
         filename = ftp_filename[iso_index+4: len(ftp_filename)]
         game_title = ftp_filename[iso_index+4: len(ftp_filename)-4]
+
+        file_size_bytes = self.ftp_instance.size(ftp_filename)
+        if file_size_bytes > 0 and file_size_bytes < (chunk_size * 1024):
+            chunk_size = (file_size_bytes / 1024) * 0.95
+        elif platform.lower() == ('psx', 'ps2'):
+            chunk_size = 750
 
         def fill_buffer(self, received):
             if self.chunk_size <= 0:
@@ -440,10 +442,10 @@ class FTPDataHandler:
                     print('ERROR could not refetch ' + filename + ', skipping')
                     data = None
 
-            # if None skip game by breaking the loop
+            # if None: refetch has failed => skip game by breaking the loop
             if data is None:
                 game_count += 1
-                print('DEBUG PROGRESS ' + game_count + ' of ' + self.total_lines)
+                print('DEBUG PROGRESS: ' + "{:.0%}".format(float(game_count).__div__(float(self.total_lines))) + '% (' + str(game_count) + '/' + str(self.total_lines) + ')')
                 break
             else:
                 if fill_buffer(self, data):
@@ -469,6 +471,7 @@ class FTPDataHandler:
                         if platform == 'psp' or platform == 'ps3':
                             icon0, pic0, pic1 = get_png_from_buffer(self, platform, filename, self.data_chunk)
 
+                        # Error 451 is normal when closing the conection
                         if '451' not in e.message:
                             print('DEBUG - connection ' + e.message + ' during data fetching of ' + game_title)
                         break
