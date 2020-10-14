@@ -81,6 +81,9 @@ class Main:
         self.usb_port_number 		= 0
 
         # images
+        self.image_xmb_icons = Image.open(os.path.join(ImagePaths.xmb, 'XMB_icons.png'))
+        self.ps3_system_logo = Image.open(os.path.join(ImagePaths.xmb, 'ps3_type_logo.png'))
+
         self.images_logo_drive = []
         self.images_logo_drive.append(PhotoImage(self.smaller_button_maker('HDD', font='conthrax-sb.ttf', x=-1, y=-2)))
         self.images_logo_drive.append(PhotoImage(self.smaller_button_maker('USB', font='conthrax-sb.ttf', x=-1, y=-2)))
@@ -158,6 +161,12 @@ class Main:
             os.makedirs(os.path.join(AppPaths.wcm_work_dir, 'pkg'))
 
             self.init_pkg_images()
+
+    def init_pkg_build_dir(self):
+        if os.path.isdir(AppPaths.pkg):
+            shutil.rmtree(AppPaths.pkg)
+            os.makedirs(AppPaths.pkg)
+        self.copytree(os.path.join(AppPaths.util_resources, 'pkg_dir_bak'), os.path.join(AppPaths.resources, 'pkg'))
 
     def init_config_file(self):
         if not os.path.isdir(AppPaths.settings):
@@ -300,9 +309,6 @@ class Main:
         self.pkg_icon0 = None
         self.pkg_pic0 = None
         self.pkg_pic1= None
-
-        self.image_xmb_icons = Image.open(os.path.join(ImagePaths.xmb, 'XMB_icons.png'))
-        self.ps3_system_logo = Image.open(os.path.join(ImagePaths.xmb, 'ps3_type_logo.png'))
 
     def load_default_pkg_images(self, filename):
         default_pkg_img_dir = os.path.join(ImagePaths.pkg, 'default')
@@ -1090,6 +1096,7 @@ class Main:
 
             self.save_preview_image()
             self.save_pkg_info_to_json()
+
             # clean up the temp work dir
             self.init_wcm_work_dir()
 
@@ -1124,20 +1131,27 @@ class Main:
                 shutil.copy2(s, d)
 
     def on_build_button(self):
-        self.copytree(os.path.join(AppPaths.util_resources, 'pkg_dir_bak'), os.path.join(AppPaths.resources, 'pkg'))
+        self.init_pkg_build_dir()
 
         if self.save_work_dir():
+            if not os.path.exists(self.pkg_dir):
+                os.makedirs(self.pkg_dir)
             if not os.path.exists(AppPaths.game_work_dir):
                 os.makedirs(AppPaths.game_work_dir)
+
             title_id = str(self.entry_field_title_id.get()).replace('-', '')
             filename = str(self.entry_field_filename.get())
             game_pkg_dir = os.path.join(AppPaths.game_work_dir, 'pkg')
 
-            if not os.path.exists(self.pkg_dir):
-                os.makedirs(self.pkg_dir)
-
             if os.path.isfile(os.path.join(game_pkg_dir, 'ICON0.PNG')):
                 shutil.copyfile(os.path.join(game_pkg_dir, 'ICON0.PNG'), os.path.join(self.pkg_dir, 'ICON0.PNG'))
+            else:
+                platform = ''
+                file_path = str(self.entry_field_iso_path.get())
+                if file_path != '':
+                    iso_str_index = file_path.index('ISO/', 0, len(file_path))
+                    platform = file_path[iso_str_index-3: iso_str_index].lower()
+                shutil.copyfile(os.path.join(AppPaths.resources, 'images', 'pkg', 'default', platform, 'ICON0.PNG'), os.path.join(self.pkg_dir, 'ICON0.PNG'))
 
             if os.path.isfile(os.path.join(game_pkg_dir, 'PIC0.PNG')):
                 shutil.copyfile(os.path.join(game_pkg_dir, 'PIC0.PNG'), os.path.join(self.pkg_dir, 'PIC0.PNG'))
@@ -1222,6 +1236,7 @@ class Main:
             preview_img.paste(pic0_img, (self.pic0_x_pos, self.pic0_y_pos), pic0_img)
         else:
             # if no PIC0, use texts
+            preview_img.paste(self.ps3_system_logo, (1180, 525), self.ps3_system_logo)
             self.draw_text_on_image_w_shadow(preview_img, "11/11/2006 00:00", 760, 522, 20, 1, 'white', 'black')
             self.draw_text_on_image_w_shadow(preview_img, str(self.entry_field_title.get()), 760, 487, 32, 2, 'white',
                                              'black')
@@ -1231,10 +1246,7 @@ class Main:
             icon0_img = Image.open(os.path.join(AppPaths.game_work_dir, 'pkg', 'ICON0.PNG')).convert("RGBA")
             preview_img.paste(icon0_img, (self.icon0_x_pos, self.icon0_y_pos), icon0_img)
 
-        xmb_img_dir = os.path.join(ImagePaths.xmb, 'XMB_icons.png')
-        xmb_img = Image.open(xmb_img_dir).convert("RGBA")
-
-        preview_img.paste(xmb_img, (0, 0), xmb_img)
+        preview_img.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
         preview_img.save(os.path.join(AppPaths.game_work_dir, '..', 'preview.png'))
 
     def on_game_list_refresh(self):
