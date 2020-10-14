@@ -286,13 +286,13 @@ class Main:
         pic0_filename = 'PIC0.PNG'
         pic1_filename = 'PIC1.PNG'
 
-        self.image_icon0 = self.load_pkg_images(icon0_filename)
+        self.image_icon0 = self.load_default_pkg_images(icon0_filename)
         self.image_icon0_ref = copy.copy(self.image_icon0)
 
-        self.image_pic0 = self.load_pkg_images(pic0_filename)
+        self.image_pic0 = self.load_default_pkg_images(pic0_filename)
         self.image_pic0_ref = copy.copy(self.image_pic0)
 
-        self.image_pic1 = self.load_pkg_images(pic1_filename)
+        self.image_pic1 = self.load_default_pkg_images(pic1_filename)
         self.image_pic1_ref = copy.copy(self.image_pic1)
         # self.photo_image_pic1_xmb = copy.copy(self.image_pic1)
         self.image_pic1_w_title = copy.copy(self.image_pic1)
@@ -304,15 +304,9 @@ class Main:
         self.image_xmb_icons = Image.open(os.path.join(ImagePaths.xmb, 'XMB_icons.png'))
         self.ps3_system_logo = Image.open(os.path.join(ImagePaths.xmb, 'ps3_type_logo.png'))
 
-    def load_pkg_images(self, filename):
+    def load_default_pkg_images(self, filename):
         default_pkg_img_dir = os.path.join(ImagePaths.pkg, 'default')
-        png_path = os.path.join(self.wcm_pkg_dir, filename)
-
-        if '.png' in png_path.lower() and os.path.isfile(png_path):
-            return Image.open(png_path).convert("RGBA")
-        else:
-            shutil.copyfile(os.path.join(default_pkg_img_dir, filename), png_path)
-            return Image.open(png_path).convert("RGBA")
+        return Image.open(os.path.join(default_pkg_img_dir, filename)).convert("RGBA")
 
     def draw_background_on_canvas(self):
         self.current_img = self.background_images[self.canvas_image_number]
@@ -646,6 +640,7 @@ class Main:
     def init_draw_images_on_canvas(self, main, *args, **kwargs):
         img_to_be_changed = kwargs.get('img_to_be_changed', None)
         pkg_build_path = kwargs.get('pkg_build_path', None)
+        default_img_path = os.path.join(AppPaths.resources, 'images', 'pkg', 'default')
 
         pic1_changed = False
         pic0_changed = False
@@ -666,34 +661,37 @@ class Main:
 
 
         # check if xmb_icons needs to be re-drawn
-        elif pkg_build_path is not None:
+        elif pkg_build_path is not None and pkg_build_path is not '':
             if os.path.exists(pkg_build_path):
                 # draw PIC1 from pkg_dir and then xmb icons and system logo onto the pkg  background
                 if os.path.isfile(os.path.join(pkg_build_path, 'ICON0.PNG')):
                     icon0_changed = True
                     self.image_icon0 = Image.open(os.path.join(pkg_build_path, 'ICON0.PNG')).convert("RGBA")
-                else:
-                    icon0_changed = True
-                    self.image_icon0 = Image.open(os.path.join(self.wcm_pkg_dir, 'ICON0.PNG')).convert("RGBA")
 
                 if os.path.isfile(os.path.join(pkg_build_path, 'PIC0.PNG')):
                     pic0_changed = True
                     self.image_pic0 = Image.open(os.path.join(pkg_build_path, 'PIC0.PNG')).convert("RGBA")
-                elif os.path.isfile(os.path.join(self.wcm_pkg_dir, 'PIC0.PNG')):
-                    pic0_changed = True
-                    self.image_pic0 = Image.open(os.path.join(self.wcm_pkg_dir, 'PIC0.PNG')).convert("RGBA")
 
                 if os.path.isfile(os.path.join(pkg_build_path, 'PIC1.PNG')):
                     self.image_pic1 = Image.open(os.path.join(pkg_build_path, 'PIC1.PNG')).convert("RGBA")
                     self.image_pic1_ref = Image.open(os.path.join(pkg_build_path, 'PIC1.PNG')).convert("RGBA")
                     pic1_changed = True
-                elif os.path.isfile(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG')):
-                    self.image_pic1 = Image.open(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG')).convert("RGBA")
-                    self.image_pic1_ref = Image.open(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG')).convert("RGBA")
-                    pic1_changed = True
-        elif os.path.isfile(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG')):
-            self.image_pic1 = Image.open(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG')).convert("RGBA")
-            self.image_pic1_ref = Image.open(os.path.join(self.wcm_pkg_dir, 'PIC1.PNG')).convert("RGBA")
+
+        else:
+            platform = ''
+            file_path = str(self.entry_field_iso_path.get())
+            if file_path != '':
+                iso_str_index = file_path.index('ISO/', 0, len(file_path))
+                platform = file_path[iso_str_index-3: iso_str_index].lower()
+
+            self.image_icon0 = Image.open(os.path.join(default_img_path, platform.upper(), 'ICON0.PNG')).convert("RGBA")
+            self.image_icon0_ref = Image.open(os.path.join(default_img_path, 'ICON0.PNG')).convert("RGBA")
+
+            self.image_pic0 = Image.open(os.path.join(default_img_path, 'PIC0.PNG')).convert("RGBA")
+            self.image_pic0_ref = Image.open(os.path.join(default_img_path, 'PIC0.PNG')).convert("RGBA")
+
+            self.image_pic1 = Image.open(os.path.join(default_img_path, 'PIC1.PNG')).convert("RGBA")
+            self.image_pic1_ref = Image.open(os.path.join(default_img_path, 'PIC1.PNG')).convert("RGBA")
             pic1_changed = True
 
 
@@ -710,24 +708,23 @@ class Main:
             tmp_image_icon0 = tmp_icon0_bg.crop((self.icon0_x_pos, self.icon0_y_pos,
                                                  self.icon0_x_pos + self.image_icon0.width,
                                                  self.icon0_y_pos + self.image_icon0.height))
+        # A PIC0 must be used for the GUI
+        if os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC0.PNG')):
+            tmp_pic0_bg = copy.copy(self.image_pic1)
+        # else use background w/ title
+        else:
+            tmp_pic0_bg = copy.copy(self.image_pic1_w_title)
+            # draw date and time beside ICON0
+            self.draw_text_on_image_w_shadow(self.image_pic1, "11/11/2006 00:00", 760, 522, 20, 1, 'white', 'black')
 
-        if pic1_changed or pic0_changed:
-            # TODO: here's a problem with PIC1 and no PIC0
-            # crop and blend PIC0 to the background
-            if os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC0.PNG')):
-                tmp_pic0_bg = copy.copy(self.image_pic1)
-            # else use backgrounf w/ title
-            else:
-                tmp_pic0_bg = copy.copy(self.image_pic1_w_title)
-            # Image.paste(im1, (left, top, right, bottom), im1)
-            tmp_pic0_bg.paste(self.image_pic0, (self.pic0_x_pos, self.pic0_y_pos), self.image_pic0)
-            # Image.crop((left, top, right, bottom))
-            tmp_image_pic0 = tmp_pic0_bg.crop((self.pic0_x_pos, self.pic0_y_pos,
+        # Image.paste(im1, (left, top, right, bottom), im1)
+        tmp_pic0_bg.paste(self.image_pic0, (self.pic0_x_pos, self.pic0_y_pos), self.image_pic0)
+        # Image.crop((left, top, right, bottom))
+        tmp_image_pic0 = tmp_pic0_bg.crop((self.pic0_x_pos, self.pic0_y_pos,
                                                self.pic0_x_pos + self.image_pic0.width,
                                                self.pic0_y_pos + self.image_pic0.height))
 
-        # draw launch-date and clock beside ICON0
-        self.draw_text_on_image_w_shadow(self.image_pic1, "11/11/2006 00:00", 760, 522, 20, 1, 'white', 'black')
+
 
         # resize: ->853, ->480
         self.photoimage_pic1 = PhotoImage(
@@ -897,13 +894,14 @@ class Main:
             self.drive_system_array[1] = system_choice
 
     # Dynamic update of the pkg path for showing fetched images
-    def dynamic_game_build_path(self):
-        if str(self.entry_field_iso_path.get()) != '' and str(self.entry_field_title_id.get()) != '':
+    def update_game_build_path(self):
+        # ask gamelist to return selected path
+        build_dir_pkg_path = None
+        selected_path = self.gamelist.get_selected_build_dir_path()
+        if selected_path is not '':
             AppPaths.game_work_dir = os.path.join(self.gamelist.get_selected_build_dir_path(), 'work_dir')
             build_dir_pkg_path = os.path.join(AppPaths.game_work_dir, 'pkg')
-            if os.path.exists(build_dir_pkg_path):
-                # update images
-                self.init_draw_images_on_canvas(self.main, pkg_build_path=build_dir_pkg_path)
+        self.init_draw_images_on_canvas(self.main, pkg_build_path=build_dir_pkg_path)
 
     # Dynamic update of the 'entry_field_filename' into the 'entry_field_iso_path'
     def dynamic_filename_to_path(self, event):
@@ -942,7 +940,7 @@ class Main:
 
         self.init_draw_images_on_canvas(self.main)
         #TODO: this might be more optimized somewhere else
-        self.dynamic_game_build_path()
+        self.update_game_build_path()
 
     def image_replace_browser(self, main):
         image = askopenfile(mode='rb', title='Browse an image', filetypes=[('PNG image', '.PNG')])
@@ -1044,7 +1042,7 @@ class Main:
             self.entry_field_filename.icursor(0)
             return False
 
-        elif str(tmp_name).endswith(file_extensions):
+        elif str(tmp_name).endswith(AppPaths.file_extensions):
             self.filename_error_msg = 'DEBUG The image file must have a name'
             print(self.filename_error_msg)
             self.entry_field_filename.focus_set()
@@ -1087,7 +1085,7 @@ class Main:
                 iso_str_index = file_path.index('ISO/', 0, len(file_path))
                 platform = file_path[iso_str_index-3: iso_str_index].lower()
 
-                icon0 = Image.open(os.path.join(AppPaths.application_path, 'resources', 'images', 'pkg', 'default', platform.upper(), 'ICON0.PNG')).convert("RGBA")
+                icon0 = Image.open(os.path.join(AppPaths.resources, 'images', 'pkg', 'default', platform.upper(), 'ICON0.PNG')).convert("RGBA")
                 icon0.save(os.path.join(AppPaths.game_work_dir, 'pkg', 'ICON0.PNG'))
 
             self.save_preview_image()
