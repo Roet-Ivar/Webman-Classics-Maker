@@ -195,10 +195,6 @@ class FtpGameList():
                         title = title[0:len(title)-len(file_ext)]
                         break
 
-                # # removes parenthesis & brackets including their content
-                # title = re.sub(r'\([^)]*\)', '', title).strip()
-                # title = re.sub(r'\[[^)]*\]', '', title).strip()
-
                 # read platform db
                 platform_db_file = platform.upper() + '_all_title_ids.json'
                 with open(os.path.join(AppPaths.games_metadata, platform_db_file)) as f:
@@ -221,10 +217,6 @@ class FtpGameList():
                             # use the first element for English
                             title = game['locale'][0]['title'].encode('utf-8').strip()
 
-
-                        #if str(title).isupper() and str(meta_data_link) == None:
-                        #   #if no meta_data_link, capitalize titles with all upper-case
-                        #   title = title.title()
                         break
 
                 # check for duplicates of the same title in the whole list
@@ -338,9 +330,15 @@ class FtpGameList():
         self.ftp.login(user='', passwd='')
 
     def image_saver(self, platform, game_build_dir, images):
+        import shutil
+
         icon0 = images[0]
         pic0 = images[1]
         pic1 = images[2]
+
+        if os.path.isdir(game_build_dir):
+            shutil.rmtree(game_build_dir)
+            os.makedirs(os.path.join(game_build_dir, 'work_dir', 'pkg'))
 
         # platforms such as PSP needs rescaling of images
         if(icon0 is not None):
@@ -508,7 +506,6 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
                     png_byte_array = data[index_png_start:index_png_end+8]
                     tmp_image = Image.open(io.BytesIO(png_byte_array)).convert("RGBA")
                     self.img_name = None
-
 
                     if self.platform == 'psp':
                         # icon image PSP
