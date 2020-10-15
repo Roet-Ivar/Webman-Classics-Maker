@@ -168,7 +168,6 @@ class FtpGameList():
 
             # check if game exist
             for game in self.json_game_list_data[platform_list]:
-                # if filename == list_game['filename']:
                 game_path = str(os.path.join(game['path'], game['filename']))
                 if 'corrupt' in filepath and 'corrupt' in game_path:
                     print()
@@ -224,30 +223,26 @@ class FtpGameList():
                 dup_list = []
                 for _platform in self.json_game_list_data:
                     for game in self.json_game_list_data[_platform]:
-                        if 'corrupt' in str(title) and 'corrupt' in str(game['title']):
-                            print()
                         if str(title) in str(game['title']):
                             dup_list.append(str(game['title']))
-                # if there is only one, append ' (1)'
-                if len(dup_list) == 1:
-                    title = title + ' (1)'
-                # if more than one we need to figure out what suffix to give
+                # if there they are the same, append suffix ' (1)'
+                if len(dup_list) == 1 and dup_list[0] == title:
+                        title = title + ' (1)'
+                # if more than one we need to figure out what suffix to append
                 elif len(dup_list) > 1:
-                    # check if there are earlier duplicates title + (1), (2) etc
                     curr_dup_number = 0
-                    new_title = ''
                     for dup in dup_list:
-                        # a dup_title has to have a (#) pattern
+                        # a dup_title must have a '(#)' pattern
                         dup_match = re.search('\(\d{1,3}\)$', dup)
                         if dup_match is not None:
                             dup_group = dup_match.group()
-                            if int(curr_dup_number) < int(dup_group[1:len(dup_group)-1]):
+                            pre_string = str(dup).replace(str(dup_group), '')
+                            new_number = int(dup_group[1:len(dup_group)-1])
+                            # title should match the pre_string w/o '(#)' pattern
+                            if title == pre_string.strip() and int(curr_dup_number) < new_number:
                                 curr_dup_number = dup_group[1:len(dup_group)-1]
-                                pre_string = str(dup).replace(str(dup_group), '')
                                 suf_string = '(' + str(int(curr_dup_number) +1) + ')'
-                                new_title = pre_string + suf_string
-
-                    title = new_title
+                                title = pre_string + suf_string
 
                 title = title.strip().encode('utf-8')
 
@@ -519,7 +514,7 @@ class FTPDataHandler:
 
                         # Error 451 is normal when closing the conection
                         if '451' not in e.message:
-                            print('DEBUG - connection ' + e.message + ' during data fetching of ' + game_title)
+                            print('DEBUG - connection ' + e.message + ' during data fetching of ' + filename)
                         break
 
         return game_title_id, icon0, pic0, pic1
