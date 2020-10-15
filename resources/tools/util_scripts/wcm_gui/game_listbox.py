@@ -155,10 +155,6 @@ class Gamelist():
     def add_item(self, item):
         if item != '':
             self.list_of_items = self._listbox.get(0, END)
-
-            if 'corrupt' in item:
-                print()
-
             # getting ascending index in order to sort alphabetically
             index = self.get_ascending_index(self.list_of_items, item)
 

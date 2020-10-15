@@ -42,6 +42,7 @@ class FtpGameList():
         self.ftp_user               = ftp_settings_file['ftp_user']
         self.ftp_password           = ftp_settings_file['ftp_password']
         self.use_mock_data          = False
+        self.ftp_folder_depth       = ftp_settings_file['ftp_folder_depth']
 
         self.PSP_ISO_PATH           = '/dev_hdd0/PSPISO/'
         self.PSX_ISO_PATH           = '/dev_hdd0/PSXISO/'
@@ -49,10 +50,10 @@ class FtpGameList():
         self.PS3_ISO_PATH           = '/dev_hdd0/PS3ISO/'
 
         # system specific variables
-        self.psp_lines   = []
-        self.psx_lines   = []
-        self.ps2_lines   = []
-        self.ps3_lines   = []
+        self.psp_lines  = []
+        self.psx_lines  = []
+        self.ps2_lines  = []
+        self.ps3_lines  = []
         self.all_lines  = []
 
         # filters and file extensions
@@ -74,22 +75,26 @@ class FtpGameList():
             self.ftp.voidcmd('TYPE I')
 
             if self.platform_filter.lower() == 'all':
-                self.ftp.retrlines('NLST ' + self.PSP_ISO_PATH, self.psp_lines.append)
-                self.ftp.retrlines('NLST ' + self.PSX_ISO_PATH, self.psx_lines.append)
-                self.ftp.retrlines('NLST ' + self.PS2_ISO_PATH, self.ps2_lines.append)
-                self.ftp.retrlines('NLST ' + self.PS3_ISO_PATH, self.ps3_lines.append)
+                self.ftp_walk(self.ftp, self.PSP_ISO_PATH, self.psp_lines)
+                self.ftp_walk(self.ftp, self.PSX_ISO_PATH, self.psx_lines)
+                self.ftp_walk(self.ftp, self.PS2_ISO_PATH, self.ps2_lines)
+                self.ftp_walk(self.ftp, self.PS3_ISO_PATH, self.ps3_lines)
 
             elif self.platform_filter.lower() == 'psp':
-                self.ftp.retrlines('NLST ' + self.PSP_ISO_PATH, self.psp_lines.append)
+                self.ftp_walk(self.ftp, self.PSP_ISO_PATH, self.psp_lines)
+                # print('DEBUG filtered_files: ' + str(self.psp_lines))
 
             elif self.platform_filter.lower() == 'psx':
-                self.ftp.retrlines('NLST ' + self.PSX_ISO_PATH, self.psx_lines.append)
+                self.ftp_walk(self.ftp, self.PSX_ISO_PATH, self.psx_lines)
+                # print('DEBUG filtered_files: ' + str(self.psp_lines))
 
             elif self.platform_filter.lower() == 'ps2':
-                self.ftp.retrlines('NLST ' + self.PS2_ISO_PATH, self.ps2_lines.append)
+                self.ftp_walk(self.ftp, self.PS2_ISO_PATH, self.ps2_lines)
+                # print('DEBUG filtered_files: ' + str(self.psp_lines))
 
             elif self.platform_filter.lower() == 'ps3':
-                self.ftp.retrlines('NLST ' + self.PS3_ISO_PATH, self.ps3_lines.append)
+                self.ftp_walk(self.ftp, self.PS3_ISO_PATH, self.ps3_lines)
+                # print('DEBUG filtered_files: ' + str(self.psp_lines))
 
             # filter out any empty entries
             self.all_lines.append(self.psp_lines)
@@ -97,17 +102,8 @@ class FtpGameList():
             self.all_lines.append(self.ps2_lines)
             self.all_lines.append(self.ps3_lines)
 
-            filtered_platform_list = []
             for p in self.all_lines:
-                # filer the lines using the platform filter
-                filtered_lines = filter(self.file_ext_filter, p)
-                filtered_platform_list.append(filtered_lines)
-                self.total_lines_count += len(filtered_lines)
-
-            self.psp_lines = filtered_platform_list[0]
-            self.psx_lines = filtered_platform_list[1]
-            self.ps2_lines = filtered_platform_list[2]
-            self.ps3_lines = filtered_platform_list[3]
+                self.total_lines_count += len(p)
 
             # after retrieving the list of file paths we fetch the actual data
             self.data_chunk = FTPDataHandler(self.ftp, self.total_lines_count)
@@ -145,19 +141,15 @@ class FtpGameList():
     def list_builder(self, platform):
         if 'psp' == platform.lower():
             platform_list   = 'psp_games'
-            platform_path   = self.PSP_ISO_PATH
             filtered_platform  = self.psp_lines
         elif 'psx' == platform.lower():
             platform_list   = 'psx_games'
-            platform_path   = self.PSX_ISO_PATH
             filtered_platform  = self.psx_lines
         elif 'ps2' == platform.lower():
             platform_list   = 'ps2_games'
-            platform_path   = self.PS2_ISO_PATH
             filtered_platform  = self.ps2_lines
         elif 'ps3' == platform.lower():
             platform_list   = 'ps3_games'
-            platform_path   = self.PS3_ISO_PATH
             filtered_platform  = self.ps3_lines
 
         # instantiate variables
@@ -169,29 +161,37 @@ class FtpGameList():
 
         for game_filename in filtered_platform:
             game_exist = False
+            filepath = game_filename
+            dir_path = os.path.dirname(filepath).__add__('/')
+            filename = os.path.basename(filepath)
+            platform_path = dir_path
 
             # check if game exist
-            for list_game in self.json_game_list_data[platform_list]:
-                if game_filename == list_game['filename']:
+            for game in self.json_game_list_data[platform_list]:
+                # if filename == list_game['filename']:
+                game_path = str(os.path.join(game['path'], game['filename']))
+                if 'corrupt' in filepath and 'corrupt' in game_path:
+                    print()
+                if filepath == game_path:
                     self.game_count += 1
                     print('DEBUG PROGRESS: ' + "{:.0%}".format(float(self.game_count).__div__(float(self.total_lines_count))) + ' (' + str(self.game_count) + '/' + str(self.total_lines_count) + ')')
-                    print('\nDEBUG skipping ' + game_filename + ', already fetched\n')
+                    print('\nDEBUG skipping ' + filename + ', already fetched\n')
                     game_exist = True
                     pass
 
+
             # if not, add it
             if not game_exist:
-                title_id, icon0, pic0, pic1 = self.get_game_data(platform_path, game_filename)
-                title = game_filename
+                title_id, icon0, pic0, pic1 = self.get_game_data(dir_path, filename)
+                title = filename
 
                 # removes parenthesis & brackets including their content
                 title = re.sub(r'\([^)]*\)', '', title)
                 title = re.sub(r'\[[^)]*\]', '', title)
 
-
                 # removes the file extension
                 for file_ext in GlobalVar.file_extensions:
-                    if game_filename.upper().endswith(file_ext):
+                    if filename.upper().endswith(file_ext):
                         title = title[0:len(title)-len(file_ext)]
                         break
 
@@ -201,70 +201,88 @@ class FtpGameList():
                     self.json_platform_metadata = json.load(f)
 
                 # check for for match the platform game database
-                for game in self.json_platform_metadata['games']:
-                    # adapt the title_id format for the xml db
-                    if platform == 'ps3':
-                        title_id = title_id.replace('-', '')
+                if title_id is not None:
+                    for game in self.json_platform_metadata['games']:
+                        # adapt the title_id format for the xml db
+                        if platform == 'ps3':
+                            title_id = title_id.replace('-', '')
 
-                    if title_id == game['title_id']:
-                        if platform == 'psp' or platform == 'psx' or platform == 'ps2':
-                            title = game['title'].encode('utf-8').strip()
+                        if title_id == game['title_id']:
+                            if platform == 'psp' or platform == 'psx' or platform == 'ps2':
+                                title = game['title'].encode('utf-8').strip()
 
-                            if game['meta_data_link'] is not None:
-                                meta_data_link = game['meta_data_link']
+                                if game['meta_data_link'] is not None:
+                                    meta_data_link = game['meta_data_link']
 
-                        elif platform == 'ps3':
-                            # use the first element for English
-                            title = game['locale'][0]['title'].encode('utf-8').strip()
+                            elif platform == 'ps3':
+                                # use the first element for English
+                                title = game['locale'][0]['title'].encode('utf-8').strip()
 
-                        break
+                            break
 
-                # check for duplicates of the same title in the whole list
-                for pltfrm in self.json_game_list_data:
-                    for game in self.json_game_list_data[pltfrm]:
-                        if str(title) == str(game['title']):
-                            # check if there are earlier duplicates title + (1), (2) etc
-                            dup_title = re.search('\(\d{1,3}\)$', str(title))
-                            if dup_title is not None:
-                                pre = str(title)[:len(str(title))-3]
-                                suf = str(title)[len(str(title))-3:]
-                                new_suf = re.sub('\d(?!\d)', lambda x: str(int(x.group(0)) + 1), suf)
-                                title = pre + new_suf
-                            else:
-                                title = str(title) + ' (1)'
+                # check for duplicates of the same title
+                dup_list = []
+                for _platform in self.json_game_list_data:
+                    for game in self.json_game_list_data[_platform]:
+                        if 'corrupt' in str(title) and 'corrupt' in str(game['title']):
+                            print()
+                        if str(title) in str(game['title']):
+                            dup_list.append(str(game['title']))
+                # if there is only one, append ' (1)'
+                if len(dup_list) == 1:
+                    title = title + ' (1)'
+                # if more than one we need to figure out what suffix to give
+                elif len(dup_list) > 1:
+                    # check if there are earlier duplicates title + (1), (2) etc
+                    curr_dup_number = 0
+                    new_title = ''
+                    for dup in dup_list:
+                        # a dup_title has to have a (#) pattern
+                        dup_match = re.search('\(\d{1,3}\)$', dup)
+                        if dup_match is not None:
+                            dup_group = dup_match.group()
+                            if int(curr_dup_number) < int(dup_group[1:len(dup_group)-1]):
+                                curr_dup_number = dup_group[1:len(dup_group)-1]
+                                pre_string = str(dup).replace(str(dup_group), '')
+                                suf_string = '(' + str(int(curr_dup_number) +1) + ')'
+                                new_title = pre_string + suf_string
 
-                title = title.strip()
+                    title = new_title
+
+                title = title.strip().encode('utf-8')
 
                 # add game to list of new games
+                if 'corrupt' in str(title):
+                    print()
                 self.game_count += 1
                 print('DEBUG PROGRESS: ' + "{:.0%}".format(float(self.game_count).__div__(float(self.total_lines_count))) + ' (' + str(self.game_count) + '/' + str(self.total_lines_count) + ')')
 
                 self.new_json_game_list_data[platform_list].append({
                     "title_id": title_id,
-                    "title": str(title),
+                    "title": title,
                     "platform": platform.upper(),
-                    "filename": game_filename,
+                    "filename": filename,
                     "path": platform_path,
                     "meta_data_link": meta_data_link})
 
                 # also append it to the existing list for next iteration
                 self.json_game_list_data[platform_list].append({
                     "title_id": title_id,
-                    "title": str(title),
+                    "title": title,
                     "platform": platform.upper(),
-                    "filename": game_filename,
+                    "filename": filename,
                     "path": platform_path,
                     "meta_data_link": meta_data_link})
 
-                print('DEBUG \'' + game_filename + '\' got title ' + str(title) + '\n')
+                print('DEBUG \'' + filename + '\' got title ' + str(title) + '\n')
                 print("Added '" + str(title) + "' to the list:\n"
                       + 'Platform: ' + platform.upper() + '\n'
-                      + 'Filename: ' + game_filename + '\n'
+                      + 'Filename: ' + filename + '\n'
                       + 'Title id: ' + str(title_id) + '\n')
 
             if title_id is not None:
                 # save game build folder data here
-                game_folder_name = game_filename[:-4].replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
+                game_folder_name = filename[:-4].replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
                 game_build_dir = os.path.join(AppPaths.builds, game_folder_name)
 
                 # making sure the work_dir and pkg directories exists
@@ -299,7 +317,7 @@ class FtpGameList():
                 not_used, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, self.ftp_psp_png_offset_kb, self.game_count)
 
             # PS3 guitar hero games needs a larger chunk to find the PIC1
-            if platform == 'ps3' and 'guitar' in game_filename.lower():
+            elif platform == 'ps3' and 'guitar' in game_filename.lower():
                 not_used, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, 6000, 0, self.game_count)
 
         # retry connection
@@ -316,7 +334,36 @@ class FtpGameList():
             if platform == 'psp':
                 title_id, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, self.ftp_psp_png_offset_kb, self.game_count)
 
+            # PS3 guitar hero games needs a larger chunk to find the PIC1
+            elif platform == 'ps3' and 'guitar' in game_filename.lower():
+                not_used, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, 6000, 0, self.game_count)
+
         return title_id, icon, pic0, pic1
+
+    def ftp_walk(self, ftp, folder_path, files):
+        print('DEBUG Folder_path :' + folder_path)
+        depth = len(folder_path.split('/')) -2
+        print('DEBUG Folder_depth: ' + str(depth))
+
+        dirs = []
+        stuff = []
+        ftp.retrlines('MLSD ' + folder_path, stuff.append)
+        for item in stuff:
+            split_item = item.split(';')
+            # check if it's a dir or a file
+            if split_item[0] == 'type=dir':
+                dirs.append(split_item[len(split_item)-1].strip())
+            elif split_item[0] == 'type=file':
+                filename = split_item[len(split_item)-1].strip()
+                # check if filename ends with any of our white listed extensions
+                if filename.upper().endswith(GlobalVar.file_extensions):
+                    files.append(os.path.join(folder_path + split_item[len(split_item) - 1].strip()))
+
+        if len(dirs) > 0 and depth <= self.ftp_folder_depth:
+            for subdir in sorted(dirs):
+                current_dir = os.path.join(folder_path, subdir + '/')
+                self.ftp_walk(ftp, current_dir, files)
+        return files
 
 
     def make_new_ftp(self):
@@ -388,17 +435,18 @@ class FTPDataHandler:
         self.null = None
         self.total_lines = total_lines
 
-    def ftp_buffer_data(self, ftp_filename, chunk_size, rest, game_count):
+    def ftp_buffer_data(self, filepath, chunk_size, rest, game_count):
         icon0 = None
         pic0 = None
         pic1 = None
 
-        iso_index = ftp_filename.index('ISO/', 0, len(ftp_filename))
-        platform = ftp_filename[iso_index-3: iso_index].lower()
-        filename = ftp_filename[iso_index+4: len(ftp_filename)]
-        game_title = ftp_filename[iso_index+4: len(ftp_filename)-4]
+        iso_index = filepath.index('ISO/', 0, len(filepath))
+        iso_index2 = filepath.index('ISO/')
+        platform = filepath[iso_index - 3: iso_index].lower()
+        filename = os.path.basename(filepath)
+        game_title = filename[0:len(filename) - 4]
 
-        file_size_bytes = self.ftp_instance.size(ftp_filename)
+        file_size_bytes = self.ftp_instance.size(filepath)
         if file_size_bytes > 0 and file_size_bytes < (chunk_size * 1024):
             chunk_size = (file_size_bytes / 1024) * 0.95
         elif platform.lower() == ('psx', 'ps2'):
@@ -417,7 +465,7 @@ class FTPDataHandler:
         self.chunk_size = chunk_size * 1024
 
         offset = max(rest*1024, 0)
-        conn = self.ftp_instance.transfercmd('RETR ' + ftp_filename, rest=offset)
+        conn = self.ftp_instance.transfercmd('RETR ' + filepath, rest=offset)
         while 1:
             # the buffer size seems a bit random, can't remember why(?)
             try:
@@ -435,7 +483,7 @@ class FTPDataHandler:
                 print('DEBUG Retrying fetching of \'' + filename + '\'')
                 # re-try fetching
                 try:
-                    conn = self.ftp_instance.transfercmd('RETR ' + ftp_filename, rest=offset)
+                    conn = self.ftp_instance.transfercmd('RETR ' + filepath, rest=offset)
                 except:
                     print('ERROR could not refetch ' + filename + ', skipping')
                     data = None
@@ -589,3 +637,5 @@ def get_title_id_from_buffer(self, platform, buffer_data):
         print('Error in get_id_from_buffer: ' + self.TITLE_ID_EXCEPTION_MESSAGE)
     finally:
         return game_id
+
+
