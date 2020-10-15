@@ -74,11 +74,9 @@ class Main:
         self.title_id_maxlength = len('PKGLAUNCH')
         self.tmp_title_id = ''
 
-        self.drive_system_array = ['drive', 'system']
-
-        self.entry_field_iso_path 	= None
-
-        self.usb_port_number 		= 0
+        self.drive_system_path_array = ['drive', 'system', 'path']
+        self.entry_field_iso_path = None
+        self.usb_port_number = 0
 
         # images
         self.image_xmb_icons = Image.open(os.path.join(ImagePaths.xmb, 'XMB_icons.png'))
@@ -124,9 +122,9 @@ class Main:
         self.build_button 	 = None
         self.add_button 	 = None
 
-        self.ftp_sync_button			= None
-        self.game_list_refresh_button	= None
-        self.dropdown = None
+        self.fetch_button    = None
+        self.refresh_button	 = None
+        self.dropdown        = None
 
 
         # text tooltip messages
@@ -134,9 +132,9 @@ class Main:
 
         self.BUILD_BUTTON_TOOLTIP_MSG = "Save & Build pkg"
         self.ADD_BUTTON_TOOLTIP_MSG = "Add game & save data"
-        self.REMOVE_BUTTON_TOOLTIP_MSG = "Remove game & data"
+        self.REMOVE_BUTTON_TOOLTIP_MSG = "Remove game & remove data"
 
-        self.SYNC_BUTTON_TOOLTIP_MSG = "Fetch gamelist and pictures over FTP"
+        self.FETCH_BUTTON_TOOLTIP_MSG = "Fetch gamelist and pictures over FTP"
         self.REFRESH_BUTTON_TOOLTIP_MSG = "Refresh gamelist from disk"
         self.ICON0_TOOLTIP_MSG = "Click to change ICON0"
         self.PIC0_TOOLTIP_MSG = "Click to change  PIC0"
@@ -192,7 +190,7 @@ class Main:
     def create_list_combo_box(self, platform):
         # create the listbox (games list)
         self.gamelist = Gamelist(platform)
-        game_list_frame = self.gamelist.create_main_frame(self.entry_field_title_id, self.entry_field_title, self.entry_field_filename, self.entry_field_iso_path, self.drive_system_array)
+        game_list_frame = self.gamelist.create_main_frame(self.entry_field_title_id, self.entry_field_title, self.entry_field_filename, self.entry_field_iso_path, self.drive_system_path_array)
         game_list_frame.place(x=int((self.main_offset_x_pos) * scaling),
                               y=self.main_offset_y_pos + 220,
                               width=270,
@@ -303,7 +301,6 @@ class Main:
 
         self.image_pic1 = self.load_default_pkg_images(pic1_filename)
         self.image_pic1_ref = copy.copy(self.image_pic1)
-        # self.photo_image_pic1_xmb = copy.copy(self.image_pic1)
         self.image_pic1_w_title = copy.copy(self.image_pic1)
 
         self.pkg_icon0 = None
@@ -455,7 +452,7 @@ class Main:
         ##########################################################################
         # Adding an on_change-listener on 'entry_field_filename'
         self.generate_on_change(self.entry_field_filename)
-        self.entry_field_filename.bind('<<Change>>', self.dynamic_filename_to_path)
+        self.entry_field_filename.bind('<<Change>>', self.dynamic_filename_and_path)
         ###########################################################################
         # Adding an on_change-listener on 'entry_field_title'
         self.generate_on_change(self.entry_field_title)
@@ -493,25 +490,25 @@ class Main:
                                  image=self.images_logo_system[0],
                                  borderwidth=1,
                                  command=lambda:
-                                 self.on_system_button(self.drive_system_array[0], self.selection_system_list[0]))
+                                 self.on_system_button(self.drive_system_path_array[0], self.selection_system_list[0]))
 
         self.button_PSX = Button(main,
                                  image=self.images_logo_system[1],
                                  borderwidth=1,
                                  command=lambda:
-                                 self.on_system_button(self.drive_system_array[0], self.selection_system_list[1]))
+                                 self.on_system_button(self.drive_system_path_array[0], self.selection_system_list[1]))
 
         self.button_PS2 = Button(main,
                                  image=self.images_logo_system[2],
                                  borderwidth=1,
                                  command=lambda:
-                                 self.on_system_button(self.drive_system_array[0], self.selection_system_list[2]))
+                                 self.on_system_button(self.drive_system_path_array[0], self.selection_system_list[2]))
 
         self.button_PS3 = Button(main,
                                  image=self.images_logo_system[3],
                                  borderwidth=1,
                                  command=lambda:
-                                 self.on_system_button(self.drive_system_array[0], self.selection_system_list[3]))
+                                 self.on_system_button(self.drive_system_path_array[0], self.selection_system_list[3]))
 
 
 
@@ -538,18 +535,18 @@ class Main:
 
 
         # ftp list buttons
-        self.ftp_sync_button = Button(main,
-                                      image=self.images_gamelist_button[0],
-                                      borderwidth=0,
-                                      command=self.on_ftp_fetch_button,
-                                      bg="#FBFCFB")
+        self.fetch_button = Button(main,
+                                   image=self.images_gamelist_button[0],
+                                   borderwidth=0,
+                                   command=self.on_ftp_fetch_button,
+                                   bg="#FBFCFB")
 
 
-        self.game_list_refresh_button = Button(main,
-                                               image=self.images_gamelist_button[1],
-                                               borderwidth=0,
-                                               command=self.on_game_list_refresh,
-                                               bg="#FBFCFB")
+        self.refresh_button = Button(main,
+                                     image=self.images_gamelist_button[1],
+                                     borderwidth=0,
+                                     command=self.on_game_list_refresh,
+                                     bg="#FBFCFB")
 
         # button tooltips
         CreateToolTip(self.button_USB, self.USB_BUTTON_TOOLTIP_MSG)
@@ -558,8 +555,8 @@ class Main:
         CreateToolTip(self.add_button, self.ADD_BUTTON_TOOLTIP_MSG)
         CreateToolTip(self.remove_button, self.REMOVE_BUTTON_TOOLTIP_MSG)
 
-        CreateToolTip(self.ftp_sync_button, self.SYNC_BUTTON_TOOLTIP_MSG)
-        CreateToolTip(self.game_list_refresh_button, self.REFRESH_BUTTON_TOOLTIP_MSG)
+        CreateToolTip(self.fetch_button, self.FETCH_BUTTON_TOOLTIP_MSG)
+        CreateToolTip(self.refresh_button, self.REFRESH_BUTTON_TOOLTIP_MSG)
 
         # Entry field placements
         entry_field_width = 200
@@ -633,11 +630,11 @@ class Main:
         #     x=int((self.text_box_spacing + self.main_offset_x_pos + 2 * 85) * scaling),
         #     y=int((self.iso_path_text_y_pos + 40) * scaling))
 
-        self.ftp_sync_button.place(
+        self.fetch_button.place(
             x=int((self.main_offset_x_pos) * scaling),
             y=int((self.main_offset_y_pos + 855) * scaling))
 
-        self.game_list_refresh_button.place(
+        self.refresh_button.place(
             x=int((self.main_offset_x_pos + 80) * scaling),
             y=int((self.main_offset_y_pos + 855) * scaling))
 
@@ -867,9 +864,13 @@ class Main:
                 drive_choice = 'dev_usb00' + str(self.usb_port_number)
 
         print('DEBUG drive_choice: ' + drive_choice)
-        self.drive_system_array[0] = drive_choice
+        self.drive_system_path_array[0] = drive_choice
 
-        current_iso_path = '/' + self.drive_system_array[0] + '/' + self.drive_system_array[1] + '/' + self.entry_field_filename.get()
+        current_iso_path = '/' + '/'.join([self.drive_system_path_array[0],
+                                     self.drive_system_path_array[1],
+                                     self.drive_system_path_array[2],
+                                     self.entry_field_filename.get()]).replace('//', '/')
+
         self.update_iso_path_entry_field(current_iso_path)
 
     def on_system_button(self, drive_choice, system_choice):
@@ -878,26 +879,30 @@ class Main:
             print('DEBUG ' + '\'' + system_choice + '\'' + ' already set')
 
         print('DEBUG system_choice: ' + system_choice)
-        self.drive_system_array[1] = system_choice
+        self.drive_system_path_array[1] = system_choice
 
-        current_iso_path = '/' + str(self.drive_system_array[0]) + '/' + str(self.drive_system_array[1]) + '/' + self.entry_field_filename.get()
+        current_iso_path = '/' + '/'.join([self.drive_system_path_array[0],
+                                           self.drive_system_path_array[1],
+                                           self.drive_system_path_array[2],
+                                           self.entry_field_filename.get()]).replace('//', '/')
+
         self.update_iso_path_entry_field(current_iso_path)
 
         # Replace current drive
         if drive_choice not in current_iso_path:
             print('DEBUG drive_choice not in current_iso_path')
-            print('DEBUG ' + '\'' + self.drive_system_array[0] + '\'' + ' changed -> ' + '\'' + drive_choice + '\'')
-            current_iso_path = current_iso_path.replace(self.drive_system_array[0], drive_choice)
+            print('DEBUG ' + '\'' + self.drive_system_path_array[0] + '\'' + ' changed -> ' + '\'' + drive_choice + '\'')
+            current_iso_path = current_iso_path.replace(self.drive_system_path_array[0], drive_choice)
             self.update_iso_path_entry_field(current_iso_path)
-            self.drive_system_array[0] = drive_choice
+            self.drive_system_path_array[0] = drive_choice
 
         # Replace current system
         if system_choice not in current_iso_path:
             print('DEBUG system_choice not in current_iso_path')
-            print('DEBUG ' + '\'' + self.drive_system_array[1] + '\'' + ' changed -> ' + '\'' + system_choice + '\'')
-            current_iso_path = current_iso_path.replace(self.drive_system_array[1], system_choice)
+            print('DEBUG ' + '\'' + self.drive_system_path_array[1] + '\'' + ' changed -> ' + '\'' + system_choice + '\'')
+            current_iso_path = current_iso_path.replace(self.drive_system_path_array[1], system_choice)
             self.update_iso_path_entry_field(current_iso_path)
-            self.drive_system_array[1] = system_choice
+            self.drive_system_path_array[1] = system_choice
 
     # Dynamic update of the pkg path for showing fetched images
     def update_game_build_path(self):
@@ -910,17 +915,20 @@ class Main:
         self.init_draw_images_on_canvas(self.main, pkg_build_path=build_dir_pkg_path)
 
     # Dynamic update of the 'entry_field_filename' into the 'entry_field_iso_path'
-    def dynamic_filename_to_path(self, event):
+    def dynamic_filename_and_path(self, event):
         drive = ''
         system = ''
+        path = ''
         filename = event.widget.get()
 
-        if self.drive_system_array[0] is not None:
-            drive = '/' + self.drive_system_array[0] + '/'
-        if self.drive_system_array[1] is not None:
-            system = '/' + self.drive_system_array[1] + '/'
+        if self.drive_system_path_array[0] is not None:
+            drive = '/' + self.drive_system_path_array[0] + '/'
+        if self.drive_system_path_array[1] is not None:
+            system = '/' + self.drive_system_path_array[1] + '/'
+        if self.drive_system_path_array[2] is not None:
+            path = '/' + self.drive_system_path_array[2] + '/'
 
-        iso_path = drive + system + filename
+        iso_path = drive + system + path + filename
         iso_path = iso_path.replace('//', '/')
 
         self.entry_field_iso_path.xview_moveto(1)
@@ -930,7 +938,7 @@ class Main:
     def update_iso_path_entry_field(self, iso_path):
         self.entry_field_iso_path.config(state='normal')
         self.entry_field_iso_path.delete(0, END)
-        self.entry_field_iso_path.insert(0, iso_path)
+        self.entry_field_iso_path.insert(0, iso_path.replace('//','/'))
         self.entry_field_iso_path.config(state='readonly')
 
 

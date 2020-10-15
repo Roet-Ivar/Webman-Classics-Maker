@@ -231,6 +231,7 @@ class FtpGameList():
                 # if more than one we need to figure out what suffix to append
                 elif len(dup_list) > 1:
                     curr_dup_number = 0
+                    new_title= ''
                     for dup in dup_list:
                         # a dup_title must have a '(#)' pattern
                         dup_match = re.search('\(\d{1,3}\)$', dup)
@@ -243,6 +244,8 @@ class FtpGameList():
                                 curr_dup_number = dup_group[1:len(dup_group)-1]
                                 suf_string = '(' + str(int(curr_dup_number) +1) + ')'
                                 title = pre_string + suf_string
+                        elif title == dup:
+                            title = title + ' (1)'
 
                 title = title.strip().encode('utf-8')
 
@@ -598,7 +601,7 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
                 return False
 
         while png_finder(self.data, self.image_name):
-            print('DEBUG Found ' + self.img_name + ' for  \'' + game_name + '\'')
+            print('DEBUG Found ' + self.img_name + ' for \'' + game_name + '\'')
 
         return self.icon0_image, self.pic0_image, self.pic1_image
 

@@ -29,12 +29,11 @@ class Gamelist():
 
 
     def create_main_frame(self, entry_field_title_id, entry_field_title, entry_field_filename, entry_field_iso_path, drive_system_array):
-        self.entry_field_title_id   = entry_field_title_id
-        self.entry_field_title      = entry_field_title
-        self.entry_field_filename   = entry_field_filename
-        self.entry_field_iso_path   = entry_field_iso_path
-        self.drive_system_array     = drive_system_array
-
+        self.entry_field_title_id       = entry_field_title_id
+        self.entry_field_title          = entry_field_title
+        self.entry_field_filename       = entry_field_filename
+        self.entry_field_iso_path       = entry_field_iso_path
+        self.drive_system_path_array    = drive_system_array
 
         self.corrected_index = []
         self.main_frame = Frame()
@@ -55,6 +54,7 @@ class Gamelist():
         if 'all_games' == self.platform_to_show:
             for platform in self.json_game_list_data:
                 for list_game in self.json_game_list_data[platform]:
+                    # titles has been designed to be unique
                     self.add_item(list_game['title'])
 
         else:
@@ -103,15 +103,14 @@ class Gamelist():
 
                     # parse drive and system from json data
                     path_array = filter(None, self.selected_path.split('/'))
-                    self.drive_system_array[0] = path_array[0]
-                    self.drive_system_array[1] = path_array[1]
+                    self.drive_system_path_array[0] = path_array[0]
+                    self.drive_system_path_array[1] = path_array[1]
+                    self.drive_system_path_array[2] = '/'.join(path_array[2:len(path_array)]).replace('//', '')
 
 
                     self.entry_field_title_id.delete(0, len(self.entry_field_title_id.get())-1)
                     self.entry_field_title_id.delete(0, END)
                     self.entry_field_title_id.insert(0, self.selected_title_id)
-
-
 
                     self.entry_field_title.delete(0, END)
                     self.entry_field_title.insert(0, self.selected_title)
