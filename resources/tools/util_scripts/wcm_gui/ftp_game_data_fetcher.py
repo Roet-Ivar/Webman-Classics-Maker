@@ -41,8 +41,8 @@ class FtpGameList():
         self.ftp_pasv_mode          = ftp_settings_file['ftp_pasv_mode']
         self.ftp_user               = ftp_settings_file['ftp_user']
         self.ftp_password           = ftp_settings_file['ftp_password']
-        self.use_mock_data          = False
         self.ftp_folder_depth       = ftp_settings_file['ftp_folder_depth']
+        self.ftp_retry_count        = ftp_settings_file['ftp_retry_count']
 
         self.PSP_ISO_PATH           = '/dev_hdd0/PSPISO/'
         self.PSX_ISO_PATH           = '/dev_hdd0/PSXISO/'
@@ -229,7 +229,7 @@ class FtpGameList():
                 if len(dup_list) == 1 and dup_list[0] == title:
                         title = title + ' (1)'
                 # if more than one we need to figure out what suffix to append
-                elif len(dup_list) > 1:
+                elif len(dup_list) > 0:
                     curr_dup_number = 0
                     new_title= ''
                     for dup in dup_list:
@@ -243,10 +243,15 @@ class FtpGameList():
                             if title == pre_string.strip() and int(curr_dup_number) < new_number:
                                 curr_dup_number = dup_group[1:len(dup_group)-1]
                                 suf_string = '(' + str(int(curr_dup_number) +1) + ')'
-                                title = pre_string + suf_string
-                        elif title == dup:
-                            title = title + ' (1)'
-
+                                new_title = pre_string + suf_string
+                                title = new_title
+                    # if there was no '(#)' pattern duplicates
+                    if new_title == '':
+                        for dup in dup_list:
+                            if title == dup:
+                                # make the first duplciate
+                                title = title + ' (1)'
+                                break
                 title = title.strip().encode('utf-8')
 
                 # add game to list of new games
@@ -308,15 +313,15 @@ class FtpGameList():
         platform = game_filepath[iso_index-3: iso_index].lower()
 
         try:
-            title_id, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, 0, self.game_count)
+            title_id, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, 0, self.game_count, self.ftp_retry_count)
 
             # make another fetch with rest offset for PSP images
             if platform == 'psp':
-                not_used, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, self.ftp_psp_png_offset_kb, self.game_count)
+                not_used, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, self.ftp_psp_png_offset_kb, self.game_count, self.ftp_retry_count)
 
             # PS3 guitar hero games needs a larger chunk to find the PIC1
             elif platform == 'ps3' and 'guitar' in game_filename.lower():
-                not_used, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, 6000, 0, self.game_count)
+                not_used, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, 6000, 0, self.game_count, self.ftp_retry_count)
 
         # retry connection
         except Exception as e:
@@ -326,15 +331,15 @@ class FtpGameList():
             self.make_new_ftp()
             self.data_chunk = FTPDataHandler(self.ftp, self.total_lines_count)
 
-            title_id, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, 0, self.game_count)
+            title_id, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, 0, self.game_count, self.ftp_retry_count)
 
             # make another fetch with rest offset for PSP images
             if platform == 'psp':
-                title_id, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, self.ftp_psp_png_offset_kb, self.game_count)
+                title_id, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, self.ftp_psp_png_offset_kb, self.game_count, self.ftp_retry_count)
 
             # PS3 guitar hero games needs a larger chunk to find the PIC1
             elif platform == 'ps3' and 'guitar' in game_filename.lower():
-                not_used, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, 6000, 0, self.game_count)
+                not_used, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, 6000, 0, self.game_count, self.ftp_retry_count)
 
         return title_id, icon, pic0, pic1
 
@@ -349,13 +354,18 @@ class FtpGameList():
         for item in stuff:
             split_item = item.split(';')
             # check if it's a dir or a file
-            if split_item[0] == 'type=dir':
-                dirs.append(split_item[len(split_item)-1].strip())
-            elif split_item[0] == 'type=file':
-                filename = split_item[len(split_item)-1].strip()
-                # check if filename ends with any of our white listed extensions
-                if filename.upper().endswith(GlobalVar.file_extensions):
-                    files.append(os.path.join(folder_path + split_item[len(split_item) - 1].strip()))
+            if 'little_text' in item:
+                print()
+
+            # a file must have at least size of 1 byte
+            if 'size=' in split_item[1] and int(split_item[1].replace('size=', '')) > 0:
+                if split_item[0] == 'type=dir':
+                    dirs.append(split_item[len(split_item)-1].strip())
+                elif split_item[0] == 'type=file':
+                    filename = split_item[len(split_item)-1].strip()
+                    # check if filename ends with any of our white listed extensions
+                    if filename.upper().endswith(GlobalVar.file_extensions):
+                        files.append(os.path.join(folder_path + split_item[len(split_item) - 1].strip()))
 
         if len(dirs) > 0 and depth <= self.ftp_folder_depth:
             for subdir in sorted(dirs):
@@ -433,7 +443,7 @@ class FTPDataHandler:
         self.null = None
         self.total_lines = total_lines
 
-    def ftp_buffer_data(self, filepath, chunk_size, rest, game_count):
+    def ftp_buffer_data(self, filepath, chunk_size, rest, game_count, ftp_retry_count):
         icon0 = None
         pic0 = None
         pic1 = None
@@ -464,6 +474,7 @@ class FTPDataHandler:
 
         offset = max(rest*1024, 0)
         conn = self.ftp_instance.transfercmd('RETR ' + filepath, rest=offset)
+        retry_cnt = 0
         while 1:
             # the buffer size seems a bit random, can't remember why(?)
             try:
@@ -479,12 +490,18 @@ class FTPDataHandler:
 
                 print('ERROR when fetching \'' + filename + '\', reason: ' + error_msg)
                 print('DEBUG Retrying fetching of \'' + filename + '\'')
-                # re-try fetching
-                try:
-                    conn = self.ftp_instance.transfercmd('RETR ' + filepath, rest=offset)
-                except:
+                retry_cnt += 1
+                print('DEBUG retry_cnt: ' + str(retry_cnt))
+                # retry fetching
+                if retry_cnt < ftp_retry_count:
+                    try:
+                        conn = self.ftp_instance.transfercmd('RETR ' + filepath, rest=offset)
+                    except:
+                        print('ERROR could not refetch ' + filename + ', skipping')
+                        data = None
+                else:
                     print('ERROR could not refetch ' + filename + ', skipping')
-                    data = None
+                    break
 
             # if None: refetch has failed => skip game by breaking the loop
             if data is None:

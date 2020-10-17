@@ -8,5 +8,6 @@
     "ftp_chunk_size_kb":4000,
 	"ftp_psp_png_offset_kb":20000,
 	"webcommand":"[filepath_var]",
-	"ftp_folder_depth":16
+	"ftp_folder_depth":16,
+	"ftp_retry_count":10
 }
