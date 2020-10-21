@@ -6,7 +6,7 @@ from global_paths import App as AppPaths
 from global_paths import GlobalVar
 
 class Gamelist():
-    def __init__(self, platform):
+    def __init__(self, drive, platform):
         # makes sure there is a json_game_list file
         if os.path.isfile(os.path.join(AppPaths.application_path, 'game_list_data.json')) is False:
             copyfile(os.path.join(AppPaths.util_resources, 'game_list_data.json.BAK'), os.path.join(AppPaths.application_path, 'game_list_data.json'))
@@ -16,6 +16,11 @@ class Gamelist():
         except Exception as e:
             print("""Error in 'game_list_data.json' contains incorrect json-syntax. Either remove it or find the error using json lint""")
             print("Details: " + e.message)
+
+        if drive == 'USB(*)':
+            self.drive_to_show = '/dev_' + drive.lower().replace('(*)', '')
+        else:
+            self.drive_to_show = '/dev_' + drive.lower() + '/'
 
         self.platform_to_show = platform.lower() + '_games'
         self.WCM_BASE_PATH  = AppPaths.wcm_gui
@@ -51,15 +56,20 @@ class Gamelist():
         self._listbox['yscrollcommand'] = s.set
 
 
+
+        # default filters
         if 'all_games' == self.platform_to_show:
+            # iterate all platforms
             for platform in self.json_game_list_data:
                 for list_game in self.json_game_list_data[platform]:
-                    # titles has been designed to be unique
-                    self.add_item(list_game['title'])
+                    # titles in the list has been designed to be unique
+                    if '/dev_all/' == self.drive_to_show or self.drive_to_show in list_game['path']:
+                        self.add_item(list_game['title'])
 
         else:
             for list_game in self.json_game_list_data[self.platform_to_show]:
-                self.add_item(list_game['title'])
+                if '/dev_all/' == self.drive_to_show or self.drive_to_show in list_game['path']:
+                    self.add_item(list_game['title'])
 
         for x in range(19 - self._listbox.size()):
             self.add_item('')

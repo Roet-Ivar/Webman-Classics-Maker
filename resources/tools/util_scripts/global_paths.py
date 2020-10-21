@@ -72,7 +72,29 @@ class Build:
     Param_SFO_Editor = os.path.join(App.tools, 'Param_SFO_Editor')
 
 class GlobalVar:
-    file_extensions = ('.BIN', '.BIN.ENC', '.MDF', '.NTFS', '.IMG', '.ISO', '.ISO.0')
+    file_extensions = ('.BIN',
+                       '.BIN.ENC',
+                       '.MDF',
+                       '.NTFS[PSXISO]',
+                       '.NTFS[PSPISO]',
+                       '.NTFS[PS2ISO]',
+                       '.NTFS[PS3ISO]',
+                       '.NTFS[BDISO]',
+                       '.NTFS[DVDISO]',
+                       '.NTFS[BDFILE]',
+                       '.IMG',
+                       '.ISO',
+                       '.ISO.0')
+
+    drive_paths = ('/dev_hdd0/',
+                   '/dev_usb(*)/')
+
+    platform_paths = ('PSPISO/',
+                      'PSXISO/',
+                      'PS2ISO/',
+                      'PS3ISO/',
+                      'tmp/wmtmp/',
+                      'Games/')
 
 if not os.path.exists(os.path.join(App.wcm_work_dir, 'pkg')):
     os.makedirs(os.path.join(App.wcm_work_dir, 'pkg'))

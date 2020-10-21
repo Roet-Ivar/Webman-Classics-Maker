@@ -33,7 +33,10 @@ from PIL import Image, ImageDraw, ImageFont
 from PIL.ImageTk import PhotoImage
 from tkFileDialog import askopenfile
 from game_listbox import Gamelist
+from dropdown import DriveDropdown
+from dropdown import PlatformDropdown
 from ftp_game_data_fetcher import FtpGameList
+
 
 # check python version higher than 2
 if sys.version_info[0] > 2:
@@ -124,7 +127,9 @@ class Main:
 
         self.fetch_button    = None
         self.refresh_button	 = None
-        self.dropdown        = None
+
+        self.drivedropdown      = None
+        self.platformdropdown   = None
 
 
         # text tooltip messages
@@ -149,7 +154,10 @@ class Main:
         self.init_default_view(self.main)
         self.draw_background_on_canvas()
 
-        self.create_list_combo_box('ALL')
+        # init gamelist and filters
+        self.list_filter_drive = 'ALL'
+        self.list_filter_platform = 'ALL'
+        self.create_list_combo_box(self.list_filter_drive, self.list_filter_platform)
 
     # definitions starts here
     def init_wcm_work_dir(self):
@@ -187,9 +195,9 @@ class Main:
         return self.ftp_settings_data['ftp_password']
 
 
-    def create_list_combo_box(self, platform):
+    def create_list_combo_box(self, drive, platform):
         # create the listbox (games list)
-        self.gamelist = Gamelist(platform)
+        self.gamelist = Gamelist(drive, platform)
         game_list_frame = self.gamelist.create_main_frame(self.entry_field_title_id, self.entry_field_title, self.entry_field_filename, self.entry_field_iso_path, self.drive_system_path_array)
         game_list_frame.place(x=int((self.main_offset_x_pos) * scaling),
                               y=self.main_offset_y_pos + 220,
@@ -201,19 +209,28 @@ class Main:
                                   activestyle='dotbox',
                                   borderwidth=0)
 
-        # insert the dropdown into the listbox
-        from platform_dropdown import Dropdown
-        if self.dropdown is None:
-            self.dropdown = Dropdown(self.canvas, self.game_list_box, 1100, 247).get_box()
-        self.dropdown.bind("<<ComboboxSelected>>", self.box_filter_callback)
+        # insert the drive dropdown into the listbox
+        if self.drivedropdown is None:
+            self.drivedropdown = DriveDropdown(self.canvas, self.game_list_box, 1100, 247).get_box()
+        self.drivedropdown.bind("<<ComboboxSelected>>", self.dropdown_filter_callback)
+        # insert the platform dropdown into the listbox
 
+        if self.platformdropdown is None:
+            self.platformdropdown = PlatformDropdown(self.canvas, self.game_list_box, 1100 + 70, 247).get_box()
+        self.platformdropdown.bind("<<ComboboxSelected>>", self.dropdown_filter_callback)
 
-    def box_filter_callback(self, event):
-        self.list_filter_platform = event.widget.get()
-        self.create_list_combo_box(self.list_filter_platform)
-        self.dropdown.set(self.list_filter_platform)
+    def dropdown_filter_callback(self, event):
+        dropdown_name = str(event.widget).split(".")[-1]
+        print('dropdown_name: ' + dropdown_name)
+        if dropdown_name == 'drive_dropdown':
+            self.list_filter_drive = event.widget.get()
+            self.drivedropdown.set(self.list_filter_drive)
+        elif dropdown_name == 'platform_dropdown':
+            self.list_filter_platform = event.widget.get()
+            self.platformdropdown.set(self.list_filter_platform)
+
+        self.create_list_combo_box(self.list_filter_drive, self.list_filter_platform)
         self.game_list_box.focus()
-
 
     def smaller_button_maker(self, text, **args):
         font = None
@@ -1203,7 +1220,7 @@ class Main:
     def on_ftp_fetch_button(self):
         # save the ps3-ip field to config file
         self.save_ftp_fields_on_fetch()
-        ftp_game_list = FtpGameList(self.dropdown.get())
+        ftp_game_list = FtpGameList(self.drivedropdown.get(), self.platformdropdown.get())
         ftp_game_list.execute()
 
         self.on_game_list_refresh()
@@ -1258,11 +1275,13 @@ class Main:
         preview_img.save(os.path.join(AppPaths.game_work_dir, '..', 'preview.png'))
 
     def on_game_list_refresh(self):
-        if not self.dropdown:
+        if not self.platformdropdown:
+            self.list_filter_drive = 'ALL'
             self.list_filter_platform = 'ALL'
         else:
-            self.list_filter_platform = self.dropdown.get()
-        self.create_list_combo_box(self.list_filter_platform)
+            self.list_filter_drive = self.drivedropdown.get()
+            self.list_filter_platform = self.platformdropdown.get()
+        self.create_list_combo_box(self.list_filter_drive, self.list_filter_platform)
 
     def save_pkg_info_to_json(self):
         with open(os.path.join(AppPaths.util_resources, 'pkg.json.BAK')) as f:

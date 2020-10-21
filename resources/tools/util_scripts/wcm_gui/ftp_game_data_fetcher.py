@@ -1,4 +1,4 @@
-import json, os, re, StringIO, sys, time, traceback
+import copy, json, os, re, StringIO, sys, time, traceback
 import PIL.Image as Image
 from ftplib import FTP
 from global_paths import GlobalVar
@@ -11,12 +11,29 @@ else:
     sys.path.append('..')
 
 from global_paths import App as AppPaths
+from global_paths import GlobalVar as GlobalVars
 sys.path.append(AppPaths.settings)
 
 class FtpGameList():
-    def __init__(self, platform_filter):
-        # platform filter to fetch
-        self.platform_filter = platform_filter
+    def __init__(self, selected_drive, selected_platform):
+        # drive and platforms to fetch
+        self.global_drive_paths = GlobalVar.drive_paths
+        self.global_platform_paths = GlobalVar.platform_paths
+
+        self.drive_filter = []
+        self.platform_filter = []
+
+        self.drive_filter.append(selected_drive)
+
+
+        if 'ALL' in selected_platform:
+            self.platform_filter = list(self.global_platform_paths)
+        elif 'NTFS' in selected_platform:
+            self.platform_filter = 'tmp/wmtmp/'
+        elif 'FOLDER' in selected_platform:
+            self.platform_filter = 'Games/'
+        else:
+            self.platform_filter.extend(list(filter(lambda x: str(selected_platform) in x, self.global_platform_paths)))
 
         # messages
         self.PAUSE_MESSAGE              = 'Press ENTER to continue...'
@@ -44,12 +61,19 @@ class FtpGameList():
         self.ftp_folder_depth       = ftp_settings_file['ftp_folder_depth']
         self.ftp_retry_count        = ftp_settings_file['ftp_retry_count']
 
-        self.PSP_ISO_PATH           = '/dev_hdd0/PSPISO/'
-        self.PSX_ISO_PATH           = '/dev_hdd0/PSXISO/'
-        self.PS2_ISO_PATH           = '/dev_hdd0/PS2ISO/'
-        self.PS3_ISO_PATH           = '/dev_hdd0/PS3ISO/'
+        # drives and folder for scanning
+        # self.DRIVE_USB_ARRAY        = [] # ['/dev_usb000/', '/dev_usb001/', '/dev_usb002/', '/dev_usb003/']
+        self.DRIVE_HDD0             = '/dev_hdd0/'
+        # TODO: The NTFS-folder needs an own platform category and logic before use
+        self.DRIVE_FOLDER_NTFS      = self.DRIVE_HDD0.join('tmp/wmtmp/')
+        self.FOLDER_PSP_ISO         = 'PSPISO/'
+        self.FOLDER_PSX_ISO         = 'PSXISO/'
+        self.FOLDER_PS2_ISO         = 'PS2ISO/'
+        self.FOLDER_PS3_ISO         = 'PS3ISO/'
 
-        # system specific variables
+        # platform ISO paths
+        # TODO: The NTFS-lines needs an own platform category and logic before use
+        self.ntfs_lines = []
         self.psp_lines  = []
         self.psx_lines  = []
         self.ps2_lines  = []
@@ -74,27 +98,53 @@ class FtpGameList():
             self.ftp.login(user=self.ftp_user, passwd=self.ftp_password)
             self.ftp.voidcmd('TYPE I')
 
-            if self.platform_filter.lower() == 'all':
-                self.ftp_walk(self.ftp, self.PSP_ISO_PATH, self.psp_lines)
-                self.ftp_walk(self.ftp, self.PSX_ISO_PATH, self.psx_lines)
-                self.ftp_walk(self.ftp, self.PS2_ISO_PATH, self.ps2_lines)
-                self.ftp_walk(self.ftp, self.PS3_ISO_PATH, self.ps3_lines)
+            # get a listing of active drives
+            drive_list = []
+            self.ftp.retrlines('MLSD /', drive_list.append)
 
-            elif self.platform_filter.lower() == 'psp':
-                self.ftp_walk(self.ftp, self.PSP_ISO_PATH, self.psp_lines)
-                # print('DEBUG filtered_files: ' + str(self.psp_lines))
 
-            elif self.platform_filter.lower() == 'psx':
-                self.ftp_walk(self.ftp, self.PSX_ISO_PATH, self.psx_lines)
-                # print('DEBUG filtered_files: ' + str(self.psp_lines))
+            new_drive_array = []
+            tmp_usb_port_array = []
+            # collect all drives to be used
+            if any(x in self.drive_filter[0] for x in ['ALL', 'USB(*)']):
+                new_drive_array = list(self.global_drive_paths)
+                for d in drive_list:
+                    # check which usb-ports are active
+                    ds = str(d).split(';')[6].strip()
+                    if 'dev_usb' in ds:
+                        # add all active usb-ports
+                        tmp_usb_port_array.append('/' + ds + '/')
+                        print(str(tmp_usb_port_array))
 
-            elif self.platform_filter.lower() == 'ps2':
-                self.ftp_walk(self.ftp, self.PS2_ISO_PATH, self.ps2_lines)
-                # print('DEBUG filtered_files: ' + str(self.psp_lines))
+            elif 'USB' in self.drive_filter[0]:
+                for d in drive_list:
+                    # check which usb-ports are active
+                    ds = str(d).split(';')[6].strip()
+                    if 'dev_usb' in ds:
+                        # if matches, add all active usb-ports
+                        if ('/' + self.drive_filter[0].lower() + '/') in ds:
+                            tmp_usb_port_array.append('/' + ds + '/')
+                            break
 
-            elif self.platform_filter.lower() == 'ps3':
-                self.ftp_walk(self.ftp, self.PS3_ISO_PATH, self.ps3_lines)
-                # print('DEBUG filtered_files: ' + str(self.psp_lines))
+            new_drive_array.append(self.drive_filter[0])
+            new_drive_array.extend(tmp_usb_port_array)
+            for drive in new_drive_array:
+                if not any(x in drive for x in ['ALL', '(*)']):
+                    for platform in self.platform_filter:
+                        if 'PSPISO/' in platform:
+                            self.ftp_walk(self.ftp, drive + platform, self.psp_lines)
+                        elif 'PSXISO/' in platform:
+                            self.ftp_walk(self.ftp, drive + platform, self.psx_lines)
+                        elif 'PS2ISO/' in platform:
+                            self.ftp_walk(self.ftp, drive + platform, self.ps2_lines)
+                        elif 'PS3ISO/' in platform:
+                            self.ftp_walk(self.ftp, drive + platform, self.ps3_lines)
+                        elif 'tmp/wmtmp/' in platform:
+                            if 'usb' not in drive:
+                                self.ftp_walk(self.ftp, drive + platform, self.ntfs_lines)
+                        # elif 'Games/' in platform:
+                        #     self.ftp_walk(self.ftp, drive + platform, self.ntfs_lines)
+
 
             # filter out any empty entries
             self.all_lines.append(self.psp_lines)
@@ -125,11 +175,11 @@ class FtpGameList():
             self.new_json_game_list_data = json.load(f)
 
         # append the platform lists
-        if self.platform_filter.lower() == 'all':
+        if self.platform_filter == list(self.global_platform_paths):
             for platform in self.json_game_list_data:
                 self.new_platform_list_data = self.list_builder(platform[0:3])
         else:
-            platform = self.platform_filter.lower()
+            platform = self.platform_filter[0].lower()
             self.new_platform_list_data = self.list_builder(platform)
 
         # save updated gamelist to disk
@@ -139,18 +189,18 @@ class FtpGameList():
 
 
     def list_builder(self, platform):
-        if 'psp' == platform.lower():
-            platform_list   = 'psp_games'
-            filtered_platform  = self.psp_lines
-        elif 'psx' == platform.lower():
-            platform_list   = 'psx_games'
-            filtered_platform  = self.psx_lines
-        elif 'ps2' == platform.lower():
-            platform_list   = 'ps2_games'
-            filtered_platform  = self.ps2_lines
-        elif 'ps3' == platform.lower():
-            platform_list   = 'ps3_games'
-            filtered_platform  = self.ps3_lines
+        if 'psp' in platform.lower():
+            platform_list = 'psp_games'
+            filtered_platform = self.psp_lines
+        elif 'psx' in platform.lower():
+            platform_list = 'psx_games'
+            filtered_platform = self.psx_lines
+        elif 'ps2' in platform.lower():
+            platform_list = 'ps2_games'
+            filtered_platform = self.ps2_lines
+        elif 'ps3' in platform.lower():
+            platform_list = 'ps3_games'
+            filtered_platform = self.ps3_lines
 
         # instantiate variables
         title_id = None
@@ -348,22 +398,51 @@ class FtpGameList():
         depth = len(folder_path.split('/')) -2
         print('DEBUG Folder_depth: ' + str(depth))
 
+
+        if '/dev_usb' in folder_path:
+            # check what usb-drive are available so we can speed things up
+            isPath = False
+            folder_list = []
+            split_folder_path = folder_path.split('/')
+            folder_base_path = '/' + '/'.join(split_folder_path[1: len(split_folder_path)-2]) + '/'
+            folder_name = split_folder_path[len(split_folder_path)-2]
+
+            # retrieve folders in the basepath we're scanning and check if our dir is listed
+            self.ftp.retrlines('MLSD ' + folder_base_path, folder_list.append)
+            for d in folder_list:
+                ds = str(d).split(';')[6].strip()
+                if folder_name == ds:
+                    isPath = True
+                    break
+            if not isPath:
+                print()
+                return files
+
+
         dirs = []
         stuff = []
-        ftp.retrlines('MLSD ' + folder_path, stuff.append)
+        try:
+            ftp.retrlines('MLSD ' + folder_path, stuff.append)
+        except Exception as e:
+            print('DEBUG retrlines error: ' + e.message)
+            return files
+
         for item in stuff:
             split_item = item.split(';')
             # check if it's a dir or a file
             if 'little_text' in item:
                 print()
 
-            # a file must have at least size of 1 byte
-            if 'size=' in split_item[1] and int(split_item[1].replace('size=', '')) > 0:
-                if split_item[0] == 'type=dir':
-                    dirs.append(split_item[len(split_item)-1].strip())
-                elif split_item[0] == 'type=file':
+            if split_item[0] == 'type=dir':
+                dirs.append(split_item[len(split_item)-1].strip())
+
+            elif split_item[0] == 'type=file':
+                # a file must have at least size of 1 byte
+                if 'size=' in split_item[1] and int(split_item[1].replace('size=', '')) > 0:
                     filename = split_item[len(split_item)-1].strip()
                     # check if filename ends with any of our white listed extensions
+                    if 'test' in filename:
+                        print()
                     if filename.upper().endswith(GlobalVar.file_extensions):
                         files.append(os.path.join(folder_path + split_item[len(split_item) - 1].strip()))
 
@@ -497,10 +576,10 @@ class FTPDataHandler:
                     try:
                         conn = self.ftp_instance.transfercmd('RETR ' + filepath, rest=offset)
                     except:
-                        print('ERROR could not refetch ' + filename + ', skipping')
+                        print('ERROR could not refetch ' + filename + ', skipping metadata')
                         data = None
                 else:
-                    print('ERROR could not refetch ' + filename + ', skipping')
+                    print('ERROR could not refetch ' + filename + ', skipping metadata')
                     break
 
             # if None: refetch has failed => skip game by breaking the loop
