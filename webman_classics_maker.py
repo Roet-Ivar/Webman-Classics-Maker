@@ -467,13 +467,13 @@ class Main:
         self.entry_field_iso_path 	= Entry(main, state='readonly')
 
         ##########################################################################
-        # Adding an on_change-listener on 'entry_field_filename'
-        self.generate_on_change(self.entry_field_filename)
-        self.entry_field_filename.bind('<<Change>>', self.dynamic_filename_and_path)
-        ###########################################################################
         # Adding an on_change-listener on 'entry_field_title'
         self.generate_on_change(self.entry_field_title)
-        self.entry_field_title.bind('<<Change>>', self.dynamic_title_to_pic1)
+        self.entry_field_title.bind('<<Change>>', self.dynamic_filename_and_path)
+        ###########################################################################
+        # Adding an on_change-listener on 'entry_field_filename'
+        self.generate_on_change(self.entry_field_filename)
+        self.entry_field_filename.bind('<<Change>>', self.dynamic_title_to_pic1)
         ###########################################################################
 
         self.entry_field_ftp_ip = Entry(main)
@@ -698,11 +698,12 @@ class Main:
                     pic1_changed = True
 
         else:
-            platform = ''
-            file_path = str(self.entry_field_iso_path.get())
-            if file_path != '':
+            try:
+                file_path = str(self.entry_field_iso_path.get())
                 iso_str_index = file_path.index('ISO/', 0, len(file_path))
                 platform = file_path[iso_str_index-3: iso_str_index].lower()
+            except:
+                platform = ''
 
             self.image_icon0 = Image.open(os.path.join(default_img_path, platform.upper(), 'ICON0.PNG')).convert("RGBA")
             self.image_icon0_ref = Image.open(os.path.join(default_img_path, 'ICON0.PNG')).convert("RGBA")
@@ -720,6 +721,12 @@ class Main:
             self.image_pic1.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
             self.image_pic1.paste(self.ps3_system_logo, (1180, 525), self.ps3_system_logo)
 
+        # A ICON0 must be used for the GUI
+        if not os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'ICON.PNG')):
+            tmp_image_icon0 = Image.open(os.path.join(default_img_path, 'ICON0.PNG')).convert("RGBA")
+            icon0_changed = True
+
+
         if pic1_changed or icon0_changed:
             # crop and blend ICON0 to the background
             tmp_icon0_bg = copy.copy(self.image_pic1_ref)
@@ -728,6 +735,8 @@ class Main:
             tmp_image_icon0 = tmp_icon0_bg.crop((self.icon0_x_pos, self.icon0_y_pos,
                                                  self.icon0_x_pos + self.image_icon0.width,
                                                  self.icon0_y_pos + self.image_icon0.height))
+
+
         # A PIC0 must be used for the GUI
         if os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC0.PNG')):
             tmp_pic0_bg = copy.copy(self.image_pic1)
@@ -968,10 +977,11 @@ class Main:
         tmp_img = tmp_img.resize((int(1280 * scaling), int(720 * scaling)), Image.ANTIALIAS)
         self.photo_image_pic1_xmb = PhotoImage(tmp_img)
         self.button_pic1.config(image=self.photo_image_pic1_xmb)
-
+        # NICLAS
         self.init_draw_images_on_canvas(self.main)
         #TODO: this might be more optimized somewhere else
         self.update_game_build_path()
+
 
     def image_replace_browser(self, main):
         image = askopenfile(mode='rb', title='Browse an image', filetypes=[('PNG image', '.PNG')])
@@ -1108,7 +1118,6 @@ class Main:
         if self.validate_fields():
             if not os.path.exists(AppPaths.game_work_dir):
                 os.makedirs(os.path.join(AppPaths.game_work_dir, 'pkg'))
-
 
             # make sure we have the mandatory ICON0 in the build_dir
             if not os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'ICON0.PNG')):

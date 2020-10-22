@@ -333,7 +333,7 @@ class FtpGameList():
                       + 'Filename: ' + filename + '\n'
                       + 'Title id: ' + str(title_id) + '\n')
 
-            if title_id is not None:
+            if title_id is not None and title_id is not '':
                 # save game build folder data here
                 game_folder_name = filename[:-4].replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
                 game_build_dir = os.path.join(AppPaths.builds, game_folder_name)
