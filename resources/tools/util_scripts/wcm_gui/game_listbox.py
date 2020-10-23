@@ -33,11 +33,12 @@ class Gamelist():
         self.selected_filename   = None
 
 
-    def create_main_frame(self, entry_field_title_id, entry_field_title, entry_field_filename, entry_field_iso_path, drive_system_array):
+    def create_main_frame(self, entry_field_title_id, entry_field_title, entry_field_filename, entry_field_iso_path, entry_field_platform, drive_system_array):
         self.entry_field_title_id       = entry_field_title_id
         self.entry_field_title          = entry_field_title
         self.entry_field_filename       = entry_field_filename
         self.entry_field_iso_path       = entry_field_iso_path
+        self.entry_field_platform       = entry_field_platform
         self.drive_system_path_array    = drive_system_array
 
         self.corrected_index = []
@@ -110,6 +111,7 @@ class Gamelist():
                     self.selected_title      = str(list_game['title'])
                     self.selected_path       = str(list_game['path'])
                     self.selected_filename   = str(list_game['filename'])
+                    self.selected_platform   = str(list_game['platform'])
 
                     # parse drive and system from json data
                     path_array = filter(None, self.selected_path.split('/'))
@@ -127,6 +129,9 @@ class Gamelist():
 
                     self.entry_field_filename.delete(0, END)
                     self.entry_field_filename.insert(0, self.selected_filename)
+
+                    self.entry_field_platform.delete(0, END)
+                    self.entry_field_platform.insert(0, self.selected_platform)
 
                     return True
 

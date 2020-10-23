@@ -31,18 +31,23 @@ class Edit_launch_txt:
 						print("""Error: make sure the string [filepath_var] (including brackets) is present in webcommand of settings.cfg""")
 						print("""Will revert back to the default webcommand""")
 
-				# webman-mod v.47.30 and older
+				# # webman-mod v.47.30 and older
+				# if web_command_string == '':
+				# 	pre_delay = 6
+				# 	post_delay = 4
+				# 	pre_cmd = '/wait.ps3?' + str(pre_delay) + ';/mount_ps3'
+				# 	post_cmd = ';/wait.ps3?' + str(post_delay) + ';/play.ps3'
+				# 	web_command_string = pre_cmd + str(json_data['iso_filepath'] + post_cmd)
+
+				# legacy command example: /wait.ps3?6;/mount_ps3/dev_hdd0/PS3ISO/game.iso;/wait.ps3?4;/play.ps3
+
+				# webman-mod v.47.30 and newer
 				if web_command_string == '':
-					pre_delay = 6
+					pre_delay = 'xmb'
 					post_delay = 4
 					pre_cmd = '/wait.ps3?' + str(pre_delay) + ';/mount_ps3'
 					post_cmd = ';/wait.ps3?' + str(post_delay) + ';/play.ps3'
 					web_command_string = pre_cmd + str(json_data['iso_filepath'] + post_cmd)
-
-				# # webman-mod v.47.31 and newer
-				# if web_command_string == '':
-				# 	pre_cmd = '/wait.ps3?xmb;/play.ps3'
-				# 	web_command_string = pre_cmd + str(json_data['iso_filepath'])
 
 			web_url_string = 'GET ' + urllib.quote(web_command_string) + ' HTTP/1.0'
 

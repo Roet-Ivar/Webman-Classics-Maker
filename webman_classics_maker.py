@@ -76,6 +76,7 @@ class Main:
         self.canvas_image_number = 0
         self.title_id_maxlength = len('PKGLAUNCH')
         self.tmp_title_id = ''
+        self.global_platform_paths = GlobalVar.platform_paths
 
         self.drive_system_path_array = ['drive', 'system', 'path']
         self.entry_field_iso_path = None
@@ -198,7 +199,13 @@ class Main:
     def create_list_combo_box(self, drive, platform):
         # create the listbox (games list)
         self.gamelist = Gamelist(drive, platform)
-        game_list_frame = self.gamelist.create_main_frame(self.entry_field_title_id, self.entry_field_title, self.entry_field_filename, self.entry_field_iso_path, self.drive_system_path_array)
+        game_list_frame = self.gamelist.create_main_frame(self.entry_field_title_id,
+                                                          self.entry_field_title,
+                                                          self.entry_field_filename,
+                                                          self.entry_field_iso_path,
+                                                          self.entry_field_platform,
+                                                          self.drive_system_path_array)
+
         game_list_frame.place(x=int((self.main_offset_x_pos) * scaling),
                               y=self.main_offset_y_pos + 220,
                               width=270,
@@ -221,13 +228,16 @@ class Main:
 
     def dropdown_filter_callback(self, event):
         dropdown_name = str(event.widget).split(".")[-1]
-        print('dropdown_name: ' + dropdown_name)
         if dropdown_name == 'drive_dropdown':
             self.list_filter_drive = event.widget.get()
             self.drivedropdown.set(self.list_filter_drive)
         elif dropdown_name == 'platform_dropdown':
             self.list_filter_platform = event.widget.get()
             self.platformdropdown.set(self.list_filter_platform)
+            # NTFS can only be used combined with HDD0
+            if 'NTFS' == self.list_filter_platform:
+                self.list_filter_drive = 'HDD0'
+                self.drivedropdown.set('HDD0')
 
         self.create_list_combo_box(self.list_filter_drive, self.list_filter_platform)
         self.game_list_box.focus()
@@ -465,6 +475,8 @@ class Main:
         self.entry_field_title 		= Entry(main)
         self.entry_field_filename 	= Entry(main)
         self.entry_field_iso_path 	= Entry(main, state='readonly')
+        # not visible in GUI
+        self.entry_field_platform   = Entry(main)
 
         ##########################################################################
         # Adding an on_change-listener on 'entry_field_title'
@@ -698,14 +710,16 @@ class Main:
                     pic1_changed = True
 
         else:
-            try:
-                file_path = str(self.entry_field_iso_path.get())
-                iso_str_index = file_path.index('ISO/', 0, len(file_path))
-                platform = file_path[iso_str_index-3: iso_str_index].lower()
-            except:
-                platform = ''
+            # extract the platform name by using the path
+            platform = ''
+            if self.entry_field_platform == 'NTFS':
+                match = re.search('(?<=\[).*?(?=\])', str(self.entry_field_filename.get()))
+                if match is not None:
+                    donor_platform = filter(lambda x: match.group() in x[0], self.global_platform_paths)
+                    if donor_platform:
+                        platform = donor_platform[0][1]
 
-            self.image_icon0 = Image.open(os.path.join(default_img_path, platform.upper(), 'ICON0.PNG')).convert("RGBA")
+            self.image_icon0 = Image.open(os.path.join(default_img_path, platform, 'ICON0.PNG')).convert("RGBA")
             self.image_icon0_ref = Image.open(os.path.join(default_img_path, 'ICON0.PNG')).convert("RGBA")
 
             self.image_pic0 = Image.open(os.path.join(default_img_path, 'PIC0.PNG')).convert("RGBA")
@@ -1121,11 +1135,17 @@ class Main:
 
             # make sure we have the mandatory ICON0 in the build_dir
             if not os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'ICON0.PNG')):
-                file_path = str(self.entry_field_iso_path.get())
-                iso_str_index = file_path.index('ISO/', 0, len(file_path))
-                platform = file_path[iso_str_index-3: iso_str_index].lower()
+                # find any donor platforms by using looking the entry field
+                platform = ''
+                if self.entry_field_platform == 'NTFS':
+                    match = re.search('(?<=\[).*?(?=\])', str(self.entry_field_filename.get()))
+                    if match is not None:
+                        donor_platform = filter(lambda x: match.group() in x[0], self.global_platform_paths)
+                        if donor_platform:
+                            platform = donor_platform[0][1]
 
-                icon0 = Image.open(os.path.join(AppPaths.resources, 'images', 'pkg', 'default', platform.upper(), 'ICON0.PNG')).convert("RGBA")
+                default_img_path = os.path.join(AppPaths.resources, 'images', 'pkg', 'default')
+                icon0 = Image.open(os.path.join(default_img_path, platform, 'ICON0.PNG')).convert("RGBA")
                 icon0.save(os.path.join(AppPaths.game_work_dir, 'pkg', 'ICON0.PNG'))
 
             self.save_preview_image()
@@ -1180,12 +1200,19 @@ class Main:
             if os.path.isfile(os.path.join(game_pkg_dir, 'ICON0.PNG')):
                 shutil.copyfile(os.path.join(game_pkg_dir, 'ICON0.PNG'), os.path.join(self.pkg_dir, 'ICON0.PNG'))
             else:
+                # extract the platform name by using the path
                 platform = ''
-                file_path = str(self.entry_field_iso_path.get())
-                if file_path != '':
-                    iso_str_index = file_path.index('ISO/', 0, len(file_path))
-                    platform = file_path[iso_str_index-3: iso_str_index].lower()
-                shutil.copyfile(os.path.join(AppPaths.resources, 'images', 'pkg', 'default', platform, 'ICON0.PNG'), os.path.join(self.pkg_dir, 'ICON0.PNG'))
+                if self.entry_field_platform == 'NTFS':
+                    match = re.search('(?<=\[).*?(?=\])', str(self.entry_field_filename.get()))
+                    if match is not None:
+                        donor_platform = filter(lambda x: match.group() in x[0], self.global_platform_paths)
+                        if donor_platform:
+                            platform = donor_platform[0][1]
+
+                default_img_path = os.path.join(AppPaths.resources, 'images', 'pkg', 'default')
+                if not os.path.isfile(os.path.join(default_img_path, platform, 'ICON0.PNG')):
+                    platform = ''
+                shutil.copyfile(os.path.join(default_img_path, platform, 'ICON0.PNG'), os.path.join(self.pkg_dir, 'ICON0.PNG'))
 
             if os.path.isfile(os.path.join(game_pkg_dir, 'PIC0.PNG')):
                 shutil.copyfile(os.path.join(game_pkg_dir, 'PIC0.PNG'), os.path.join(self.pkg_dir, 'PIC0.PNG'))

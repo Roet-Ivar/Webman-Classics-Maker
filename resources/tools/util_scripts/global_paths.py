@@ -86,15 +86,45 @@ class GlobalVar:
                        '.ISO',
                        '.ISO.0')
 
-    drive_paths = ('/dev_hdd0/',
-                   '/dev_usb(*)/')
+    platform_by_file_extension = [('.BIN', ('PSX')),
+                                  ('.BIN.ENC', ('PS2')),
+                                  ('.MDF', ('PSX')),
+                                  ('.NTFS[PSXISO]', ('NTFS', 'PSX')),
+                                  ('.NTFS[PSPISO]', ('NTFS', 'PSP')),
+                                  ('.NTFS[PS2ISO]', ('NTFS', 'PS2')),
+                                  ('.NTFS[PS3ISO]', ('NTFS', 'PS3')),
+                                  ('.NTFS[BDISO]', ('NTFS', 'MOVIE')),
+                                  ('.NTFS[DVDISO]', ('NTFS', 'MOVIE')),
+                                  ('.NTFS[BDFILE]', ('NTFS', 'MOVIE')),
+                                  ('.IMG', ('')),
+                                  ('.ISO', ('PSP', 'PSX', 'PS2', 'PS3')),
+                                  ('.ISO.0', (''))]
 
-    platform_paths = ('PSPISO/',
-                      'PSXISO/',
-                      'PS2ISO/',
-                      'PS3ISO/',
-                      'tmp/wmtmp/',
-                      'Games/')
+    file_extension_by_platform = [('PSP', ('.ISO','.NTFS[PSPISO]')),
+                                  ('PSX', ('.ISO', '.BIN', '.MDF', '.NTFS[PSXISO]')),
+                                  ('PS2', ('.ISO', '.BIN.ENC', '.NTFS[PS2ISO]')),
+                                  ('PS3', ('.ISO','.NTFS[PS3ISO]')),
+                                  ('NTFS', ('.NTFS[PSXISO]',
+                                            '.NTFS[PSPISO]',
+                                            '.NTFS[PS2ISO]',
+                                            '.NTFS[PS3ISO]',
+                                            '.NTFS[BDISO]',
+                                            '.NTFS[DVDISO]',
+                                            '.NTFS[BDFILE]'))]
+
+    drive_paths = [('/dev_hdd0/', 'HDD0'),
+                   ('/dev_usb000/', 'USB000'),
+                   ('/dev_usb001/', 'USB001'),
+                   ('/dev_usb002/', 'USB002'),
+                   ('/dev_usb003/', 'USB003'),
+                   ('/dev_usb(*)/', 'USB(*)')]
+
+    platform_paths = [('PSPISO/', 'PSP'),
+                      ('PSXISO/', 'PSX'),
+                      ('PS2ISO/', 'PS2'),
+                      ('PS3ISO/', 'PS3'),
+                      ('tmp/wmtmp/', 'NTFS')] #,('Games/', 'GAMES')]
+
 
 if not os.path.exists(os.path.join(App.wcm_work_dir, 'pkg')):
     os.makedirs(os.path.join(App.wcm_work_dir, 'pkg'))

@@ -9,5 +9,6 @@
 	"ftp_psp_png_offset_kb":20000,
 	"webcommand":"[filepath_var]",
 	"ftp_folder_depth":16,
-	"ftp_retry_count":10
+	"ftp_retry_count":10,
+	"legacy_webcommand":"/wait.ps3?6;/mount_ps3[filepath_var];/wait.ps3?4;/play.ps3"
 }

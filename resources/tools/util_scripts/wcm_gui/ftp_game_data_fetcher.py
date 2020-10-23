@@ -23,17 +23,19 @@ class FtpGameList():
         self.drive_filter = []
         self.platform_filter = []
 
-        self.drive_filter.append(selected_drive)
-
-
-        if 'ALL' in selected_platform:
-            self.platform_filter = list(self.global_platform_paths)
-        elif 'NTFS' in selected_platform:
-            self.platform_filter = 'tmp/wmtmp/'
-        elif 'FOLDER' in selected_platform:
-            self.platform_filter = 'Games/'
+        # fix drive path based on gamelist filter
+        if any(x in selected_drive for x in ['ALL', 'USB(*)']):
+            # make a list w/o single USB-ports, add 'USB(*)' instead
+            self.drive_filter.extend(filter(lambda x: 'USB' not in x[1], self.global_drive_paths))
+            self.drive_filter.append(('', 'USB(*)'))
         else:
-            self.platform_filter.extend(list(filter(lambda x: str(selected_platform) in x, self.global_platform_paths)))
+            self.drive_filter.extend(filter(lambda x: str(selected_drive) == x[1], self.global_drive_paths))
+
+        # fix platform path based on gamelist filter
+        if 'ALL' in selected_platform:
+            self.platform_filter = self.global_platform_paths
+        else:
+            self.platform_filter.extend(filter(lambda x: str(selected_platform) == x[1], self.global_platform_paths))
 
         # messages
         self.PAUSE_MESSAGE              = 'Press ENTER to continue...'
@@ -61,27 +63,13 @@ class FtpGameList():
         self.ftp_folder_depth       = ftp_settings_file['ftp_folder_depth']
         self.ftp_retry_count        = ftp_settings_file['ftp_retry_count']
 
-        # drives and folder for scanning
-        # self.DRIVE_USB_ARRAY        = [] # ['/dev_usb000/', '/dev_usb001/', '/dev_usb002/', '/dev_usb003/']
-        self.DRIVE_HDD0             = '/dev_hdd0/'
-        # TODO: The NTFS-folder needs an own platform category and logic before use
-        self.DRIVE_FOLDER_NTFS      = self.DRIVE_HDD0.join('tmp/wmtmp/')
-        self.FOLDER_PSP_ISO         = 'PSPISO/'
-        self.FOLDER_PSX_ISO         = 'PSXISO/'
-        self.FOLDER_PS2_ISO         = 'PS2ISO/'
-        self.FOLDER_PS3_ISO         = 'PS3ISO/'
-
         # platform ISO paths
-        # TODO: The NTFS-lines needs an own platform category and logic before use
         self.ntfs_lines = []
         self.psp_lines  = []
         self.psx_lines  = []
         self.ps2_lines  = []
         self.ps3_lines  = []
         self.all_lines  = []
-
-        # filters and file extensions
-        self.file_ext_filter = lambda x: x.upper().endswith(GlobalVar.file_extensions)
 
         # singular instances
         self.total_lines_count = 0
@@ -99,51 +87,50 @@ class FtpGameList():
             self.ftp.voidcmd('TYPE I')
 
             # get a listing of active drives
-            drive_list = []
-            self.ftp.retrlines('MLSD /', drive_list.append)
+            active_drives_list = []
+            self.ftp.retrlines('MLSD /', active_drives_list.append)
 
 
-            new_drive_array = []
-            tmp_usb_port_array = []
+            active_usb_ports = []
             # collect all drives to be used
-            if any(x in self.drive_filter[0] for x in ['ALL', 'USB(*)']):
-                new_drive_array = list(self.global_drive_paths)
-                for d in drive_list:
-                    # check which usb-ports are active
-                    ds = str(d).split(';')[6].strip()
-                    if 'dev_usb' in ds:
-                        # add all active usb-ports
-                        tmp_usb_port_array.append('/' + ds + '/')
-                        print(str(tmp_usb_port_array))
+            if self.drive_filter.count(('', 'USB(*)')) > 0:
+                self.drive_filter.remove(('', 'USB(*)'))
+                for d in active_drives_list:
+                    # check which USB-ports are active
+                    ds = '/' + str(d).split(';')[6].strip() + '/'
+                    if '/dev_usb00' in ds:
+                        # add all active USB-ports
+                        active_usb_ports.append((ds, ds[5:len(ds)-2].upper()))
 
-            elif 'USB' in self.drive_filter[0]:
-                for d in drive_list:
-                    # check which usb-ports are active
-                    ds = str(d).split(';')[6].strip()
-                    if 'dev_usb' in ds:
-                        # if matches, add all active usb-ports
-                        if ('/' + self.drive_filter[0].lower() + '/') in ds:
-                            tmp_usb_port_array.append('/' + ds + '/')
+            elif 'USB00' in self.drive_filter[0][1]:
+                usb_is_active = False
+                for d in active_drives_list:
+                    ds = '/' + str(d).split(';')[6].strip() + '/'
+                    if '/dev_usb00' in ds:
+                        # check if matching the active USB-port
+                        if (self.drive_filter[0][0].lower()) in ds:
+                            usb_is_active = True
                             break
+                if not usb_is_active:
+                    print('DEBUG selected USB-port: \'' + self.drive_filter[0][0] + '\' is not active.')
+                    self.drive_filter.remove(self.drive_filter[0])
 
-            new_drive_array.append(self.drive_filter[0])
-            new_drive_array.extend(tmp_usb_port_array)
-            for drive in new_drive_array:
-                if not any(x in drive for x in ['ALL', '(*)']):
-                    for platform in self.platform_filter:
-                        if 'PSPISO/' in platform:
-                            self.ftp_walk(self.ftp, drive + platform, self.psp_lines)
-                        elif 'PSXISO/' in platform:
-                            self.ftp_walk(self.ftp, drive + platform, self.psx_lines)
-                        elif 'PS2ISO/' in platform:
-                            self.ftp_walk(self.ftp, drive + platform, self.ps2_lines)
-                        elif 'PS3ISO/' in platform:
-                            self.ftp_walk(self.ftp, drive + platform, self.ps3_lines)
-                        elif 'tmp/wmtmp/' in platform:
-                            if 'usb' not in drive:
-                                self.ftp_walk(self.ftp, drive + platform, self.ntfs_lines)
-                        # elif 'Games/' in platform:
-                        #     self.ftp_walk(self.ftp, drive + platform, self.ntfs_lines)
+            self.drive_filter.extend(active_usb_ports)
+            for drive in self.drive_filter:
+                # filter out any unwanted drives
+                for platform in self.platform_filter:
+                    if 'PSP' == platform[1]:
+                        self.ftp_walk(self.ftp, drive[0] + platform[0], self.psp_lines)
+                    elif 'PSX' in platform[1]:
+                        self.ftp_walk(self.ftp, drive[0] + platform[0], self.psx_lines)
+                    elif 'PS2' in platform[1]:
+                        self.ftp_walk(self.ftp, drive[0] + platform[0], self.ps2_lines)
+                    elif 'PS3' in platform[1]:
+                        self.ftp_walk(self.ftp, drive[0] + platform[0], self.ps3_lines)
+                    elif 'NTFS' in platform[1] and 'HDD0' in drive[1]:
+                            self.ftp_walk(self.ftp, drive[0] + platform[0], self.ntfs_lines)
+                    # elif 'GAMES' in platform[1] and 'HDD0' in drive[1]:
+                    #     self.ftp_walk(self.ftp, drive[0] + platform[0], self.games_lines)
 
 
             # filter out any empty entries
@@ -151,6 +138,7 @@ class FtpGameList():
             self.all_lines.append(self.psx_lines)
             self.all_lines.append(self.ps2_lines)
             self.all_lines.append(self.ps3_lines)
+            self.all_lines.append(self.ntfs_lines)
 
             for p in self.all_lines:
                 self.total_lines_count += len(p)
@@ -175,12 +163,8 @@ class FtpGameList():
             self.new_json_game_list_data = json.load(f)
 
         # append the platform lists
-        if self.platform_filter == list(self.global_platform_paths):
-            for platform in self.json_game_list_data:
-                self.new_platform_list_data = self.list_builder(platform[0:3])
-        else:
-            platform = self.platform_filter[0].lower()
-            self.new_platform_list_data = self.list_builder(platform)
+        for platform in self.json_game_list_data:
+            self.new_platform_list_data = self.list_builder(str(platform).split('_')[0].upper())
 
         # save updated gamelist to disk
         with open(self.GAME_LIST_DATA_FILE, 'w') as newFile:
@@ -189,18 +173,22 @@ class FtpGameList():
 
 
     def list_builder(self, platform):
-        if 'psp' in platform.lower():
+        original_platform = platform
+        if 'PSP' in platform:
             platform_list = 'psp_games'
             filtered_platform = self.psp_lines
-        elif 'psx' in platform.lower():
+        elif 'PSX' in platform:
             platform_list = 'psx_games'
             filtered_platform = self.psx_lines
-        elif 'ps2' in platform.lower():
+        elif 'PS2' in platform:
             platform_list = 'ps2_games'
             filtered_platform = self.ps2_lines
-        elif 'ps3' in platform.lower():
+        elif 'PS3' in platform:
             platform_list = 'ps3_games'
             filtered_platform = self.ps3_lines
+        elif 'NTFS' in platform:
+            platform_list = 'ntfs_games'
+            filtered_platform = self.ntfs_lines
 
         # instantiate variables
         title_id = None
@@ -219,8 +207,6 @@ class FtpGameList():
             # check if game exist
             for game in self.json_game_list_data[platform_list]:
                 game_path = str(os.path.join(game['path'], game['filename']))
-                if 'corrupt' in filepath and 'corrupt' in game_path:
-                    print()
                 if filepath == game_path:
                     self.game_count += 1
                     print('DEBUG PROGRESS: ' + "{:.0%}".format(float(self.game_count).__div__(float(self.total_lines_count))) + ' (' + str(self.game_count) + '/' + str(self.total_lines_count) + ')')
@@ -229,41 +215,52 @@ class FtpGameList():
                     pass
 
 
+            # this is where .NTFS[xxx] files need a donor platform
+            if platform == 'NTFS':
+                match = re.search('(?<=\[).*?(?=\])', filename)
+                if match is not None:
+                    # These will not match: '.NTFS[BDISO]', '.NTFS[DVDISO]', '.NTFS[BDFILE]',
+                    tmp_platform = filter(lambda x: match.group() in x[0], self.global_platform_paths)
+                    if tmp_platform:
+                        platform = tmp_platform[0][1]
+
+
             # if not, add it
             if not game_exist:
                 title_id, icon0, pic0, pic1 = self.get_game_data(dir_path, filename)
-                title = filename
+                title = filename.encode('utf-8').strip()
 
-                # removes parenthesis & brackets including their content
-                title = re.sub(r'\([^)]*\)', '', title)
-                title = re.sub(r'\[[^)]*\]', '', title)
-
-                # removes the file extension
+                # removes the file extension and use it as title
                 for file_ext in GlobalVar.file_extensions:
                     if filename.upper().endswith(file_ext):
                         title = title[0:len(title)-len(file_ext)]
                         break
 
+                # removes parenthesis & brackets including their content
+                title = re.sub(r'\([^)]*\)', '', title)
+                title = re.sub(r'\[[^)]*\]', '', title)
+
                 # read platform db
-                platform_db_file = platform.upper() + '_all_title_ids.json'
+                platform_db_file = platform + '_all_title_ids.json'
                 with open(os.path.join(AppPaths.games_metadata, platform_db_file)) as f:
                     self.json_platform_metadata = json.load(f)
+
 
                 # check for for match the platform game database
                 if title_id is not None:
                     for game in self.json_platform_metadata['games']:
                         # adapt the title_id format for the xml db
-                        if platform == 'ps3':
+                        if platform == 'PS3':
                             title_id = title_id.replace('-', '')
 
                         if title_id == game['title_id']:
-                            if platform == 'psp' or platform == 'psx' or platform == 'ps2':
+                            if platform == 'PSP' or platform == 'PSX' or platform == 'PS2':
                                 title = game['title'].encode('utf-8').strip()
 
                                 if game['meta_data_link'] is not None:
                                     meta_data_link = game['meta_data_link']
 
-                            elif platform == 'ps3':
+                            elif platform == 'PS3':
                                 # use the first element for English
                                 title = game['locale'][0]['title'].encode('utf-8').strip()
 
@@ -273,47 +270,47 @@ class FtpGameList():
                 dup_list = []
                 for _platform in self.json_game_list_data:
                     for game in self.json_game_list_data[_platform]:
-                        if str(title) in str(game['title']):
-                            dup_list.append(str(game['title']))
+                        if title == game['title'] or (title + ' (') in game['title']:
+                            dup_list.append(game['title'].encode('utf-8').strip())
                 # if there they are the same, append suffix ' (1)'
                 if len(dup_list) == 1 and dup_list[0] == title:
                         title = title + ' (1)'
                 # if more than one we need to figure out what suffix to append
-                elif len(dup_list) > 0:
-                    curr_dup_number = 0
-                    new_title= ''
+                elif len(dup_list) > 1:
+                    new_title = ''
+                    curr_dup_number = 1
                     for dup in dup_list:
                         # a dup_title must have a '(#)' pattern
-                        dup_match = re.search('\(\d{1,3}\)$', dup)
+                        dup_match = re.search('(?<=\()\d{1,3}?(?=\))', dup)
                         if dup_match is not None:
-                            dup_group = dup_match.group()
-                            pre_string = str(dup).replace(str(dup_group), '')
-                            new_number = int(dup_group[1:len(dup_group)-1])
+                            new_number = dup_match.group()
+                            pre_string = str(dup).replace('(' + new_number + ')', '')
                             # title should match the pre_string w/o '(#)' pattern
-                            if title == pre_string.strip() and int(curr_dup_number) < new_number:
-                                curr_dup_number = dup_group[1:len(dup_group)-1]
-                                suf_string = '(' + str(int(curr_dup_number) +1) + ')'
+                            if title == pre_string.strip() and new_number > curr_dup_number:
+                                curr_dup_number += 1
+                                suf_string = '(' + str(curr_dup_number) + ')'
                                 new_title = pre_string + suf_string
-                                title = new_title
+                    title = new_title
                     # if there was no '(#)' pattern duplicates
                     if new_title == '':
                         for dup in dup_list:
                             if title == dup:
-                                # make the first duplciate
+                                # make the first duplicate
                                 title = title + ' (1)'
                                 break
                 title = title.strip().encode('utf-8')
 
                 # add game to list of new games
-                if 'corrupt' in str(title):
-                    print()
                 self.game_count += 1
                 print('DEBUG PROGRESS: ' + "{:.0%}".format(float(self.game_count).__div__(float(self.total_lines_count))) + ' (' + str(self.game_count) + '/' + str(self.total_lines_count) + ')')
+
+                if platform != original_platform:
+                    platform = original_platform
 
                 self.new_json_game_list_data[platform_list].append({
                     "title_id": title_id,
                     "title": title,
-                    "platform": platform.upper(),
+                    "platform": platform,
                     "filename": filename,
                     "path": platform_path,
                     "meta_data_link": meta_data_link})
@@ -322,19 +319,19 @@ class FtpGameList():
                 self.json_game_list_data[platform_list].append({
                     "title_id": title_id,
                     "title": title,
-                    "platform": platform.upper(),
+                    "platform": platform,
                     "filename": filename,
                     "path": platform_path,
                     "meta_data_link": meta_data_link})
 
                 print('DEBUG \'' + filename + '\' got title ' + str(title) + '\n')
                 print("Added '" + str(title) + "' to the list:\n"
-                      + 'Platform: ' + platform.upper() + '\n'
+                      + 'Platform: ' + platform + '\n'
                       + 'Filename: ' + filename + '\n'
                       + 'Title id: ' + str(title_id) + '\n')
 
+            # save game build folder data here
             if title_id is not None and title_id is not '':
-                # save game build folder data here
                 game_folder_name = filename[:-4].replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
                 game_build_dir = os.path.join(AppPaths.builds, game_folder_name)
 
@@ -359,19 +356,38 @@ class FtpGameList():
         pic1 = None
 
         game_filepath = os.path.join(platform_path, game_filename)
-        iso_index = game_filepath.index('ISO/', 0, len(game_filepath))
-        platform = game_filepath[iso_index-3: iso_index].lower()
 
         try:
-            title_id, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, 0, self.game_count, self.ftp_retry_count)
+            split_folder_path = game_filepath.split('/')
+            platform_str = split_folder_path[2] + '/'
+            platform_match = filter(lambda x: platform_str in x[0], self.global_platform_paths)
+            platform = str(platform_match[0][1]).upper()
+
+            original_platform = platform
+            # this is where .NTFS[xxx] files need a donor platform
+            if platform == 'NTFS':
+                match = re.search('(?<=\[).*?(?=\])', game_filename)
+                if match is not None:
+                    # These will not match: '.NTFS[BDISO]', '.NTFS[DVDISO]', '.NTFS[BDFILE]',
+                    donor_platform = filter(lambda x: match.group() in x[0], self.global_platform_paths)
+                    if donor_platform:
+                        platform = donor_platform[0][1]
+
+        except Exception as e:
+            print('ERROR could not parse platform')
+            print(e.message)
+
+        try:
+            # if no offset
+            title_id, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, platform, self.chunk_size_kb, 0, self.game_count, self.ftp_retry_count)
 
             # make another fetch with rest offset for PSP images
-            if platform == 'psp':
-                not_used, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, self.ftp_psp_png_offset_kb, self.game_count, self.ftp_retry_count)
+            if platform == 'PSP':
+                not_used, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, platform, self.chunk_size_kb, self.ftp_psp_png_offset_kb, self.game_count, self.ftp_retry_count)
 
             # PS3 guitar hero games needs a larger chunk to find the PIC1
-            elif platform == 'ps3' and 'guitar' in game_filename.lower():
-                not_used, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, 6000, 0, self.game_count, self.ftp_retry_count)
+            elif platform == 'PS3' and 'guitar' in game_filename.lower():
+                not_used, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, platform, 6000, 0, self.game_count, self.ftp_retry_count)
 
         # retry connection
         except Exception as e:
@@ -381,29 +397,29 @@ class FtpGameList():
             self.make_new_ftp()
             self.data_chunk = FTPDataHandler(self.ftp, self.total_lines_count)
 
-            title_id, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, 0, self.game_count, self.ftp_retry_count)
+            title_id, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, platform, self.chunk_size_kb, 0, self.game_count, self.ftp_retry_count)
 
             # make another fetch with rest offset for PSP images
-            if platform == 'psp':
-                title_id, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, self.chunk_size_kb, self.ftp_psp_png_offset_kb, self.game_count, self.ftp_retry_count)
+            if platform == 'PSP':
+                title_id, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, platform, self.chunk_size_kb, self.ftp_psp_png_offset_kb, self.game_count, self.ftp_retry_count)
 
             # PS3 guitar hero games needs a larger chunk to find the PIC1
-            elif platform == 'ps3' and 'guitar' in game_filename.lower():
-                not_used, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, 6000, 0, self.game_count, self.ftp_retry_count)
+            elif platform == 'PS3' and 'guitar' in game_filename.lower():
+                not_used, icon, pic0, pic1 = self.data_chunk.ftp_buffer_data(game_filepath, platform, 6000, 0, self.game_count, self.ftp_retry_count)
 
         return title_id, icon, pic0, pic1
 
     def ftp_walk(self, ftp, folder_path, files):
-        print('DEBUG Folder_path :' + folder_path)
+        print('DEBUG Current folder path :' + folder_path)
         depth = len(folder_path.split('/')) -2
-        print('DEBUG Folder_depth: ' + str(depth))
-
+        extensions = GlobalVar.file_extensions
 
         if '/dev_usb' in folder_path:
             # check what usb-drive are available so we can speed things up
             isPath = False
             folder_list = []
             split_folder_path = folder_path.split('/')
+
             folder_base_path = '/' + '/'.join(split_folder_path[1: len(split_folder_path)-2]) + '/'
             folder_name = split_folder_path[len(split_folder_path)-2]
 
@@ -415,9 +431,15 @@ class FtpGameList():
                     isPath = True
                     break
             if not isPath:
-                print()
                 return files
 
+        # only NTFS extensions valid in this folder
+        elif 'tmp/wmtmp/' in folder_path:
+            extensions = tuple([i for i in list(extensions) if 'NTFS' in i])
+
+        # TODO: implement /Games PARAMS.SFO parser
+        elif 'Games/' in folder_path:
+            return files
 
         dirs = []
         stuff = []
@@ -430,9 +452,6 @@ class FtpGameList():
         for item in stuff:
             split_item = item.split(';')
             # check if it's a dir or a file
-            if 'little_text' in item:
-                print()
-
             if split_item[0] == 'type=dir':
                 dirs.append(split_item[len(split_item)-1].strip())
 
@@ -440,13 +459,19 @@ class FtpGameList():
                 # a file must have at least size of 1 byte
                 if 'size=' in split_item[1] and int(split_item[1].replace('size=', '')) > 0:
                     filename = split_item[len(split_item)-1].strip()
+
+                    # make sure that .BIN.ENC files has capitalized extension
+                    if filename.upper().endswith('.BIN.ENC'):
+                        if filename.endswith('.BIN.ENC'):
+                            files.append(os.path.join(folder_path + split_item[len(split_item) - 1].strip()))
+                        else:
+                            # we need to return here or it will be included in the next clause
+                            return files
                     # check if filename ends with any of our white listed extensions
-                    if 'test' in filename:
-                        print()
-                    if filename.upper().endswith(GlobalVar.file_extensions):
+                    elif filename.upper().endswith(extensions):
                         files.append(os.path.join(folder_path + split_item[len(split_item) - 1].strip()))
 
-        if len(dirs) > 0 and depth <= self.ftp_folder_depth:
+        if len(dirs) > 0 and depth < self.ftp_folder_depth:
             for subdir in sorted(dirs):
                 current_dir = os.path.join(folder_path, subdir + '/')
                 self.ftp_walk(ftp, current_dir, files)
@@ -488,7 +513,11 @@ class FtpGameList():
                 icon0.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON0.PNG'))
 
         else:
-            icon0 = Image.open(os.path.join(AppPaths.application_path, 'resources', 'images', 'pkg', 'default', platform.upper(), 'ICON0.PNG')).convert("RGBA")
+            default_pkg_img_dir = os.path.join(AppPaths.resources, 'images', 'pkg', 'default')
+            icon0_platform_path = os.path.join(default_pkg_img_dir, platform, 'ICON0.PNG')
+            if not os.path.isfile(icon0_platform_path):
+                platform = ''
+            icon0 = Image.open(os.path.join(default_pkg_img_dir, platform, 'ICON0.PNG')).convert("RGBA")
             icon0.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON0.PNG'))
 
         if(pic0 is not None):
@@ -517,26 +546,33 @@ class FtpGameList():
 
 class FTPDataHandler:
     def __init__(self, ftp, total_lines):
+        self.global_platform_paths = GlobalVar.platform_paths
         self.ftp_instance = ftp
         self.ftp_instance.voidcmd('TYPE I')
         self.null = None
         self.total_lines = total_lines
 
-    def ftp_buffer_data(self, filepath, chunk_size, rest, game_count, ftp_retry_count):
+    def ftp_buffer_data(self, filepath, platform, chunk_size, rest, game_count, ftp_retry_count):
         icon0 = None
         pic0 = None
         pic1 = None
 
-        iso_index = filepath.index('ISO/', 0, len(filepath))
-        iso_index2 = filepath.index('ISO/')
-        platform = filepath[iso_index - 3: iso_index].lower()
+        # try:
+        #     split_folder_path = filepath.split('/')
+        #     platform_str = split_folder_path[2] + '/'
+        #     platform_match = filter(lambda x: platform_str in x[0], self.global_platform_paths)
+        #     platform = str(platform_match[0][1]).upper()
+        # except Exception as e:
+        #     print('ERROR could not parse platform')
+        #     print(e.message)
+
         filename = os.path.basename(filepath)
         game_title = filename[0:len(filename) - 4]
 
         file_size_bytes = self.ftp_instance.size(filepath)
         if file_size_bytes > 0 and file_size_bytes < (chunk_size * 1024):
             chunk_size = (file_size_bytes / 1024) * 0.95
-        elif platform.lower() == ('psx', 'ps2'):
+        elif platform == ('PSX', 'PS2'):
             chunk_size = 750
 
         def fill_buffer(self, received):
@@ -608,7 +644,7 @@ class FTPDataHandler:
                             game_title_id = get_title_id_from_buffer(self, platform, self.data_chunk)
 
                         # PS3 and PSP are the only platforms that has game art embedded
-                        if platform == 'psp' or platform == 'ps3':
+                        if platform == 'PSP' or platform == 'PS3':
                             icon0, pic0, pic1 = get_png_from_buffer(self, platform, filename, self.data_chunk)
 
                         # Error 451 is normal when closing the conection
@@ -649,7 +685,7 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
                     tmp_image = Image.open(io.BytesIO(png_byte_array)).convert("RGBA")
                     self.img_name = None
 
-                    if self.platform == 'psp':
+                    if self.platform == 'PSP':
                         # icon image PSP
                         if tmp_image.size == (144, 80):
                             self.img_name = 'ICON0.PNG'
@@ -665,7 +701,7 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
                                 self.has_pic1 = True
 
 
-                    elif self.platform == 'ps3':
+                    elif self.platform == 'PS3':
                         # icon image PS3
                         if tmp_image.size == (320, 176):
                             self.img_name = 'ICON0.PNG'
@@ -710,25 +746,26 @@ def get_title_id_from_buffer(self, platform, buffer_data):
     game_id = ''
     try:
         # psx and ps2
-        if platform == 'psx' or platform == 'ps2':
+        if platform == 'PSX' or platform == 'PS2':
             for m in re.finditer("""\w{4}\_\d{3}\.\d{2}""", buffer_data):
                 if m is not None:
                     game_id = str(m.group(0)).strip()
                     game_id = game_id.replace('_', '-')
                     game_id = game_id.replace('.', '')
 
-        elif platform == 'ps3':
+        elif platform == 'PS3':
             for m in re.finditer("""\w{4}-\d{5} """, buffer_data):
                 if m is not None:
                     game_id = str(m.group(0)).strip()
 
-        elif platform == 'psp':
+        elif platform == 'PSP':
             for m in re.finditer("""\w{4}-\d{5}\|""", buffer_data):
                 game_id = str(m.group(0)).strip()
                 game_id = game_id[0:len(game_id)-1]
 
-    except Exception:
-        print('Error in get_id_from_buffer: ' + self.TITLE_ID_EXCEPTION_MESSAGE)
+    except Exception as e:
+        print('Error in get_title_id_from_buffer: ' + self.TITLE_ID_EXCEPTION_MESSAGE)
+        print('ERROR: ' + e.message)
     finally:
         return game_id
 
