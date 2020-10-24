@@ -733,7 +733,7 @@ class Main:
         if pic1_changed:
             # draw xmb icons and system logo onto the background
             self.image_pic1.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
-            self.image_pic1.paste(self.ps3_system_logo, (1180, 525), self.ps3_system_logo)
+            self.image_pic0.paste(self.ps3_system_logo, (1180, 525), self.ps3_system_logo)
 
         # A ICON0 must be used for the GUI
         if not os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'ICON.PNG')):
@@ -754,11 +754,13 @@ class Main:
         # A PIC0 must be used for the GUI
         if os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC0.PNG')):
             tmp_pic0_bg = copy.copy(self.image_pic1)
-        # else use background w/ title
         else:
+            # else use background w/ title
             tmp_pic0_bg = copy.copy(self.image_pic1_w_title)
+            # add ps3 system logo
+            tmp_pic0_bg.paste(self.ps3_system_logo, (1180, 525), self.ps3_system_logo)
             # draw date and time beside ICON0
-            self.draw_text_on_image_w_shadow(self.image_pic1, "11/11/2006 00:00", 760, 522, 20, 1, 'white', 'black')
+            self.draw_text_on_image_w_shadow(tmp_pic0_bg, "11/11/2006 00:00", 760, 522, 20, 1, 'white', 'black')
 
         # Image.paste(im1, (left, top, right, bottom), im1)
         tmp_pic0_bg.paste(self.image_pic0, (self.pic0_x_pos, self.pic0_y_pos), self.image_pic0)
@@ -959,8 +961,8 @@ class Main:
         drive = ''
         system = ''
         path = ''
-        filename = event.widget.get()
-
+        filename = self.entry_field_filename.get().replace('//', '/', )
+        # TODO: this section could probably be optimized
         if self.drive_system_path_array[0] is not None:
             drive = '/' + self.drive_system_path_array[0] + '/'
         if self.drive_system_path_array[1] is not None:
@@ -969,7 +971,7 @@ class Main:
             path = '/' + self.drive_system_path_array[2] + '/'
 
         iso_path = drive + system + path + filename
-        iso_path = iso_path.replace('//', '/')
+        iso_path = iso_path.replace('//', '/', )
 
         self.entry_field_iso_path.xview_moveto(1)
         self.update_iso_path_entry_field(iso_path)
@@ -1241,7 +1243,7 @@ class Main:
 
                     # open builds folder in windows explorer
                     if 'win' in sys.platform:
-                        print('DEBUG opening folder: ' + os.path.join(AppPaths.game_work_dir, '..'))
+                        # print('DEBUG opening folder: ' + os.path.join(AppPaths.game_work_dir, '..'))
                         try:
                             os.startfile(os.path.join(AppPaths.game_work_dir, '../'))
                         except:
@@ -1249,7 +1251,7 @@ class Main:
 
             else:
                 import tkMessageBox
-                tkMessageBox.showinfo("Build status", "Build failed!")
+                tkMessageBox.showinfo("Build status", "Build failed!\nSee error log.")
 
 
 

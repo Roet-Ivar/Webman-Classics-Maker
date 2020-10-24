@@ -879,11 +879,12 @@ class Webman_pkg:
 				pack(args[0], contentid)
 			elif len(args) == 2 and contentid != None:
 				pack(args[0], contentid, args[1])
-				
+
+			if os.path.isfile(pkg_name) and os.path.isdir(build_dir_path):
 				if os.path.isfile(os.path.join(build_dir_path, pkg_name)):
 					os.remove(os.path.join(build_dir_path, pkg_name))
-
 				shutil.move(pkg_name, build_dir_path)
+
 				print('[5/5] Execution of \'webman_pkg.py\':              DONE')
 				print('-----------------------------------------------------')
 				print('Package created in: ' + build_dir_path + '/' + pkg_name + '\n')
@@ -891,7 +892,8 @@ class Webman_pkg:
 			else:
 				print('[5/5] Execution of \'webman_pkg.py\':              FAILED')
 				print('-----------------------------------------------------')
-				print('Package created in: ' + build_dir_path + '/' + pkg_name + '\n')
-				return pkg_name
+				raise Exception('pkg_name: ' + pkg_name +
+								',\nbuild_dir_path: ' + build_dir_path +
+								',\njson_data[\'iso_filepath\']: ' + filepath)
 				usage()
 				sys.exit(2)
