@@ -3,12 +3,10 @@ import json, os, sys
 from shutil import copyfile
 sys.path.append('..')
 from global_paths import App as AppPaths
-
-
+from global_paths import GlobalVar
 
 class Gamelist():
-
-    def __init__(self, platform):
+    def __init__(self, drive, platform):
         # makes sure there is a json_game_list file
         if os.path.isfile(os.path.join(AppPaths.application_path, 'game_list_data.json')) is False:
             copyfile(os.path.join(AppPaths.util_resources, 'game_list_data.json.BAK'), os.path.join(AppPaths.application_path, 'game_list_data.json'))
@@ -18,6 +16,11 @@ class Gamelist():
         except Exception as e:
             print("""Error in 'game_list_data.json' contains incorrect json-syntax. Either remove it or find the error using json lint""")
             print("Details: " + e.message)
+
+        if drive == 'USB(*)':
+            self.drive_to_show = '/dev_' + drive.lower().replace('(*)', '')
+        else:
+            self.drive_to_show = '/dev_' + drive.lower() + '/'
 
         self.platform_to_show = platform.lower() + '_games'
         self.WCM_BASE_PATH  = AppPaths.wcm_gui
@@ -30,13 +33,13 @@ class Gamelist():
         self.selected_filename   = None
 
 
-    def create_main_frame(self, entry_field_title_id, entry_field_title, entry_field_filename, entry_field_iso_path, drive_system_array):
-        self.entry_field_title_id   = entry_field_title_id
-        self.entry_field_title      = entry_field_title
-        self.entry_field_filename   = entry_field_filename
-        self.entry_field_iso_path   = entry_field_iso_path
-        self.drive_system_array     = drive_system_array
-
+    def create_main_frame(self, entry_field_title_id, entry_field_title, entry_field_filename, entry_field_iso_path, entry_field_platform, drive_system_array):
+        self.entry_field_title_id       = entry_field_title_id
+        self.entry_field_title          = entry_field_title
+        self.entry_field_filename       = entry_field_filename
+        self.entry_field_iso_path       = entry_field_iso_path
+        self.entry_field_platform       = entry_field_platform
+        self.drive_system_path_array    = drive_system_array
 
         self.corrected_index = []
         self.main_frame = Frame()
@@ -54,14 +57,20 @@ class Gamelist():
         self._listbox['yscrollcommand'] = s.set
 
 
+
+        # default filters
         if 'all_games' == self.platform_to_show:
+            # iterate all platforms
             for platform in self.json_game_list_data:
                 for list_game in self.json_game_list_data[platform]:
-                    self.add_item(list_game['title'])
+                    # titles in the list has been designed to be unique
+                    if '/dev_all/' == self.drive_to_show or self.drive_to_show in list_game['path']:
+                        self.add_item(list_game['title'])
 
         else:
             for list_game in self.json_game_list_data[self.platform_to_show]:
-                self.add_item(list_game['title'])
+                if '/dev_all/' == self.drive_to_show or self.drive_to_show in list_game['path']:
+                    self.add_item(list_game['title'])
 
         for x in range(19 - self._listbox.size()):
             self.add_item('')
@@ -91,22 +100,29 @@ class Gamelist():
 
     def entry_fields_update(self, new_selection):
         for platform in self.json_game_list_data:
+
             for list_game in self.json_game_list_data[platform]:
                 self.selected_title = self._listbox.get(new_selection[0])
                 tmp_title = list_game['title']
-                if self.selected_title == str(tmp_title):
-                    self.selected_title_id   = str(list_game['title_id'])
+
+                match = self.selected_title == str(tmp_title)
+                if match:
+                    self.selected_title_id   = str(list_game['title_id']).replace('-', '')
                     self.selected_title      = str(list_game['title'])
                     self.selected_path       = str(list_game['path'])
                     self.selected_filename   = str(list_game['filename'])
+                    self.selected_platform   = str(list_game['platform'])
 
                     # parse drive and system from json data
                     path_array = filter(None, self.selected_path.split('/'))
-                    self.drive_system_array[0] = path_array[0]
-                    self.drive_system_array[1] = path_array[1]
+                    self.drive_system_path_array[0] = path_array[0]
+                    self.drive_system_path_array[1] = path_array[1]
+                    self.drive_system_path_array[2] = '/'.join(path_array[2:len(path_array)]).replace('//', '')
 
+
+                    self.entry_field_title_id.delete(0, len(self.entry_field_title_id.get())-1)
                     self.entry_field_title_id.delete(0, END)
-                    self.entry_field_title_id.insert(0, self.selected_title_id.replace('-', ''))
+                    self.entry_field_title_id.insert(0, self.selected_title_id)
 
                     self.entry_field_title.delete(0, END)
                     self.entry_field_title.insert(0, self.selected_title)
@@ -114,7 +130,11 @@ class Gamelist():
                     self.entry_field_filename.delete(0, END)
                     self.entry_field_filename.insert(0, self.selected_filename)
 
-                    break
+                    self.entry_field_platform.delete(0, END)
+                    self.entry_field_platform.insert(0, self.selected_platform)
+
+                    return True
+
 
 
     def get_selected_path(self):
@@ -123,7 +143,7 @@ class Gamelist():
     def get_listbox(self):
         return self._listbox
 
-    def get_ascending_index(self, list_of_items, item, ignore_case=False):
+    def get_ascending_index(self, list_of_items, item, ignore_case=True):
         lo = 0
         hi = len(list_of_items)
 
@@ -149,9 +169,9 @@ class Gamelist():
     def add_item(self, item):
         if item != '':
             self.list_of_items = self._listbox.get(0, END)
-
             # getting ascending index in order to sort alphabetically
             index = self.get_ascending_index(self.list_of_items, item)
+
             self._listbox.insert(index, item)
         else:
             self._listbox.insert(END, item)
@@ -170,12 +190,20 @@ class Gamelist():
 
 
     def get_selected_build_dir_path(self):
-        filename = self.selected_filename
-        title_id = self.selected_title_id.replace('-', '')
+        pkg_project_name = ''
+        build_dir_path = ''
+        if self.selected_filename is not '':
+            filename = self.selected_filename
+            title_id = self.selected_title_id.replace('-', '')
+            build_base_path = AppPaths.builds
 
-        build_base_path = AppPaths.builds
-        pkg_project_name = filename[:-4].replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
+            # removes the file extension
+            for file_ext in GlobalVar.file_extensions:
+                if filename.upper().endswith(file_ext):
+                    pkg_project_name = filename[0:len(filename)-len(file_ext)]
+                    pkg_project_name = pkg_project_name.replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
+                    break
 
-        build_dir_path = os.path.join(build_base_path, pkg_project_name)
+            build_dir_path = os.path.join(build_base_path, pkg_project_name)
         return build_dir_path
 

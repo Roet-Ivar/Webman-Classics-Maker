@@ -2,9 +2,6 @@ import sys, os, zipfile
 import application_path
 from global_paths import Build as BuildPaths
 
-# import pyinstaller_Build_Webman_PKG_exe
-# import pyinstaller_Edit_Param_SFO_exe
-# import pyinstaller_FTP_Game_List_exe
 import pyinstaller_Webman_Classics_Maker_exe
 
 def zipdir(path, ziph):

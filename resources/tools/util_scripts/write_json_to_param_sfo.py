@@ -22,26 +22,26 @@ class Write_param_sfo():
 				file = f.read()
 				f.close()
 
-				try:
-					# add title
-					start_index_title = file.find(dummy_title)
-					print('DEBUG: ' + str(file[888:1025]))
-					file=file[0:start_index_title]+str(title)+file[start_index_title+len(title):]
+				# add title
+				start_index_title = file.find(dummy_title)
+				print('DEBUG: ' + str(file[888:1025]))
+				file=file[0:start_index_title]+str(title)+file[start_index_title+len(title):]
 
-					# add title_id
-					max_pos_title_id = 1025
-					file=file[0:max_pos_title_id-len(str(title_id))]+str(title_id)+file[max_pos_title_id:]
-					print('DEBUG: ' + str(file[start_index_title:1025]))
+				# add title_id
+				max_pos_title_id = 1025
+				file=file[0:max_pos_title_id-len(str(title_id))]+str(title_id)+file[max_pos_title_id:]
+				print('DEBUG: ' + str(file[start_index_title:1025]))
 
-					# write to generated files
-					newFile = open(os.path.join(AppPaths.pkg, 'PARAM.SFO'), 'wb')
-					newFileByteArray = bytearray(file)
-					newFile.write(newFileByteArray)
+				# write to generated files
+				newFile = open(os.path.join(AppPaths.pkg, 'PARAM.SFO'), 'wb')
+				newFileByteArray = bytearray(file)
+				newFile.write(newFileByteArray)
 
-					print('\n\nExecution of \'write_json_to_param_sfo.py\': Done')
-					print('-----------------------------------------------')
-
-				except ValueError:
-					print('File write error / \'PKGLAUNCH\' not found / \'title_id\' not a string')
+				print('\n\n[1/5] Execution of \'write_json_to_param_sfo.py\': DONE')
+				print('-----------------------------------------------------')
+				return True
 		except Exception as e:
-			print(e)
+			print('\n\n[1/5] Execution of \'write_json_to_param_sfo.py\': FAILED')
+			print(e.message)
+			print('-----------------------------------------------------')
+			return False
