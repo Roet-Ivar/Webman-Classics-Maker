@@ -79,12 +79,14 @@ class GlobalVar:
                        '.NTFS[PSPISO]',
                        '.NTFS[PS2ISO]',
                        '.NTFS[PS3ISO]',
-                       '.NTFS[BDISO]',
-                       '.NTFS[DVDISO]',
-                       '.NTFS[BDFILE]',
                        '.IMG',
                        '.ISO',
-                       '.ISO.0')
+                       '.ISO.0'
+                       )
+                       # ,
+                       # '.NTFS[BDISO]',
+                       # '.NTFS[DVDISO]',
+                       # '.NTFS[BDFILE]',)
 
     platform_by_file_extension = [('.BIN', ('PSX')),
                                   ('.BIN.ENC', ('PS2')),
