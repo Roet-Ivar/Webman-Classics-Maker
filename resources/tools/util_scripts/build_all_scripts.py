@@ -1,3 +1,5 @@
+import traceback
+
 from write_json_to_param_sfo import Write_param_sfo
 from content_id_elf_replace import Elf_replace
 from edit_launch_txt import Edit_launch_txt
@@ -35,9 +37,14 @@ class Webman_PKG:
 			if build_is_ok:
 				pkg_name = webman_pkg.execute()
 		except Exception as e:
+			print('[5/5] Execution of \'webman_pkg.py\':              FAILED')
+			print('-----------------------------------------------------')
 			print('Could not build pkg and/or return pkg_name!')
 			if e.message:
 				print('ERROR: ' + e.message)
+
+			if repr(e):
+				print('DEBUG ERROR traceback: ' + str(traceback.print_exc()))
 
 		# clean up .pyc-files
 		import os

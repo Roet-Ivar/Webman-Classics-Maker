@@ -25,7 +25,7 @@ class Param_to_json:
 				json_data['content_id']='UP0001-'+ params_arr[1] + '_00-0000000000000000'
 				json_data['iso_filepath']=params_arr[3]
 
-				newFile = open(os.path.join(work_dir, 'pkg.json'), 'wb')
+				newFile = open(os.path.join(AppPaths.game_work_dir, 'pkg.json'), 'wb')
 				json_text = json.dumps(json_data, indent=4, separators=(",", ":"))
 				
 				newFile.write(json_text)

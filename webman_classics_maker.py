@@ -175,6 +175,9 @@ class Main:
             os.makedirs(AppPaths.pkg)
         self.copytree(os.path.join(AppPaths.util_resources, 'pkg_dir_bak'), os.path.join(AppPaths.resources, 'pkg'))
 
+        # if os.path.isdir(os.path.join(AppPaths.game_work_dir, 'pkg')):
+        #     self.copytree(os.path.join(AppPaths.util_resources, 'pkg_dir_bak'), os.path.join(AppPaths.game_work_dir, 'pkg'))
+
     def init_config_file(self):
         if not os.path.isdir(AppPaths.settings):
             os.mkdir(AppPaths.settings)
@@ -481,11 +484,11 @@ class Main:
         ##########################################################################
         # Adding an on_change-listener on 'entry_field_title'
         self.generate_on_change(self.entry_field_title)
-        self.entry_field_title.bind('<<Change>>', self.dynamic_filename_and_path)
+        self.entry_field_title.bind('<<Change>>', self.dynamic_title_to_pic1)
         ###########################################################################
         # Adding an on_change-listener on 'entry_field_filename'
         self.generate_on_change(self.entry_field_filename)
-        self.entry_field_filename.bind('<<Change>>', self.dynamic_title_to_pic1)
+        self.entry_field_filename.bind('<<Change>>', self.dynamic_filename_and_path)
         ###########################################################################
 
         self.entry_field_ftp_ip = Entry(main)
@@ -988,7 +991,7 @@ class Main:
     def dynamic_title_to_pic1(self, event):
         tmp_img = self.image_pic1
         # self, image, text, text_x, text_y, text_size, text_outline, text_color,
-        self.draw_text_on_image_w_shadow(tmp_img, event.widget.get(), 760, 487, 32, 2, 'white', 'black')
+        self.draw_text_on_image_w_shadow(tmp_img, self.entry_field_title.get(), 760, 487, 32, 2, 'white', 'black')
         self.image_pic1_w_title = copy.copy(tmp_img)
         tmp_img = tmp_img.resize((int(1280 * scaling), int(720 * scaling)), Image.ANTIALIAS)
         self.photo_image_pic1_xmb = PhotoImage(tmp_img)
@@ -1231,8 +1234,8 @@ class Main:
                 if not os.path.exists(game_pkg_dir):
                     os.makedirs(game_pkg_dir)
 
-                # saving the build content in the game build folder
-                self.copytree(self.pkg_dir, game_pkg_dir)
+                    # saving the build content in the game build folder
+                    self.copytree(AppPaths.pkg, game_pkg_dir)
 
 
                 if os.path.isdir(AppPaths.game_work_dir):
@@ -1257,11 +1260,14 @@ class Main:
 
     def on_ftp_fetch_button(self):
         # save the ps3-ip field to config file
-        self.save_ftp_fields_on_fetch()
-        ftp_game_list = FtpGameList(self.drivedropdown.get(), self.platformdropdown.get())
-        ftp_game_list.execute()
+        if self.entry_field_ftp_ip.get() is not '':
+            self.save_ftp_fields_on_fetch()
+            ftp_game_list = FtpGameList(self.drivedropdown.get(), self.platformdropdown.get())
+            ftp_game_list.execute()
 
-        self.on_game_list_refresh()
+            self.on_game_list_refresh()
+        else:
+            print('DEBUG cannot connect with empty ip.')
 
 
     def save_ftp_fields_on_fetch(self):
@@ -1325,15 +1331,22 @@ class Main:
         with open(os.path.join(AppPaths.util_resources, 'pkg.json.BAK')) as f:
             json_data = json.load(f)
 
+        # ftp settings
+        with open(os.path.join(AppPaths.settings, 'ftp_settings.cfg')) as f:
+            ftp_settings_file = json.load(f)
+            f.close()
+
         try:
-            json_data['title'] = str(self.entry_field_title.get())
+            # if use_w_title_id from config, swap first letter of title_id to 'W'
+            if ftp_settings_file['use_w_title_id']:
+                json_data['title'] = 'W' + str(self.entry_field_title.get())[1:]
+            else:
+                json_data['title'] = str(self.entry_field_title.get())
             json_data['title_id'] = self.entry_field_title_id.get()
             json_data['content_id'] = 'UP0001-' + self.entry_field_title_id.get() + '_00-0000000000000000'
             json_data['iso_filepath'] = str(self.entry_field_iso_path.get())
 
             pkg_json_path = os.path.join(AppPaths.game_work_dir, 'pkg.json')
-            # if (os.path.isfile(pkg_json_path)):
-            # 	os.remove(pkg_json_path)
             newFile = open(pkg_json_path, "w")
             json_text = json.dumps(json_data, indent=4, separators=(",", ":"))
             newFile.write(json_text)

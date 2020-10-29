@@ -54,11 +54,11 @@ class Edit_launch_txt:
 			if not os.path.exists(os.path.join(AppPaths.game_work_dir, 'pkg', 'USRDIR')):
 				os.makedirs(os.path.join(AppPaths.game_work_dir, 'pkg', 'USRDIR'))
 
-			launch_txt = open(os.path.join(AppPaths.pkg, 'USRDIR', 'launch.txt'), 'wb')
+			launch_txt = open(os.path.join(AppPaths.game_work_dir, 'pkg', 'USRDIR', 'launch.txt'), 'wb')
 			launch_txt_byteArray = bytearray(web_command_string, 'utf8') + os.linesep
 			launch_txt.write(launch_txt_byteArray)
 
-			url_txt = open(os.path.join(AppPaths.pkg, 'USRDIR', 'url.txt'), 'wb')
+			url_txt = open(os.path.join(AppPaths.game_work_dir, 'pkg', 'USRDIR', 'url.txt'), 'wb')
 			url_txt_byteArray = bytearray(web_url_string) + os.linesep
 			url_txt.write(url_txt_byteArray)
 
