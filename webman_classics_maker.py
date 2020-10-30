@@ -1339,11 +1339,12 @@ class Main:
         try:
             # if use_w_title_id from config, swap first letter of title_id to 'W'
             if ftp_settings_file['use_w_title_id']:
-                json_data['title'] = 'W' + str(self.entry_field_title.get())[1:]
+                json_data['title_id'] = 'W' + str(self.entry_field_title_id.get())[1:]
             else:
-                json_data['title'] = str(self.entry_field_title.get())
-            json_data['title_id'] = self.entry_field_title_id.get()
-            json_data['content_id'] = 'UP0001-' + self.entry_field_title_id.get() + '_00-0000000000000000'
+                json_data['title_id'] = self.entry_field_title_id.get()
+
+            json_data['title'] = str(self.entry_field_title.get())
+            json_data['content_id'] = 'UP0001-' + json_data['title_id'] + '_00-0000000000000000'
             json_data['iso_filepath'] = str(self.entry_field_iso_path.get())
 
             pkg_json_path = os.path.join(AppPaths.game_work_dir, 'pkg.json')
