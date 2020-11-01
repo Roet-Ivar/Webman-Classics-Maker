@@ -24,23 +24,26 @@ class FtpGameList():
         self.selected_drives = []
         self.platform_filter = []
 
-        # fix drive path based on gamelist filter
-        if any(x in selected_drive for x in ['ALL']): #, 'USB(*)']):
+        # add all drive paths based on choice from drive filter
+        if any(x in selected_drive for x in ['ALL']):
             self.selected_drives.extend(GlobalVar.drive_paths)
             if self.selected_drives.count(('/dev_usb(*)/', 'USB(*)')) > 0:
                 self.selected_drives.remove(('/dev_usb(*)/', 'USB(*)'))
+
         elif any(x in selected_drive for x in ['USB(*)']):
             self.selected_drives.extend(GlobalVar.drive_paths)
             if self.selected_drives.count(('/dev_usb(*)/', 'USB(*)')) > 0:
                 self.selected_drives.remove(('/dev_usb(*)/', 'USB(*)'))
             if self.selected_drives.count(('/dev_hdd0/', 'HDD0')) > 0:
                 self.selected_drives.remove(('/dev_hdd0/', 'HDD0'))
+        # single drive choice
         else:
             self.selected_drives.extend(filter(lambda x: str(selected_drive) == x[1], self.global_drive_paths))
 
-        # fix platform path based on gamelist filter
+        # add all drive paths based on choice from platform filter
         if 'ALL' in selected_platform:
             self.platform_filter.extend(self.global_platform_paths)
+        # single platform choice
         else:
             self.platform_filter.extend(filter(lambda x: str(selected_platform) == x[1], self.global_platform_paths))
 
@@ -71,12 +74,13 @@ class FtpGameList():
         self.ftp_retry_count        = ftp_settings_file['ftp_retry_count']
 
         # platform ISO paths
-        self.ntfs_lines = []
-        self.psp_lines  = []
-        self.psx_lines  = []
-        self.ps2_lines  = []
-        self.ps3_lines  = []
-        self.all_lines  = []
+        self.PSPISO_lines  = []
+        self.PSXISO_lines  = []
+        self.PS2ISO_lines  = []
+        self.PS3ISO_lines  = []
+        self.NTFS_lines = []
+        self.GAMES_lines = []
+        self.ALL_lines  = []
 
         # singular instances
         self.total_lines_count = 0
@@ -110,28 +114,28 @@ class FtpGameList():
 
             for drive in filtered_drives:
                 for platform in self.platform_filter:
-                    if 'PSP' == platform[1]:
-                        self.ftp_walk(self.ftp, drive[0] + platform[0], self.psp_lines)
-                    elif 'PSX' in platform[1]:
-                        self.ftp_walk(self.ftp, drive[0] + platform[0], self.psx_lines)
-                    elif 'PS2' in platform[1]:
-                        self.ftp_walk(self.ftp, drive[0] + platform[0], self.ps2_lines)
-                    elif 'PS3' in platform[1]:
-                        self.ftp_walk(self.ftp, drive[0] + platform[0], self.ps3_lines)
+                    if 'PSPISO' == platform[1]:
+                        self.ftp_walk(self.ftp, drive[0] + platform[0], self.PSPISO_lines)
+                    elif 'PSXISO' == platform[1]:
+                        self.ftp_walk(self.ftp, drive[0] + platform[0], self.PSXISO_lines)
+                    elif 'PS2ISO' == platform[1]:
+                        self.ftp_walk(self.ftp, drive[0] + platform[0], self.PS2ISO_lines)
+                    elif 'PS3ISO' == platform[1]:
+                        self.ftp_walk(self.ftp, drive[0] + platform[0], self.PS3ISO_lines)
                     elif 'NTFS' in platform[1] and 'HDD0' in drive[1]:
-                            self.ftp_walk(self.ftp, drive[0] + platform[0], self.ntfs_lines)
-                    # elif 'GAMES' in platform[1] and 'HDD0' in drive[1]:
-                    #     self.ftp_walk(self.ftp, drive[0] + platform[0], self.games_lines)
-
+                            self.ftp_walk(self.ftp, drive[0] + platform[0], self.NTFS_lines)
+                    elif 'GAMES' in platform[1]:
+                        self.ftp_walk(self.ftp, drive[0] + platform[0], self.GAMES_lines)
 
             # filter out any empty entries
-            self.all_lines.append(self.psp_lines)
-            self.all_lines.append(self.psx_lines)
-            self.all_lines.append(self.ps2_lines)
-            self.all_lines.append(self.ps3_lines)
-            self.all_lines.append(self.ntfs_lines)
+            self.ALL_lines.append(self.PSPISO_lines)
+            self.ALL_lines.append(self.PSXISO_lines)
+            self.ALL_lines.append(self.PS2ISO_lines)
+            self.ALL_lines.append(self.PS3ISO_lines)
+            self.ALL_lines.append(self.NTFS_lines)
+            self.ALL_lines.append(self.GAMES_lines)
 
-            for p in self.all_lines:
+            for p in self.ALL_lines:
                 self.total_lines_count += len(p)
 
             # after retrieving the list of file paths we fetch the actual data
@@ -155,7 +159,7 @@ class FtpGameList():
 
         # append the platform lists
         for platform in self.json_game_list_data:
-            self.new_platform_list_data = self.list_builder(str(platform).split('_')[0].upper())
+            self.new_platform_list_data = self.list_builder(str(platform).split('_')[0])
 
         # save updated gamelist to disk
         with open(self.GAME_LIST_DATA_FILE, 'w') as newFile:
@@ -164,21 +168,20 @@ class FtpGameList():
 
 
     def list_builder(self, original_platform):
-        if 'PSP' in original_platform:
-            platform_list = 'psp_games'
-            filtered_platform = self.psp_lines
-        elif 'PSX' in original_platform:
-            platform_list = 'psx_games'
-            filtered_platform = self.psx_lines
-        elif 'PS2' in original_platform:
-            platform_list = 'ps2_games'
-            filtered_platform = self.ps2_lines
-        elif 'PS3' in original_platform:
-            platform_list = 'ps3_games'
-            filtered_platform = self.ps3_lines
-        elif 'NTFS' in original_platform:
-            platform_list = 'ntfs_games'
-            filtered_platform = self.ntfs_lines
+        platform_list = original_platform + '_games'
+        filtered_platform = None
+        if 'PSPISO' in platform_list:
+            filtered_platform = self.PSPISO_lines
+        elif 'PSXISO' in platform_list:
+            filtered_platform = self.PSXISO_lines
+        elif 'PS2ISO' in platform_list:
+            filtered_platform = self.PS2ISO_lines
+        elif 'PS3ISO' in platform_list:
+            filtered_platform = self.PS3ISO_lines
+        elif 'NTFS' in platform_list:
+            filtered_platform = self.NTFS_lines
+        elif 'GAMES' in platform_list:
+            filtered_platform = self.GAMES_lines
 
         # instantiate variables
         title_id = None
@@ -203,7 +206,8 @@ class FtpGameList():
                 game_path = str(os.path.join(game['path'], game['filename']))
                 if filepath == game_path:
                     self.game_count += 1
-                    print('DEBUG PROGRESS: ' + "{:.0%}".format(float(self.game_count).__div__(float(self.total_lines_count))) + ' (' + str(self.game_count) + '/' + str(self.total_lines_count) + ')')
+                    if self.total_lines_count > 0:
+                        print('DEBUG PROGRESS: ' + "{:.0%}".format(float(self.game_count).__div__(float(self.total_lines_count))) + ' (' + str(self.game_count) + '/' + str(self.total_lines_count) + ')')
                     print('\nDEBUG skipping ' + filename + ', already fetched\n')
                     game_exist = True
                     pass
@@ -217,12 +221,23 @@ class FtpGameList():
                     tmp_platform = filter(lambda x: match.group() in x[0], self.global_platform_paths)
                     if tmp_platform:
                         platform = tmp_platform[0][1]
+            # GAMES get the PS3 metadata
+            elif platform == 'GAMES':
+                donor_platform = 'PS3ISO'
+                platform = donor_platform
 
 
             # if not, add it
             if not game_exist:
-                title_id, icon0, pic0, pic1, pic2, at3, pam = self.get_game_data(dir_path, filename)
-                title = filename.strip()
+                if original_platform == 'GAMES':
+                    split_path = dir_path.split('/')
+                    title_id = split_path[len(split_path)-3]
+                    title = '[' + title_id + ']'
+                    filename = title
+
+                else:
+                    title_id, icon0, pic0, pic1, pic2, at3, pam = self.get_game_data(dir_path, filename)
+                    title = filename.strip()
 
                 # removes the file extension and use it as title
                 for file_ext in GlobalVar.file_extensions:
@@ -231,11 +246,13 @@ class FtpGameList():
                         break
 
                 # removes parenthesis & brackets including their content
-                title = re.sub(r'\([^)]*\)', '', title)
-                title = re.sub(r'\[[^)]*\]', '', title)
+                tmp_title = re.sub(r'\([^)]*\)', '', title)
+                tmp_title = re.sub(r'\[[^)]*\]', '', tmp_title)
+                if tmp_title != '':
+                    title = tmp_title
 
                 # read platform db
-                platform_db_file = platform + '_all_title_ids.json'
+                platform_db_file = platform.replace('ISO', '') + '_all_title_ids.json'
                 with open(os.path.join(AppPaths.games_metadata, platform_db_file)) as f:
                     self.json_platform_metadata = json.load(f)
 
@@ -244,17 +261,17 @@ class FtpGameList():
                 if title_id is not None and title_id is not '':
                     for game in self.json_platform_metadata['games']:
                         # adapt the title_id format for the xml db
-                        if platform == 'PS3':
+                        if platform == 'PS3ISO':
                             title_id = title_id.replace('-', '')
 
                         if title_id == game['title_id']:
-                            if platform == 'PSP' or platform == 'PSX' or platform == 'PS2':
+                            if platform == 'PSPISO' or platform == 'PSXISO' or platform == 'PS2ISO':
                                 title = game['title'].encode('utf-8').strip()
 
                                 if game['meta_data_link'] is not None:
                                     meta_data_link = game['meta_data_link']
 
-                            elif platform == 'PS3':
+                            elif platform == 'PS3ISO':
                                 # use the first element for English
                                 title = game['locale'][0]['title'].encode('utf-8').strip()
 
@@ -299,9 +316,13 @@ class FtpGameList():
 
                 # add game to list of new games
                 self.game_count += 1
-                print('DEBUG PROGRESS: ' + "{:.0%}".format(float(self.game_count).__div__(float(self.total_lines_count))) + ' (' + str(self.game_count) + '/' + str(self.total_lines_count) + ')')
+                if self.total_lines_count > 0:
+                    print('DEBUG PROGRESS: ' + "{:.0%}".format(float(self.game_count).__div__(float(self.total_lines_count))) + ' (' + str(self.game_count) + '/' + str(self.total_lines_count) + ')')
 
                 if platform != original_platform:
+                    if original_platform == 'GAMES':
+                        split_path = platform_path.split('/')
+                        platform_path = '/'.join(split_path[0:len(split_path) - 2]) + '/'
                     platform = original_platform
 
                 self.new_json_game_list_data[platform_list].append({
@@ -331,15 +352,21 @@ class FtpGameList():
 
             # save data to game build folder here
             if title_id is not None and title_id is not '':
-                game_folder_name = filename[:-4].replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
+                tmp_filename = filename
+                # removes the file extension from tmp_filename
+                for file_ext in GlobalVar.file_extensions:
+                    if filename.upper().endswith(file_ext):
+                        tmp_filename = filename[0:len(filename)-len(file_ext)]
+                        break
+                game_folder_name = tmp_filename.replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
                 game_build_dir = os.path.join(AppPaths.builds, game_folder_name)
 
-                # making sure the work_dir and pkg directories exists
-                if not os.path.exists(os.path.join(game_build_dir, 'work_dir', 'pkg')):
-                    os.makedirs(os.path.join(game_build_dir, 'work_dir', 'pkg'))
+                # # making sure the work_dir and pkg directories exists
+                # if not os.path.exists(os.path.join(game_build_dir, 'work_dir', 'pkg')):
+                #     os.makedirs(os.path.join(game_build_dir, 'work_dir', 'pkg'))
 
                 # save images to game work folders
-                self.image_saver(platform, game_build_dir, [icon0, pic0, pic1, pic2, at3, pam])
+                image_saver(self.ftp, platform_path, platform, game_build_dir, [icon0, pic0, pic1, pic2, at3, pam])
 
             # reset game data for next iteration
             title = None
@@ -364,7 +391,7 @@ class FtpGameList():
             split_folder_path = game_filepath.split('/')
             platform_str = split_folder_path[2] + '/'
             platform_match = filter(lambda x: platform_str in x[0], self.global_platform_paths)
-            platform = str(platform_match[0][1]).upper()
+            platform = str(platform_match[0][1])
 
             original_platform = platform
             # this is where .NTFS[xxx] files need a donor platform
@@ -375,6 +402,9 @@ class FtpGameList():
                     donor_platform = filter(lambda x: match.group() in x[0], self.global_platform_paths)
                     if donor_platform:
                         platform = donor_platform[0][1]
+            elif platform == 'GAMES':
+                donor_platform = 'PS3ISO'
+                platform = donor_platform
 
         except Exception as e:
             print('ERROR could not parse platform')
@@ -385,11 +415,11 @@ class FtpGameList():
             title_id, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform, self.chunk_size_kb, 0, self.game_count, self.ftp_retry_count)
 
             # make another fetch with rest offset for PSP images
-            if platform == 'PSP':
+            if platform == 'PSPISO':
                 not_used, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform, self.chunk_size_kb, self.ftp_psp_png_offset_kb, self.game_count, self.ftp_retry_count)
 
             # PS3 guitar hero games needs a larger chunk to find the PIC1
-            elif platform == 'PS3' and 'guitar' in game_filename.lower():
+            elif platform == 'PS3ISO' and 'guitar' in game_filename.lower():
                 not_used, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform, 6000, 0, self.game_count, self.ftp_retry_count)
 
         # retry connection
@@ -403,11 +433,11 @@ class FtpGameList():
             title_id, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform, self.chunk_size_kb, 0, self.game_count, self.ftp_retry_count)
 
             # make another fetch with rest offset for PSP images
-            if platform == 'PSP':
+            if platform == 'PSPISO':
                 title_id, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform, self.chunk_size_kb, self.ftp_psp_png_offset_kb, self.game_count, self.ftp_retry_count)
 
             # PS3 guitar hero games needs a larger chunk to find the PIC1
-            elif platform == 'PS3' and 'guitar' in game_filename.lower():
+            elif platform == 'PS3ISO' and 'guitar' in game_filename.lower():
                 not_used, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform, 6000, 0, self.game_count, self.ftp_retry_count)
 
         return title_id, icon0, pic0, pic1, pic2, at3, pam
@@ -417,32 +447,14 @@ class FtpGameList():
         depth = len(folder_path.split('/')) -2
         extensions = GlobalVar.file_extensions
 
-        if '/dev_usb' in folder_path:
-            # check what usb-drive are available so we can speed things up
-            isPath = False
-            folder_list = []
-            split_folder_path = folder_path.split('/')
-
-            folder_base_path = '/' + '/'.join(split_folder_path[1: len(split_folder_path)-2]) + '/'
-            folder_name = split_folder_path[len(split_folder_path)-2]
-
-            # retrieve folders in the basepath we're scanning and check if our dir is listed
-            self.ftp.retrlines('MLSD ' + folder_base_path, folder_list.append)
-            for d in folder_list:
-                ds = str(d).split(';')[6].strip()
-                if folder_name == ds:
-                    isPath = True
-                    break
-            if not isPath:
-                return files
-
-        # only NTFS extensions valid in this folder
-        elif 'tmp/wmtmp/' in folder_path:
+        # only NTFS extensions are valid in this folder
+        if 'tmp/wmtmp/' in folder_path:
             extensions = tuple([i for i in list(extensions) if 'NTFS' in i])
 
         # TODO: implement /Games PARAMS.SFO parser
-        elif 'Games/' in folder_path:
-            return files
+        elif 'GAMES/' in folder_path:
+            self.ftp_folder_depth = 4
+            extensions = ('.SFO')
 
         dirs = []
         stuff = []
@@ -490,126 +502,6 @@ class FtpGameList():
         self.ftp = FTP(self.ps3_lan_ip, timeout=self.ftp_timeout)
         self.ftp.set_pasv=self.ftp_pasv_mode
         self.ftp.login(user='', passwd='')
-
-    def image_saver(self, platform, game_build_dir, images):
-        import shutil
-        import PIL.Image as Image
-        import io
-
-        icon0 = images[0]
-        pic0 = images[1]
-        pic1 = images[2]
-        pic2 = images[3]
-        at3 = images[4]
-        pam = images[5]
-
-        game_work_dir = os.path.join(game_build_dir, 'work_dir')
-        game_pkg_dir = os.path.join(game_work_dir, 'pkg')
-        try:
-            if os.path.isdir(game_pkg_dir):
-                shutil.rmtree(game_pkg_dir)
-                os.makedirs(game_pkg_dir)
-        except Exception as e:
-            print('ERROR: could not clean the folder: ' + game_work_dir + '\n' +
-                  'Please close any file browser accessing the specific folder.')
-
-
-        GlobalDef().copytree(os.path.join(AppPaths.util_resources, 'pkg_dir_bak'), os.path.join(game_work_dir, 'pkg'))
-
-        # platforms such as PSP needs rescaling of images
-        if icon0 is not None:
-            icon0_image = Image.open(io.BytesIO(icon0)).convert("RGBA")
-
-            if platform == 'PSP':
-                t_icon0 = Image.open(os.path.join(AppPaths.application_path, 'resources', 'images', 'pkg', 'default', 'transparent_ICON0.PNG')).convert("RGBA")
-                icon0_image = icon0_image.resize((int(icon0_image.width*2), int(icon0_image.height*2)), Image.ANTIALIAS)
-                x_pos = (t_icon0.width - icon0_image.width)/2
-                y_pos = (t_icon0.height - icon0_image.height)/2
-                t_icon0.paste(icon0_image, (x_pos, y_pos), icon0_image)
-
-                t_icon0.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON0.PNG'))
-            else:
-                icon0_image.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON0.PNG'))
-                # icon0_file = open(os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON0.PNG'), "wb")
-                # icon0_file.write(icon0)
-                # icon0_file.close()
-
-        else:
-            default_pkg_img_dir = os.path.join(AppPaths.resources, 'images', 'pkg', 'default')
-            icon0_platform_path = os.path.join(default_pkg_img_dir, platform, 'ICON0.PNG')
-            if not os.path.isfile(icon0_platform_path):
-                platform = ''
-            # icon0_image = Image.open(os.path.join(default_pkg_img_dir, platform, 'ICON0.PNG')).convert("RGBA")
-            # icon0_image.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON0.PNG'))
-            shutil.copyfile(os.path.join(default_pkg_img_dir, platform, 'ICON0.PNG'), os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON0.PNG'))
-
-
-        if pic0 is not None:
-            pic0_image = Image.open(io.BytesIO(pic0)).convert("RGBA")
-            if platform == 'PSP':
-                t_pic0 = Image.open(os.path.join(AppPaths.application_path, 'resources', 'images', 'pkg', 'default', 'transparent_PIC0.PNG')).convert("RGBA")
-                x_pos = (t_pic0.width - pic0_image.width)/2
-                y_pos = (t_pic0.height - pic0_image.height)/2
-                t_pic0.paste(pic0_image, (x_pos, y_pos), pic0_image)
-
-                t_pic0.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC0.PNG'))
-            else:
-                # pic0_image.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC0.PNG'))
-                pic0_file = open(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC0.PNG'), "wb")
-                pic0_file.write(pic0)
-                pic0_file.close()
-
-        if pic1 is not None:
-            pic1_image = Image.open(io.BytesIO(pic1)).convert("RGBA")
-            if platform == 'PSP':
-                t_pic1 = Image.open(os.path.join(AppPaths.application_path, 'resources', 'images', 'pkg', 'default', 'transparent_PIC1.PNG')).convert("RGBA")
-                pic1_image = pic1_image.resize((int(pic1_image.width*3), int(pic1_image.height*3)), Image.ANTIALIAS)
-                x_pos = (t_pic1.width - pic1_image.width)/2
-                y_pos = (t_pic1.height - pic1_image.height)/2
-                t_pic1.paste(pic1_image, (x_pos, y_pos), pic1_image)
-
-                t_pic1.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC1.PNG'))
-            else:
-                # pic1_image.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC1.PNG'))
-                pic1_file = open(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC1.PNG'), "wb")
-                pic1_file.write(pic1)
-                pic1_file.close()
-
-
-        if pic2 is not None:
-            pic2_image = Image.open(io.BytesIO(pic2)).convert("RGBA")
-            if platform == 'PS3':
-                # pic2_image.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC2.PNG'))
-                pic2_file = open(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC2.PNG'), "wb")
-                pic2_file.write(pic2)
-                pic2_file.close()
-
-        if at3 is not None:
-            if platform == 'PS3':
-                # for .AT3 we need to save the binary data to a file
-                at3_file = open(os.path.join(game_build_dir, 'work_dir', 'pkg', 'SND0.AT3'), "wb")
-                at3_file.write(at3)
-                at3_file.close()
-
-        if pam is not None:
-            if platform == 'PS3':
-                # for .PAM we need to save the binary data to a file
-                pam_file = open(os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON1.PAM'), "wb")
-                pam_file.write(pam)
-                pam_file.close()
-
-        # if at3 is not None or pam is not None:
-        #     if platform == 'PS3':
-        #         # add PS3LOGO.DAT
-        #         shutil.copyfile(os.path.join(AppPaths.util_resources, 'PS3_LOG_DAT.BAK'), os.path.join(game_build_dir, 'work_dir', 'pkg', 'PS3LOGO.DAT'))
-
-
-        # elif platform == 'PSP':
-        #     # for .PMF we need to save the binary data to a file
-        #     pmf_file = open(os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON0.PMF'), "wb")
-        #     pmf_file.write(pam)
-        #     pmf_file.close()
-
 
 class FTPDataHandler:
     def __init__(self, ftp, total_lines):
@@ -685,7 +577,8 @@ class FTPDataHandler:
             # if None: refetch has failed => skip game by breaking the loop
             if data is None:
                 game_count += 1
-                print('DEBUG PROGRESS: ' + "{:.0%}".format(float(game_count).__div__(float(self.total_lines))) + ' (' + str(game_count) + '/' + str(self.total_lines) + ')')
+                if self.total_lines > 0:
+                     print('DEBUG PROGRESS: ' + "{:.0%}".format(float(game_count).__div__(float(self.total_lines))) + ' (' + str(game_count) + '/' + str(self.total_lines) + ')')
                 break
             else:
                 if fill_buffer(self, data):
@@ -711,24 +604,20 @@ class FTPDataHandler:
                             game_title_id = get_title_id_from_buffer(self, platform, self.data_chunk)
 
                         # PS3 and PSP are the only platforms that has game art embedded
-                        if platform == 'PSP' or platform == 'PS3':
+                        if platform == 'PSPISO' or platform == 'PS3ISO':
                             icon0, pic0, pic1, pic2 = get_png_from_buffer(self, platform, filename, self.data_chunk)
 
-                            if platform == 'PS3':
+                            if platform == 'PS3ISO':
                                 at3 = get_AT3_from_buffer(self, platform, filename, self.data_chunk)
                                 pam = get_PAM_from_buffer(self, platform, filename, self.data_chunk)
 
                                 try:
                                     at3_size_KB = int(len(at3)*0.978/1000)
-                                except:
-                                    at3_size_KB = 0
-                                try:
                                     pam_size_KB = int(len(at3)*0.978/1000)
+                                    if at3_size_KB + pam_size_KB > 24000:
+                                        print("ERROR: the sum of the sizes of SND0.AT3 + ICON1.PAM can't be larger than 2.4MB")
                                 except:
-                                    pam_size_KB = 0
-
-                                if at3_size_KB + pam_size_KB > 24000:
-                                    print("ERROR: the sum of the sizes of SND0.AT3 + ICON1.PAM can't be larger than 2.4MB")
+                                    pass
 
                         # Error 451 is normal when closing the conection
                         if '451' not in e.message:
@@ -742,19 +631,19 @@ def get_title_id_from_buffer(self, platform, buffer_data):
     title_id = ''
     try:
         # psx and ps2
-        if platform == 'PSX' or platform == 'PS2':
+        if platform == 'PSXISO' or platform == 'PS2ISO':
             for m in re.finditer("""\w{4}\_\d{3}\.\d{2}""", buffer_data):
                 if m is not None:
                     title_id = str(m.group(0)).strip()
                     title_id = title_id.replace('_', '-')
                     title_id = title_id.replace('.', '')
 
-        elif platform == 'PS3':
+        elif platform == 'PS3ISO':
             for m in re.finditer("""\w{4}-\d{5} """, buffer_data):
                 if m is not None:
                     title_id = str(m.group(0)).strip()
 
-        elif platform == 'PSP':
+        elif platform == 'PSPISO':
             for m in re.finditer("""\w{4}-\d{5}\|""", buffer_data):
                 title_id = str(m.group(0)).strip()
                 title_id = title_id[0:len(title_id)-1]
@@ -798,7 +687,7 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
                     tmp_image = Image.open(io.BytesIO(png_byte_array)).convert("RGBA")
                     self.img_name = None
 
-                    if self.platform == 'PSP':
+                    if self.platform == 'PSPISO':
                         # icon image PSP
                         if tmp_image.size == (144, 80):
                             self.img_name = 'ICON0.PNG'
@@ -814,7 +703,7 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
                                 self.has_pic1 = True
 
 
-                    elif self.platform == 'PS3':
+                    elif self.platform == 'PS3ISO':
                         # icon image PS3
                         if tmp_image.size == (320, 176):
                             self.img_name = 'ICON0.PNG'
@@ -973,3 +862,151 @@ def get_AT3_from_buffer(self, platform, game_name, buffer_data):
         print('ERROR: get_AT3_from_buffer - ' + e.message)
         return self.at3_image
 
+def image_saver(ftp, platform_path, platform, game_build_dir, images):
+    import shutil
+    import PIL.Image as Image
+    import io
+
+    icon0 = images[0]
+    pic0 = images[1]
+    pic1 = images[2]
+    pic2 = images[3]
+    at3 = images[4]
+    pam = images[5]
+
+    game_work_dir = os.path.join(game_build_dir, 'work_dir')
+    game_pkg_dir = os.path.join(game_work_dir, 'pkg')
+    try:
+        if os.path.isdir(game_pkg_dir):
+            shutil.rmtree(game_pkg_dir)
+            os.makedirs(game_pkg_dir)
+    except Exception as e:
+        print('ERROR: could not clean the folder: ' + game_work_dir + '\n' +
+              'Please close any file browser accessing the specific folder.')
+    GlobalDef().copytree(os.path.join(AppPaths.util_resources, 'pkg_dir_bak'), os.path.join(game_work_dir, 'pkg'))
+
+    # check if platform is GAMES
+    split_path = platform_path.split('/')
+    if split_path[len(split_path) - 3] == 'GAMES':
+        icon0 = None
+        pic0 = None
+        pic1 = None
+        pic2 = None
+        at3 = None
+        pam = None
+        PS3_GAME_path = platform_path + 'PS3_GAME/'
+        stuff = []
+        files = []
+        try:
+            ftp.retrlines('MLSD ' + PS3_GAME_path, stuff.append)
+        except Exception as e:
+            print('DEBUG retrlines error: ' + e.message)
+            return files
+
+        for item in stuff:
+            split_item = item.split(';')
+            # check if it's a dir or a file
+            if split_item[0] == 'type=file':
+                files.append(split_item[len(split_item)-1].strip())
+
+        for f in files:
+            data = []
+            filepath = PS3_GAME_path + f
+
+            if f == 'ICON0.PNG':
+                ftp.retrbinary("RETR " + filepath, callback=data.append)
+                icon0 = ''.join(data)
+            elif f == 'PIC0.PNG':
+                ftp.retrbinary("RETR " + filepath, callback=data.append)
+                pic0 = ''.join(data)
+            elif f == 'PIC1.PNG':
+                ftp.retrbinary("RETR " + filepath, callback=data.append)
+                pic1 = ''.join(data)
+            elif f == 'PIC2.PNG':
+                ftp.retrbinary("RETR " + filepath, callback=data.append)
+                pic2 = ''.join(data)
+            elif f == 'SND0.AT3':
+                ftp.retrbinary("RETR " + filepath, callback=data.append)
+                at3 = ''.join(data)
+            elif f == 'ICON1.PAM':
+                ftp.retrbinary("RETR " + filepath, callback=data.append)
+                pam = ''.join(data)
+    # platforms such as PSP needs rescaling of images
+    if icon0 is not None:
+        icon0_image = Image.open(io.BytesIO(icon0)).convert("RGBA")
+
+        if platform == 'PSPISO':
+            t_icon0 = Image.open(os.path.join(AppPaths.application_path, 'resources', 'images', 'pkg', 'default', 'transparent_ICON0.PNG')).convert("RGBA")
+            icon0_image = icon0_image.resize((int(icon0_image.width*2), int(icon0_image.height*2)), Image.ANTIALIAS)
+            x_pos = (t_icon0.width - icon0_image.width)/2
+            y_pos = (t_icon0.height - icon0_image.height)/2
+            t_icon0.paste(icon0_image, (x_pos, y_pos), icon0_image)
+
+            t_icon0.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON0.PNG'))
+        else:
+            icon0_image.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON0.PNG'))
+
+    else:
+        default_pkg_img_dir = os.path.join(AppPaths.resources, 'images', 'pkg', 'default')
+        icon0_platform_path = os.path.join(default_pkg_img_dir, platform, 'ICON0.PNG')
+        if not os.path.isfile(icon0_platform_path):
+            platform = ''
+        shutil.copyfile(os.path.join(default_pkg_img_dir, platform, 'ICON0.PNG'), os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON0.PNG'))
+
+
+    if pic0 is not None:
+        pic0_image = Image.open(io.BytesIO(pic0)).convert("RGBA")
+        if platform == 'PSPISO':
+            t_pic0 = Image.open(os.path.join(AppPaths.application_path, 'resources', 'images', 'pkg', 'default', 'transparent_PIC0.PNG')).convert("RGBA")
+            x_pos = (t_pic0.width - pic0_image.width)/2
+            y_pos = (t_pic0.height - pic0_image.height)/2
+            t_pic0.paste(pic0_image, (x_pos, y_pos), pic0_image)
+
+            t_pic0.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC0.PNG'))
+        else:
+            pic0_file = open(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC0.PNG'), "wb")
+            pic0_file.write(pic0)
+            pic0_file.close()
+
+    if pic1 is not None:
+        pic1_image = Image.open(io.BytesIO(pic1)).convert("RGBA")
+        if platform == 'PSPISO':
+            t_pic1 = Image.open(os.path.join(AppPaths.application_path, 'resources', 'images', 'pkg', 'default', 'transparent_PIC1.PNG')).convert("RGBA")
+            pic1_image = pic1_image.resize((int(pic1_image.width*3), int(pic1_image.height*3)), Image.ANTIALIAS)
+            x_pos = (t_pic1.width - pic1_image.width)/2
+            y_pos = (t_pic1.height - pic1_image.height)/2
+            t_pic1.paste(pic1_image, (x_pos, y_pos), pic1_image)
+
+            t_pic1.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC1.PNG'))
+        else:
+            pic1_file = open(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC1.PNG'), "wb")
+            pic1_file.write(pic1)
+            pic1_file.close()
+
+
+    if pic2 is not None:
+        if platform == 'PS3ISO':
+            pic2_file = open(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC2.PNG'), "wb")
+            pic2_file.write(pic2)
+            pic2_file.close()
+
+    if at3 is not None:
+        if platform == 'PS3ISO' or platform == 'GAMES':
+            # for .AT3 we need to save the binary data to a file
+            at3_file = open(os.path.join(game_build_dir, 'work_dir', 'pkg', 'SND0.AT3'), "wb")
+            at3_file.write(at3)
+            at3_file.close()
+
+    if pam is not None:
+        if platform == 'PS3ISO' or platform == 'GAMES':
+            # for .PAM we need to save the binary data to a file
+            pam_file = open(os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON1.PAM'), "wb")
+            pam_file.write(pam)
+            pam_file.close()
+
+    # TODO: PMF
+    # elif platform == 'PSPISO':
+    #     # for .PMF we need to save the binary data to a file
+    #     pmf_file = open(os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON0.PMF'), "wb")
+    #     pmf_file.write(pam)
+    #     pmf_file.close()

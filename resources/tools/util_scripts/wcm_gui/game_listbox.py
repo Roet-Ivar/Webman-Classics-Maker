@@ -22,7 +22,7 @@ class Gamelist():
         else:
             self.drive_to_show = '/dev_' + drive.lower() + '/'
 
-        self.platform_to_show = platform.lower() + '_games'
+        self.platform_to_show = platform + '_games'
         self.WCM_BASE_PATH  = AppPaths.wcm_gui
         self.last_selection = (None, 0)
         self.list_of_items = []
@@ -59,7 +59,7 @@ class Gamelist():
 
 
         # default filters
-        if 'all_games' == self.platform_to_show:
+        if 'ALL_games' == self.platform_to_show:
             # iterate all platforms
             for platform in self.json_game_list_data:
                 for list_game in self.json_game_list_data[platform]:
@@ -190,20 +190,21 @@ class Gamelist():
 
 
     def get_selected_build_dir_path(self):
-        pkg_project_name = ''
+        game_folder_name = ''
         build_dir_path = ''
         if self.selected_filename is not '':
             filename = self.selected_filename
             title_id = self.selected_title_id.replace('-', '')
             build_base_path = AppPaths.builds
 
-            # removes the file extension
+            tmp_filename = filename
+            # removes the file extension from tmp_filename
             for file_ext in GlobalVar.file_extensions:
                 if filename.upper().endswith(file_ext):
-                    pkg_project_name = filename[0:len(filename)-len(file_ext)]
-                    pkg_project_name = pkg_project_name.replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
+                    tmp_filename = filename[0:len(filename)-len(file_ext)]
                     break
+            game_folder_name = tmp_filename.replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
 
-            build_dir_path = os.path.join(build_base_path, pkg_project_name)
+            build_dir_path = os.path.join(build_base_path, game_folder_name)
         return build_dir_path
 

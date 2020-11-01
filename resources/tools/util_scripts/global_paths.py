@@ -121,11 +121,12 @@ class GlobalVar:
                    ('/dev_usb003/', 'USB003'),
                    ('/dev_usb(*)/', 'USB(*)')]
 
-    platform_paths = [('PSPISO/', 'PSP'),
-                      ('PSXISO/', 'PSX'),
-                      ('PS2ISO/', 'PS2'),
-                      ('PS3ISO/', 'PS3'),
-                      ('tmp/wmtmp/', 'NTFS')] #,('Games/', 'GAMES')]
+    platform_paths = [('PSPISO/', 'PSPISO'),
+                      ('PSXISO/', 'PSXISO'),
+                      ('PS2ISO/', 'PS2ISO'),
+                      ('PS3ISO/', 'PS3ISO'),
+                      ('tmp/wmtmp/', 'NTFS'),
+                      ('GAMES/', 'GAMES')]
 
 class GlobalDef:
     def copytree(self, src, dst, symlinks=False, ignore=None):

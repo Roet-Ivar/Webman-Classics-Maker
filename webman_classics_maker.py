@@ -1090,8 +1090,13 @@ class Main:
     # Ensures title id is exactly 9 characters during save
     def validate_filename_on_save(self):
         filename = self.entry_field_filename.get()
-        tmp_name = filename.lower()
-        if str(tmp_name).upper().endswith(GlobalVar.file_extensions) and len(tmp_name) > 4:
+        tmp_name = filename
+        # platform type GAMES has no file extension
+        if self.entry_field_platform.get() == 'GAMES' and len(tmp_name) > 0:
+            main_window.focus()
+            return True
+        # other platforms do have file extensions
+        elif str(tmp_name).upper().endswith(GlobalVar.file_extensions) and len(tmp_name) > 4:
             main_window.focus()
             return True
 

@@ -25,10 +25,10 @@ class PlatformDropdown:
     def __init__(self, root, frame, x, y):
         self.root = root
         self.frame = frame
-        self.combobox = ttk.Combobox(root, values=["ALL", "PSP", "PSX", "PS2", "PS3", 'NTFS'], name="platform_dropdown")
+        self.combobox = ttk.Combobox(root, values=["ALL", "PSPISO", "PSXISO", "PS2ISO", "PS3ISO", 'NTFS', "GAMES"], name="platform_dropdown")
         self.combobox.place(x=x, y=y)
         self.combobox.current(0)
-        self.combobox.config(width='5', state="readonly")
+        self.combobox.config(width='7', state="readonly")
 
     def get_box(self):
         return self.combobox

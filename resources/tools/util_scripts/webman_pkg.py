@@ -2,6 +2,7 @@
 from __future__ import with_statement
 import struct, sys, os, shutil, json, re
 from global_paths import App as AppPaths
+from global_paths import GlobalVar
 
 pkgcrypt_ver = 'py'
 
@@ -838,17 +839,21 @@ class Webman_pkg:
 
 		contentid = str(json_data['content_id'])
 		
-		titleid = str(json_data['title_id'])
+		title_id = str(json_data['title_id'])
 		filepath = str(json_data['iso_filepath'])
 		filepath_arr = [x for x in filepath.split('/')]
 		
 		pkg_build_script='webman_pkg.py'
 		pkg_flag = '--contentid'
 
-		old_pkg_dir_path = AppPaths.pkg + '/'
 		pkg_dir_path = os.path.join(AppPaths.game_work_dir, 'pkg') + '/'
-
-		pkg_name = (filepath_arr[3][:-4]).replace(' ', '_') + '_(' + titleid + ')' + '.pkg'
+		tmp_filename = filepath_arr[len(filepath_arr) -1]
+		# removes the file extension from tmp_filename
+		for file_ext in GlobalVar.file_extensions:
+			if tmp_filename.upper().endswith(file_ext):
+				tmp_filename = tmp_filename[0:len(tmp_filename)-len(file_ext)]
+				break
+		pkg_name = tmp_filename.replace(' ', '_') + '_(' + title_id.replace('-', '') + ')' + '.pkg'
 		build_dir_path = os.path.join(AppPaths.game_work_dir, '..')
 
 		print('DEBUG pkg_name: ' + pkg_name)
