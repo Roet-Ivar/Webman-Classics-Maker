@@ -122,10 +122,11 @@ class FtpGameList():
                         self.ftp_walk(self.ftp, drive[0] + platform[0], self.PS2ISO_lines)
                     elif 'PS3ISO' == platform[1]:
                         self.ftp_walk(self.ftp, drive[0] + platform[0], self.PS3ISO_lines)
-                    elif 'NTFS' in platform[1] and 'HDD0' in drive[1]:
+                    elif 'NTFS' == platform[1] and 'HDD0' in drive[1]:
                             self.ftp_walk(self.ftp, drive[0] + platform[0], self.NTFS_lines)
-                    elif 'GAMES' in platform[1]:
+                    elif 'GAMES' == platform[1]:
                         self.ftp_walk(self.ftp, drive[0] + platform[0], self.GAMES_lines)
+                        self.ftp_walk(self.ftp, drive[0] + 'GAMEZ/', self.GAMES_lines)
 
             # filter out any empty entries
             self.ALL_lines.append(self.PSPISO_lines)
@@ -229,11 +230,29 @@ class FtpGameList():
 
             # if not, add it
             if not game_exist:
+                # parsing of PARAM.SFO would provde appropriate title_id and title for the GUI
                 if original_platform == 'GAMES':
-                    split_path = dir_path.split('/')
-                    title_id = split_path[len(split_path)-3]
-                    title = '[' + title_id + ']'
-                    filename = title
+                    data = []
+                    PARAM_SFO_PATH = platform_path + 'PARAM.SFO'
+                    self.ftp.retrbinary("RETR " + PARAM_SFO_PATH, callback=data.append)
+                    title_id, title = param_sfo_parser(''.join(data))
+
+                    # if title_id still None, get it from the folder name
+                    if title_id is None:
+                        id_match = re.search('(\w{4}\d{5})', dir_path)
+                        # find title_id in folder name
+                        if id_match:
+                            title_id = id_match.group(0)
+                        else:
+                            print('DEBUG: Folder-game in: ' + dir_path
+                                  + ' does not contain title_id in folder name\n skipping metadata')
+                            self.game_count += 1
+                            break
+
+                    if title is None:
+                        title = '[' + title_id + ']'
+                    filename = ''.join(e for e in title if e.isalnum()) + ' [' + title_id + ']'
+                    filename = filename.replace(' ', '_')
 
                 else:
                     title_id, icon0, pic0, pic1, pic2, at3, pam = self.get_game_data(dir_path, filename)
@@ -251,14 +270,13 @@ class FtpGameList():
                 if tmp_title != '':
                     title = tmp_title
 
-                # read platform db
-                platform_db_file = platform.replace('ISO', '') + '_all_title_ids.json'
-                with open(os.path.join(AppPaths.games_metadata, platform_db_file)) as f:
-                    self.json_platform_metadata = json.load(f)
-
-
                 # check for for match the platform game database
                 if title_id is not None and title_id is not '':
+                    # read platform db
+                    platform_db_file = platform.replace('ISO', '') + '_all_title_ids.json'
+                    with open(os.path.join(AppPaths.games_metadata, platform_db_file)) as f:
+                        self.json_platform_metadata = json.load(f)
+
                     for game in self.json_platform_metadata['games']:
                         # adapt the title_id format for the xml db
                         if platform == 'PS3ISO':
@@ -274,7 +292,6 @@ class FtpGameList():
                             elif platform == 'PS3ISO':
                                 # use the first element for English
                                 title = game['locale'][0]['title'].encode('utf-8').strip()
-
                             break
 
                 # check for duplicates of the same title
@@ -361,10 +378,6 @@ class FtpGameList():
                 game_folder_name = tmp_filename.replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
                 game_build_dir = os.path.join(AppPaths.builds, game_folder_name)
 
-                # # making sure the work_dir and pkg directories exists
-                # if not os.path.exists(os.path.join(game_build_dir, 'work_dir', 'pkg')):
-                #     os.makedirs(os.path.join(game_build_dir, 'work_dir', 'pkg'))
-
                 # save images to game work folders
                 image_saver(self.ftp, platform_path, platform, game_build_dir, [icon0, pic0, pic1, pic2, at3, pam])
 
@@ -443,7 +456,7 @@ class FtpGameList():
         return title_id, icon0, pic0, pic1, pic2, at3, pam
 
     def ftp_walk(self, ftp, folder_path, files):
-        print('DEBUG adding path for scanning:' + folder_path)
+        print('DEBUG adding: ' + folder_path + ' for scanning')
         depth = len(folder_path.split('/')) -2
         extensions = GlobalVar.file_extensions
 
@@ -451,7 +464,6 @@ class FtpGameList():
         if 'tmp/wmtmp/' in folder_path:
             extensions = tuple([i for i in list(extensions) if 'NTFS' in i])
 
-        # TODO: implement /Games PARAMS.SFO parser
         elif 'GAMES/' in folder_path:
             self.ftp_folder_depth = 4
             extensions = ('.SFO')
@@ -461,7 +473,7 @@ class FtpGameList():
         try:
             ftp.retrlines('MLSD ' + folder_path, stuff.append)
         except Exception as e:
-            print('DEBUG retrlines error: ' + e.message)
+            print('DEBUG retrlines error: ' + e.message + '\n during command retrlines(\'MLSD ' + folder_path + '\')')
             return files
 
         for item in stuff:
@@ -887,50 +899,45 @@ def image_saver(ftp, platform_path, platform, game_build_dir, images):
 
     # check if platform is GAMES
     split_path = platform_path.split('/')
-    if split_path[len(split_path) - 3] == 'GAMES':
-        icon0 = None
-        pic0 = None
-        pic1 = None
-        pic2 = None
-        at3 = None
-        pam = None
+    if split_path[len(split_path) - 3] in {'GAMES', 'GAMEZ'}:
+        icon0, pic0, pic1, pic2, at3, pam = [None, None, None, None, None, None]
+
+        # fetch a list of names from the game folder
         PS3_GAME_path = platform_path + 'PS3_GAME/'
         stuff = []
-        files = []
         try:
             ftp.retrlines('MLSD ' + PS3_GAME_path, stuff.append)
         except Exception as e:
-            print('DEBUG retrlines error: ' + e.message)
-            return files
+            print('DEBUG image_saver - retrlines error: ' + e.message + '\n during command retrlines(\'MLSD ' + PS3_GAME_path + '\')')
+            # retry
+            print('Retrying ...')
+            ftp.retrlines('MLSD ' + PS3_GAME_path, stuff.append)
 
-        for item in stuff:
-            split_item = item.split(';')
-            # check if it's a dir or a file
-            if split_item[0] == 'type=file':
-                files.append(split_item[len(split_item)-1].strip())
+        if len(stuff) > 0:
+            # sort out filenames only from the list
+            fetched_files = []
+            for item in stuff:
+                split_item = item.split(';')
+                if split_item[0] == 'type=file':
+                    fetched_files.append(split_item[len(split_item)-1].strip())
+            # fetch the files that match our filename_list
+            filename_list = ['ICON0.PNG', 'PIC0.PNG', 'PIC1.PNG', 'PIC2.PNG', 'SND0.AT3', 'ICON1.PAM']
+            file_data_list = [None, None, None, None, None, None]
+            for pkg_fname in filename_list:
+                if pkg_fname in fetched_files:
+                    try:
+                        data = []
+                        filepath = PS3_GAME_path + pkg_fname
+                        ftp.retrbinary("RETR " + filepath, callback=data.append)
+                        file_data_list[filename_list.index(pkg_fname)] = ''.join(data)
+                    except Exception as e:
+                        print('DEBUG image_saver() - retrlines error: ' + e.message)
+                        print('Skipping ' + pkg_fname + ' for ' + split_path[len(split_path) - 2])
+                        continue
+            # assign any all data values to our file variables
+            icon0, pic0, pic1, pic2, at3, pam = file_data_list
 
-        for f in files:
-            data = []
-            filepath = PS3_GAME_path + f
 
-            if f == 'ICON0.PNG':
-                ftp.retrbinary("RETR " + filepath, callback=data.append)
-                icon0 = ''.join(data)
-            elif f == 'PIC0.PNG':
-                ftp.retrbinary("RETR " + filepath, callback=data.append)
-                pic0 = ''.join(data)
-            elif f == 'PIC1.PNG':
-                ftp.retrbinary("RETR " + filepath, callback=data.append)
-                pic1 = ''.join(data)
-            elif f == 'PIC2.PNG':
-                ftp.retrbinary("RETR " + filepath, callback=data.append)
-                pic2 = ''.join(data)
-            elif f == 'SND0.AT3':
-                ftp.retrbinary("RETR " + filepath, callback=data.append)
-                at3 = ''.join(data)
-            elif f == 'ICON1.PAM':
-                ftp.retrbinary("RETR " + filepath, callback=data.append)
-                pam = ''.join(data)
     # platforms such as PSP needs rescaling of images
     if icon0 is not None:
         icon0_image = Image.open(io.BytesIO(icon0)).convert("RGBA")
@@ -1010,3 +1017,19 @@ def image_saver(ftp, platform_path, platform, game_build_dir, images):
     #     pmf_file = open(os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON0.PMF'), "wb")
     #     pmf_file.write(pam)
     #     pmf_file.close()
+
+def param_sfo_parser(param_data):
+    title_id = None
+    title = None
+    filtered_data_list = filter(None,  param_data.split(b'\x00'))
+    for fd in filtered_data_list:
+        id_match  = re.search('\w{4}\d{5}$', fd)
+        if id_match:
+            title_id = id_match.group()
+            try:
+                title = filtered_data_list[filtered_data_list.index(title_id) -1]
+            except:
+                title = None
+            break
+
+    return title_id, title

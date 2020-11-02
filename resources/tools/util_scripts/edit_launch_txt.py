@@ -24,8 +24,9 @@ class Edit_launch_txt:
 				split_path = iso_filepath.split('/')
 				folder_path = '/'.join(split_path[0:len(split_path) -1])
 				pre_delay = 'xmb'
+				post_delay = 4
 				pre_cmd = '/wait.ps3?' + str(pre_delay) + ';/mount_ps3'
-				post_cmd = ';/play.ps3'
+				post_cmd = ';/wait.ps3?' + str(post_delay) + ';/play.ps3'
 				web_command_string = pre_cmd + str(folder_path) + post_cmd
 
 			# check if the user has added a custom webcommand in the config file
