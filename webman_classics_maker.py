@@ -1203,10 +1203,7 @@ class Main:
             if not os.path.exists(AppPaths.game_work_dir):
                 os.makedirs(AppPaths.game_work_dir)
 
-            title_id = str(self.entry_field_title_id.get()).replace('-', '')
-            filename = str(self.entry_field_filename.get())
             game_pkg_dir = os.path.join(AppPaths.game_work_dir, 'pkg')
-
             if os.path.isfile(os.path.join(game_pkg_dir, 'ICON0.PNG')):
                 shutil.copyfile(os.path.join(game_pkg_dir, 'ICON0.PNG'), os.path.join(self.pkg_dir, 'ICON0.PNG'))
             else:
@@ -1215,10 +1212,12 @@ class Main:
                 if self.entry_field_platform == 'NTFS':
                     match = re.search('(?<=\[).*?(?=\])', str(self.entry_field_filename.get()))
                     if match is not None:
+                        # donor platform could be PS3 for game_name.NTFS[PS3]
                         donor_platform = filter(lambda x: match.group() in x[0], self.global_platform_paths)
                         if donor_platform:
                             platform = donor_platform[0][1]
 
+                # plaform is used to determine which ICON0 should be used
                 default_img_path = os.path.join(AppPaths.resources, 'images', 'pkg', 'default')
                 if not os.path.isfile(os.path.join(default_img_path, platform, 'ICON0.PNG')):
                     platform = ''
@@ -1242,11 +1241,58 @@ class Main:
                     # saving the build content in the game build folder
                     self.copytree(AppPaths.pkg, game_pkg_dir)
 
-
                 if os.path.isdir(AppPaths.game_work_dir):
                     import tkMessageBox
                     def popup():
-                        msgBox = tkMessageBox.showinfo("Build status", "Build successful!")
+                        install_path = self.drive_system_path_array[0]
+                        remote_path = ''
+                        if 'hdd0' in install_path:
+                            remote_path = '/' + install_path + '/packages'
+                        # usb
+                        else:
+                            remote_path = '/' + install_path + '/'
+
+                        response = tkMessageBox.askyesno('Build status: success', 'Build successful!\nTransfer ' + pkg_name + ' to ' + remote_path + '?')
+                        # yes
+                        if response:
+                            # tkMessageBox.showinfo('Status: tranferring pkg', 'transferring pkg ...')
+                            # class Transfer_pkg(self, pkg_name, remote_path):
+
+                            # ftp settings
+                            with open(os.path.join(AppPaths.settings, 'ftp_settings.cfg')) as f:
+                                ftp_settings_file = json.load(f)
+                                f.close()
+
+                            # some PSP-images is found around 20MB into the ISO
+                            ps3_lan_ip             = ftp_settings_file['ps3_lan_ip']
+                            ftp_timeout            = ftp_settings_file['ftp_timeout']
+                            ftp_pasv_mode          = ftp_settings_file['ftp_pasv_mode']
+                            ftp_user               = ftp_settings_file['ftp_user']
+                            ftp_password           = ftp_settings_file['ftp_password']
+                            ftp_retry_count        = ftp_settings_file['ftp_retry_count']
+
+                            # setup connection to FTP
+                            try:
+                                from ftplib import FTP
+                                print('Connection attempt to ' + ps3_lan_ip + ', timeout set to ' + str(ftp_timeout) + 's...\n')
+                                ftp = FTP(ps3_lan_ip, timeout=ftp_timeout)
+                                ftp.set_pasv = ftp_pasv_mode
+                                ftp.login(user=ftp_user, passwd=ftp_password)
+                                ftp.voidcmd('TYPE I')
+
+                                # go to path
+                                ftp.cwd(remote_path)
+                                # transfer the pkg
+                                pkg_file = open(os.path.join(AppPaths.game_work_dir, '../', pkg_name), "rb")
+                                ftp.storbinary('STOR ' + pkg_name, pkg_file)
+                                ftp.quit()
+
+                                print "DEBUG: Transfer succeeded"
+                            except Exception as e:
+                                print ('ERROR: Transfer failed')
+                                print(e.message)
+
+                    # execute def popup()
                     popup()
 
                     # open builds folder in windows explorer
@@ -1259,7 +1305,9 @@ class Main:
 
             else:
                 import tkMessageBox
-                tkMessageBox.showinfo("Build status", "Build failed!\nSee error log.")
+                tkMessageBox.showerror("Build status: fail", "Build failed!\nSee error log.")
+
+
 
 
 

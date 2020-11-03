@@ -1,4 +1,4 @@
-import copy, json, os, re, StringIO, sys, time, traceback
+import json, os, re, StringIO, sys, time, traceback
 import PIL.Image as Image
 from ftplib import FTP
 from shutil import copyfile
