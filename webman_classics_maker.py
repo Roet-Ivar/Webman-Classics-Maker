@@ -1252,11 +1252,10 @@ class Main:
                         else:
                             remote_path = '/' + install_path + '/'
 
-                        response = tkMessageBox.askyesno('Build status: success', 'Build successful!\nTransfer ' + pkg_name + ' to ' + remote_path + '?')
+                        response = tkMessageBox.askyesno('Build status: success', 'Transfer and install the pkg?\nName: ' + pkg_name)
                         # yes
                         if response:
                             # tkMessageBox.showinfo('Status: tranferring pkg', 'transferring pkg ...')
-                            # class Transfer_pkg(self, pkg_name, remote_path):
 
                             # ftp settings
                             with open(os.path.join(AppPaths.settings, 'ftp_settings.cfg')) as f:
@@ -1280,17 +1279,46 @@ class Main:
                                 ftp.login(user=ftp_user, passwd=ftp_password)
                                 ftp.voidcmd('TYPE I')
 
-                                # go to path
+                                pkg_local_path = os.path.join(AppPaths.game_work_dir, '../', pkg_name)
+                                pkg_local_file = open(pkg_local_path, "rb")
+                                # go to path and transfer the pkg
                                 ftp.cwd(remote_path)
-                                # transfer the pkg
-                                pkg_file = open(os.path.join(AppPaths.game_work_dir, '../', pkg_name), "rb")
-                                ftp.storbinary('STOR ' + pkg_name, pkg_file)
+                                ftp.storbinary('STOR ' + pkg_name, pkg_local_file)
                                 ftp.quit()
 
                                 print "DEBUG: Transfer succeeded"
+                                # tkMessageBox.showinfo('Status: transfer complete', 'transfer of ' + pkg_name + ' to ' + remote_path + ' complete')
                             except Exception as e:
                                 print ('ERROR: Transfer failed')
                                 print(e.message)
+
+                            response = True # tkMessageBox.askyesno('Status: transfer complete', 'Remote install pkg?')
+                            # yes
+                            if response:
+                                try:
+                                    import urllib
+                                    import traceback
+                                    pkg_ps3_path = remote_path + '/' + pkg_name
+                                    # webcommand = '/install_ps3' + urllib.quote(pkg_ps3_path) # + '?restart.ps3'
+                                    webcommand = '/install.ps3' + urllib.quote(pkg_ps3_path)
+                                    webcommand_url = 'http://' + str(ps3_lan_ip) + webcommand
+                                    print('DEBUG webcommand_url: ' + webcommand_url)
+                                    response = urllib.urlopen(webcommand_url)
+                                    status_code = response.getcode()
+                                    print('DEBUG status_code: ' + str(status_code))
+                                    if status_code == 200:
+                                        tkMessageBox.showinfo('Status: pkg installed', 'Install completed!')
+                                    # 400 webman => faulty path => Error
+                                    # 404 webman => faulty command => Not found
+                                    # 200 OK
+                                    print()
+                                except Exception as ez:
+                                    print('ERROR: could not install pkg')
+                                    print('DEBUG ERROR traceback: ' + str(traceback.print_exc()))
+                                    print(ez.message)
+
+
+
 
                     # execute def popup()
                     popup()
