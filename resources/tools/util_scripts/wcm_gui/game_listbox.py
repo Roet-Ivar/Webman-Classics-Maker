@@ -199,14 +199,19 @@ class Gamelist():
 
     def popup(self, event):
         try:
-            self.popup_menu.tk_popup(event.x_root, event.y_root, 0)
+            self._listbox.selection_clear(0,END)
+            self._listbox.selection_set(self._listbox.nearest(event.y))
+            self._listbox.activate(self._listbox.nearest(event.y))
+            self.popup_menu.tk_popup(event.x_root + 43, event.y_root + 12, 0)
+
         finally:
             self.popup_menu.grab_release()
+            self.popup_menu.focus_set()
 
     def delete_selected(self):
         for i in self._listbox.curselection()[::-1]:
             # self.delete(i)
-            print('DEBUG DELETE')
+            print('DEBUG DELETE ' + self.selected_title)
 
     def select_all(self):
         self._listbox.selection_set(0, 'end')
