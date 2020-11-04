@@ -1,4 +1,4 @@
-from Tkinter import Frame, Scrollbar, Listbox, LEFT, RIGHT, Y, END, Label
+from Tkinter import Frame, Scrollbar, Listbox, LEFT, RIGHT, Y, END, Label, Menu
 import json, os, sys
 from shutil import copyfile
 sys.path.append('..')
@@ -44,11 +44,20 @@ class Gamelist():
         self.corrected_index = []
         self.main_frame = Frame()
 
+        self.popup_menu = Menu(self.main_frame, tearoff=0)
+        self.popup_menu.add_command(label="Delete",
+                                    command=self.delete_selected)
+        self.popup_menu.add_command(label="Select All",
+                                    command=self.select_all)
+
+
+
 
         s = Scrollbar(self.main_frame)
         self._listbox = Listbox(self.main_frame, width=465)
         self._listbox.bind('<Enter>', self._bound_to_mousewheel)
         self._listbox.bind('<Leave>', self._unbound_to_mousewheel)
+        self._listbox.bind("<Button-3>", self.popup) # Button-2 on Aqua
 
         s.pack(side=RIGHT, fill=Y)
         self._listbox.pack(side=LEFT, fill=Y)
@@ -187,6 +196,21 @@ class Gamelist():
 
     def _on_mousewheel(self, event):
         self._listbox.yview_scroll(int(-1*(event.delta/30)), "units")
+
+    def popup(self, event):
+        try:
+            self.popup_menu.tk_popup(event.x_root, event.y_root, 0)
+        finally:
+            self.popup_menu.grab_release()
+
+    def delete_selected(self):
+        for i in self._listbox.curselection()[::-1]:
+            # self.delete(i)
+            print('DEBUG DELETE')
+
+    def select_all(self):
+        self._listbox.selection_set(0, 'end')
+
 
 
     def get_selected_build_dir_path(self):
