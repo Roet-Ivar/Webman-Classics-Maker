@@ -57,21 +57,18 @@ class FtpGameList():
         self.NEW_LIST_DATA_FILE     = os.path.join(AppPaths.util_resources, 'game_list_data.json.BAK')
 
         # ftp settings
-        with open(os.path.join(AppPaths.settings, 'ftp_settings.cfg')) as f:
-            ftp_settings_file = json.load(f)
-            f.close()
-
+        from global_paths import FtpSettings
         # some PSP-images is found around 20MB into the ISO
-        self.ftp_psp_png_offset_kb  = ftp_settings_file['ftp_psp_png_offset_kb']
-        self.chunk_size_kb          = ftp_settings_file['ftp_chunk_size_kb']
-        self.chunk_size_kb          = ftp_settings_file['ftp_chunk_size_kb']
-        self.ps3_lan_ip             = ftp_settings_file['ps3_lan_ip']
-        self.ftp_timeout            = ftp_settings_file['ftp_timeout']
-        self.ftp_pasv_mode          = ftp_settings_file['ftp_pasv_mode']
-        self.ftp_user               = ftp_settings_file['ftp_user']
-        self.ftp_password           = ftp_settings_file['ftp_password']
-        self.ftp_folder_depth       = ftp_settings_file['ftp_folder_depth']
-        self.ftp_retry_count        = ftp_settings_file['ftp_retry_count']
+        self.ftp_psp_png_offset_kb  = FtpSettings.ftp_psp_png_offset_kb
+        self.chunk_size_kb          = FtpSettings.ftp_chunk_size_kb
+        self.chunk_size_kb          = FtpSettings.ftp_chunk_size_kb
+        self.ps3_lan_ip             = FtpSettings.ps3_lan_ip
+        self.ftp_timeout            = FtpSettings.ftp_timeout
+        self.ftp_pasv_mode          = FtpSettings.ftp_pasv_mode
+        self.ftp_user               = FtpSettings.ftp_user
+        self.ftp_password           = FtpSettings.ftp_password
+        self.ftp_folder_depth       = FtpSettings.ftp_folder_depth
+        self.ftp_retry_count        = FtpSettings.ftp_retry_count
 
         # platform ISO paths
         self.PSPISO_lines  = []
@@ -474,7 +471,16 @@ class FtpGameList():
             ftp.retrlines('MLSD ' + folder_path, stuff.append)
         except Exception as e:
             print('DEBUG retrlines error: ' + e.message + '\n during command retrlines(\'MLSD ' + folder_path + '\')')
-            return files
+
+            try:
+                print('DEBUG retrying -> retrlines(\'MLSD ' + folder_path + '\')')
+                ftp.retrlines('MLSD ' + folder_path, stuff.append)
+
+            except Exception as e:
+                print('DEBUG retrlines error: ' + e.message + '\n during rerty of command retrlines(\'MLSD ' + folder_path + '\')')
+                return files
+
+
 
         for item in stuff:
             split_item = item.split(';')

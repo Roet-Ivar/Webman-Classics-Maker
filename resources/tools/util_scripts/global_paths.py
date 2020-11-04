@@ -55,12 +55,14 @@ class App:
     game_work_dir   = ''
 
 class Image:
-    launchbox_base_image_url = 'https://gamesdb.launchbox-app.com/games/images/'
     images          = os.path.join(App.resources, 'images')
     # in images
     misc            = os.path.join(images, 'misc')
     pkg             = os.path.join(images, 'pkg')
     xmb             = os.path.join(images, 'xmb')
+
+class Metadata:
+    launchbox_base_image_url = 'https://gamesdb.launchbox-app.com/games/images/'
 
 class Build:
     application_path = application_path
@@ -70,6 +72,36 @@ class Build:
     pyinstaller      = os.path.join(util_scripts, '_pyinstaller_and_release_scripts')
 
     Param_SFO_Editor = os.path.join(App.tools, 'Param_SFO_Editor')
+
+class FtpSettings:
+    # ftp settings
+    import json
+    import shutil
+
+    ftp_settings_path = os.path.join(App.settings, 'ftp_settings.cfg')
+    if not os.path.isdir(App.settings):
+        os.mkdir(App.settings)
+        if os.path.isfile(os.path.join(App.util_resources, 'ftp_settings.cfg.BAK')):
+            shutil.copyfile(os.path.join(App.util_resources, 'ftp_settings.cfg.BAK'), ftp_settings_path)
+        else:
+            print('Error: ' + os.path.join(App.util_resources, 'ftp_settings.cfg.BAK') + ' could not be find.')
+    with open(ftp_settings_path) as f:
+        ftp_settings_file = json.load(f)
+        f.close()
+
+    # some PSP-images is found around 20MB into the ISO
+    ps3_lan_ip              = ftp_settings_file['ps3_lan_ip']
+    ftp_timeout             = ftp_settings_file['ftp_timeout']
+    ftp_pasv_mode           = ftp_settings_file['ftp_pasv_mode']
+    ftp_user                = ftp_settings_file['ftp_user']
+    ftp_password            = ftp_settings_file['ftp_password']
+    ftp_chunk_size_kb       = ftp_settings_file['ftp_chunk_size_kb']
+    ftp_folder_depth        = ftp_settings_file['ftp_folder_depth']
+    ftp_psp_png_offset_kb   = ftp_settings_file['ftp_psp_png_offset_kb']
+    use_w_title_id          = ftp_settings_file['use_w_title_id']
+    legacy_webcommand       = ftp_settings_file['legacy_webcommand']
+    ftp_retry_count         = ftp_settings_file['ftp_retry_count']
+    webcommand              = ftp_settings_file['webcommand']
 
 class GlobalVar:
     file_extensions = ('.BIN',

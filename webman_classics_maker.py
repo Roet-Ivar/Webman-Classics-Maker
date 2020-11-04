@@ -13,6 +13,7 @@ else:
 from global_paths import App as AppPaths
 from global_paths import Image as ImagePaths
 from global_paths import GlobalVar
+from global_paths import FtpSettings
 
 sys.path.append(AppPaths.settings)
 
@@ -147,7 +148,6 @@ class Main:
         self.PIC1_TOOLTIP_MSG = "Click to change  PIC1"
 
         # init definitions
-        self.init_config_file()
         self.init_wcm_work_dir()
         self.init_pkg_images()
 
@@ -175,28 +175,14 @@ class Main:
             os.makedirs(AppPaths.pkg)
         self.copytree(os.path.join(AppPaths.util_resources, 'pkg_dir_bak'), os.path.join(AppPaths.resources, 'pkg'))
 
-        # if os.path.isdir(os.path.join(AppPaths.game_work_dir, 'pkg')):
-        #     self.copytree(os.path.join(AppPaths.util_resources, 'pkg_dir_bak'), os.path.join(AppPaths.game_work_dir, 'pkg'))
-
-    def init_config_file(self):
-        if not os.path.isdir(AppPaths.settings):
-            os.mkdir(AppPaths.settings)
-            if os.path.isfile(os.path.join(AppPaths.util_resources, 'ftp_settings.cfg.BAK')):
-                shutil.copyfile(os.path.join(AppPaths.util_resources, 'ftp_settings.cfg.BAK'), self.ftp_settings_path)
-            else:
-                print('Error: ' + os.path.join(AppPaths.util_resources, 'ftp_settings.cfg.BAK') + ' could not be find.')
-
-        with open(self.ftp_settings_path, 'r') as settings_file:
-            self.ftp_settings_data = json.load(settings_file)
-
     def get_ftp_ip_from_config(self):
-        return self.ftp_settings_data['ps3_lan_ip']
+        return FtpSettings.ps3_lan_ip
 
     def get_ftp_user_from_config(self):
-        return self.ftp_settings_data['ftp_user']
+        return FtpSettings.ftp_user
 
     def get_ftp_pass_from_config(self):
-        return self.ftp_settings_data['ftp_password']
+        return FtpSettings.ftp_password
 
 
     def create_list_combo_box(self, drive, platform):
@@ -1247,78 +1233,18 @@ class Main:
                         install_path = self.drive_system_path_array[0]
                         remote_path = ''
                         if 'hdd0' in install_path:
-                            remote_path = '/' + install_path + '/packages'
+                            pkg_remote_path = '/' + install_path + '/packages'
                         # usb
                         else:
-                            remote_path = '/' + install_path + '/'
+                            pkg_remote_path = '/' + install_path + '/'
 
                         response = tkMessageBox.askyesno('Build status: success', 'Transfer and install the pkg?\nName: ' + pkg_name)
                         # yes
                         if response:
-                            # tkMessageBox.showinfo('Status: tranferring pkg', 'transferring pkg ...')
+                            pkg_local_path = os.path.join(AppPaths.game_work_dir, '../', pkg_name)
 
-                            # ftp settings
-                            with open(os.path.join(AppPaths.settings, 'ftp_settings.cfg')) as f:
-                                ftp_settings_file = json.load(f)
-                                f.close()
-
-                            # some PSP-images is found around 20MB into the ISO
-                            ps3_lan_ip             = ftp_settings_file['ps3_lan_ip']
-                            ftp_timeout            = ftp_settings_file['ftp_timeout']
-                            ftp_pasv_mode          = ftp_settings_file['ftp_pasv_mode']
-                            ftp_user               = ftp_settings_file['ftp_user']
-                            ftp_password           = ftp_settings_file['ftp_password']
-                            ftp_retry_count        = ftp_settings_file['ftp_retry_count']
-
-                            # setup connection to FTP
-                            try:
-                                from ftplib import FTP
-                                print('Connection attempt to ' + ps3_lan_ip + ', timeout set to ' + str(ftp_timeout) + 's...\n')
-                                ftp = FTP(ps3_lan_ip, timeout=ftp_timeout)
-                                ftp.set_pasv = ftp_pasv_mode
-                                ftp.login(user=ftp_user, passwd=ftp_password)
-                                ftp.voidcmd('TYPE I')
-
-                                pkg_local_path = os.path.join(AppPaths.game_work_dir, '../', pkg_name)
-                                pkg_local_file = open(pkg_local_path, "rb")
-                                # go to path and transfer the pkg
-                                ftp.cwd(remote_path)
-                                ftp.storbinary('STOR ' + pkg_name, pkg_local_file)
-                                ftp.quit()
-
-                                print "DEBUG: Transfer succeeded"
-                                # tkMessageBox.showinfo('Status: transfer complete', 'transfer of ' + pkg_name + ' to ' + remote_path + ' complete')
-                            except Exception as e:
-                                print ('ERROR: Transfer failed')
-                                print(e.message)
-
-                            response = True # tkMessageBox.askyesno('Status: transfer complete', 'Remote install pkg?')
-                            # yes
-                            if response:
-                                try:
-                                    import urllib
-                                    import traceback
-                                    pkg_ps3_path = remote_path + '/' + pkg_name
-                                    # webcommand = '/install_ps3' + urllib.quote(pkg_ps3_path) # + '?restart.ps3'
-                                    webcommand = '/install.ps3' + urllib.quote(pkg_ps3_path)
-                                    webcommand_url = 'http://' + str(ps3_lan_ip) + webcommand
-                                    print('DEBUG webcommand_url: ' + webcommand_url)
-                                    response = urllib.urlopen(webcommand_url)
-                                    status_code = response.getcode()
-                                    print('DEBUG status_code: ' + str(status_code))
-                                    if status_code == 200:
-                                        tkMessageBox.showinfo('Status: pkg installed', 'Install completed!')
-                                    # 400 webman => faulty path => Error
-                                    # 404 webman => faulty command => Not found
-                                    # 200 OK
-                                    print()
-                                except Exception as ez:
-                                    print('ERROR: could not install pkg')
-                                    print('DEBUG ERROR traceback: ' + str(traceback.print_exc()))
-                                    print(ez.message)
-
-
-
+                            self.transfer_pkg(pkg_local_path, pkg_remote_path, pkg_name)
+                            self.remote_install_pkg(pkg_remote_path, pkg_name)
 
                     # execute def popup()
                     popup()
@@ -1412,14 +1338,9 @@ class Main:
         with open(os.path.join(AppPaths.util_resources, 'pkg.json.BAK')) as f:
             json_data = json.load(f)
 
-        # ftp settings
-        with open(os.path.join(AppPaths.settings, 'ftp_settings.cfg')) as f:
-            ftp_settings_file = json.load(f)
-            f.close()
-
         try:
             # if use_w_title_id from config, swap first letter of title_id to 'W'
-            if ftp_settings_file['use_w_title_id']:
+            if FtpSettings.use_w_title_id:
                 json_data['title_id'] = 'W' + str(self.entry_field_title_id.get())[1:]
             else:
                 json_data['title_id'] = self.entry_field_title_id.get()
@@ -1436,6 +1357,60 @@ class Main:
         except ValueError as e:
             print("ERROR: File write error or 'PKGLAUNCH'/title-_d not found.")
             print(e.message)
+
+    def transfer_pkg(self, pkg_local_path, pkg_remote_path, pkg_name):
+        # ftp settings
+        ps3_lan_ip      = FtpSettings.ps3_lan_ip
+        ftp_timeout     = FtpSettings.ftp_timeout
+        ftp_pasv_mode   = FtpSettings.ftp_pasv_mode
+        ftp_user        = FtpSettings.ftp_user
+        ftp_password    = FtpSettings.ftp_password
+        # setup connection to FTP
+        try:
+            from ftplib import FTP
+            print('Connection attempt to ' + ps3_lan_ip + ', timeout set to ' + str(ftp_timeout) + 's...\n')
+            ftp = FTP(ps3_lan_ip, timeout=ftp_timeout)
+            ftp.set_pasv = ftp_pasv_mode
+            ftp.login(user=ftp_user, passwd=ftp_password)
+            ftp.voidcmd('TYPE I')
+
+            pkg_local_file = open(pkg_local_path, "rb")
+            # go to path and transfer the pkg
+            ftp.cwd(pkg_remote_path)
+            ftp.storbinary('STOR ' + pkg_name, pkg_local_file)
+            ftp.quit()
+
+            print "DEBUG: Transfer succeeded"
+            # tkMessageBox.showinfo('Status: transfer complete', 'transfer of ' + pkg_name + ' to ' + remote_path + ' complete')
+        except Exception as e:
+            print ('ERROR: Transfer failed')
+            print(e.message)
+
+    def remote_install_pkg(self, pkg_remote_path, pkg_name):
+        try:
+            from global_paths import FtpSettings
+            ps3_lan_ip = FtpSettings.ps3_lan_ip
+            import tkMessageBox
+            import urllib
+            import traceback
+            pkg_ps3_path = pkg_remote_path + '/' + pkg_name
+            # webcommand = '/install_ps3' + urllib.quote(pkg_ps3_path) # + '?restart.ps3'
+            webcommand = '/install.ps3' + urllib.quote(pkg_ps3_path) # + ';/refresh.ps3?xmb'
+            webcommand_url = 'http://' + str(ps3_lan_ip) + webcommand
+            print('DEBUG webcommand_url: ' + webcommand_url)
+            response = urllib.urlopen(webcommand_url)
+            status_code = response.getcode()
+            print('DEBUG status_code: ' + str(status_code))
+            if status_code == 200:
+                tkMessageBox.showinfo('Status: pkg installed', 'Install completed!')
+            # 400 webman => faulty path => Error
+            # 404 webman => faulty command => Not found
+            # 200 OK
+            print()
+        except Exception as ez:
+            print('ERROR: could not install pkg')
+            print('DEBUG ERROR traceback: ' + str(traceback.print_exc()))
+            print(ez.message)
 
 class CreateToolTip(object):
     """

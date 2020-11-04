@@ -9,14 +9,12 @@ class Edit_launch_txt:
 			with open(os.path.join(AppPaths.game_work_dir, 'pkg.json')) as f:
 				json_data = json.load(f)
 
-			with open(os.path.join(AppPaths.settings, 'ftp_settings.cfg'), 'r') as settings_file:
-				json_settings_data = json.load(settings_file)
-				settings_file.close()
+			from global_paths import FtpSettings
 
 			# init variables
 			web_command_string = ''
 			iso_filepath = str(json_data['iso_filepath'])
-			cfg_webcommand = json_settings_data['webcommand']
+			cfg_webcommand = FtpSettings.webcommand
 
 			if '/PSPISO/' in iso_filepath:
 				web_command_string = '/mount_ps3' + iso_filepath + ';/wait.ps3?8;/browser.ps3$focus_segment_index xmb_app3 0;/wait.ps3?1;/browser.ps3$exec_push;/wait.ps3?1;/browser.ps3$focus_index 0 4;/wait.ps3?1;/browser.ps3$exec_push;/wait.ps3?1;/browser.ps3$exec_push;/wait.ps3?1;/browser.ps3$exec_push'
