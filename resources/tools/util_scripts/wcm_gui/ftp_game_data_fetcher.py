@@ -192,9 +192,8 @@ class FtpGameList():
         at3 = None
         pam = None
 
-        for new_game_path in filtered_platform:
+        for new_game_path in tqdm(filtered_platform, desc='Fetching ' + original_platform + ' games', bar_format="{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt} [{elapsed}]\n"):
             game_exist = False
-
             new_game_dir_path = os.path.dirname(new_game_path).__add__('/')
             new_game_filename = os.path.basename(new_game_path)
             new_game_platform_path = new_game_dir_path
@@ -211,8 +210,8 @@ class FtpGameList():
 
                 if new_game_path == existing_game_path:
                     self.game_count += 1
-                    if self.total_lines_count > 0:
-                        print('DEBUG PROGRESS: ' + "{:.0%}".format(float(self.game_count).__div__(float(self.total_lines_count))) + ' (' + str(self.game_count) + '/' + str(self.total_lines_count) + ')')
+                    # if self.total_lines_count > 0:
+                    #     print('DEBUG PROGRESS: ' + "{:.0%}".format(float(self.game_count).__div__(float(self.total_lines_count))) + ' (' + str(self.game_count) + '/' + str(self.total_lines_count) + ')')
                     print('\nDEBUG skipping ' + new_game_filename + ', already fetched\n')
                     game_exist = True
                     pass
@@ -337,8 +336,8 @@ class FtpGameList():
 
                 # add game to list of new games
                 self.game_count += 1
-                if self.total_lines_count > 0:
-                    print('DEBUG PROGRESS: ' + "{:.0%}".format(float(self.game_count).__div__(float(self.total_lines_count))) + ' (' + str(self.game_count) + '/' + str(self.total_lines_count) + ')')
+                # if self.total_lines_count > 0:
+                #     print('DEBUG PROGRESS: ' + "{:.0%}".format(float(self.game_count).__div__(float(self.total_lines_count))) + ' (' + str(self.game_count) + '/' + str(self.total_lines_count) + ')')
 
                 if new_game_platform != original_platform:
                     if original_platform in {'GAMES', 'GAMEZ'}:
@@ -602,8 +601,8 @@ class FTPDataHandler:
             # if None: refetch has failed => skip game by breaking the loop
             if data is None:
                 game_count += 1
-                if self.total_lines > 0:
-                     print('DEBUG PROGRESS: ' + "{:.0%}".format(float(game_count).__div__(float(self.total_lines))) + ' (' + str(game_count) + '/' + str(self.total_lines) + ')')
+                # if self.total_lines > 0:
+                #      print('DEBUG PROGRESS: ' + "{:.0%}".format(float(game_count).__div__(float(self.total_lines))) + ' (' + str(game_count) + '/' + str(self.total_lines) + ')')
                 break
             else:
                 if fill_buffer(self, data):
@@ -644,9 +643,9 @@ class FTPDataHandler:
                                 except:
                                     pass
 
-                        # Error 451 is normal when closing the conection
+                        # Error 451 is normal when closing the connection
                         if '451' not in e.message:
-                            print('DEBUG - connection ' + e.message + ' during data fetching of ' + filename)
+                            print('DEBUG - connection ' + e.message + ' during data fetching of \'' + filename + '\'')
                         break
 
         return game_title_id, icon0, pic0, pic1, pic2, at3, pam
