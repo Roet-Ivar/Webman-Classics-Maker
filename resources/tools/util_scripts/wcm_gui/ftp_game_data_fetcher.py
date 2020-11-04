@@ -1,6 +1,7 @@
 import json, os, re, StringIO, sys, time, traceback
 import PIL.Image as Image
 from ftplib import FTP
+from tqdm import tqdm
 from shutil import copyfile
 
 # adding util_scripts depending on if it's an executable or if it's running from the wcm_gui
@@ -157,7 +158,7 @@ class FtpGameList():
 
         # append the platform lists
         for platform in self.json_game_list_data:
-            self.new_platform_list_data = self.list_builder(str(platform).split('_')[0])
+            self.new_platform_list_data = self.json_game_list_data_builder(str(platform).split('_')[0])
 
         # save updated gamelist to disk
         with open(self.GAME_LIST_DATA_FILE, 'w') as newFile:
@@ -165,7 +166,7 @@ class FtpGameList():
             newFile.write(json_text)
 
 
-    def list_builder(self, original_platform):
+    def json_game_list_data_builder(self, original_platform):
         platform_list = original_platform + '_games'
         filtered_platform = None
         if 'PSPISO' in platform_list:
@@ -191,79 +192,79 @@ class FtpGameList():
         at3 = None
         pam = None
 
-        for filepath in filtered_platform:
+        for new_game_path in filtered_platform:
             game_exist = False
 
-            dir_path = os.path.dirname(filepath).__add__('/')
-            filename = os.path.basename(filepath)
-            platform_path = dir_path
-            platform = original_platform
+            new_game_dir_path = os.path.dirname(new_game_path).__add__('/')
+            new_game_filename = os.path.basename(new_game_path)
+            new_game_platform_path = new_game_dir_path
+            new_game_platform = original_platform
 
             # check if game exist
-            for game in self.json_game_list_data[platform_list]:
-                game_path = str(os.path.join(game['path'], game['filename']))
+            for game_json in self.json_game_list_data[platform_list]:
+                existing_game_path = str(os.path.join(game_json['path'], game_json['filename']))
 
-                if platform in {'GAMES', 'GAMEZ'}:
+                if new_game_platform in {'GAMES', 'GAMEZ'}:
                     # Since GAMES-folders get variations of the titles we will compare their base paths
-                    filepath = '/'.join(filepath.split('/')[:-2]) + '/'
-                    game_path = '/'.join(game_path.split('/')[:-1]) + '/'
+                    new_game_path = '/'.join(new_game_path.split('/')[:-2]) + '/'
+                    existing_game_path = '/'.join(existing_game_path.split('/')[:-1]) + '/'
 
-                if filepath == game_path:
+                if new_game_path == existing_game_path:
                     self.game_count += 1
                     if self.total_lines_count > 0:
                         print('DEBUG PROGRESS: ' + "{:.0%}".format(float(self.game_count).__div__(float(self.total_lines_count))) + ' (' + str(self.game_count) + '/' + str(self.total_lines_count) + ')')
-                    print('\nDEBUG skipping ' + filename + ', already fetched\n')
+                    print('\nDEBUG skipping ' + new_game_filename + ', already fetched\n')
                     game_exist = True
                     pass
 
 
             # .NTFS[xxx] gets a donor platform for metadata scraping
-            if platform == 'NTFS':
-                match = re.search('(?<=\[).*?(?=\])', filename)
+            if new_game_platform == 'NTFS':
+                match = re.search('(?<=\[).*?(?=\])', new_game_filename)
                 if match is not None:
                     # These will not match: '.NTFS[BDISO]', '.NTFS[DVDISO]', '.NTFS[BDFILE]',
                     tmp_platform = filter(lambda x: match.group() in x[0], self.global_platform_paths)
                     if tmp_platform:
-                        platform = tmp_platform[0][1]
+                        new_game_platform = tmp_platform[0][1]
             # GAMES get the PS3 metadata
-            elif platform in {'GAMES', 'GAMEZ'}:
+            elif new_game_platform in {'GAMES', 'GAMEZ'}:
                 donor_platform = 'PS3ISO'
-                platform = donor_platform
+                new_game_platform = donor_platform
 
 
             # if not, add it
             if not game_exist:
-                # parsing of PARAM.SFO would provde appropriate title_id and title for the GUI
+                # parsing of PARAM.SFO will provide appropriate title_id and title for the GUI
                 if original_platform in {'GAMES', 'GAMEZ'}:
                     data = []
-                    PARAM_SFO_PATH = platform_path + 'PARAM.SFO'
+                    PARAM_SFO_PATH = new_game_platform_path + 'PARAM.SFO'
                     self.ftp.retrbinary("RETR " + PARAM_SFO_PATH, callback=data.append)
                     title_id, title = param_sfo_parser(''.join(data))
 
                     # if title_id still None, get it from the folder name
                     if title_id is None:
-                        id_match = re.search('(\w{4}\d{5})', dir_path)
+                        id_match = re.search('(\w{4}\d{5})', new_game_dir_path)
                         # find title_id in folder name
                         if id_match:
                             title_id = id_match.group(0)
                         else:
-                            print('DEBUG: Folder-game in: ' + dir_path
+                            print('DEBUG: Folder-game in: ' + new_game_dir_path
                                   + ' does not contain title_id in folder name\n skipping metadata')
                             self.game_count += 1
                             break
 
                     if title is None:
                         title = '[' + title_id + ']'
-                    filename = ''.join(e for e in title if e.isalnum()) + ' [' + title_id + ']'
-                    filename = filename.replace(' ', '_')
+                    new_game_filename = ''.join(e for e in title if e.isalnum()) + ' [' + title_id + ']'
+                    new_game_filename = new_game_filename.replace(' ', '_')
 
                 else:
-                    title_id, icon0, pic0, pic1, pic2, at3, pam = self.get_game_data(dir_path, filename)
-                    title = filename.strip()
+                    title_id, icon0, pic0, pic1, pic2, at3, pam = self.get_game_data(new_game_dir_path, new_game_filename)
+                    title = new_game_filename.strip()
 
                 # removes the file extension and use it as title
                 for file_ext in GlobalVar.file_extensions:
-                    if filename.upper().endswith(file_ext):
+                    if new_game_filename.upper().endswith(file_ext):
                         title = title[0:len(title)-len(file_ext)]
                         break
 
@@ -276,34 +277,34 @@ class FtpGameList():
                 # check for for match the platform game database
                 if title_id is not None and title_id is not '':
                     # read platform db
-                    platform_db_file = platform.replace('ISO', '') + '_all_title_ids.json'
+                    platform_db_file = new_game_platform.replace('ISO', '') + '_all_title_ids.json'
                     with open(os.path.join(AppPaths.games_metadata, platform_db_file)) as f:
                         self.json_platform_metadata = json.load(f)
 
-                    for game in self.json_platform_metadata['games']:
+                    for game_json in self.json_platform_metadata['games']:
                         # adapt the title_id format for the xml db
-                        if platform == 'PS3ISO':
+                        if new_game_platform == 'PS3ISO':
                             title_id = title_id.replace('-', '')
 
-                        if title_id == game['title_id']:
-                            if platform == 'PSPISO' or platform == 'PSXISO' or platform == 'PS2ISO':
-                                title = game['title'].encode('utf-8').strip()
+                        if title_id == game_json['title_id']:
+                            if new_game_platform == 'PSPISO' or new_game_platform == 'PSXISO' or new_game_platform == 'PS2ISO':
+                                title = game_json['title'].encode('utf-8').strip()
 
-                                if game['meta_data_link'] is not None:
-                                    meta_data_link = game['meta_data_link']
+                                if game_json['meta_data_link'] is not None:
+                                    meta_data_link = game_json['meta_data_link']
 
-                            elif platform == 'PS3ISO':
+                            elif new_game_platform == 'PS3ISO':
                                 # use the first element for English
-                                title = game['locale'][0]['title'].encode('utf-8').strip()
+                                title = game_json['locale'][0]['title'].encode('utf-8').strip()
                             break
 
                 # check for duplicates of the same title
                 dup_list = []
                 for _platform in self.json_game_list_data:
-                    for game in self.json_game_list_data[_platform]:
-                        dup_match = re.search('^' + title + '\s(\()\d{1,3}?(\))$', game['title'])
-                        if title == game['title'] or dup_match:
-                            dup_list.append(game['title'].encode('utf-8').strip())
+                    for game_json in self.json_game_list_data[_platform]:
+                        dup_match = re.search('^' + title + '\s(\()\d{1,3}?(\))$', game_json['title'])
+                        if title == game_json['title'] or dup_match:
+                            dup_list.append(game_json['title'].encode('utf-8').strip())
                 # if there they are the same, append suffix ' (1)'
                 if len(dup_list) == 1 and dup_list[0] == title:
                         title = title + ' (1)'
@@ -339,56 +340,56 @@ class FtpGameList():
                 if self.total_lines_count > 0:
                     print('DEBUG PROGRESS: ' + "{:.0%}".format(float(self.game_count).__div__(float(self.total_lines_count))) + ' (' + str(self.game_count) + '/' + str(self.total_lines_count) + ')')
 
-                if platform != original_platform:
+                if new_game_platform != original_platform:
                     if original_platform in {'GAMES', 'GAMEZ'}:
-                        split_path = platform_path.split('/')
-                        platform_path = '/'.join(split_path[0:len(split_path) - 2]) + '/'
-                    platform = original_platform
+                        split_path = new_game_platform_path.split('/')
+                        new_game_platform_path = '/'.join(split_path[0:len(split_path) - 2]) + '/'
+                    new_game_platform = original_platform
 
                 self.new_json_game_list_data[platform_list].append({
                     "title_id": title_id,
                     "title": title,
-                    "platform": platform,
-                    "filename": filename,
-                    "path": platform_path,
+                    "platform": new_game_platform,
+                    "filename": new_game_filename,
+                    "path": new_game_platform_path,
                     "meta_data_link": meta_data_link})
 
                 # also append it to the existing list for next iteration
                 self.json_game_list_data[platform_list].append({
                     "title_id": title_id,
                     "title": title,
-                    "platform": platform,
-                    "filename": filename,
-                    "path": platform_path,
+                    "platform": new_game_platform,
+                    "filename": new_game_filename,
+                    "path": new_game_platform_path,
                     "meta_data_link": meta_data_link})
 
-                print('DEBUG \'' + filename + '\' got the title \'' + str(title) + '\'' + '\n')
+                print('DEBUG \'' + new_game_filename + '\' got the title \'' + str(title) + '\'' + '\n')
                 print("Added '" + str(title) + "' to the list:\n"
-                      + 'Platform: ' + platform + '\n'
-                      + 'Filename: ' + filename + '\n'
+                      + 'Platform: ' + new_game_platform + '\n'
+                      + 'Filename: ' + new_game_filename + '\n'
                       + 'Title id: ' + str(title_id) + '\n')
 
 
 
             # save data to game build folder here
             if title_id is not None and title_id is not '':
-                tmp_filename = filename
+                tmp_filename = new_game_filename
                 # removes the file extension from tmp_filename
                 for file_ext in GlobalVar.file_extensions:
-                    if filename.upper().endswith(file_ext):
-                        tmp_filename = filename[0:len(filename)-len(file_ext)]
+                    if new_game_filename.upper().endswith(file_ext):
+                        tmp_filename = new_game_filename[0:len(new_game_filename)-len(file_ext)]
                         break
                 game_folder_name = tmp_filename.replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
                 game_build_dir = os.path.join(AppPaths.builds, game_folder_name)
 
                 # save images to game work folders
-                image_saver(self.ftp, platform_path, platform, game_build_dir, [icon0, pic0, pic1, pic2, at3, pam])
+                image_saver(self.ftp, new_game_platform_path, new_game_platform, game_build_dir, [icon0, pic0, pic1, pic2, at3, pam])
 
             # reset game data for next iteration
             title = None
             title_id = None
             meta_data_link = None
-            platform = original_platform
+            new_game_platform = original_platform
 
         return self.new_json_game_list_data
 
