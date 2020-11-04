@@ -191,9 +191,9 @@ class FtpGameList():
         at3 = None
         pam = None
 
-        for game_filename in filtered_platform:
+        for filepath in filtered_platform:
             game_exist = False
-            filepath = game_filename
+
             dir_path = os.path.dirname(filepath).__add__('/')
             filename = os.path.basename(filepath)
             platform_path = dir_path
@@ -202,6 +202,12 @@ class FtpGameList():
             # check if game exist
             for game in self.json_game_list_data[platform_list]:
                 game_path = str(os.path.join(game['path'], game['filename']))
+
+                if platform in {'GAMES', 'GAMEZ'}:
+                    # Since GAMES-folders get variations of the titles we will compare their base paths
+                    filepath = '/'.join(filepath.split('/')[:-2]) + '/'
+                    game_path = '/'.join(game_path.split('/')[:-1]) + '/'
+
                 if filepath == game_path:
                     self.game_count += 1
                     if self.total_lines_count > 0:
@@ -220,7 +226,7 @@ class FtpGameList():
                     if tmp_platform:
                         platform = tmp_platform[0][1]
             # GAMES get the PS3 metadata
-            elif platform == 'GAMES':
+            elif platform in {'GAMES', 'GAMEZ'}:
                 donor_platform = 'PS3ISO'
                 platform = donor_platform
 
@@ -228,7 +234,7 @@ class FtpGameList():
             # if not, add it
             if not game_exist:
                 # parsing of PARAM.SFO would provde appropriate title_id and title for the GUI
-                if original_platform == 'GAMES':
+                if original_platform in {'GAMES', 'GAMEZ'}:
                     data = []
                     PARAM_SFO_PATH = platform_path + 'PARAM.SFO'
                     self.ftp.retrbinary("RETR " + PARAM_SFO_PATH, callback=data.append)
@@ -334,7 +340,7 @@ class FtpGameList():
                     print('DEBUG PROGRESS: ' + "{:.0%}".format(float(self.game_count).__div__(float(self.total_lines_count))) + ' (' + str(self.game_count) + '/' + str(self.total_lines_count) + ')')
 
                 if platform != original_platform:
-                    if original_platform == 'GAMES':
+                    if original_platform in {'GAMES', 'GAMEZ'}:
                         split_path = platform_path.split('/')
                         platform_path = '/'.join(split_path[0:len(split_path) - 2]) + '/'
                     platform = original_platform
@@ -412,7 +418,7 @@ class FtpGameList():
                     donor_platform = filter(lambda x: match.group() in x[0], self.global_platform_paths)
                     if donor_platform:
                         platform = donor_platform[0][1]
-            elif platform == 'GAMES':
+            elif platform in {'GAMES', 'GAMEZ'}:
                 donor_platform = 'PS3ISO'
                 platform = donor_platform
 
@@ -1004,14 +1010,14 @@ def image_saver(ftp, platform_path, platform, game_build_dir, images):
             pic2_file.close()
 
     if at3 is not None:
-        if platform == 'PS3ISO' or platform == 'GAMES':
+        if platform == 'PS3ISO' or platform in {'GAMES', 'GAMEZ'}:
             # for .AT3 we need to save the binary data to a file
             at3_file = open(os.path.join(game_build_dir, 'work_dir', 'pkg', 'SND0.AT3'), "wb")
             at3_file.write(at3)
             at3_file.close()
 
     if pam is not None:
-        if platform == 'PS3ISO' or platform == 'GAMES':
+        if platform == 'PS3ISO' or platform in {'GAMES', 'GAMEZ'}:
             # for .PAM we need to save the binary data to a file
             pam_file = open(os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON1.PAM'), "wb")
             pam_file.write(pam)

@@ -740,9 +740,10 @@ class Main:
                                                  self.icon0_y_pos + self.image_icon0.height))
 
 
-        # A PIC0 must be used for the GUI
+        # A PIC0 must be used for the GUI: either existing
         if os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC0.PNG')):
             tmp_pic0_bg = copy.copy(self.image_pic1)
+        # or make with title text
         else:
             # else use background w/ title
             tmp_pic0_bg = copy.copy(self.image_pic1_w_title)
@@ -753,6 +754,8 @@ class Main:
 
         # Image.paste(im1, (left, top, right, bottom), im1)
         tmp_pic0_bg.paste(self.image_pic0, (self.pic0_x_pos, self.pic0_y_pos), self.image_pic0)
+        if tmp_pic0_bg is not None and 'power stone' in AppPaths.game_work_dir.lower():
+            Image._show(tmp_pic0_bg)
         # Image.crop((left, top, right, bottom))
         tmp_image_pic0 = tmp_pic0_bg.crop((self.pic0_x_pos, self.pic0_y_pos,
                                                self.pic0_x_pos + self.image_pic0.width,
@@ -822,7 +825,7 @@ class Main:
 
     def draw_text_on_image_w_font(self, image, text, text_x, text_y, text_size, text_color, font):
         if not os.path.isfile(font):
-            print('font does not exist')
+            print('ERROR: font does not exist')
         font = ImageFont.truetype(font, text_size)
         draw = ImageDraw.Draw(image)
         return draw.text((text_x, text_y), text, fill=text_color, font=font)
@@ -1238,7 +1241,7 @@ class Main:
                         else:
                             pkg_remote_path = '/' + install_path + '/'
 
-                        response = tkMessageBox.askyesno('Build status: success', 'Transfer and install the pkg?\nName: ' + pkg_name)
+                        response = tkMessageBox.askyesno('Build status: success', 'Build done!\nDo you want to remote-install the pkg?\n\nLocation: ' + pkg_remote_path + '/' + pkg_name)
                         # yes
                         if response:
                             pkg_local_path = os.path.join(AppPaths.game_work_dir, '../', pkg_name)
@@ -1388,7 +1391,6 @@ class Main:
 
     def remote_install_pkg(self, pkg_remote_path, pkg_name):
         try:
-            from global_paths import FtpSettings
             ps3_lan_ip = FtpSettings.ps3_lan_ip
             import tkMessageBox
             import urllib
