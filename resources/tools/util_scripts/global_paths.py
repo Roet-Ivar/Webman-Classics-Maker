@@ -103,6 +103,33 @@ class FtpSettings:
     ftp_retry_count         = ftp_settings_file['ftp_retry_count']
     webcommand              = ftp_settings_file['webcommand']
 
+class GameListDataFile:
+    import json
+    from shutil import copyfile
+
+    GAME_LIST_DATA_PATH = os.path.join(App.application_path, 'game_list_data.json')
+    GAME_LIST_DATA_BAK_PATH = os.path.join(App.util_resources, 'game_list_data.json.BAK')
+
+    game_list_data_json = None
+    game_list_data_bak_json = None
+
+    # makes sure there is a json_game_list file
+    if os.path.isfile(GAME_LIST_DATA_PATH) is False:
+        copyfile(GAME_LIST_DATA_BAK_PATH, GAME_LIST_DATA_PATH)
+    try:
+        with open(GAME_LIST_DATA_PATH) as f:
+            game_list_data_json = json.load(f)
+    except Exception as e:
+        print("""Error in 'game_list_data.json' contains incorrect json-syntax. Either remove it or find the error using json lint""")
+        print("Details: " + e.message)
+
+    # open a copy of the current gamelist from disk
+    try:
+        with open(GAME_LIST_DATA_BAK_PATH) as f:
+            game_list_data_bak_json = json.load(f)
+    except Exception as e:
+        print('ERROR: could not parse ' + GAME_LIST_DATA_BAK_PATH + ' to ' + game_list_data_bak_json)
+
 class GlobalVar:
     file_extensions = ('.BIN',
                        '.BIN.ENC',

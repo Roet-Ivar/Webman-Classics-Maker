@@ -13,6 +13,8 @@ else:
 from global_paths import App as AppPaths
 from global_paths import GlobalVar
 from global_paths import GlobalDef
+from global_paths import GameListDataFile
+from global_paths import FtpSettings
 
 sys.path.append(AppPaths.settings)
 
@@ -53,12 +55,7 @@ class FtpGameList():
         self.CONNECTION_ERROR_MESSAGE   = "TIPS: Check your PS3 ip-address in webMan VSH menu (hold SELECT on the XMB)"
         self.TITLE_ID_EXCEPTION_MESSAGE = """Exception: 'get_image' failed during regex operation."""
 
-        # constants
-        self.GAME_LIST_DATA_FILE    = os.path.join(AppPaths.application_path, 'game_list_data.json')
-        self.NEW_LIST_DATA_FILE     = os.path.join(AppPaths.util_resources, 'game_list_data.json.BAK')
-
         # ftp settings
-        from global_paths import FtpSettings
         # some PSP-images is found around 20MB into the ISO
         self.ftp_psp_png_offset_kb  = FtpSettings.ftp_psp_png_offset_kb
         self.chunk_size_kb          = FtpSettings.ftp_chunk_size_kb
@@ -149,19 +146,17 @@ class FtpGameList():
             return
 
         # open a copy of the current gamelist from disk
-        with open(self.GAME_LIST_DATA_FILE) as f:
-            self.json_game_list_data = json.load(f)
+        self.json_game_list_data = GameListDataFile.game_list_data_json
 
         # open a copy of an empty gamelist from disk
-        with open(self.NEW_LIST_DATA_FILE) as f:
-            self.new_json_game_list_data = json.load(f)
+        self.new_json_game_list_data = GameListDataFile.game_list_data_bak_json
 
-        # append the platform lists
+        # append the current platform data to the new list
         for platform in self.json_game_list_data:
             self.new_platform_list_data = self.json_game_list_data_builder(str(platform).split('_')[0])
 
         # save updated gamelist to disk
-        with open(self.GAME_LIST_DATA_FILE, 'w') as newFile:
+        with open(GameListDataFile.GAME_LIST_DATA_PATH, 'w') as newFile:
             json_text = json.dumps(self.json_game_list_data, indent=4, separators=(",", ":"))
             newFile.write(json_text)
 
@@ -192,7 +187,7 @@ class FtpGameList():
         at3 = None
         pam = None
 
-        for new_game_path in tqdm(filtered_platform, desc='Fetching ' + original_platform + ' games', bar_format="{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt} [{elapsed}]\n"):
+        for new_game_path in tqdm(filtered_platform, desc='Fetching ' + original_platform, bar_format="{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt} [{elapsed}]\n"):
             game_exist = False
             new_game_dir_path = os.path.dirname(new_game_path).__add__('/')
             new_game_filename = os.path.basename(new_game_path)
@@ -480,10 +475,15 @@ class FtpGameList():
 
             try:
                 print('DEBUG retrying -> retrlines(\'MLSD ' + folder_path + '\')')
+                print('Connection attempt to ' + self.ps3_lan_ip + ', timeout set to ' + str(self.ftp_timeout) + 's...\n')
+                ftp = FTP(self.ps3_lan_ip, timeout=self.ftp_timeout)
+                ftp.set_pasv = self.ftp_pasv_mode
+                ftp.login(user=self.ftp_user, passwd=self.ftp_password)
+                ftp.voidcmd('TYPE I')
                 ftp.retrlines('MLSD ' + folder_path, stuff.append)
 
             except Exception as e:
-                print('DEBUG retrlines error: ' + e.message + '\n during rerty of command retrlines(\'MLSD ' + folder_path + '\')')
+                print('DEBUG retrlines error: ' + e.message + '\n during retry of command retrlines(\'MLSD ' + folder_path + '\')')
                 return files
 
 

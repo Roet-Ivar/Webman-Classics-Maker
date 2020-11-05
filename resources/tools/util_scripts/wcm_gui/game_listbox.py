@@ -1,21 +1,14 @@
 from Tkinter import Frame, Scrollbar, Listbox, LEFT, RIGHT, Y, END, Label, Menu
-import json, os, sys
+import json, os, sys, shutil
 from shutil import copyfile
 sys.path.append('..')
 from global_paths import App as AppPaths
 from global_paths import GlobalVar
+from global_paths import GameListDataFile
 
 class Gamelist():
     def __init__(self, drive, platform):
-        # makes sure there is a json_game_list file
-        if os.path.isfile(os.path.join(AppPaths.application_path, 'game_list_data.json')) is False:
-            copyfile(os.path.join(AppPaths.util_resources, 'game_list_data.json.BAK'), os.path.join(AppPaths.application_path, 'game_list_data.json'))
-        try:
-            with open(os.path.join(AppPaths.application_path, 'game_list_data.json')) as f:
-                self.json_game_list_data = json.load(f)
-        except Exception as e:
-            print("""Error in 'game_list_data.json' contains incorrect json-syntax. Either remove it or find the error using json lint""")
-            print("Details: " + e.message)
+        self.json_game_list_data = GameListDataFile.game_list_data_json
 
         if drive == 'USB(*)':
             self.drive_to_show = '/dev_' + drive.lower().replace('(*)', '')
@@ -31,6 +24,9 @@ class Gamelist():
         self.selected_title      = None
         self.selected_path       = None
         self.selected_filename   = None
+        self.drive_system_path_array = None
+
+        self.is_cleared = False
 
 
     def create_main_frame(self, entry_field_title_id, entry_field_title, entry_field_filename, entry_field_iso_path, entry_field_platform, drive_system_array):
@@ -44,11 +40,14 @@ class Gamelist():
         self.corrected_index = []
         self.main_frame = Frame()
 
-        self.popup_menu = Menu(self.main_frame, tearoff=0)
+        # self.popup_menu = Menu(self.main_frame, tearoff=0)
+        # self.popup_menu.add_command(label="Re-fetch",
+        #                             command=self.select_all)
+
         self.popup_menu.add_command(label="Delete",
                                     command=self.delete_selected)
-        self.popup_menu.add_command(label="Select All",
-                                    command=self.select_all)
+        # self.popup_menu.add_command(label="Select All",
+        #                             command=self.select_all)
 
 
 
@@ -102,8 +101,9 @@ class Gamelist():
         # cursor har been initiated
         if self._listbox.curselection() is not ():
             new_selection = self._listbox.curselection()
-            if new_selection[0] is not self.last_selection[0]:
+            if new_selection[0] is not self.last_selection[0] or self.is_cleared:
                 self.entry_fields_update(new_selection)
+                self.is_cleared = False
 
             self.last_selection = new_selection
 
@@ -209,19 +209,54 @@ class Gamelist():
             self.popup_menu.focus_set()
 
     def delete_selected(self):
-        for i in self._listbox.curselection()[::-1]:
-            # self.delete(i)
-            print('DEBUG DELETE ' + self.selected_title)
+        import tkMessageBox
+        game_folder_path = os.path.join(AppPaths.game_work_dir, '..')
+        response = tkMessageBox.askyesno('Delete game folder', 'Do you really want to delete \'' + self.entry_field_title.get() + '\'?\n\nFolder path: ' + os.path.realpath(game_folder_path))
+        # yes
+        if response:
+            # remove game from visual game list
+            for i in self._listbox.curselection()[::-1]:
+                self._listbox.delete(i)
+                removed_index = i
+
+            # remove game from json game list
+            platform_key = self.entry_field_platform.get() + '_games'
+            self.json_game_list_data[platform_key] = [x for x in self.json_game_list_data[platform_key] if x['title'] != self.selected_title]
+
+            # update the json game list file
+            with open(GameListDataFile.GAME_LIST_DATA_PATH, 'w') as newFile:
+                json_text = json.dumps(self.json_game_list_data, indent=4, separators=(",", ":"))
+                newFile.write(json_text)
+
+            # remove the game build folder too
+            if AppPaths.game_work_dir != os.path.join(AppPaths.wcm_gui, 'work_dir'):
+                if os.path.isdir(game_folder_path):
+                    shutil.rmtree(game_folder_path)
+                # clear entry_fields
+                self.clear_entries_and_path()
+                # set cursor
+                self._listbox.select_set(removed_index) #This only sets focus on the first item.
+
+
 
     def select_all(self):
         self._listbox.selection_set(0, 'end')
 
 
+    def clear_entries_and_path(self):
+        self.entry_field_title_id.delete(0, len(self.entry_field_title_id.get())-1)
+        self.entry_field_title_id.delete(0, END)
+        self.entry_field_title.delete(0, END)
+        self.entry_field_platform.delete(0, END)
+        self.entry_field_filename.delete(0, END)
+
+        self.is_cleared = True
+
+
 
     def get_selected_build_dir_path(self):
-        game_folder_name = ''
-        build_dir_path = ''
-        if self.selected_filename is not '':
+        self.build_dir_path = ''
+        if self.selected_filename not in {'', None}:
             filename = self.selected_filename
             title_id = self.selected_title_id.replace('-', '')
             build_base_path = AppPaths.builds
@@ -234,6 +269,6 @@ class Gamelist():
                     break
             game_folder_name = tmp_filename.replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
 
-            build_dir_path = os.path.join(build_base_path, game_folder_name)
-        return build_dir_path
+            self.build_dir_path = os.path.join(build_base_path, game_folder_name)
+        return self.build_dir_path
 

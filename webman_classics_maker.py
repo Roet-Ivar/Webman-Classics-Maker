@@ -668,7 +668,7 @@ class Main:
         icon0_changed = False
 
         # TODO image replace browser: missing the title text!
-        if img_to_be_changed is not None:
+        if img_to_be_changed not in {'', None}:
             if img_to_be_changed.lower() == 'pic1':
                 pic1_changed = True
                 self.draw_text_on_image_w_shadow(self.image_pic1, self.entry_field_title.get(), 745, 457, 32, 2, 'white', 'black')
@@ -680,9 +680,13 @@ class Main:
                 self.image_pic0 = self.image_pic0_ref
                 self.image_icon0 = self.image_icon0_ref
 
+            elif img_to_be_changed.lower() == 'pic0':
+                self.image_pic0 = self.image_pic0_ref
+                pic0_changed = True
+
 
         # check if xmb_icons needs to be re-drawn
-        elif pkg_build_path is not None and pkg_build_path is not '':
+        elif pkg_build_path not in {'', None}:
             if os.path.exists(pkg_build_path):
                 # draw PIC1 from pkg_dir and then xmb icons and system logo onto the pkg  background
                 if os.path.isfile(os.path.join(pkg_build_path, 'ICON0.PNG')):
@@ -754,8 +758,6 @@ class Main:
 
         # Image.paste(im1, (left, top, right, bottom), im1)
         tmp_pic0_bg.paste(self.image_pic0, (self.pic0_x_pos, self.pic0_y_pos), self.image_pic0)
-        if tmp_pic0_bg is not None and 'power stone' in AppPaths.game_work_dir.lower():
-            Image._show(tmp_pic0_bg)
         # Image.crop((left, top, right, bottom))
         tmp_image_pic0 = tmp_pic0_bg.crop((self.pic0_x_pos, self.pic0_y_pos,
                                                self.pic0_x_pos + self.image_pic0.width,
@@ -950,6 +952,7 @@ class Main:
 
     # Dynamic update of the 'entry_field_filename' into the 'entry_field_iso_path'
     def dynamic_filename_and_path(self, event):
+        iso_path = ''
         drive = ''
         system = ''
         path = ''
@@ -962,18 +965,24 @@ class Main:
         if self.drive_system_path_array[2] is not None:
             path = '/' + self.drive_system_path_array[2] + '/'
 
-        iso_path = drive + system + path + filename
-        iso_path = iso_path.replace('//', '/', )
+        if '' not in {drive, system, path, filename}:
+            iso_path = drive + system + path + filename
+            iso_path = iso_path.replace('//', '/', )
 
         self.entry_field_iso_path.xview_moveto(1)
         self.update_iso_path_entry_field(iso_path)
 
+        if iso_path == '':
+            # re-draw work_dir image on canvas
+            self.init_pkg_images()
+            self.init_draw_images_on_canvas(self.main)
+
 
     def update_iso_path_entry_field(self, iso_path):
-        self.entry_field_iso_path.config(state='normal')
-        self.entry_field_iso_path.delete(0, END)
-        self.entry_field_iso_path.insert(0, iso_path.replace('//','/'))
-        self.entry_field_iso_path.config(state='readonly')
+            self.entry_field_iso_path.config(state='normal')
+            self.entry_field_iso_path.delete(0, END)
+            self.entry_field_iso_path.insert(0, iso_path.replace('//','/'))
+            self.entry_field_iso_path.config(state='readonly')
 
 
     # Dynamic update of the game title on to the PIC1 image
@@ -985,7 +994,6 @@ class Main:
         tmp_img = tmp_img.resize((int(1280 * scaling), int(720 * scaling)), Image.ANTIALIAS)
         self.photo_image_pic1_xmb = PhotoImage(tmp_img)
         self.button_pic1.config(image=self.photo_image_pic1_xmb)
-        # NICLAS
         self.init_draw_images_on_canvas(self.main)
         #TODO: this might be more optimized somewhere else
         self.update_game_build_path()
