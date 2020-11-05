@@ -86,7 +86,7 @@ def zipdir(path, ziph):
 if __name__ == '__main__':
 
 	# windows release
-	zip_archive_name = 'webman_classics_maker_v2.0_win.zip'
+	zip_archive_name = 'webman_classics_maker_v2.2.x_win.zip'
 	zip_dir_path = BuildPaths.zip_dir
 	release_dir = BuildPaths.release
 

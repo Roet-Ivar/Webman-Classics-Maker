@@ -40,10 +40,9 @@ class Gamelist():
         self.corrected_index = []
         self.main_frame = Frame()
 
-        # self.popup_menu = Menu(self.main_frame, tearoff=0)
+        self.popup_menu = Menu(self.main_frame, tearoff=0)
         # self.popup_menu.add_command(label="Re-fetch",
         #                             command=self.select_all)
-
         self.popup_menu.add_command(label="Delete",
                                     command=self.delete_selected)
         # self.popup_menu.add_command(label="Select All",
@@ -98,14 +97,14 @@ class Gamelist():
 
     def selection_poller(self):
         self.label.after(200, self.selection_poller)
+        self.new_selection = self._listbox.curselection()
         # cursor har been initiated
         if self._listbox.curselection() is not ():
-            new_selection = self._listbox.curselection()
-            if new_selection[0] is not self.last_selection[0] or self.is_cleared:
-                self.entry_fields_update(new_selection)
+            if self.new_selection[0] is not self.last_selection[0] or self.is_cleared:
+                self.entry_fields_update(self.new_selection)
                 self.is_cleared = False
+                self.last_selection = self.new_selection
 
-            self.last_selection = new_selection
 
     def entry_fields_update(self, new_selection):
         for platform in self.json_game_list_data:
@@ -199,14 +198,14 @@ class Gamelist():
 
     def popup(self, event):
         try:
-            self._listbox.selection_clear(0,END)
+            self._listbox.selection_clear(0, END)
             self._listbox.selection_set(self._listbox.nearest(event.y))
             self._listbox.activate(self._listbox.nearest(event.y))
-            self.popup_menu.tk_popup(event.x_root + 43, event.y_root + 12, 0)
-
         finally:
-            self.popup_menu.grab_release()
-            self.popup_menu.focus_set()
+            if self._listbox.get(self._listbox.curselection()[0]) is not '':
+                self.popup_menu.tk_popup(event.x_root + 43, event.y_root + 12, 0)
+                self.popup_menu.grab_release()
+                self.popup_menu.focus_set()
 
     def delete_selected(self):
         import tkMessageBox
