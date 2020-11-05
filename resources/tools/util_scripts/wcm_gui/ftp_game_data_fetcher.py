@@ -476,6 +476,7 @@ class FtpGameList():
             try:
                 print('DEBUG retrying -> retrlines(\'MLSD ' + folder_path + '\')')
                 print('Connection attempt to ' + self.ps3_lan_ip + ', timeout set to ' + str(self.ftp_timeout) + 's...\n')
+                ftp.close()
                 ftp = FTP(self.ps3_lan_ip, timeout=self.ftp_timeout)
                 ftp.set_pasv = self.ftp_pasv_mode
                 ftp.login(user=self.ftp_user, passwd=self.ftp_password)

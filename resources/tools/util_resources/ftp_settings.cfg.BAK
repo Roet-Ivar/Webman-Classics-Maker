@@ -4,11 +4,10 @@
     "ftp_chunk_size_kb":4000,
     "ftp_folder_depth":16,
     "ftp_timeout":8,
-    "ftp_lan_ip":"",
+    "ps3_lan_ip":"",
     "use_w_title_id":true,
     "ftp_psp_png_offset_kb":20000,
     "ftp_password":"",
-    "ps3_lan_ip":"",
     "legacy_webcommand":"/wait.ps3?6;/mount_ps3[filepath_var];/wait.ps3?5;/play.ps3",
     "ftp_retry_count":10,
     "webcommand":"[filepath_var]"
