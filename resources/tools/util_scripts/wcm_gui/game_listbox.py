@@ -41,10 +41,13 @@ class Gamelist():
         self.main_frame = Frame()
 
         self.popup_menu = Menu(self.main_frame, tearoff=0)
-        # self.popup_menu.add_command(label="Re-fetch",
-        #                             command=self.select_all)
+
         self.popup_menu.add_command(label="Delete",
                                     command=self.delete_selected)
+        self.popup_menu.add_command(label="Rename",
+                                    command=self.rename_selected)
+        # self.popup_menu.add_command(label="Refetch",
+        #                             command=self.refetch)
         # self.popup_menu.add_command(label="Select All",
         #                             command=self.select_all)
 
@@ -236,7 +239,9 @@ class Gamelist():
                 # set cursor
                 self._listbox.select_set(removed_index) #This only sets focus on the first item.
 
-
+    def rename_selected(self):
+        self.entry_field_title.selection_range(0, END)
+        self.entry_field_title.focus_set()
 
     def select_all(self):
         self._listbox.selection_set(0, 'end')
