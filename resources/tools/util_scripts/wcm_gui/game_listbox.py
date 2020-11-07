@@ -4,11 +4,11 @@ from shutil import copyfile
 sys.path.append('..')
 from global_paths import App as AppPaths
 from global_paths import GlobalVar
-from global_paths import GameListDataFile
+from global_paths import GameListData
 
 class Gamelist():
     def __init__(self, drive, platform):
-        self.json_game_list_data = GameListDataFile.game_list_data_json
+        self.json_game_list_data = GameListData.game_list_data_json
 
         if drive == 'USB(*)':
             self.drive_to_show = '/dev_' + drive.lower().replace('(*)', '')
@@ -213,7 +213,7 @@ class Gamelist():
     def delete_selected(self):
         import tkMessageBox
         game_folder_path = os.path.join(AppPaths.game_work_dir, '..')
-        response = tkMessageBox.askyesno('Delete game folder', 'Do you really want to delete \'' + self.entry_field_title.get() + '\'?\n\nFolder path: ' + os.path.realpath(game_folder_path))
+        response = tkMessageBox.askyesno('Delete game folder', 'Delete \'' + self.entry_field_title.get() + '\'?\n\nFolder path: ' + os.path.realpath(game_folder_path))
         # yes
         if response:
             # remove game from visual game list
@@ -226,7 +226,7 @@ class Gamelist():
             self.json_game_list_data[platform_key] = [x for x in self.json_game_list_data[platform_key] if x['title'] != self.selected_title]
 
             # update the json game list file
-            with open(GameListDataFile.GAME_LIST_DATA_PATH, 'w') as newFile:
+            with open(GameListData.GAME_LIST_DATA_PATH, 'w') as newFile:
                 json_text = json.dumps(self.json_game_list_data, indent=4, separators=(",", ":"))
                 newFile.write(json_text)
 

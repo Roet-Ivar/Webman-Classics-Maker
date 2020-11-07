@@ -1,6 +1,5 @@
 import json, os, re, StringIO, sys, time, traceback
 import PIL.Image as Image
-from ftplib import FTP
 from tqdm import tqdm
 from shutil import copyfile
 
@@ -13,7 +12,7 @@ else:
 from global_paths import App as AppPaths
 from global_paths import GlobalVar
 from global_paths import GlobalDef
-from global_paths import GameListDataFile
+from global_paths import GameListData
 from global_paths import FtpSettings
 
 sys.path.append(AppPaths.settings)
@@ -55,19 +54,6 @@ class FtpGameList():
         self.CONNECTION_ERROR_MESSAGE   = "TIPS: Check your PS3 ip-address in webMan VSH menu (hold SELECT on the XMB)"
         self.TITLE_ID_EXCEPTION_MESSAGE = """Exception: 'get_image' failed during regex operation."""
 
-        # ftp settings
-        # some PSP-images is found around 20MB into the ISO
-        self.ftp_psp_png_offset_kb  = FtpSettings.ftp_psp_png_offset_kb
-        self.chunk_size_kb          = FtpSettings.ftp_chunk_size_kb
-        self.chunk_size_kb          = FtpSettings.ftp_chunk_size_kb
-        self.ps3_lan_ip             = FtpSettings.ps3_lan_ip
-        self.ftp_timeout            = FtpSettings.ftp_timeout
-        self.ftp_pasv_mode          = FtpSettings.ftp_pasv_mode
-        self.ftp_user               = FtpSettings.ftp_user
-        self.ftp_password           = FtpSettings.ftp_password
-        self.ftp_folder_depth       = FtpSettings.ftp_folder_depth
-        self.ftp_retry_count        = FtpSettings.ftp_retry_count
-
         # platform ISO paths
         self.PSPISO_lines  = []
         self.PSXISO_lines  = []
@@ -86,12 +72,7 @@ class FtpGameList():
 
     def execute(self):
         try:
-            print('Connection attempt to ' + self.ps3_lan_ip + ', timeout set to ' + str(self.ftp_timeout) + 's...\n')
-            self.ftp = FTP(self.ps3_lan_ip, timeout=self.ftp_timeout)
-            self.ftp.set_pasv = self.ftp_pasv_mode
-            self.ftp.login(user=self.ftp_user, passwd=self.ftp_password)
-            self.ftp.voidcmd('TYPE I')
-
+            self.ftp = FtpSettings().get_ftp()
             # get a listing of active drives
             active_drives_list = []
             self.ftp.retrlines('MLSD /', active_drives_list.append)
@@ -146,17 +127,16 @@ class FtpGameList():
             return
 
         # open a copy of the current gamelist from disk
-        self.json_game_list_data = GameListDataFile.game_list_data_json
-
+        self.json_game_list_data = GameListData.game_list_data_json
         # open a copy of an empty gamelist from disk
-        self.new_json_game_list_data = GameListDataFile.game_list_data_bak_json
+        self.new_json_game_list_data = GameListData.game_list_data_bak_json
 
         # append the current platform data to the new list
         for platform in self.json_game_list_data:
             self.new_platform_list_data = self.json_game_list_data_builder(str(platform).split('_')[0])
 
         # save updated gamelist to disk
-        with open(GameListDataFile.GAME_LIST_DATA_PATH, 'w') as newFile:
+        with open(GameListData.GAME_LIST_DATA_PATH, 'w') as newFile:
             json_text = json.dumps(self.json_game_list_data, indent=4, separators=(",", ":"))
             newFile.write(json_text)
 
@@ -292,42 +272,7 @@ class FtpGameList():
                                 title = game_json['locale'][0]['title'].encode('utf-8').strip()
                             break
 
-                # check for duplicates of the same title
-                dup_list = []
-                for _platform in self.json_game_list_data:
-                    for game_json in self.json_game_list_data[_platform]:
-                        dup_match = re.search('^' + title + '\s(\()\d{1,3}?(\))$', game_json['title'])
-                        if title == game_json['title'] or dup_match:
-                            dup_list.append(game_json['title'].encode('utf-8').strip())
-                # if there they are the same, append suffix ' (1)'
-                if len(dup_list) == 1 and dup_list[0] == title:
-                        title = title + ' (1)'
-                # if more than one we need to figure out what suffix to append
-                elif len(dup_list) > 1:
-                    new_title = ''
-                    curr_dup_number = 1
-                    for dup in dup_list:
-                        # a dup_title must have a '(#)' pattern
-                        dup_match = re.search('(?<=\()\d{1,3}?(?=\))', dup)
-                        if dup_match is not None:
-                            new_number = dup_match.group()
-                            pre_string = str(dup).replace('(' + new_number + ')', '')
-                            # title should match the pre_string w/o '(#)' pattern
-                            if title == pre_string.strip() and new_number > curr_dup_number:
-                                curr_dup_number += 1
-                                suf_string = '(' + str(curr_dup_number) + ')'
-                                new_title = pre_string + suf_string
-                    title = new_title
-                    # if there was no '(#)' pattern duplicates
-                    if new_title == '':
-                        for dup in dup_list:
-                            if title == dup:
-                                # make the first duplicate
-                                title = title + ' (1)'
-                                break
-
-                title = title.replace('  ', ' ')
-                title = title.strip().encode('utf-8')
+                title = GameListData().duplicate_title_checker(title)
 
                 # add game to list of new games
                 self.game_count += 1
@@ -438,7 +383,7 @@ class FtpGameList():
             print('DEBUG Error: ' + e.message)
             print('Connection timed out, re-connecting in ' + str(self.ftp_timeout) + 's...\n')
 
-            self.make_new_ftp()
+            self.ftp = FtpSettings().get_ftp()
             self.data_chunk = FTPDataHandler(self.ftp, self.total_lines_count)
 
             title_id, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform, self.chunk_size_kb, 0, self.game_count, self.ftp_retry_count)
@@ -517,16 +462,6 @@ class FtpGameList():
                 self.ftp_walk(ftp, current_dir, files)
         return files
 
-
-    def make_new_ftp(self):
-
-        if None is not self.ftp:
-            self.ftp.close()
-            time.sleep(self.ftp_timeout)
-
-        self.ftp = FTP(self.ps3_lan_ip, timeout=self.ftp_timeout)
-        self.ftp.set_pasv=self.ftp_pasv_mode
-        self.ftp.login(user='', passwd='')
 
 class FTPDataHandler:
     def __init__(self, ftp, total_lines):

@@ -14,6 +14,7 @@ from global_paths import App as AppPaths
 from global_paths import Image as ImagePaths
 from global_paths import GlobalVar
 from global_paths import FtpSettings
+from global_paths import GameListData
 
 sys.path.append(AppPaths.settings)
 
@@ -889,17 +890,17 @@ class Main:
         print('DEBUG on_drive_button')
         # Check if same drive already set
         if drive_choice in self.entry_field_iso_path.get():
-            print('DEBUG ' + '\'' + drive_choice + '\'' + ' already set')
+            # print('DEBUG ' + '\'' + drive_choice + '\'' + ' already set')
             # if dev_usb### already set -> iterate port (0-3)
             if 'dev_usb00' in drive_choice:
                 self.usb_port_number = self.usb_port_number + 1
 
                 if self.usb_port_number > 3:
                     self.usb_port_number = 0
-                print('DEBUG usb_port_number: ' + str(self.usb_port_number))
+                # print('DEBUG usb_port_number: ' + str(self.usb_port_number))
                 drive_choice = 'dev_usb00' + str(self.usb_port_number)
 
-        print('DEBUG drive_choice: ' + drive_choice)
+        # print('DEBUG drive_choice: ' + drive_choice)
         self.drive_system_path_array[0] = drive_choice
 
         current_iso_path = '/' + '/'.join([self.drive_system_path_array[0],
@@ -910,11 +911,11 @@ class Main:
         self.update_iso_path_entry_field(current_iso_path)
 
     def on_system_button(self, drive_choice, system_choice):
-        print('DEBUG on_system_button')
-        if system_choice in self.entry_field_iso_path.get():
-            print('DEBUG ' + '\'' + system_choice + '\'' + ' already set')
+        # print('DEBUG on_system_button')
+        # if system_choice in self.entry_field_iso_path.get():
+            # print('DEBUG ' + '\'' + system_choice + '\'' + ' already set')
 
-        print('DEBUG system_choice: ' + system_choice)
+        # print('DEBUG system_choice: ' + system_choice)
         self.drive_system_path_array[1] = system_choice
 
         current_iso_path = '/' + '/'.join([self.drive_system_path_array[0],
@@ -1069,7 +1070,7 @@ class Main:
             self.title_id_error_msg = 'Title id must be 9 characters long.'
             print(self.title_id_error_msg)
             self.entry_field_title_id.focus_set()
-            self.entry_field_title_id.icursor(0)
+            self.entry_field_title_id.selection_range(0, END)
             return False
         else:
             return True
@@ -1351,11 +1352,13 @@ class Main:
             self.list_filter_platform = self.platformdropdown.get()
         self.create_list_combo_box(self.list_filter_drive, self.list_filter_platform)
 
-    def save_pkg_info_to_json(self):
-        with open(os.path.join(AppPaths.util_resources, 'pkg.json.BAK')) as f:
-            json_data = json.load(f)
+    def entry_fields_to_json(self):
+        json_data = None
 
         try:
+            with open(os.path.join(AppPaths.util_resources, 'pkg.json.BAK')) as f:
+                json_data = json.load(f)
+
             # if use_w_title_id from config, swap first letter of title_id to 'W'
             if FtpSettings.use_w_title_id:
                 json_data['title_id'] = 'W' + str(self.entry_field_title_id.get())[1:]
@@ -1365,32 +1368,22 @@ class Main:
             json_data['title'] = str(self.entry_field_title.get())
             json_data['content_id'] = 'UP0001-' + json_data['title_id'] + '_00-0000000000000000'
             json_data['iso_filepath'] = str(self.entry_field_iso_path.get())
-
-            pkg_json_path = os.path.join(AppPaths.game_work_dir, 'pkg.json')
-            newFile = open(pkg_json_path, "w")
-            json_text = json.dumps(json_data, indent=4, separators=(",", ":"))
-            newFile.write(json_text)
-
         except ValueError as e:
             print("ERROR: File write error or 'PKGLAUNCH'/title-_d not found.")
             print(e.message)
 
+        return json_data
+
+    def save_pkg_info_to_json(self):
+            json_data = self.entry_fields_to_json()
+            newFile = open(os.path.join(AppPaths.game_work_dir, 'pkg.json'), "w")
+            json_text = json.dumps(json_data, indent=4, separators=(",", ":"))
+            newFile.write(json_text)
+
     def transfer_pkg(self, pkg_local_path, pkg_remote_path, pkg_name):
-        # ftp settings
-        ps3_lan_ip      = FtpSettings.ps3_lan_ip
-        ftp_timeout     = FtpSettings.ftp_timeout
-        ftp_pasv_mode   = FtpSettings.ftp_pasv_mode
-        ftp_user        = FtpSettings.ftp_user
-        ftp_password    = FtpSettings.ftp_password
         # setup connection to FTP
         try:
-            from ftplib import FTP
-            print('Connection attempt to ' + ps3_lan_ip + ', timeout set to ' + str(ftp_timeout) + 's...\n')
-            ftp = FTP(ps3_lan_ip, timeout=ftp_timeout)
-            ftp.set_pasv = ftp_pasv_mode
-            ftp.login(user=ftp_user, passwd=ftp_password)
-            ftp.voidcmd('TYPE I')
-
+            ftp = FtpSettings().get_ftp()
             pkg_local_file = open(pkg_local_path, "rb")
             # go to path and transfer the pkg
             ftp.cwd(pkg_remote_path)

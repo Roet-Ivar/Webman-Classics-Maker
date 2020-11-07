@@ -103,7 +103,16 @@ class FtpSettings:
     ftp_retry_count         = ftp_settings_file['ftp_retry_count']
     webcommand              = ftp_settings_file['webcommand']
 
-class GameListDataFile:
+    def get_ftp(self):
+        from ftplib import FTP
+        print('Connection attempt to ' + self.ps3_lan_ip + ', timeout set to ' + str(self.ftp_timeout) + 's...\n')
+        ftp = FTP(self.ps3_lan_ip, timeout=self.ftp_timeout)
+        ftp.set_pasv=self.ftp_pasv_mode
+        ftp.login(user='', passwd='')
+        ftp.voidcmd('TYPE I')
+        return ftp
+
+class GameListData:
     import json
     from shutil import copyfile
 
@@ -129,6 +138,47 @@ class GameListDataFile:
             game_list_data_bak_json = json.load(f)
     except Exception as e:
         print('ERROR: could not parse ' + GAME_LIST_DATA_BAK_PATH + ' to ' + game_list_data_bak_json)
+
+
+    def duplicate_title_checker(self, title):
+        import re
+        # check for duplicates of the same title
+        dup_list = []
+        for _platform in self.game_list_data_json:
+            for game_json in self.game_list_data_json[_platform]:
+                dup_match = re.search('^' + title + '\s(\()\d{1,3}?(\))$', game_json['title'])
+                if title == game_json['title'] or dup_match:
+                    dup_list.append(game_json['title'].encode('utf-8').strip())
+        # if there they are the same, append suffix ' (1)'
+        if len(dup_list) == 1 and dup_list[0] == title:
+            title = title + ' (1)'
+        # if more than one we need to figure out what suffix to append
+        elif len(dup_list) > 1:
+            new_title = ''
+            curr_dup_number = 1
+            for dup in dup_list:
+                # a dup_title must have a '(#)' pattern
+                dup_match = re.search('(?<=\()\d{1,3}?(?=\))', dup)
+                if dup_match is not None:
+                    new_number = dup_match.group()
+                    pre_string = str(dup).replace('(' + new_number + ')', '')
+                    # title should match the pre_string w/o '(#)' pattern
+                    if title == pre_string.strip() and new_number > curr_dup_number:
+                        curr_dup_number += 1
+                        suf_string = '(' + str(curr_dup_number) + ')'
+                        new_title = pre_string + suf_string
+            title = new_title
+            # if there was no '(#)' pattern duplicates
+            if new_title == '':
+                for dup in dup_list:
+                    if title == dup:
+                        # make the first duplicate
+                        title = title + ' (1)'
+                        break
+
+        title = title.replace('  ', ' ')
+        title = title.strip().encode('utf-8')
+        return title
 
 class GlobalVar:
     file_extensions = ('.BIN',
