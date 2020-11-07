@@ -101,7 +101,7 @@ class Main:
         self.images_function_button = []
         self.images_function_button.append(PhotoImage(self.small_button_maker('Build', font='arial.ttf', x=3, y=0)))
         self.images_function_button.append(PhotoImage(self.small_button_maker('Add', font='arial.ttf', x=3, y=0)))
-        self.images_function_button.append(PhotoImage(self.small_button_maker('Remove', font='arial.ttf', x=-3, y=0)))
+        self.images_function_button.append(PhotoImage(self.small_button_maker('Save', font='arial.ttf', x=3, y=0)))
         # self.images_function_button.append(PhotoImage(self.small_button_maker('Quit', font='arial.ttf', x=3, y=0)))
         # self.images_function_button.append(PhotoImage(self.small_button_maker('Change', font='arial.ttf', x=-3, y=0)))
 
@@ -126,8 +126,6 @@ class Main:
         self.button_PS3 	 = None
 
         self.build_button 	 = None
-        self.add_button 	 = None
-
         self.fetch_button    = None
         self.refresh_button	 = None
 
@@ -139,14 +137,13 @@ class Main:
         self.USB_BUTTON_TOOLTIP_MSG = "Toggle USB port (0-3)"
 
         self.BUILD_BUTTON_TOOLTIP_MSG = "Save & Build pkg"
-        self.ADD_BUTTON_TOOLTIP_MSG = "Add game & save data"
-        self.REMOVE_BUTTON_TOOLTIP_MSG = "Remove game & remove data"
-
-        self.FETCH_BUTTON_TOOLTIP_MSG = "Fetch gamelist and pictures over FTP"
+        self.SAVE_BUTTON_TOOLTIP_MSG = "Save data"
+        self.FETCH_BUTTON_TOOLTIP_MSG = "Fetch gamelist and images over FTP"
         self.REFRESH_BUTTON_TOOLTIP_MSG = "Refresh gamelist from disk"
-        self.ICON0_TOOLTIP_MSG = "Click to change ICON0"
-        self.PIC0_TOOLTIP_MSG = "Click to change  PIC0"
-        self.PIC1_TOOLTIP_MSG = "Click to change  PIC1"
+
+        self.ICON0_TOOLTIP_MSG = "Click to replace ICON0"
+        self.PIC0_TOOLTIP_MSG = "Click to replace  PIC0"
+        self.PIC1_TOOLTIP_MSG = "Click to replace  PIC1"
 
         # init definitions
         self.init_wcm_work_dir()
@@ -538,20 +535,11 @@ class Main:
                                    command=self.on_build_button,
                                    bg="#FBFCFB")
 
-
-        self.add_button = Button(main,
-                                 image=self.images_function_button[1],
-                                 borderwidth=0,
-                                 command=self.save_work_dir,
-                                 bg="#FBFCFB")
-
-        self.remove_button = Button(main,
+        self.save_button = Button(main,
                                   image=self.images_function_button[2],
                                   borderwidth=0,
-                                  command=self.validate_fields,
+                                  command=self.on_save_button,
                                   bg="#FBFCFB")
-
-
 
         # ftp list buttons
         self.fetch_button = Button(main,
@@ -571,8 +559,7 @@ class Main:
         CreateToolTip(self.button_USB, self.USB_BUTTON_TOOLTIP_MSG)
 
         CreateToolTip(self.build_button, self.BUILD_BUTTON_TOOLTIP_MSG)
-        CreateToolTip(self.add_button, self.ADD_BUTTON_TOOLTIP_MSG)
-        CreateToolTip(self.remove_button, self.REMOVE_BUTTON_TOOLTIP_MSG)
+        CreateToolTip(self.save_button, self.SAVE_BUTTON_TOOLTIP_MSG)
 
         CreateToolTip(self.fetch_button, self.FETCH_BUTTON_TOOLTIP_MSG)
         CreateToolTip(self.refresh_button, self.REFRESH_BUTTON_TOOLTIP_MSG)
@@ -641,17 +628,13 @@ class Main:
             x=int((self.text_box_spacing + self.main_offset_x_pos + 0 * 85) * scaling),
             y=int((self.iso_path_text_y_pos + 40) * scaling))
 
-        # self.add_button.place(
-        #     x=int((self.text_box_spacing + self.main_offset_x_pos + 1 * 85) * scaling),
-        #     y=int((self.iso_path_text_y_pos + 40) * scaling))
-
-        # self.remove_button.place(
-        #     x=int((self.text_box_spacing + self.main_offset_x_pos + 2 * 85) * scaling),
-        #     y=int((self.iso_path_text_y_pos + 40) * scaling))
-
         self.fetch_button.place(
             x=int((self.main_offset_x_pos) * scaling),
             y=int((self.main_offset_y_pos + 855) * scaling))
+
+        self.save_button.place(
+            x=int((self.text_box_spacing + self.main_offset_x_pos + 1 * 85) * scaling),
+            y=int((self.iso_path_text_y_pos + 40) * scaling))
 
         self.refresh_button.place(
             x=int((self.main_offset_x_pos + 80) * scaling),
@@ -941,6 +924,11 @@ class Main:
             self.update_iso_path_entry_field(current_iso_path)
             self.drive_system_path_array[1] = system_choice
 
+
+    def on_save_button(self):
+        self.save_entry_to_game_list()
+        self.save_work_dir()
+
     # Dynamic update of the pkg path for showing fetched images
     def update_game_build_path(self):
         # ask gamelist to return selected path
@@ -1166,6 +1154,35 @@ class Main:
         else:
             return False
 
+    def save_entry_to_game_list(self):
+        # if filepath exist, remove game from json game list
+        platform_key = self.entry_field_platform.get() + '_games'
+        if self.entry_field_platform.get() in {'GAMES', 'GAMEZ'}:
+            path = '/'.join(self.entry_field_iso_path.get().split('/')[:-1])
+            GameListData.game_list_data_json[platform_key] = [x for x in GameListData.game_list_data_json[platform_key] if '/'.join(x['path'].split('/')[:-1]) != path]
+        else:
+            path = self.entry_field_iso_path.get()
+            GameListData.game_list_data_json[platform_key] = [x for x in GameListData.game_list_data_json[platform_key] if x['path'] != path]
+
+
+        # dup check title against list and update the title
+        title = GameListData().duplicate_title_checker(self.entry_field_title.get())
+        self.entry_field_title.delete(0, END)
+        self.entry_field_title.insert(0, title)
+
+        # add new data to the game list
+        GameListData.game_list_data_json[platform_key].append(self.entry_fields_to_json())
+
+        # update the json game list file
+        with open(GameListData.GAME_LIST_DATA_PATH, 'w') as newFile:
+            json_text = json.dumps(GameListData.game_list_data_json, indent=4, separators=(",", ":"))
+            newFile.write(json_text)
+
+        self.on_game_list_refresh()
+
+
+
+
     def copytree(self, src, dst, symlinks=False, ignore=None):
         if not os.path.exists(dst):
             os.makedirs(dst)
@@ -1358,16 +1375,11 @@ class Main:
         try:
             with open(os.path.join(AppPaths.util_resources, 'pkg.json.BAK')) as f:
                 json_data = json.load(f)
-
-            # if use_w_title_id from config, swap first letter of title_id to 'W'
-            if FtpSettings.use_w_title_id:
-                json_data['title_id'] = 'W' + str(self.entry_field_title_id.get())[1:]
-            else:
-                json_data['title_id'] = self.entry_field_title_id.get()
-
             json_data['title'] = str(self.entry_field_title.get())
-            json_data['content_id'] = 'UP0001-' + json_data['title_id'] + '_00-0000000000000000'
-            json_data['iso_filepath'] = str(self.entry_field_iso_path.get())
+            json_data['title_id'] = self.entry_field_title_id.get()
+            json_data['filename'] = str(self.entry_field_filename.get())
+            json_data['platform'] = str(self.entry_field_platform.get())
+            json_data['path'] = str(self.entry_field_iso_path.get())
         except ValueError as e:
             print("ERROR: File write error or 'PKGLAUNCH'/title-_d not found.")
             print(e.message)
