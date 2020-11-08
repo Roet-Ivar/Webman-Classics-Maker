@@ -311,18 +311,9 @@ class FtpGameList():
 
 
             # save data to game build folder here
-            if title_id is not None and title_id is not '':
-                tmp_filename = new_game_filename
-                # removes the file extension from tmp_filename
-                for file_ext in GlobalVar.file_extensions:
-                    if new_game_filename.upper().endswith(file_ext):
-                        tmp_filename = new_game_filename[0:len(new_game_filename)-len(file_ext)]
-                        break
-                game_folder_name = tmp_filename.replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
-                game_build_dir = os.path.join(AppPaths.builds, game_folder_name)
-
-                # save images to game work folders
-                image_saver(self.ftp, new_game_platform_path, new_game_platform, game_build_dir, [icon0, pic0, pic1, pic2, at3, pam])
+            game_build_dir = AppPaths().get_game_build_dir(title_id, new_game_filename)
+            # save images to game work folders
+            image_saver(self.ftp, new_game_platform_path, new_game_platform, game_build_dir, [icon0, pic0, pic1, pic2, at3, pam])
 
             # reset game data for next iteration
             title = None
@@ -422,7 +413,7 @@ class FtpGameList():
                 print('DEBUG retrying -> retrlines(\'MLSD ' + folder_path + '\')')
                 print('Connection attempt to ' + self.ps3_lan_ip + ', timeout set to ' + str(self.ftp_timeout) + 's...\n')
                 ftp.close()
-                ftp = FTP(self.ps3_lan_ip, timeout=self.ftp_timeout)
+                ftp = ftp(self.ps3_lan_ip, timeout=self.ftp_timeout)
                 ftp.set_pasv = self.ftp_pasv_mode
                 ftp.login(user=self.ftp_user, passwd=self.ftp_password)
                 ftp.voidcmd('TYPE I')
@@ -838,7 +829,8 @@ def image_saver(ftp, platform_path, platform, game_build_dir, images):
     game_pkg_dir = os.path.join(game_work_dir, 'pkg')
     try:
         if os.path.isdir(game_pkg_dir):
-            shutil.rmtree(game_pkg_dir)
+            if 'webman-classics-maker' in game_pkg_dir.lower():
+                shutil.rmtree(game_pkg_dir)
             os.makedirs(game_pkg_dir)
     except Exception as e:
         print('ERROR: could not clean the folder: ' + game_work_dir + '\n' +

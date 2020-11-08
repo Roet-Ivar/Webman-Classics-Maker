@@ -52,6 +52,18 @@ class App:
     wcm_work_dir    = os.path.join(wcm_gui, 'work_dir')
 
     # variable game work dir
+    def get_game_build_dir(self, title_id, filename):
+        if title_id is not None and title_id is not '':
+            tmp_filename = filename
+            # removes the file extension from tmp_filename
+            for file_ext in GlobalVar.file_extensions:
+                if filename.upper().endswith(file_ext):
+                    tmp_filename = filename[0:len(filename)-len(file_ext)]
+                    break
+            game_folder_name = tmp_filename.replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
+            game_build_dir = os.path.join(App.builds, game_folder_name)
+            return game_build_dir
+
     game_work_dir   = ''
 
 class Image:

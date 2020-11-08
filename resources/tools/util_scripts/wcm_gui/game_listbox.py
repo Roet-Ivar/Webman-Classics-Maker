@@ -233,7 +233,8 @@ class Gamelist():
             # remove the game build folder too
             if AppPaths.game_work_dir != os.path.join(AppPaths.wcm_gui, 'work_dir'):
                 if os.path.isdir(game_folder_path):
-                    shutil.rmtree(game_folder_path)
+                    if 'webman-classics-maker' in game_folder_path:
+                        shutil.rmtree(game_folder_path)
                 # clear entry_fields
                 self.clear_entries_and_path()
                 # set cursor

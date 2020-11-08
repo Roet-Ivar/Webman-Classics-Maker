@@ -15,6 +15,7 @@ from global_paths import Image as ImagePaths
 from global_paths import GlobalVar
 from global_paths import FtpSettings
 from global_paths import GameListData
+from global_paths import GlobalDef
 
 sys.path.append(AppPaths.settings)
 
@@ -162,16 +163,18 @@ class Main:
     def init_wcm_work_dir(self):
         # clean and init wcm_work_dir in startup
         if os.path.isdir(AppPaths.wcm_work_dir):
-            shutil.rmtree(AppPaths.wcm_work_dir)
+            if 'webman-classics-maker' in AppPaths.wcm_work_dir.lower():
+                shutil.rmtree(AppPaths.wcm_work_dir)
             os.makedirs(os.path.join(AppPaths.wcm_work_dir, 'pkg'))
 
             self.init_pkg_images()
 
     def init_pkg_build_dir(self):
         if os.path.isdir(AppPaths.pkg):
-            shutil.rmtree(AppPaths.pkg)
+            if 'webman-classics-maker' in AppPaths.pkg:
+                shutil.rmtree(AppPaths.pkg)
             os.makedirs(AppPaths.pkg)
-        self.copytree(os.path.join(AppPaths.util_resources, 'pkg_dir_bak'), os.path.join(AppPaths.resources, 'pkg'))
+        GlobalDef().copytree(os.path.join(AppPaths.util_resources, 'pkg_dir_bak'), os.path.join(AppPaths.resources, 'pkg'))
 
     def get_ftp_ip_from_config(self):
         return FtpSettings.ps3_lan_ip
@@ -1155,7 +1158,15 @@ class Main:
             return False
 
     def save_entry_to_game_list(self):
-        # if filepath exist, remove game from json game list
+        current_work_dir = AppPaths.game_work_dir
+        # save all changes to the current work_dir
+        if self.save_work_dir():
+            if not os.path.exists(self.pkg_dir):
+                os.makedirs(self.pkg_dir)
+            if not os.path.exists(AppPaths.game_work_dir):
+                os.makedirs(current_work_dir)
+
+        # if filepath already exist, remove game from json game list so we can update it
         platform_key = self.entry_field_platform.get() + '_games'
         if self.entry_field_platform.get() in {'GAMES', 'GAMEZ'}:
             path = '/'.join(self.entry_field_iso_path.get().split('/')[:-1])
@@ -1164,6 +1175,19 @@ class Main:
             path = self.entry_field_iso_path.get()
             GameListData.game_list_data_json[platform_key] = [x for x in GameListData.game_list_data_json[platform_key] if x['path'] != path]
 
+        # update path to game work_dir
+        AppPaths.game_work_dir = os.path.join(AppPaths().get_game_build_dir(self.entry_field_title_id.get(), self.entry_field_filename.get()), 'work_dir')
+        new_game_build_path = os.path.join(AppPaths.game_work_dir, '..')
+        if not os.path.exists(new_game_build_path):
+            os.mkdir(new_game_build_path)
+
+        if current_work_dir != AppPaths.game_work_dir:
+            # copy old work_dir to new work_dir
+            GlobalDef().copytree(os.path.join(current_work_dir, ''), AppPaths.game_work_dir)
+
+            # remove old folder build folder
+            if 'webman-classics-maker' in current_work_dir.lower():
+                shutil.rmtree(os.path.join(current_work_dir, ''))
 
         # dup check title against list and update the title
         title = GameListData().duplicate_title_checker(self.entry_field_title.get())
@@ -1171,43 +1195,21 @@ class Main:
         self.entry_field_title.insert(0, title)
 
         # add new data to the game list
-        GameListData.game_list_data_json[platform_key].append(self.entry_fields_to_json())
+        new_data_json = self.entry_fields_to_json()
+        GameListData.game_list_data_json[platform_key].append(new_data_json)
 
         # update the json game list file
         with open(GameListData.GAME_LIST_DATA_PATH, 'w') as newFile:
             json_text = json.dumps(GameListData.game_list_data_json, indent=4, separators=(",", ":"))
             newFile.write(json_text)
 
+        # TODO: change Appdata.work_dir
+        AppPaths.game_work_dir = os.path.join(AppPaths().get_game_build_dir(self.entry_field_title_id.get(), self.entry_field_filename.get()), 'work_dir')
+
+
+        # refresh the GUI list
         self.on_game_list_refresh()
 
-
-
-
-    def copytree(self, src, dst, symlinks=False, ignore=None):
-        if not os.path.exists(dst):
-            os.makedirs(dst)
-            shutil.copystat(src, dst)
-        lst = os.listdir(src)
-        if ignore:
-            excl = ignore(src, lst)
-            lst = [x for x in lst if x not in excl]
-        for item in lst:
-            s = os.path.join(src, item)
-            d = os.path.join(dst, item)
-            if symlinks and os.path.islink(s):
-                if os.path.lexists(d):
-                    os.remove(d)
-                os.symlink(os.readlink(s), d)
-                try:
-                    st = os.lstat(s)
-                    mode = stat.S_IMODE(st.st_mode)
-                    os.lchmod(d, mode)
-                except:
-                    pass  # lchmod not available
-            elif os.path.isdir(s):
-                self.copytree(s, d, symlinks, ignore)
-            else:
-                shutil.copy2(s, d)
 
     def on_build_button(self):
         self.init_pkg_build_dir()
@@ -1232,7 +1234,7 @@ class Main:
                         if donor_platform:
                             platform = donor_platform[0][1]
 
-                # plaform is used to determine which ICON0 should be used
+                # platform is used to determine which ICON0 should be used
                 default_img_path = os.path.join(AppPaths.resources, 'images', 'pkg', 'default')
                 if not os.path.isfile(os.path.join(default_img_path, platform, 'ICON0.PNG')):
                     platform = ''
@@ -1254,7 +1256,7 @@ class Main:
                     os.makedirs(game_pkg_dir)
 
                     # saving the build content in the game build folder
-                    self.copytree(AppPaths.pkg, game_pkg_dir)
+                    GlobalDef().copytree(AppPaths.pkg, game_pkg_dir)
 
                 if os.path.isdir(AppPaths.game_work_dir):
                     import tkMessageBox
