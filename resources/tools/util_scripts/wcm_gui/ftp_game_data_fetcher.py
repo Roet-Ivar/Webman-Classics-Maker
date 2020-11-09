@@ -312,8 +312,10 @@ class FtpGameList():
 
             # save data to game build folder here
             game_build_dir = AppPaths().get_game_build_dir(title_id, new_game_filename)
-            # save images to game work folders
-            image_saver(self.ftp, new_game_platform_path, new_game_platform, game_build_dir, [icon0, pic0, pic1, pic2, at3, pam])
+
+            if game_build_dir is not None:
+                # save images to game work folders
+                image_saver(self.ftp, new_game_platform_path, new_game_platform, game_build_dir, [icon0, pic0, pic1, pic2, at3, pam])
 
             # reset game data for next iteration
             title = None
@@ -331,6 +333,7 @@ class FtpGameList():
         pic2 = None
         at3 = None
         pam = None
+        platform = None
 
         game_filepath = os.path.join(platform_path, game_filename)
 
@@ -359,33 +362,33 @@ class FtpGameList():
 
         try:
             # if no offset
-            title_id, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform, self.chunk_size_kb, 0, self.game_count, self.ftp_retry_count)
+            title_id, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform, FtpSettings.ftp_chunk_size_kb, 0, self.game_count, FtpSettings.ftp_retry_count)
 
             # make another fetch with rest offset for PSP images
             if platform == 'PSPISO':
-                not_used, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform, self.chunk_size_kb, self.ftp_psp_png_offset_kb, self.game_count, self.ftp_retry_count)
+                not_used, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform, FtpSettings.ftp_chunk_size_kb, FtpSettings.ftp_psp_png_offset_kb, self.game_count, FtpSettings.ftp_retry_count)
 
             # PS3 guitar hero games needs a larger chunk to find the PIC1
             elif platform == 'PS3ISO' and 'guitar' in game_filename.lower():
-                not_used, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform, 6000, 0, self.game_count, self.ftp_retry_count)
+                not_used, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform, 6000, 0, self.game_count, FtpSettings.ftp_retry_count)
 
         # retry connection
         except Exception as e:
             print('DEBUG Error: ' + e.message)
-            print('Connection timed out, re-connecting in ' + str(self.ftp_timeout) + 's...\n')
+            print('Connection timed out, re-connecting in ' + str(FtpSettings.ftp_timeout) + 's...\n')
 
             self.ftp = FtpSettings().get_ftp()
             self.data_chunk = FTPDataHandler(self.ftp, self.total_lines_count)
 
-            title_id, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform, self.chunk_size_kb, 0, self.game_count, self.ftp_retry_count)
+            title_id, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform, FtpSettings.ftp_chunk_size_kb, 0, self.game_count, FtpSettings.ftp_retry_count)
 
             # make another fetch with rest offset for PSP images
             if platform == 'PSPISO':
-                title_id, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform, self.chunk_size_kb, self.ftp_psp_png_offset_kb, self.game_count, self.ftp_retry_count)
+                title_id, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform, FtpSettings.ftp_chunk_size_kb, FtpSettings.ftp_psp_png_offset_kb, self.game_count, FtpSettings.ftp_retry_count)
 
             # PS3 guitar hero games needs a larger chunk to find the PIC1
             elif platform == 'PS3ISO' and 'guitar' in game_filename.lower():
-                not_used, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform, 6000, 0, self.game_count, self.ftp_retry_count)
+                not_used, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform, 6000, 0, self.game_count, FtpSettings.ftp_retry_count)
 
         return title_id, icon0, pic0, pic1, pic2, at3, pam
 
@@ -393,13 +396,14 @@ class FtpGameList():
         print('DEBUG adding: ' + folder_path + ' for scanning')
         depth = len(folder_path.split('/')) -2
         extensions = GlobalVar.file_extensions
+        ftp_folder_depth = FtpSettings.ftp_folder_depth
 
         # only NTFS extensions are valid in this folder
         if 'tmp/wmtmp/' in folder_path:
             extensions = tuple([i for i in list(extensions) if 'NTFS' in i])
 
         elif 'GAMES/' in folder_path:
-            self.ftp_folder_depth = 4
+            ftp_folder_depth = 4
             extensions = ('.SFO')
 
         dirs = []
@@ -411,13 +415,8 @@ class FtpGameList():
 
             try:
                 print('DEBUG retrying -> retrlines(\'MLSD ' + folder_path + '\')')
-                print('Connection attempt to ' + self.ps3_lan_ip + ', timeout set to ' + str(self.ftp_timeout) + 's...\n')
-                ftp.close()
-                ftp = ftp(self.ps3_lan_ip, timeout=self.ftp_timeout)
-                ftp.set_pasv = self.ftp_pasv_mode
-                ftp.login(user=self.ftp_user, passwd=self.ftp_password)
-                ftp.voidcmd('TYPE I')
-                ftp.retrlines('MLSD ' + folder_path, stuff.append)
+                self.ftp = FtpSettings().get_ftp()
+                self.ftp.retrlines('MLSD ' + folder_path, stuff.append)
 
             except Exception as e:
                 print('DEBUG retrlines error: ' + e.message + '\n during retry of command retrlines(\'MLSD ' + folder_path + '\')')
@@ -447,7 +446,7 @@ class FtpGameList():
                     elif filename.upper().endswith(extensions):
                         files.append(os.path.join(folder_path + split_item[len(split_item) - 1].strip()))
 
-        if len(dirs) > 0 and depth < self.ftp_folder_depth:
+        if len(dirs) > 0 and depth < ftp_folder_depth:
             for subdir in sorted(dirs):
                 current_dir = os.path.join(folder_path, subdir + '/')
                 self.ftp_walk(ftp, current_dir, files)

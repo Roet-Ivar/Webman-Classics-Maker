@@ -63,6 +63,8 @@ class App:
             game_folder_name = tmp_filename.replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
             game_build_dir = os.path.join(App.builds, game_folder_name)
             return game_build_dir
+        else:
+            return None
 
     game_work_dir   = ''
 
