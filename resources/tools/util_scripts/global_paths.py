@@ -136,16 +136,6 @@ class GameListData:
     game_list_data_json = None
     game_list_data_bak_json = None
 
-    # makes sure there is a json_game_list file
-    if os.path.isfile(GAME_LIST_DATA_PATH) is False:
-        copyfile(GAME_LIST_DATA_BAK_PATH, GAME_LIST_DATA_PATH)
-    try:
-        with open(GAME_LIST_DATA_PATH) as f:
-            game_list_data_json = json.load(f)
-    except Exception as e:
-        print("""Error in 'game_list_data.json' contains incorrect json-syntax. Either remove it or find the error using json lint""")
-        print("Details: " + e.message)
-
     # open a copy of the current gamelist from disk
     try:
         with open(GAME_LIST_DATA_BAK_PATH) as f:
@@ -153,6 +143,21 @@ class GameListData:
     except Exception as e:
         print('ERROR: could not parse ' + GAME_LIST_DATA_BAK_PATH + ' to ' + game_list_data_bak_json)
 
+
+    def get_game_list(self):
+        import json
+        import shutil
+        # makes sure there is a json_game_list file
+        if not os.path.isfile(self.GAME_LIST_DATA_PATH):
+            shutil.copyfile(self.GAME_LIST_DATA_BAK_PATH, self.GAME_LIST_DATA_PATH)
+
+        try:
+            with open(self.GAME_LIST_DATA_PATH) as f:
+                self.game_list_data_json = json.load(f)
+        except Exception as e:
+            print("""Error in 'game_list_data.json' contains incorrect json-syntax. Either remove it or find the error using json lint""")
+            print("Details: " + e.message)
+        return self.game_list_data_json
 
     def duplicate_title_checker(self, title):
         import re

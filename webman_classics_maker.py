@@ -171,7 +171,7 @@ class Main:
 
     def init_pkg_build_dir(self):
         if os.path.isdir(AppPaths.pkg):
-            if 'webman-classics-maker' in AppPaths.pkg:
+            if 'webman-classics-maker' in AppPaths.pkg.lower():
                 shutil.rmtree(AppPaths.pkg)
             os.makedirs(AppPaths.pkg)
         GlobalDef().copytree(os.path.join(AppPaths.util_resources, 'pkg_dir_bak'), os.path.join(AppPaths.resources, 'pkg'))
@@ -929,8 +929,8 @@ class Main:
 
 
     def on_save_button(self):
-        self.save_entry_to_game_list()
-        self.save_work_dir()
+        if self.validate_fields():
+            self.save_entry_to_game_list()
 
     # Dynamic update of the pkg path for showing fetched images
     def update_game_build_path(self):
@@ -1158,6 +1158,7 @@ class Main:
             return False
 
     def save_entry_to_game_list(self):
+        json_game_list = GameListData().get_game_list()
         current_work_dir = AppPaths.game_work_dir
         # save all changes to the current work_dir
         if self.save_work_dir():
@@ -1170,18 +1171,25 @@ class Main:
         platform_key = self.entry_field_platform.get() + '_games'
         if self.entry_field_platform.get() in {'GAMES', 'GAMEZ'}:
             path = '/'.join(self.entry_field_iso_path.get().split('/')[:-1])
-            GameListData.game_list_data_json[platform_key] = [x for x in GameListData.game_list_data_json[platform_key] if '/'.join(x['path'].split('/')[:-1]) != path]
+            test_path1 = '/'.join(json_game_list[platform_key][0]['path'].split('/')[:-1])
+            json_game_list[platform_key] = [x for x in json_game_list[platform_key] if '/'.join(x['path'].split('/')[:-1]) != path]
+            print("test_path1: " + test_path1)
         else:
             path = self.entry_field_iso_path.get()
-            GameListData.game_list_data_json[platform_key] = [x for x in GameListData.game_list_data_json[platform_key] if x['path'] != path]
+            test_path2 = json_game_list[platform_key][0]['path'] + json_game_list[platform_key][0]['filename']
+            print("test_path2: " + test_path2)
+            for test in json_game_list[platform_key]:
+                if 'kingdom' in test['filename'].lower():
+                    print(str(test['path'] +test['filename']))
+
+            json_game_list[platform_key] = [x for x in json_game_list[platform_key] if str(x['path'] + x['filename']) != path]
 
         # update path to game work_dir
         AppPaths.game_work_dir = os.path.join(AppPaths().get_game_build_dir(self.entry_field_title_id.get(), self.entry_field_filename.get()), 'work_dir')
-        new_game_build_path = os.path.join(AppPaths.game_work_dir, '..')
-        if not os.path.exists(new_game_build_path):
-            os.mkdir(new_game_build_path)
-
         if current_work_dir != AppPaths.game_work_dir:
+            new_game_build_path = os.path.join(AppPaths.game_work_dir, '..')
+            if not os.path.exists(new_game_build_path):
+                os.mkdir(new_game_build_path)
             # copy old work_dir to new work_dir
             GlobalDef().copytree(os.path.join(current_work_dir, ''), AppPaths.game_work_dir)
 
@@ -1195,15 +1203,17 @@ class Main:
         self.entry_field_title.insert(0, title)
 
         # add new data to the game list
-        new_data_json = self.entry_fields_to_json()
-        GameListData.game_list_data_json[platform_key].append(new_data_json)
+        new_data_json = self.entry_fields_to_json(os.path.join(AppPaths.util_resources, 'game_structure.json.BAK'))
+        json_game_list[platform_key].append(new_data_json)
 
         # update the json game list file
         with open(GameListData.GAME_LIST_DATA_PATH, 'w') as newFile:
-            json_text = json.dumps(GameListData.game_list_data_json, indent=4, separators=(",", ":"))
+            json_text = json.dumps(json_game_list, indent=4, separators=(",", ":"))
             newFile.write(json_text)
 
-        # TODO: change Appdata.work_dir
+            # GameListData.game_list_data_json = GameListData().get_game_list()
+
+        # change Appdata.work_dir
         AppPaths.game_work_dir = os.path.join(AppPaths().get_game_build_dir(self.entry_field_title_id.get(), self.entry_field_filename.get()), 'work_dir')
 
 
@@ -1371,25 +1381,32 @@ class Main:
             self.list_filter_platform = self.platformdropdown.get()
         self.create_list_combo_box(self.list_filter_drive, self.list_filter_platform)
 
-    def entry_fields_to_json(self):
+    def entry_fields_to_json(self, json_data_path):
         json_data = None
+        if os.path.isfile(json_data_path):
+            try:
+                with open(json_data_path) as f:
+                    json_data = json.load(f)
+                    f.close()
+            except ValueError as e:
+                print("ERROR: File write error.")
+                print(e.message)
 
-        try:
-            with open(os.path.join(AppPaths.util_resources, 'pkg.json.BAK')) as f:
-                json_data = json.load(f)
-            json_data['title'] = str(self.entry_field_title.get())
-            json_data['title_id'] = self.entry_field_title_id.get()
-            json_data['filename'] = str(self.entry_field_filename.get())
-            json_data['platform'] = str(self.entry_field_platform.get())
-            json_data['path'] = str(self.entry_field_iso_path.get())
-        except ValueError as e:
-            print("ERROR: File write error or 'PKGLAUNCH'/title-_d not found.")
-            print(e.message)
+        json_data['title'] = str(self.entry_field_title.get())
+        json_data['title_id'] = self.entry_field_title_id.get()
+        json_data['filename'] = str(self.entry_field_filename.get())
+        json_data['platform'] = str(self.entry_field_platform.get())
+        if str(self.entry_field_platform.get()) in {'GAMES', 'GAMEZ'}:
+            print('path1: ' + str(self.entry_field_iso_path.get()).replace(str(self.entry_field_filename.get()), '').replace('//', '/'))
+            json_data['path'] = str(self.entry_field_iso_path.get()).replace(str(self.entry_field_filename.get()), '').replace('//', '/')
+        else:
+            print('path2: ' + str(self.entry_field_iso_path.get()).replace(str(self.entry_field_filename.get()), ''))
+            json_data['path'] = str(self.entry_field_iso_path.get()).replace(str(self.entry_field_filename.get()), '')
 
         return json_data
 
     def save_pkg_info_to_json(self):
-            json_data = self.entry_fields_to_json()
+            json_data = self.entry_fields_to_json(os.path.join(AppPaths.util_resources, 'pkg.json.BAK'))
             newFile = open(os.path.join(AppPaths.game_work_dir, 'pkg.json'), "w")
             json_text = json.dumps(json_data, indent=4, separators=(",", ":"))
             newFile.write(json_text)

@@ -8,6 +8,7 @@ from global_paths import GameListData
 
 class Gamelist():
     def __init__(self, drive, platform):
+        GameListData.game_list_data_json = GameListData().get_game_list()
         self.json_game_list_data = GameListData.game_list_data_json
 
         if drive == 'USB(*)':

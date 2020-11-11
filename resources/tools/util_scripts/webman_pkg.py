@@ -840,14 +840,16 @@ class Webman_pkg:
 		contentid = str(json_data['content_id'])
 		
 		title_id = str(json_data['title_id'])
-		filepath = str(json_data['iso_filepath'])
-		filepath_arr = [x for x in filepath.split('/')]
+		filepath = str(json_data['path'])
+		filename = str(json_data['filename'])
+		# filepath_arr = [x for x in filepath.split('/')]
+
 		
 		pkg_build_script='webman_pkg.py'
 		pkg_flag = '--contentid'
 
 		pkg_dir_path = os.path.join(AppPaths.game_work_dir, 'pkg') + '/'
-		tmp_filename = filepath_arr[len(filepath_arr) -1]
+		tmp_filename = filename
 		# removes the file extension from tmp_filename
 		for file_ext in GlobalVar.file_extensions:
 			if tmp_filename.upper().endswith(file_ext):
