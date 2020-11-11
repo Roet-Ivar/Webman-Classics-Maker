@@ -1393,14 +1393,18 @@ class Main:
                 print(e.message)
 
         json_data['title'] = str(self.entry_field_title.get())
-        json_data['title_id'] = self.entry_field_title_id.get()
+
+        if FtpSettings.use_w_title_id:
+            json_data['title_id'] = 'W' + self.entry_field_title_id.get()[1:]
+        else:
+            json_data['title_id'] = self.entry_field_title_id.get()
+
+        json_data['content_id'] = 'UP0001-' + str(json_data['title_id']) + '_00-0000000000000000'
         json_data['filename'] = str(self.entry_field_filename.get())
         json_data['platform'] = str(self.entry_field_platform.get())
         if str(self.entry_field_platform.get()) in {'GAMES', 'GAMEZ'}:
-            print('path1: ' + str(self.entry_field_iso_path.get()).replace(str(self.entry_field_filename.get()), '').replace('//', '/'))
             json_data['path'] = str(self.entry_field_iso_path.get()).replace(str(self.entry_field_filename.get()), '').replace('//', '/')
         else:
-            print('path2: ' + str(self.entry_field_iso_path.get()).replace(str(self.entry_field_filename.get()), ''))
             json_data['path'] = str(self.entry_field_iso_path.get()).replace(str(self.entry_field_filename.get()), '')
 
         return json_data

@@ -9,13 +9,12 @@ class Elf_replace:
 
 		# load it
 		with open(os.path.join(AppPaths.util_resources, 'EBOOT.ELF.BAK'), 'rb') as f:
-			file = f.read()
+			eboot_elf_file = f.read()
 			
 			try:
-				file = file.replace('PKGLAUNCH', str(json_data['title_id']))
-
+				eboot_elf_file = eboot_elf_file.replace('PKGLAUNCH', str(json_data['title_id']))
 				newFile = open(os.path.join(AppPaths.scetool, 'EBOOT.ELF'), 'wb')
-				newFileByteArray = bytearray(file)
+				newFileByteArray = bytearray(eboot_elf_file)
 				newFile.write(newFileByteArray)
 
 				print('[2/5] Execution of \'content_id_elf_replace.py\':  DONE')
