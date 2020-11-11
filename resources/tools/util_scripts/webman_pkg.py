@@ -910,6 +910,6 @@ class Webman_pkg:
 				print('-----------------------------------------------------')
 				raise Exception('pkg_name: ' + pkg_name +
 								',\nbuild_dir_path: ' + build_dir_path +
-								',\njson_data[\'iso_filepath\']: ' + filepath)
+								',\njson_data[\'path\']: ' + filepath)
 				usage()
 				sys.exit(2)
