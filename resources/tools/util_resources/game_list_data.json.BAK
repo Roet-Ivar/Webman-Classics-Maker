@@ -1,7 +1,8 @@
 {
-    "psx_games":[],
-    "ps2_games":[],
-    "ps3_games":[],
-    "psp_games":[],
-	"ntfs_games":[]
+    "PSXISO_games":[],
+    "PS2ISO_games":[],
+    "PS3ISO_games":[],
+    "PSPISO_games":[],
+	"NTFS_games":[],
+	"GAMES_games":[]
 }

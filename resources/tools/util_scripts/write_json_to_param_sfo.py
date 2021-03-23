@@ -33,7 +33,8 @@ class Write_param_sfo():
 				print('DEBUG: ' + str(file[start_index_title:1025]))
 
 				# write to generated files
-				newFile = open(os.path.join(AppPaths.pkg, 'PARAM.SFO'), 'wb')
+				# newFile = open(os.path.join(AppPaths.pkg, 'PARAM.SFO'), 'wb')
+				newFile = open(os.path.join(AppPaths.game_work_dir, 'pkg', 'PARAM.SFO'), 'wb')
 				newFileByteArray = bytearray(file)
 				newFile.write(newFileByteArray)
 

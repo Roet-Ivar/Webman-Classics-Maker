@@ -1,1 +1,0 @@
-GET /play.ps3/dev_hdd0/PS2ISO/Game_Name.ISO HTTP/1.0

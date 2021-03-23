@@ -1,7 +1,8 @@
 
 from __future__ import with_statement
-import struct, sys, os, shutil, json
+import struct, sys, os, shutil, json, re
 from global_paths import App as AppPaths
+from global_paths import GlobalVar
 
 pkgcrypt_ver = 'py'
 
@@ -19,7 +20,7 @@ else:
 
 # if running the webman_classics_maker.exe from root
 if getattr(sys, 'frozen', False):
-	sys.path.append(os.path.join(os.path.dirname(sys.executable),'resources', 'tools', 'util_scripts', 'pkgcrypt', pkgcrypt_ver))
+	sys.path.append(os.path.join(AppPaths.util_scripts, 'pkgcrypt', pkgcrypt_ver))
 else:
 	# running webman_classics_maker.py from root
 	sys.path.append(os.path.join(AppPaths.pkgcrypt, pkgcrypt_ver))
@@ -579,6 +580,8 @@ def SHA1(data):
 pkgcrypt.register_sha1_callback(SHA1)
 	
 def getFiles(files, folder, original):
+	# in case pkg_dir_path contains [] we glob won't like it'
+	folder = re.sub('([\[\]])','[\\1]',folder)
 	oldfolder = folder
 	foundFiles = glob.glob( os.path.join(folder, '*') )
 	sortedList = []
@@ -836,17 +839,30 @@ class Webman_pkg:
 
 		contentid = str(json_data['content_id'])
 		
-		titleid = str(json_data['title_id'])
-		filepath = str(json_data['iso_filepath'])
-		filepath_arr = [x for x in filepath.split('/')]
+		title_id = str(json_data['title_id'])
+		filepath = str(json_data['path'])
+		filename = str(json_data['filename'])
+		# filepath_arr = [x for x in filepath.split('/')]
+
 		
 		pkg_build_script='webman_pkg.py'
-		pkg_flag='--contentid'
-		pkg_dir_path=AppPaths.pkg + '/'
-		
-		pkg_name = (filepath_arr[3][:-4]).replace(' ', '_') + '_(' + titleid + ')' + '.pkg'
-		# build_dir_path = os.path.join(AppPaths.builds, pkg_name.replace('.pkg', ''))
+		pkg_flag = '--contentid'
+
+		pkg_dir_path = os.path.join(AppPaths.game_work_dir, 'pkg') + '/'
+		tmp_filename = filename
+		# removes the file extension from tmp_filename
+		for file_ext in GlobalVar.file_extensions:
+			if tmp_filename.upper().endswith(file_ext):
+				tmp_filename = tmp_filename[0:len(tmp_filename)-len(file_ext)]
+				break
+		pkg_name = tmp_filename.replace(' ', '_') + '_(' + title_id.replace('-', '') + ')' + '.pkg'
 		build_dir_path = os.path.join(AppPaths.game_work_dir, '..')
+
+		print('DEBUG pkg_name: ' + pkg_name)
+		if os.path.isdir(build_dir_path):
+			print('DEBUG pkg_dir_path: ' + pkg_dir_path + ' is a path')
+		if os.path.isdir(build_dir_path):
+			print('DEBUG build_dir_path: ' + build_dir_path + ' is a path')
 
 		arg_list = [pkg_build_script, pkg_flag, contentid, pkg_dir_path, pkg_name]	
 		try:
@@ -880,7 +896,7 @@ class Webman_pkg:
 			elif len(args) == 2 and contentid != None:
 				pack(args[0], contentid, args[1])
 
-			if os.path.isfile(pkg_name) and os.path.isdir(build_dir_path):
+			if os.path.isdir(build_dir_path) and os.path.isfile(pkg_name):
 				if os.path.isfile(os.path.join(build_dir_path, pkg_name)):
 					os.remove(os.path.join(build_dir_path, pkg_name))
 				shutil.move(pkg_name, build_dir_path)
@@ -894,6 +910,6 @@ class Webman_pkg:
 				print('-----------------------------------------------------')
 				raise Exception('pkg_name: ' + pkg_name +
 								',\nbuild_dir_path: ' + build_dir_path +
-								',\njson_data[\'iso_filepath\']: ' + filepath)
+								',\njson_data[\'path\']: ' + filepath)
 				usage()
 				sys.exit(2)

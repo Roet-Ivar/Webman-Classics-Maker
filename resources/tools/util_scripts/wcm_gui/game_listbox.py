@@ -1,28 +1,22 @@
-from Tkinter import Frame, Scrollbar, Listbox, LEFT, RIGHT, Y, END, Label
-import json, os, sys
+from Tkinter import Frame, Scrollbar, Listbox, LEFT, RIGHT, Y, END, Label, Menu
+import json, os, sys, shutil
 from shutil import copyfile
 sys.path.append('..')
 from global_paths import App as AppPaths
 from global_paths import GlobalVar
+from global_paths import GameListData
 
 class Gamelist():
     def __init__(self, drive, platform):
-        # makes sure there is a json_game_list file
-        if os.path.isfile(os.path.join(AppPaths.application_path, 'game_list_data.json')) is False:
-            copyfile(os.path.join(AppPaths.util_resources, 'game_list_data.json.BAK'), os.path.join(AppPaths.application_path, 'game_list_data.json'))
-        try:
-            with open(os.path.join(AppPaths.application_path, 'game_list_data.json')) as f:
-                self.json_game_list_data = json.load(f)
-        except Exception as e:
-            print("""Error in 'game_list_data.json' contains incorrect json-syntax. Either remove it or find the error using json lint""")
-            print("Details: " + e.message)
+        GameListData.game_list_data_json = GameListData().get_game_list()
+        self.json_game_list_data = GameListData.game_list_data_json
 
         if drive == 'USB(*)':
             self.drive_to_show = '/dev_' + drive.lower().replace('(*)', '')
         else:
             self.drive_to_show = '/dev_' + drive.lower() + '/'
 
-        self.platform_to_show = platform.lower() + '_games'
+        self.platform_to_show = platform + '_games'
         self.WCM_BASE_PATH  = AppPaths.wcm_gui
         self.last_selection = (None, 0)
         self.list_of_items = []
@@ -31,6 +25,9 @@ class Gamelist():
         self.selected_title      = None
         self.selected_path       = None
         self.selected_filename   = None
+        self.drive_system_path_array = None
+
+        self.is_cleared = False
 
 
     def create_main_frame(self, entry_field_title_id, entry_field_title, entry_field_filename, entry_field_iso_path, entry_field_platform, drive_system_array):
@@ -44,11 +41,25 @@ class Gamelist():
         self.corrected_index = []
         self.main_frame = Frame()
 
+        self.popup_menu = Menu(self.main_frame, tearoff=0)
+
+        self.popup_menu.add_command(label="Delete",
+                                    command=self.delete_selected)
+        self.popup_menu.add_command(label="Rename",
+                                    command=self.rename_selected)
+        # self.popup_menu.add_command(label="Refetch",
+        #                             command=self.refetch)
+        # self.popup_menu.add_command(label="Select All",
+        #                             command=self.select_all)
+
+
+
 
         s = Scrollbar(self.main_frame)
         self._listbox = Listbox(self.main_frame, width=465)
         self._listbox.bind('<Enter>', self._bound_to_mousewheel)
         self._listbox.bind('<Leave>', self._unbound_to_mousewheel)
+        self._listbox.bind("<Button-3>", self.popup) # Button-2 on Aqua
 
         s.pack(side=RIGHT, fill=Y)
         self._listbox.pack(side=LEFT, fill=Y)
@@ -59,7 +70,7 @@ class Gamelist():
 
 
         # default filters
-        if 'all_games' == self.platform_to_show:
+        if 'ALL_games' == self.platform_to_show:
             # iterate all platforms
             for platform in self.json_game_list_data:
                 for list_game in self.json_game_list_data[platform]:
@@ -90,13 +101,14 @@ class Gamelist():
 
     def selection_poller(self):
         self.label.after(200, self.selection_poller)
+        self.new_selection = self._listbox.curselection()
         # cursor har been initiated
         if self._listbox.curselection() is not ():
-            new_selection = self._listbox.curselection()
-            if new_selection[0] is not self.last_selection[0]:
-                self.entry_fields_update(new_selection)
+            if self.new_selection[0] is not self.last_selection[0] or self.is_cleared:
+                self.entry_fields_update(self.new_selection)
+                self.is_cleared = False
+                self.last_selection = self.new_selection
 
-            self.last_selection = new_selection
 
     def entry_fields_update(self, new_selection):
         for platform in self.json_game_list_data:
@@ -188,22 +200,81 @@ class Gamelist():
     def _on_mousewheel(self, event):
         self._listbox.yview_scroll(int(-1*(event.delta/30)), "units")
 
+    def popup(self, event):
+        try:
+            self._listbox.selection_clear(0, END)
+            self._listbox.selection_set(self._listbox.nearest(event.y))
+            self._listbox.activate(self._listbox.nearest(event.y))
+        finally:
+            if self._listbox.get(self._listbox.curselection()[0]) is not '':
+                self.popup_menu.tk_popup(event.x_root + 43, event.y_root + 12, 0)
+                self.popup_menu.grab_release()
+                self.popup_menu.focus_set()
+
+    def delete_selected(self):
+        import tkMessageBox
+        game_folder_path = os.path.join(AppPaths.game_work_dir, '..')
+        response = tkMessageBox.askyesno('Delete game folder', 'Delete \'' + self.entry_field_title.get() + '\'?\n\nFolder path: ' + os.path.realpath(game_folder_path))
+        # yes
+        if response:
+            # remove game from visual game list
+            for i in self._listbox.curselection()[::-1]:
+                self._listbox.delete(i)
+                removed_index = i
+
+            # remove game from json game list
+            platform_key = self.entry_field_platform.get() + '_games'
+            self.json_game_list_data[platform_key] = [x for x in self.json_game_list_data[platform_key] if x['title'] != self.selected_title]
+
+            # update the json game list file
+            with open(GameListData.GAME_LIST_DATA_PATH, 'w') as newFile:
+                json_text = json.dumps(self.json_game_list_data, indent=4, separators=(",", ":"))
+                newFile.write(json_text)
+
+            # remove the game build folder too
+            if AppPaths.game_work_dir != os.path.join(AppPaths.wcm_gui, 'work_dir'):
+                if os.path.isdir(game_folder_path):
+                    if 'webman-classics-maker' in game_folder_path:
+                        shutil.rmtree(game_folder_path)
+                # clear entry_fields
+                self.clear_entries_and_path()
+                # set cursor
+                self._listbox.select_set(removed_index) #This only sets focus on the first item.
+
+    def rename_selected(self):
+        self.entry_field_title.selection_range(0, END)
+        self.entry_field_title.focus_set()
+
+    def select_all(self):
+        self._listbox.selection_set(0, 'end')
+
+
+    def clear_entries_and_path(self):
+        self.entry_field_title_id.delete(0, len(self.entry_field_title_id.get())-1)
+        self.entry_field_title_id.delete(0, END)
+        self.entry_field_title.delete(0, END)
+        self.entry_field_platform.delete(0, END)
+        self.entry_field_filename.delete(0, END)
+
+        self.is_cleared = True
+
+
 
     def get_selected_build_dir_path(self):
-        pkg_project_name = ''
-        build_dir_path = ''
-        if self.selected_filename is not '':
+        self.build_dir_path = ''
+        if self.selected_filename not in {'', None}:
             filename = self.selected_filename
             title_id = self.selected_title_id.replace('-', '')
             build_base_path = AppPaths.builds
 
-            # removes the file extension
+            tmp_filename = filename
+            # removes the file extension from tmp_filename
             for file_ext in GlobalVar.file_extensions:
                 if filename.upper().endswith(file_ext):
-                    pkg_project_name = filename[0:len(filename)-len(file_ext)]
-                    pkg_project_name = pkg_project_name.replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
+                    tmp_filename = filename[0:len(filename)-len(file_ext)]
                     break
+            game_folder_name = tmp_filename.replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
 
-            build_dir_path = os.path.join(build_base_path, pkg_project_name)
-        return build_dir_path
+            self.build_dir_path = os.path.join(build_base_path, game_folder_name)
+        return self.build_dir_path
 

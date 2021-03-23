@@ -13,6 +13,9 @@ else:
 from global_paths import App as AppPaths
 from global_paths import Image as ImagePaths
 from global_paths import GlobalVar
+from global_paths import FtpSettings
+from global_paths import GameListData
+from global_paths import GlobalDef
 
 sys.path.append(AppPaths.settings)
 
@@ -99,7 +102,7 @@ class Main:
         self.images_function_button = []
         self.images_function_button.append(PhotoImage(self.small_button_maker('Build', font='arial.ttf', x=3, y=0)))
         self.images_function_button.append(PhotoImage(self.small_button_maker('Add', font='arial.ttf', x=3, y=0)))
-        self.images_function_button.append(PhotoImage(self.small_button_maker('Remove', font='arial.ttf', x=-3, y=0)))
+        self.images_function_button.append(PhotoImage(self.small_button_maker('Save', font='arial.ttf', x=3, y=0)))
         # self.images_function_button.append(PhotoImage(self.small_button_maker('Quit', font='arial.ttf', x=3, y=0)))
         # self.images_function_button.append(PhotoImage(self.small_button_maker('Change', font='arial.ttf', x=-3, y=0)))
 
@@ -124,8 +127,6 @@ class Main:
         self.button_PS3 	 = None
 
         self.build_button 	 = None
-        self.add_button 	 = None
-
         self.fetch_button    = None
         self.refresh_button	 = None
 
@@ -137,17 +138,15 @@ class Main:
         self.USB_BUTTON_TOOLTIP_MSG = "Toggle USB port (0-3)"
 
         self.BUILD_BUTTON_TOOLTIP_MSG = "Save & Build pkg"
-        self.ADD_BUTTON_TOOLTIP_MSG = "Add game & save data"
-        self.REMOVE_BUTTON_TOOLTIP_MSG = "Remove game & remove data"
-
-        self.FETCH_BUTTON_TOOLTIP_MSG = "Fetch gamelist and pictures over FTP"
+        self.SAVE_BUTTON_TOOLTIP_MSG = "Save data"
+        self.FETCH_BUTTON_TOOLTIP_MSG = "Fetch gamelist and images over FTP"
         self.REFRESH_BUTTON_TOOLTIP_MSG = "Refresh gamelist from disk"
-        self.ICON0_TOOLTIP_MSG = "Click to change ICON0"
-        self.PIC0_TOOLTIP_MSG = "Click to change  PIC0"
-        self.PIC1_TOOLTIP_MSG = "Click to change  PIC1"
+
+        self.ICON0_TOOLTIP_MSG = "Click to replace ICON0"
+        self.PIC0_TOOLTIP_MSG = "Click to replace  PIC0"
+        self.PIC1_TOOLTIP_MSG = "Click to replace  PIC1"
 
         # init definitions
-        self.init_config_file()
         self.init_wcm_work_dir()
         self.init_pkg_images()
 
@@ -164,36 +163,27 @@ class Main:
     def init_wcm_work_dir(self):
         # clean and init wcm_work_dir in startup
         if os.path.isdir(AppPaths.wcm_work_dir):
-            shutil.rmtree(AppPaths.wcm_work_dir)
+            if 'webman-classics-maker' in AppPaths.wcm_work_dir.lower():
+                shutil.rmtree(AppPaths.wcm_work_dir)
             os.makedirs(os.path.join(AppPaths.wcm_work_dir, 'pkg'))
 
             self.init_pkg_images()
 
     def init_pkg_build_dir(self):
         if os.path.isdir(AppPaths.pkg):
-            shutil.rmtree(AppPaths.pkg)
+            if 'webman-classics-maker' in AppPaths.pkg.lower():
+                shutil.rmtree(AppPaths.pkg)
             os.makedirs(AppPaths.pkg)
-        self.copytree(os.path.join(AppPaths.util_resources, 'pkg_dir_bak'), os.path.join(AppPaths.resources, 'pkg'))
-
-    def init_config_file(self):
-        if not os.path.isdir(AppPaths.settings):
-            os.mkdir(AppPaths.settings)
-            if os.path.isfile(os.path.join(AppPaths.util_resources, 'ftp_settings.cfg.BAK')):
-                shutil.copyfile(os.path.join(AppPaths.util_resources, 'ftp_settings.cfg.BAK'), self.ftp_settings_path)
-            else:
-                print('Error: ' + os.path.join(AppPaths.util_resources, 'ftp_settings.cfg.BAK') + ' could not be find.')
-
-        with open(self.ftp_settings_path, 'r') as settings_file:
-            self.ftp_settings_data = json.load(settings_file)
+        GlobalDef().copytree(os.path.join(AppPaths.util_resources, 'pkg_dir_bak'), os.path.join(AppPaths.resources, 'pkg'))
 
     def get_ftp_ip_from_config(self):
-        return self.ftp_settings_data['ps3_lan_ip']
+        return FtpSettings.ps3_lan_ip
 
     def get_ftp_user_from_config(self):
-        return self.ftp_settings_data['ftp_user']
+        return FtpSettings.ftp_user
 
     def get_ftp_pass_from_config(self):
-        return self.ftp_settings_data['ftp_password']
+        return FtpSettings.ftp_password
 
 
     def create_list_combo_box(self, drive, platform):
@@ -481,11 +471,11 @@ class Main:
         ##########################################################################
         # Adding an on_change-listener on 'entry_field_title'
         self.generate_on_change(self.entry_field_title)
-        self.entry_field_title.bind('<<Change>>', self.dynamic_filename_and_path)
+        self.entry_field_title.bind('<<Change>>', self.dynamic_title_to_pic1)
         ###########################################################################
         # Adding an on_change-listener on 'entry_field_filename'
         self.generate_on_change(self.entry_field_filename)
-        self.entry_field_filename.bind('<<Change>>', self.dynamic_title_to_pic1)
+        self.entry_field_filename.bind('<<Change>>', self.dynamic_filename_and_path)
         ###########################################################################
 
         self.entry_field_ftp_ip = Entry(main)
@@ -548,20 +538,11 @@ class Main:
                                    command=self.on_build_button,
                                    bg="#FBFCFB")
 
-
-        self.add_button = Button(main,
-                                 image=self.images_function_button[1],
-                                 borderwidth=0,
-                                 command=self.save_work_dir,
-                                 bg="#FBFCFB")
-
-        self.remove_button = Button(main,
+        self.save_button = Button(main,
                                   image=self.images_function_button[2],
                                   borderwidth=0,
-                                  command=self.validate_fields,
+                                  command=self.on_save_button,
                                   bg="#FBFCFB")
-
-
 
         # ftp list buttons
         self.fetch_button = Button(main,
@@ -581,8 +562,7 @@ class Main:
         CreateToolTip(self.button_USB, self.USB_BUTTON_TOOLTIP_MSG)
 
         CreateToolTip(self.build_button, self.BUILD_BUTTON_TOOLTIP_MSG)
-        CreateToolTip(self.add_button, self.ADD_BUTTON_TOOLTIP_MSG)
-        CreateToolTip(self.remove_button, self.REMOVE_BUTTON_TOOLTIP_MSG)
+        CreateToolTip(self.save_button, self.SAVE_BUTTON_TOOLTIP_MSG)
 
         CreateToolTip(self.fetch_button, self.FETCH_BUTTON_TOOLTIP_MSG)
         CreateToolTip(self.refresh_button, self.REFRESH_BUTTON_TOOLTIP_MSG)
@@ -651,17 +631,13 @@ class Main:
             x=int((self.text_box_spacing + self.main_offset_x_pos + 0 * 85) * scaling),
             y=int((self.iso_path_text_y_pos + 40) * scaling))
 
-        # self.add_button.place(
-        #     x=int((self.text_box_spacing + self.main_offset_x_pos + 1 * 85) * scaling),
-        #     y=int((self.iso_path_text_y_pos + 40) * scaling))
-
-        # self.remove_button.place(
-        #     x=int((self.text_box_spacing + self.main_offset_x_pos + 2 * 85) * scaling),
-        #     y=int((self.iso_path_text_y_pos + 40) * scaling))
-
         self.fetch_button.place(
             x=int((self.main_offset_x_pos) * scaling),
             y=int((self.main_offset_y_pos + 855) * scaling))
+
+        self.save_button.place(
+            x=int((self.text_box_spacing + self.main_offset_x_pos + 1 * 85) * scaling),
+            y=int((self.iso_path_text_y_pos + 40) * scaling))
 
         self.refresh_button.place(
             x=int((self.main_offset_x_pos + 80) * scaling),
@@ -679,7 +655,7 @@ class Main:
         icon0_changed = False
 
         # TODO image replace browser: missing the title text!
-        if img_to_be_changed is not None:
+        if img_to_be_changed not in {'', None}:
             if img_to_be_changed.lower() == 'pic1':
                 pic1_changed = True
                 self.draw_text_on_image_w_shadow(self.image_pic1, self.entry_field_title.get(), 745, 457, 32, 2, 'white', 'black')
@@ -691,9 +667,13 @@ class Main:
                 self.image_pic0 = self.image_pic0_ref
                 self.image_icon0 = self.image_icon0_ref
 
+            elif img_to_be_changed.lower() == 'pic0':
+                self.image_pic0 = self.image_pic0_ref
+                pic0_changed = True
+
 
         # check if xmb_icons needs to be re-drawn
-        elif pkg_build_path is not None and pkg_build_path is not '':
+        elif pkg_build_path not in {'', None}:
             if os.path.exists(pkg_build_path):
                 # draw PIC1 from pkg_dir and then xmb icons and system logo onto the pkg  background
                 if os.path.isfile(os.path.join(pkg_build_path, 'ICON0.PNG')):
@@ -751,9 +731,10 @@ class Main:
                                                  self.icon0_y_pos + self.image_icon0.height))
 
 
-        # A PIC0 must be used for the GUI
+        # A PIC0 must be used for the GUI: either existing
         if os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC0.PNG')):
             tmp_pic0_bg = copy.copy(self.image_pic1)
+        # or make with title text
         else:
             # else use background w/ title
             tmp_pic0_bg = copy.copy(self.image_pic1_w_title)
@@ -833,7 +814,7 @@ class Main:
 
     def draw_text_on_image_w_font(self, image, text, text_x, text_y, text_size, text_color, font):
         if not os.path.isfile(font):
-            print('font does not exist')
+            print('ERROR: font does not exist')
         font = ImageFont.truetype(font, text_size)
         draw = ImageDraw.Draw(image)
         return draw.text((text_x, text_y), text, fill=text_color, font=font)
@@ -895,17 +876,17 @@ class Main:
         print('DEBUG on_drive_button')
         # Check if same drive already set
         if drive_choice in self.entry_field_iso_path.get():
-            print('DEBUG ' + '\'' + drive_choice + '\'' + ' already set')
+            # print('DEBUG ' + '\'' + drive_choice + '\'' + ' already set')
             # if dev_usb### already set -> iterate port (0-3)
             if 'dev_usb00' in drive_choice:
                 self.usb_port_number = self.usb_port_number + 1
 
                 if self.usb_port_number > 3:
                     self.usb_port_number = 0
-                print('DEBUG usb_port_number: ' + str(self.usb_port_number))
+                # print('DEBUG usb_port_number: ' + str(self.usb_port_number))
                 drive_choice = 'dev_usb00' + str(self.usb_port_number)
 
-        print('DEBUG drive_choice: ' + drive_choice)
+        # print('DEBUG drive_choice: ' + drive_choice)
         self.drive_system_path_array[0] = drive_choice
 
         current_iso_path = '/' + '/'.join([self.drive_system_path_array[0],
@@ -916,11 +897,11 @@ class Main:
         self.update_iso_path_entry_field(current_iso_path)
 
     def on_system_button(self, drive_choice, system_choice):
-        print('DEBUG on_system_button')
-        if system_choice in self.entry_field_iso_path.get():
-            print('DEBUG ' + '\'' + system_choice + '\'' + ' already set')
+        # print('DEBUG on_system_button')
+        # if system_choice in self.entry_field_iso_path.get():
+            # print('DEBUG ' + '\'' + system_choice + '\'' + ' already set')
 
-        print('DEBUG system_choice: ' + system_choice)
+        # print('DEBUG system_choice: ' + system_choice)
         self.drive_system_path_array[1] = system_choice
 
         current_iso_path = '/' + '/'.join([self.drive_system_path_array[0],
@@ -946,6 +927,11 @@ class Main:
             self.update_iso_path_entry_field(current_iso_path)
             self.drive_system_path_array[1] = system_choice
 
+
+    def on_save_button(self):
+        if self.validate_fields():
+            self.save_entry_to_game_list()
+
     # Dynamic update of the pkg path for showing fetched images
     def update_game_build_path(self):
         # ask gamelist to return selected path
@@ -958,6 +944,7 @@ class Main:
 
     # Dynamic update of the 'entry_field_filename' into the 'entry_field_iso_path'
     def dynamic_filename_and_path(self, event):
+        iso_path = ''
         drive = ''
         system = ''
         path = ''
@@ -970,30 +957,35 @@ class Main:
         if self.drive_system_path_array[2] is not None:
             path = '/' + self.drive_system_path_array[2] + '/'
 
-        iso_path = drive + system + path + filename
-        iso_path = iso_path.replace('//', '/', )
+        if '' not in {drive, system, path, filename}:
+            iso_path = drive + system + path + filename
+            iso_path = iso_path.replace('//', '/', )
 
         self.entry_field_iso_path.xview_moveto(1)
         self.update_iso_path_entry_field(iso_path)
 
+        if iso_path == '':
+            # re-draw work_dir image on canvas
+            self.init_pkg_images()
+            self.init_draw_images_on_canvas(self.main)
+
 
     def update_iso_path_entry_field(self, iso_path):
-        self.entry_field_iso_path.config(state='normal')
-        self.entry_field_iso_path.delete(0, END)
-        self.entry_field_iso_path.insert(0, iso_path.replace('//','/'))
-        self.entry_field_iso_path.config(state='readonly')
+            self.entry_field_iso_path.config(state='normal')
+            self.entry_field_iso_path.delete(0, END)
+            self.entry_field_iso_path.insert(0, iso_path.replace('//','/'))
+            self.entry_field_iso_path.config(state='readonly')
 
 
     # Dynamic update of the game title on to the PIC1 image
     def dynamic_title_to_pic1(self, event):
         tmp_img = self.image_pic1
         # self, image, text, text_x, text_y, text_size, text_outline, text_color,
-        self.draw_text_on_image_w_shadow(tmp_img, event.widget.get(), 760, 487, 32, 2, 'white', 'black')
+        self.draw_text_on_image_w_shadow(tmp_img, self.entry_field_title.get(), 760, 487, 32, 2, 'white', 'black')
         self.image_pic1_w_title = copy.copy(tmp_img)
         tmp_img = tmp_img.resize((int(1280 * scaling), int(720 * scaling)), Image.ANTIALIAS)
         self.photo_image_pic1_xmb = PhotoImage(tmp_img)
         self.button_pic1.config(image=self.photo_image_pic1_xmb)
-        # NICLAS
         self.init_draw_images_on_canvas(self.main)
         #TODO: this might be more optimized somewhere else
         self.update_game_build_path()
@@ -1069,7 +1061,7 @@ class Main:
             self.title_id_error_msg = 'Title id must be 9 characters long.'
             print(self.title_id_error_msg)
             self.entry_field_title_id.focus_set()
-            self.entry_field_title_id.icursor(0)
+            self.entry_field_title_id.selection_range(0, END)
             return False
         else:
             return True
@@ -1087,8 +1079,13 @@ class Main:
     # Ensures title id is exactly 9 characters during save
     def validate_filename_on_save(self):
         filename = self.entry_field_filename.get()
-        tmp_name = filename.lower()
-        if str(tmp_name).upper().endswith(GlobalVar.file_extensions) and len(tmp_name) > 4:
+        tmp_name = filename
+        # platform type GAMES has no file extension
+        if self.entry_field_platform.get() == 'GAMES' and len(tmp_name) > 0:
+            main_window.focus()
+            return True
+        # other platforms do have file extensions
+        elif str(tmp_name).upper().endswith(GlobalVar.file_extensions) and len(tmp_name) > 4:
             main_window.focus()
             return True
 
@@ -1160,31 +1157,69 @@ class Main:
         else:
             return False
 
-    def copytree(self, src, dst, symlinks=False, ignore=None):
-        if not os.path.exists(dst):
-            os.makedirs(dst)
-            shutil.copystat(src, dst)
-        lst = os.listdir(src)
-        if ignore:
-            excl = ignore(src, lst)
-            lst = [x for x in lst if x not in excl]
-        for item in lst:
-            s = os.path.join(src, item)
-            d = os.path.join(dst, item)
-            if symlinks and os.path.islink(s):
-                if os.path.lexists(d):
-                    os.remove(d)
-                os.symlink(os.readlink(s), d)
-                try:
-                    st = os.lstat(s)
-                    mode = stat.S_IMODE(st.st_mode)
-                    os.lchmod(d, mode)
-                except:
-                    pass  # lchmod not available
-            elif os.path.isdir(s):
-                self.copytree(s, d, symlinks, ignore)
-            else:
-                shutil.copy2(s, d)
+    def save_entry_to_game_list(self):
+        json_game_list = GameListData().get_game_list()
+        current_work_dir = AppPaths.game_work_dir
+        # save all changes to the current work_dir
+        if self.save_work_dir():
+            if not os.path.exists(self.pkg_dir):
+                os.makedirs(self.pkg_dir)
+            if not os.path.exists(AppPaths.game_work_dir):
+                os.makedirs(current_work_dir)
+
+        # if filepath already exist, remove game from json game list so we can update it
+        platform_key = self.entry_field_platform.get() + '_games'
+        if self.entry_field_platform.get() in {'GAMES', 'GAMEZ'}:
+            path = '/'.join(self.entry_field_iso_path.get().split('/')[:-1])
+            test_path1 = '/'.join(json_game_list[platform_key][0]['path'].split('/')[:-1])
+            json_game_list[platform_key] = [x for x in json_game_list[platform_key] if '/'.join(x['path'].split('/')[:-1]) != path]
+            print("test_path1: " + test_path1)
+        else:
+            path = self.entry_field_iso_path.get()
+            test_path2 = json_game_list[platform_key][0]['path'] + json_game_list[platform_key][0]['filename']
+            print("test_path2: " + test_path2)
+            for test in json_game_list[platform_key]:
+                if 'kingdom' in test['filename'].lower():
+                    print(str(test['path'] +test['filename']))
+
+            json_game_list[platform_key] = [x for x in json_game_list[platform_key] if str(x['path'] + x['filename']) != path]
+
+        # update path to game work_dir
+        AppPaths.game_work_dir = os.path.join(AppPaths().get_game_build_dir(self.entry_field_title_id.get(), self.entry_field_filename.get()), 'work_dir')
+        if current_work_dir != AppPaths.game_work_dir:
+            new_game_build_path = os.path.join(AppPaths.game_work_dir, '..')
+            if not os.path.exists(new_game_build_path):
+                os.mkdir(new_game_build_path)
+            # copy old work_dir to new work_dir
+            GlobalDef().copytree(os.path.join(current_work_dir, ''), AppPaths.game_work_dir)
+
+            # remove old folder build folder
+            if 'webman-classics-maker' in current_work_dir.lower():
+                shutil.rmtree(os.path.join(current_work_dir, ''))
+
+        # dup check title against list and update the title
+        title = GameListData().duplicate_title_checker(self.entry_field_title.get())
+        self.entry_field_title.delete(0, END)
+        self.entry_field_title.insert(0, title)
+
+        # add new data to the game list
+        new_data_json = self.entry_fields_to_json(os.path.join(AppPaths.util_resources, 'game_structure.json.BAK'))
+        json_game_list[platform_key].append(new_data_json)
+
+        # update the json game list file
+        with open(GameListData.GAME_LIST_DATA_PATH, 'w') as newFile:
+            json_text = json.dumps(json_game_list, indent=4, separators=(",", ":"))
+            newFile.write(json_text)
+
+            # GameListData.game_list_data_json = GameListData().get_game_list()
+
+        # change Appdata.work_dir
+        AppPaths.game_work_dir = os.path.join(AppPaths().get_game_build_dir(self.entry_field_title_id.get(), self.entry_field_filename.get()), 'work_dir')
+
+
+        # refresh the GUI list
+        self.on_game_list_refresh()
+
 
     def on_build_button(self):
         self.init_pkg_build_dir()
@@ -1195,10 +1230,7 @@ class Main:
             if not os.path.exists(AppPaths.game_work_dir):
                 os.makedirs(AppPaths.game_work_dir)
 
-            title_id = str(self.entry_field_title_id.get()).replace('-', '')
-            filename = str(self.entry_field_filename.get())
             game_pkg_dir = os.path.join(AppPaths.game_work_dir, 'pkg')
-
             if os.path.isfile(os.path.join(game_pkg_dir, 'ICON0.PNG')):
                 shutil.copyfile(os.path.join(game_pkg_dir, 'ICON0.PNG'), os.path.join(self.pkg_dir, 'ICON0.PNG'))
             else:
@@ -1207,10 +1239,12 @@ class Main:
                 if self.entry_field_platform == 'NTFS':
                     match = re.search('(?<=\[).*?(?=\])', str(self.entry_field_filename.get()))
                     if match is not None:
+                        # donor platform could be PS3 for game_name.NTFS[PS3]
                         donor_platform = filter(lambda x: match.group() in x[0], self.global_platform_paths)
                         if donor_platform:
                             platform = donor_platform[0][1]
 
+                # platform is used to determine which ICON0 should be used
                 default_img_path = os.path.join(AppPaths.resources, 'images', 'pkg', 'default')
                 if not os.path.isfile(os.path.join(default_img_path, platform, 'ICON0.PNG')):
                     platform = ''
@@ -1231,14 +1265,29 @@ class Main:
                 if not os.path.exists(game_pkg_dir):
                     os.makedirs(game_pkg_dir)
 
-                # saving the build content in the game build folder
-                self.copytree(self.pkg_dir, game_pkg_dir)
-
+                    # saving the build content in the game build folder
+                    GlobalDef().copytree(AppPaths.pkg, game_pkg_dir)
 
                 if os.path.isdir(AppPaths.game_work_dir):
                     import tkMessageBox
                     def popup():
-                        msgBox = tkMessageBox.showinfo("Build status", "Build successful!")
+                        install_path = self.drive_system_path_array[0]
+                        remote_path = ''
+                        if 'hdd0' in install_path:
+                            pkg_remote_path = '/' + install_path + '/packages'
+                        # usb
+                        else:
+                            pkg_remote_path = '/' + install_path + '/'
+
+                        response = tkMessageBox.askyesno('Build status: success', 'Build done!\nDo you want to remote-install the pkg?\n\nLocation: ' + pkg_remote_path + '/' + pkg_name)
+                        # yes
+                        if response:
+                            pkg_local_path = os.path.join(AppPaths.game_work_dir, '../', pkg_name)
+
+                            self.transfer_pkg(pkg_local_path, pkg_remote_path, pkg_name)
+                            self.remote_install_pkg(pkg_remote_path, pkg_name)
+
+                    # execute def popup()
                     popup()
 
                     # open builds folder in windows explorer
@@ -1251,32 +1300,43 @@ class Main:
 
             else:
                 import tkMessageBox
-                tkMessageBox.showinfo("Build status", "Build failed!\nSee error log.")
+                tkMessageBox.showerror("Build status: fail", "Build failed!\nSee error log.")
+
+
 
 
 
     def on_ftp_fetch_button(self):
         # save the ps3-ip field to config file
-        self.save_ftp_fields_on_fetch()
-        ftp_game_list = FtpGameList(self.drivedropdown.get(), self.platformdropdown.get())
-        ftp_game_list.execute()
+        if self.entry_field_ftp_ip.get() is not '':
+            self.save_ftp_fields_on_fetch()
+            ftp_game_list = FtpGameList(self.drivedropdown.get(), self.platformdropdown.get())
+            ftp_game_list.execute()
 
-        self.on_game_list_refresh()
+            self.on_game_list_refresh()
+        else:
+            print('DEBUG cannot connect with empty ip.')
 
 
     def save_ftp_fields_on_fetch(self):
+        # open make changes to existing settings file
         with open(self.ftp_settings_path, 'r') as settings_file:
             json_settings_data = json.load(settings_file)
             json_settings_data['ps3_lan_ip'] = str(self.entry_field_ftp_ip.get())
-            json_settings_data['ftp_lan_ip'] = str(self.entry_field_ftp_ip.get())
             json_settings_data['ftp_user'] = str(self.entry_field_ftp_user.get())
             json_settings_data['ftp_password'] = str(self.entry_field_ftp_pass.get())
             settings_file.close()
-        # save to file
+            
+        # write changes to file
         with open(self.ftp_settings_path, 'w') as save_settings_file:
             new_json_data = json.dumps(json_settings_data, indent=4, separators=(",", ":"))
             save_settings_file.write(new_json_data)
             save_settings_file.close()
+
+        # update FtpSettings
+        FtpSettings.ps3_lan_ip = str(self.entry_field_ftp_ip.get())
+        FtpSettings.ftp_user = str(self.entry_field_ftp_user.get())
+        FtpSettings.ftp_password = str(self.entry_field_ftp_pass.get())
 
 
 
@@ -1321,26 +1381,80 @@ class Main:
             self.list_filter_platform = self.platformdropdown.get()
         self.create_list_combo_box(self.list_filter_drive, self.list_filter_platform)
 
-    def save_pkg_info_to_json(self):
-        with open(os.path.join(AppPaths.util_resources, 'pkg.json.BAK')) as f:
-            json_data = json.load(f)
+    def entry_fields_to_json(self, json_data_path):
+        json_data = None
+        if os.path.isfile(json_data_path):
+            try:
+                with open(json_data_path) as f:
+                    json_data = json.load(f)
+                    f.close()
+            except ValueError as e:
+                print("ERROR: File write error.")
+                print(e.message)
 
-        try:
-            json_data['title'] = str(self.entry_field_title.get())
+        json_data['title'] = str(self.entry_field_title.get())
+
+        if FtpSettings.use_w_title_id:
+            json_data['title_id'] = 'W' + self.entry_field_title_id.get()[1:]
+        else:
             json_data['title_id'] = self.entry_field_title_id.get()
-            json_data['content_id'] = 'UP0001-' + self.entry_field_title_id.get() + '_00-0000000000000000'
-            json_data['iso_filepath'] = str(self.entry_field_iso_path.get())
 
-            pkg_json_path = os.path.join(AppPaths.game_work_dir, 'pkg.json')
-            # if (os.path.isfile(pkg_json_path)):
-            # 	os.remove(pkg_json_path)
-            newFile = open(pkg_json_path, "w")
+        json_data['content_id'] = 'UP0001-' + str(json_data['title_id']) + '_00-0000000000000000'
+        json_data['filename'] = str(self.entry_field_filename.get())
+        json_data['platform'] = str(self.entry_field_platform.get())
+        if str(self.entry_field_platform.get()) in {'GAMES', 'GAMEZ'}:
+            json_data['path'] = str(self.entry_field_iso_path.get()).replace(str(self.entry_field_filename.get()), '').replace('//', '/')
+        else:
+            json_data['path'] = str(self.entry_field_iso_path.get()).replace(str(self.entry_field_filename.get()), '')
+
+        return json_data
+
+    def save_pkg_info_to_json(self):
+            json_data = self.entry_fields_to_json(os.path.join(AppPaths.util_resources, 'pkg.json.BAK'))
+            newFile = open(os.path.join(AppPaths.game_work_dir, 'pkg.json'), "w")
             json_text = json.dumps(json_data, indent=4, separators=(",", ":"))
             newFile.write(json_text)
 
-        except ValueError as e:
-            print("ERROR: File write error or 'PKGLAUNCH'/title-_d not found.")
+    def transfer_pkg(self, pkg_local_path, pkg_remote_path, pkg_name):
+        # setup connection to FTP
+        try:
+            ftp = FtpSettings().get_ftp()
+            pkg_local_file = open(pkg_local_path, "rb")
+            # go to path and transfer the pkg
+            ftp.cwd(pkg_remote_path)
+            ftp.storbinary('STOR ' + pkg_name, pkg_local_file)
+            ftp.quit()
+
+            print "DEBUG: Transfer succeeded"
+            # tkMessageBox.showinfo('Status: transfer complete', 'transfer of ' + pkg_name + ' to ' + remote_path + ' complete')
+        except Exception as e:
+            print ('ERROR: Transfer failed')
             print(e.message)
+
+    def remote_install_pkg(self, pkg_remote_path, pkg_name):
+        try:
+            ps3_lan_ip = FtpSettings.ps3_lan_ip
+            import tkMessageBox
+            import urllib
+            import traceback
+            pkg_ps3_path = pkg_remote_path + '/' + pkg_name
+            # webcommand = '/install_ps3' + urllib.quote(pkg_ps3_path) # + '?restart.ps3'
+            webcommand = '/install.ps3' + urllib.quote(pkg_ps3_path) # + ';/refresh.ps3?xmb'
+            webcommand_url = 'http://' + str(ps3_lan_ip) + webcommand
+            print('DEBUG webcommand_url: ' + webcommand_url)
+            response = urllib.urlopen(webcommand_url)
+            status_code = response.getcode()
+            print('DEBUG status_code: ' + str(status_code))
+            if status_code == 200:
+                tkMessageBox.showinfo('Status: pkg installed', 'Install completed!')
+            # 400 webman => faulty path => Error
+            # 404 webman => faulty command => Not found
+            # 200 OK
+            print()
+        except Exception as ez:
+            print('ERROR: could not install pkg')
+            print('DEBUG ERROR traceback: ' + str(traceback.print_exc()))
+            print(ez.message)
 
 class CreateToolTip(object):
     """

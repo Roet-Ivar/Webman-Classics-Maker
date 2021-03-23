@@ -1,6 +1,8 @@
 {
     "title":"",
-    "iso_filepath":"",
     "title_id":"",
+    "filename":"",
+    "platform":"",
+    "path":"",
     "content_id":""
 }

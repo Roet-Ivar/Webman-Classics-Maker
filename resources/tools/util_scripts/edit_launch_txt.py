@@ -9,37 +9,35 @@ class Edit_launch_txt:
 			with open(os.path.join(AppPaths.game_work_dir, 'pkg.json')) as f:
 				json_data = json.load(f)
 
-			with open(os.path.join(AppPaths.settings, 'ftp_settings.cfg'), 'r') as settings_file:
-				json_settings_data = json.load(settings_file)
-				settings_file.close()
+			from global_paths import FtpSettings
 
 			# init variables
 			web_command_string = ''
-			iso_filepath = str(json_data['iso_filepath'])
-			cfg_webcommand = json_settings_data['webcommand']
+			path = str(json_data['path'])
+			full_path = path + str(json_data['filename'])
 
-			if '/pspiso/' in iso_filepath.lower():
-				web_command_string = '/mount_ps3' + iso_filepath + ';/wait.ps3?8;/browser.ps3$focus_segment_index xmb_app3 0;/wait.ps3?1;/browser.ps3$exec_push;/wait.ps3?1;/browser.ps3$focus_index 0 4;/wait.ps3?1;/browser.ps3$exec_push;/wait.ps3?1;/browser.ps3$exec_push;/wait.ps3?1;/browser.ps3$exec_push'
+			cfg_webcommand = FtpSettings.webcommand
+
+			if '/PSPISO/' in path:
+				web_command_string = '/mount_ps3' + path + ';/wait.ps3?8;/browser.ps3$focus_segment_index xmb_app3 0;/wait.ps3?1;/browser.ps3$exec_push;/wait.ps3?1;/browser.ps3$focus_index 0 4;/wait.ps3?1;/browser.ps3$exec_push;/wait.ps3?1;/browser.ps3$exec_push;/wait.ps3?1;/browser.ps3$exec_push'
+			elif '/GAMES/' in path or '/GAMEZ/' in path:
+				split_path = path.split('/')
+				folder_path = '/'.join(split_path[0:len(split_path) -1])
+				pre_delay = 'xmb'
+				post_delay = 4
+				pre_cmd = '/wait.ps3?' + str(pre_delay) + ';/mount_ps3'
+				post_cmd = ';/wait.ps3?' + str(post_delay) + ';/play.ps3'
+				web_command_string = pre_cmd + str(full_path) + post_cmd
 
 			# check if the user has added a custom webcommand in the config file
 			else:
 				if len(cfg_webcommand) > len('[filepath_var]'):
 					if '[filepath_var]' in cfg_webcommand:
-						web_command_string = cfg_webcommand.replace('[filepath_var]', str(json_data['iso_filepath']))
+						web_command_string = cfg_webcommand.replace('[filepath_var]', str(full_path))
 						web_command_string = web_command_string.replace('//', '/')
 					else:
 						print("""Error: make sure the string [filepath_var] (including brackets) is present in webcommand of settings.cfg""")
 						print("""Will revert back to the default webcommand""")
-
-				# # webman-mod v.47.30 and older
-				# if web_command_string == '':
-				# 	pre_delay = 6
-				# 	post_delay = 4
-				# 	pre_cmd = '/wait.ps3?' + str(pre_delay) + ';/mount_ps3'
-				# 	post_cmd = ';/wait.ps3?' + str(post_delay) + ';/play.ps3'
-				# 	web_command_string = pre_cmd + str(json_data['iso_filepath'] + post_cmd)
-
-				# legacy command example: /wait.ps3?6;/mount_ps3/dev_hdd0/PS3ISO/game.iso;/wait.ps3?4;/play.ps3
 
 				# webman-mod v.47.30 and newer
 				if web_command_string == '':
@@ -47,18 +45,18 @@ class Edit_launch_txt:
 					post_delay = 4
 					pre_cmd = '/wait.ps3?' + str(pre_delay) + ';/mount_ps3'
 					post_cmd = ';/wait.ps3?' + str(post_delay) + ';/play.ps3'
-					web_command_string = pre_cmd + str(json_data['iso_filepath'] + post_cmd)
+					web_command_string = pre_cmd + str(full_path + post_cmd)
 
 			web_url_string = 'GET ' + urllib.quote(web_command_string) + ' HTTP/1.0'
 
 			if not os.path.exists(os.path.join(AppPaths.game_work_dir, 'pkg', 'USRDIR')):
 				os.makedirs(os.path.join(AppPaths.game_work_dir, 'pkg', 'USRDIR'))
 
-			launch_txt = open(os.path.join(AppPaths.pkg, 'USRDIR', 'launch.txt'), 'wb')
+			launch_txt = open(os.path.join(AppPaths.game_work_dir, 'pkg', 'USRDIR', 'launch.txt'), 'wb')
 			launch_txt_byteArray = bytearray(web_command_string, 'utf8') + os.linesep
 			launch_txt.write(launch_txt_byteArray)
 
-			url_txt = open(os.path.join(AppPaths.pkg, 'USRDIR', 'url.txt'), 'wb')
+			url_txt = open(os.path.join(AppPaths.game_work_dir, 'pkg', 'USRDIR', 'url.txt'), 'wb')
 			url_txt_byteArray = bytearray(web_url_string) + os.linesep
 			url_txt.write(url_txt_byteArray)
 
