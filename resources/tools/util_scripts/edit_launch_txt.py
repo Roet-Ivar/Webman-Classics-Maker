@@ -14,6 +14,8 @@ class Edit_launch_txt:
 			# init variables
 			web_command_string = ''
 			path = str(json_data['path'])
+			full_path = path + str(json_data['filename'])
+
 			cfg_webcommand = FtpSettings.webcommand
 
 			if '/PSPISO/' in path:
@@ -25,13 +27,13 @@ class Edit_launch_txt:
 				post_delay = 4
 				pre_cmd = '/wait.ps3?' + str(pre_delay) + ';/mount_ps3'
 				post_cmd = ';/wait.ps3?' + str(post_delay) + ';/play.ps3'
-				web_command_string = pre_cmd + str(folder_path) + post_cmd
+				web_command_string = pre_cmd + str(full_path) + post_cmd
 
 			# check if the user has added a custom webcommand in the config file
 			else:
 				if len(cfg_webcommand) > len('[filepath_var]'):
 					if '[filepath_var]' in cfg_webcommand:
-						web_command_string = cfg_webcommand.replace('[filepath_var]', str(json_data['path']))
+						web_command_string = cfg_webcommand.replace('[filepath_var]', str(full_path))
 						web_command_string = web_command_string.replace('//', '/')
 					else:
 						print("""Error: make sure the string [filepath_var] (including brackets) is present in webcommand of settings.cfg""")
@@ -43,7 +45,7 @@ class Edit_launch_txt:
 					post_delay = 4
 					pre_cmd = '/wait.ps3?' + str(pre_delay) + ';/mount_ps3'
 					post_cmd = ';/wait.ps3?' + str(post_delay) + ';/play.ps3'
-					web_command_string = pre_cmd + str(json_data['path'] + post_cmd)
+					web_command_string = pre_cmd + str(full_path + post_cmd)
 
 			web_url_string = 'GET ' + urllib.quote(web_command_string) + ' HTTP/1.0'
 
