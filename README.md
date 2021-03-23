@@ -1,5 +1,5 @@
 
-![Alt text](https://imgur.com/IS7aC3E.png "Optional title")
+![Alt text](https://i.imgur.com/AHBXvnK.png "Optional title")
 # ABOUT
 Webman Classics Maker is tool for the PS3 that makes PKG shortcuts for ISO files straight to the home menu. It is using web commands  through webMAN-mod to mount and launch the ISOs automatically:
 http://www.psx-place.com/threads/webman-mod-web-commands.1508/
@@ -24,62 +24,40 @@ https://github.com/HACKERCHANNEL/PSL1GHT/tree/master/tools/PS3Py
 * PARAM_SFO_EDITOR (Aldos PS3 tool collection)
 https://www.aldostools.org/
 
-Credits goes to all of you guys!
+* webMan-mod
+https://github.com/aldostools/webMAN-MOD
+
+
+**Credits goes to all of you guys!**
 
 ------------------------------------------------------------------------
 # HOW TO USE
-
-**(optional) FTP DUMP -> 'games_list.txt'**
-	
-	1. Check IP settings in webMan (holding [SELECT])
-	2. Edit your /settings/ftp_settings.txt with your IP
-	3. To get your "game_list.txt run "FTP_Game_List.exe", or "ftp_game_list.py" for linux
-
-**EDIT PARAM.SFO**
-
-	1. Run "Edit_param_sfo.exe" (Windows only right now, you can hex edit the "params.sfo" in linux)
-	2. Fill in "Title ID"
-	3. Fill in the field "TITLE"
-	4. Drop down and fill in the field "FILE_PATH"
-
-	NOTE: The filepath must be exact and it is case-sensitive!
-	Bad path: /dev_HDD0/ps3ISO/Marvel Vs Capcom 3.iso
-	Good path: /dev_hdd0/PS3ISO/Marvel Vs Capcom 3.iso
-
-	5. Click "Save" to save your PARAM.SFO
-
-
-**BUILD PKG -> game.pkg'**
-
-	1. Run "Build_Webman_PKG.exe", or "build_all_scripts.py" for linux
-	2. Get your built package in the "builds"-folder
-	3. Install the PKG on your PS3
-	
+1. PS3: Dump your disc-based games (multiman is great for this)
+2. PS3: Make sure webMan-mod from aldostools is installed
+3. PC: Start Webman Classics Maker application
+4. PC: Fetch games-list over FTP
+5. PC: Build PKG forwarder for the game you like
+6. PS3: Install PKG on PS3 and enjoy disc-images straight from XMB	
 ---------------------------------------------------------------------------------------------------	
 # TROUBLESHOOTING
 	
-* If you hear three rapid beeps you probably misspelled your path to the ISO, double check it!
-
-* Sometimes at first boot the game hangs on blackscreen, reboot and start it again. This is mostly due to modifications of the same game w/o reboots.
-	
+* If you hear three rapid beeps: Probably misspelled path to the ISO, double check it (case sensitive)!
+* Games only mounts but doesn't automatically start: the timings on the webcommand are not enough for
+your HDD read speeds, see the forum thread for mor info!  	
 ---------------------------------------------------------------------------------------------------
 
 # Windows dev environment setup 
 
 * install python2.7.xx x86_64 (https://www.python.org/downloads/release/python-2715/)
-* pip install pillow
+* pip install pillow (often bundled in the windows version)
 * pip install pyinstaller
 
-**Building executables**
+**Building the executable**
 
-Run the pyinstaller-scipts located in:
+* Run the pyinstaller-scipts located in:
 /Webman-Classics-Maker/resources/tools/util_scripts/_pyinstaller_and_release_scripts/
+* Run your new **webman-classics-maker.exe** based on your new changes
 
-You now have a brand new executables based on the changes you made in the scripts:
-
-* **Build_Webman_PKG.exe**
-* **Edit_Param_SFO.exe** 
-* **FTP_Game_List.exe** 
 
 # Linux dev environment setup
 
