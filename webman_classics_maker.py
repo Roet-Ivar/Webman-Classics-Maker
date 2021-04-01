@@ -165,6 +165,7 @@ class Main:
         if os.path.isdir(AppPaths.wcm_work_dir):
             if 'webman-classics-maker' in AppPaths.wcm_work_dir.lower():
                 shutil.rmtree(AppPaths.wcm_work_dir)
+        if not os.path.isdir(os.path.join(AppPaths.wcm_work_dir, 'pkg')):
             os.makedirs(os.path.join(AppPaths.wcm_work_dir, 'pkg'))
 
             self.init_pkg_images()
