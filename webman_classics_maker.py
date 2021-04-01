@@ -174,6 +174,7 @@ class Main:
         if os.path.isdir(AppPaths.pkg):
             if 'webman-classics-maker' in AppPaths.pkg.lower():
                 shutil.rmtree(AppPaths.pkg)
+        if not os.path.isdir(AppPaths.pkg):
             os.makedirs(AppPaths.pkg)
         GlobalDef().copytree(os.path.join(AppPaths.util_resources, 'pkg_dir_bak'), os.path.join(AppPaths.resources, 'pkg'))
 
