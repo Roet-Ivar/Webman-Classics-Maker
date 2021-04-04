@@ -24,7 +24,7 @@ class Resign_eboot:
 
 			current_dir = os.getcwd()
 			os.chdir(AppPaths.scetool)
-			os.system(scetool_exe_path + ' ' + args)
+			os.system('"' + scetool_exe_path + ' ' + args + '"')
 			os.chdir(current_dir)
 			copyfile(os.path.join(AppPaths.scetool, 'EBOOT.BIN'), os.path.join(AppPaths.game_work_dir, 'pkg', 'USRDIR', 'EBOOT.BIN'))
 
