@@ -1,5 +1,15 @@
-import json, os, re, StringIO, sys, time, traceback
+from __future__ import print_function
+import json, os, re, sys, time, traceback
+try:
+    # Python2
+    import StringIO
+except ImportError as e:
+    # Python3
+    import io
+    from io import StringIO
+
 import PIL.Image as Image
+# pip install tqdm
 from tqdm import tqdm
 from shutil import copyfile
 

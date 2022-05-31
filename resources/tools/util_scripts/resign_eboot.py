@@ -1,3 +1,4 @@
+from __future__ import print_function
 import json, os
 from shutil import copyfile
 from global_paths import App as AppPaths

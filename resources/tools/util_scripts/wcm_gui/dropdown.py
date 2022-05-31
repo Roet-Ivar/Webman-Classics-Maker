@@ -1,12 +1,12 @@
+from __future__ import print_function
 try:
     # Python2
     import Tkinter as tk
     import ttk
 except ImportError as e:
-    print("Tkinter import error: " + e.message)
     # Python3
     import tkinter as tk
-    import ttk
+    from tkinter import ttk
 
 class DriveDropdown:
     def __init__(self, root, frame, x, y):

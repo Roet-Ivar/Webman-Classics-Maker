@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os, json, copy, shutil, sys
 
 # if running the webman_classics_maker.exe from root
@@ -24,28 +25,26 @@ try:
     from Tkinter import *
     import Tkinter as tk
     import ttk
+    import Tkinter.tkFileDialog
+    from tkFileDialog import askopenfile
 except ImportError as e:
-    print("Tkinter import error: " + e.message)
     # Python3
+    # sudo apt-get install python3-tk
     from tkinter import *
     import tkinter as tk
-    import ttk
+    from tkinter import ttk
+    from tkinter import filedialog
+    from tkinter.filedialog import askopenfile
 
-
-from PIL import Image, ImageDraw, ImageFont
+# pip install Pillow
+import PIL
+from PIL import Image, ImageDraw, ImageFont, ImageTk
 from PIL.ImageTk import PhotoImage
-from tkFileDialog import askopenfile
+
 from game_listbox import Gamelist
 from dropdown import DriveDropdown
 from dropdown import PlatformDropdown
 from ftp_game_data_fetcher import FtpGameList
-
-
-# check python version higher than 2
-if sys.version_info[0] > 2:
-    print("""Error: Webman Classics Maker is only compatible with python 2.7 32/64.
-          Reason: the pkgcrypt module hasn't been ported to python 3.x""")
-    sys.exit(1)
 
 from build_all_scripts import Webman_PKG as Webman_PKG
 
@@ -238,17 +237,33 @@ class Main:
         font = None
         x = None
         icon_bg_img = Image.new('RGB', (44, 15), color='black')
-        for key, value in args.iteritems():
-            if 'font' is key:
-                font = value
-            elif 'x' is key:
-                x = value
-            elif 'y' is key:
-                y = value
-            elif 'width' is key:
-                width = value
-            elif 'height' is key:
-                height = value
+        try:
+            # python2
+            for key, value in args.iteritems():
+                if 'font' is key:
+                    font = value
+                elif 'x' is key:
+                    x = value
+                elif 'y' is key:
+                    y = value
+                elif 'width' is key:
+                    width = value
+                elif 'height' is key:
+                    height = value
+        except Exception as e:
+            # python3
+            for key, value in args.items():
+                if 'font' is key:
+                    font = value
+                elif 'x' is key:
+                    x = value
+                elif 'y' is key:
+                    y = value
+                elif 'width' is key:
+                    width = value
+                elif 'height' is key:
+                    height = value
+
 
         if not font:
             self.draw_text_on_image_w_font(icon_bg_img, text, 7, 3, 12, 'white',
@@ -269,17 +284,32 @@ class Main:
         font = None
         x = None
         icon_bg_img = Image.new('RGB', (50, 20), color='black')
-        for key, value in args.iteritems():
-            if 'font' is key:
-                font = value
-            elif 'x' is key:
-                x = value
-            elif 'y' is key:
-                y = value
-            elif 'width' is key:
-                width = value
-            elif 'height' is key:
-                height = value
+        try:
+            # python2
+            for key, value in args.iteritems():
+                if 'font' is key:
+                    font = value
+                elif 'x' is key:
+                    x = value
+                elif 'y' is key:
+                    y = value
+                elif 'width' is key:
+                    width = value
+                elif 'height' is key:
+                    height = value
+        except Exception as e:
+             # python3
+             for key, value in args.items():
+                  if 'font' is key:
+                       font = value
+                  elif 'x' is key:
+                       x = value
+                  elif 'y' is key:
+                       y = value
+                  elif 'width' is key:
+                       width = value
+                  elif 'height' is key:
+                       height = value
 
         if not font:
             self.draw_text_on_image_w_font(icon_bg_img, text, 7, 3, 12, 'white',
@@ -1392,7 +1422,7 @@ class Main:
                     f.close()
             except ValueError as e:
                 print("ERROR: File write error.")
-                print(e.message)
+                print(getattr(e, 'message', repr(e)))
 
         json_data['title'] = str(self.entry_field_title.get())
 
@@ -1427,11 +1457,11 @@ class Main:
             ftp.storbinary('STOR ' + pkg_name, pkg_local_file)
             ftp.quit()
 
-            print "DEBUG: Transfer succeeded"
+            print("DEBUG: Transfer succeeded")
             # tkMessageBox.showinfo('Status: transfer complete', 'transfer of ' + pkg_name + ' to ' + remote_path + ' complete')
         except Exception as e:
             print ('ERROR: Transfer failed')
-            print(e.message)
+            print(getattr(e, 'message', repr(e)))
 
     def remote_install_pkg(self, pkg_remote_path, pkg_name):
         try:
@@ -1456,7 +1486,7 @@ class Main:
         except Exception as ez:
             print('ERROR: could not install pkg')
             print('DEBUG ERROR traceback: ' + str(traceback.print_exc()))
-            print(ez.message)
+            print(getattr(e, 'message', repr(ez)))
 
 class CreateToolTip(object):
     """
@@ -1491,7 +1521,6 @@ class CreateToolTip(object):
             self.widget.after_cancel(id)
 
     def showtip(self, event=None):
-        import Tkinter as tk
         x = y = 0
         x, y, cx, cy = self.widget.bbox("insert")
         x += self.widget.winfo_rootx() + 25

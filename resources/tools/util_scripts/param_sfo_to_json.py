@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os, json
 
 from global_paths import App as AppPaths

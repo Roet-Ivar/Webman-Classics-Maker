@@ -1,5 +1,6 @@
 
 from __future__ import with_statement
+from __future__ import print_function
 import struct, sys, os, shutil, json, re
 from global_paths import App as AppPaths
 from global_paths import GlobalVar
@@ -10,8 +11,8 @@ pkgcrypt_ver = 'py'
 if sys.version_info[0] < 3:
 	pkgcrypt_ver += '27_'
 else:
-	print('Error: webMAN Classics Maker is only compatible with python 2.7 32/64')
-	sys.exit(1)
+	pkgcrypt_ver += '3_'
+
 # check if python runs as 32 or 64 bit
 if struct.calcsize('P') * 8 == 64:
 	pkgcrypt_ver += '64'
@@ -20,24 +21,12 @@ else:
 
 # if running the webman_classics_maker.exe from root
 if getattr(sys, 'frozen', False):
-	sys.path.append(os.path.join(AppPaths.util_scripts, 'pkgcrypt', pkgcrypt_ver))
+    pkgcrypt_path = os.path.join(AppPaths.util_scripts, 'pkgcrypt', pkgcrypt_ver)
+    sys.path.append(pkgcrypt_path)
 else:
 	# running webman_classics_maker.py from root
-	sys.path.append(os.path.join(AppPaths.pkgcrypt, pkgcrypt_ver))
-
-try:
-	import pkgcrypt
-except:
-	print("""
-	-----------------
-	PKG BUILD ERROR
-	-----------------
-	Couldn't make PKG file. Go into the ps3py directory, and type the following:
-	
-	python2 setup.py build
-	
-	This should create a pkgcrypt.so file in the build/ directory. Move that file
-	over to the root of the ps3py directory and try running this script again.""")
+	pkgcrypt_path = os.path.join(AppPaths.pkgcrypt, pkgcrypt_ver)
+	sys.path.append(pkgcrypt_path)
 
 
 class StructType(tuple):
@@ -71,7 +60,8 @@ class Struct(object):
 	
 	LE = '<'
 	BE = '>'
-	__endian__ = '<'
+	def __init__():
+	    __endian__ = '<'
 	
 	def __init__(self, func=None, unpack=None, **kwargs):
 		self.__defs__ = []
@@ -86,7 +76,7 @@ class Struct(object):
 		else:
 			sys.settrace(self.__trace__)
 			func()
-			for name in func.func_code.co_varnames:
+			for name in func.__code__.co_varnames:
 				value = self.__frame__.f_locals[name]
 				self.__setattr__(name, value)
 		
@@ -351,7 +341,13 @@ import sys
 import hashlib
 import os
 import getopt
-import ConfigParser
+try:
+    # Python2
+    import ConfigParser
+except ImportError as e:
+    # Python3
+    import configparser
+
 import io
 import glob
 
@@ -551,12 +547,30 @@ def setContextNum(key, tmpnum):
 	key[0x3e] = ord(tmpchrs[6])
 	key[0x3f] = ord(tmpchrs[7])
 
+try:
+	import pkgcrypt
+except:
+	print("""
+	-----------------
+	PKG BUILD ERROR
+	-----------------
+	Couldn't find pkgcrypt in """, pkgcrypt_path, """
+
+
+	Go into the ps3py directory, and type the following:
+
+	python2 setup.py build
+
+	This should create a pkgcrypt.so file in the build/ directory. Move that file
+	over to the root of the ps3py directory and try running this script again.""")
+
+# import pkgcrypt
 
 def crypt(key, inbuf, length):
 	if not isinstance(key, list):
 		return ""
 	# Call our ultra fast c implemetation
-	return pkgcrypt.pkgcrypt(listToString(key), inbuf, length);
+	return pkgcrypt.pkgcrypt(listToString(key), inbuf, length)
 
 	# Original python (slow) implementation
 	ret = ""
@@ -811,10 +825,10 @@ def pack(folder, contentid, outname=None):
 	outFile.write(encData)
 	outFile.write('\0' * 0x60)
 	outFile.close()
-	print header
+	print(header)
 	
 def usage():
-	print """usage: [based on revision 1061]
+	print("""usage: [based on revision 1061]
 
     python pkg.py target-directory [out-file]
 
@@ -824,10 +838,10 @@ def usage():
 
     python pkg.py [options]
         --version               print revision.
-        --help                  print this message."""
+        --help                  print this message.""")
 
 def version():
-	print """pkg.py 0.5"""
+	print("""pkg.py 0.5""")
 
 class Webman_pkg:
 	def execute(self):
@@ -838,7 +852,6 @@ class Webman_pkg:
 			json_data = json.load(f)
 
 		contentid = str(json_data['content_id'])
-		
 		title_id = str(json_data['title_id'])
 		filepath = str(json_data['path'])
 		filename = str(json_data['filename'])

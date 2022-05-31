@@ -1,4 +1,11 @@
-from Tkinter import Frame, Scrollbar, Listbox, LEFT, RIGHT, Y, END, Label, Menu
+from __future__ import print_function
+try:
+    # Python2
+    from Tkinter import Frame, Scrollbar, Listbox, LEFT, RIGHT, Y, END, Label, Menu
+except ImportError as e:
+    # Python3
+    from tkinter import Frame, Scrollbar, Listbox, LEFT, RIGHT, Y, END, Label, Menu
+
 import json, os, sys, shutil
 from shutil import copyfile
 sys.path.append('..')
@@ -126,7 +133,7 @@ class Gamelist():
                     self.selected_platform   = str(list_game['platform'])
 
                     # parse drive and system from json data
-                    path_array = filter(None, self.selected_path.split('/'))
+                    path_array = list(filter(None, self.selected_path.split('/')))
                     self.drive_system_path_array[0] = path_array[0]
                     self.drive_system_path_array[1] = path_array[1]
                     self.drive_system_path_array[2] = '/'.join(path_array[2:len(path_array)]).replace('//', '')
