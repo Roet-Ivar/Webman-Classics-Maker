@@ -1,4 +1,3 @@
-from __future__ import print_function
 import sys, os, zipfile
 from ..global_paths import BuildPaths
 

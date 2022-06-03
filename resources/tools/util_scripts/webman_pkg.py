@@ -1,9 +1,16 @@
 
-from __future__ import with_statement
 from __future__ import print_function
-import struct, sys, os, shutil, json, re
-from resources.tools.util_scripts import AppPaths
-from resources.tools.util_scripts import GlobalVar
+from __future__ import with_statement
+
+import json
+import os
+import re
+import shutil
+import struct
+import sys
+
+from global_paths import AppPaths
+from global_paths import GlobalVar
 
 pkgcrypt_ver = 'py'
 

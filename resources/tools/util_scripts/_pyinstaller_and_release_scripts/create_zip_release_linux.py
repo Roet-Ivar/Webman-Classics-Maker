@@ -1,6 +1,5 @@
-from __future__ import print_function
 import os, zipfile
-from resources.tools.util_scripts import BuildPaths
+from global_paths import BuildPaths
 
 def zipdir(path, ziph):
 	# ziph is zipfile handle

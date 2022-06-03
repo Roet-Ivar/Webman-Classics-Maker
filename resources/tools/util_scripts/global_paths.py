@@ -1,4 +1,3 @@
-from __future__ import print_function
 import sys, os
 if getattr(sys, 'frozen', False):
     application_path = os.path.join(os.path.dirname(sys.executable))

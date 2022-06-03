@@ -1,9 +1,8 @@
-from __future__ import print_function
 import json
 import os
 import urllib
 import urllib.parse
-from resources.tools.util_scripts import AppPaths
+from global_paths import AppPaths
 
 class Edit_launch_txt:
 	def execute(self):
@@ -11,7 +10,7 @@ class Edit_launch_txt:
 			with open(os.path.join(AppPaths.game_work_dir, 'pkg.json')) as f:
 				json_data = json.load(f)
 
-			from resources.tools.util_scripts import FtpSettings
+			from global_paths import FtpSettings
 
 			# init variables
 			web_command_string = ''

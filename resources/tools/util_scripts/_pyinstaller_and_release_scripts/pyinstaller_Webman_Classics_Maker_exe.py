@@ -2,14 +2,13 @@
 # pyinstaller.exe --onefile --noconsole --icon=./resources/image_resources/param_sfo.ico start_edit_param_sfo.py
 # pyinstaller.exe --onefile --icon=./resources/image_resources/webman.ico ./resources/tools/util_scripts/build_all_scripts.py
 # NOTE: '--noconsole' is optional and seems to give a false positive on my AV
-from __future__ import print_function
 
 import os
 import subprocess
 import sys
 from shutil import rmtree
 
-import application_path
+import add_application_path
 from global_paths import AppPaths
 from global_paths import BuildPaths
 from global_paths import ImagePaths

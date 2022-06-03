@@ -1,4 +1,3 @@
-from __future__ import print_function
 import traceback
 
 from write_json_to_param_sfo import Write_param_sfo
@@ -12,7 +11,7 @@ from resign_eboot import Resign_eboot
 
 from create_pkg import Webman_pkg
 
-from resources.tools.util_scripts import AppPaths
+from global_paths import AppPaths
 
 class Webman_PKG:
 	def build(self):

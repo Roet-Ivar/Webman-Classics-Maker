@@ -1,4 +1,3 @@
-from __future__ import print_function
 try:
     # Python2
     import Tkinter as tk

@@ -22,10 +22,10 @@ if getattr(sys, 'frozen', False):
 else:
     sys.path.append('..')
 
-from resources.tools.util_scripts import AppPaths
-from resources.tools.util_scripts import GlobalVar
-from resources.tools.util_scripts import GameListData
-from resources.tools.util_scripts import FtpSettings
+from global_paths import AppPaths
+from global_paths import GlobalVar
+from global_paths import GameListData
+from global_paths import FtpSettings
 
 sys.path.append(AppPaths.settings)
 

@@ -1,9 +1,8 @@
-from __future__ import print_function
 import json, os
 import sys
 import subprocess
 from shutil import copyfile
-from resources.tools.util_scripts import AppPaths
+from global_paths import AppPaths
 
 class Resign_eboot:
 	def execute(self):

@@ -10,9 +10,9 @@ except ImportError as e:
 import json, os, sys, shutil
 
 sys.path.append('..')
-from resources.tools.util_scripts import AppPaths
-from resources.tools.util_scripts import GlobalVar
-from resources.tools.util_scripts import GameListData
+from global_paths import AppPaths
+from global_paths  import GlobalVar
+from global_paths  import GameListData
 
 
 class Gamelist():

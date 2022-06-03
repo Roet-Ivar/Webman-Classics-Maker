@@ -1,6 +1,6 @@
 import json, os, re, requests
 from bs4 import BeautifulSoup
-from resources.tools.util_scripts import AppPaths
+from global_paths import AppPaths
 
 game_list_file_name = []
 page_link_list = []

@@ -7,22 +7,14 @@ import sys
 from global_paths import GlobalVar
 from global_paths import AppPaths
 
-
-#
-# Create PS3 PKG
-# https://github.com/sahlberg/pop-fe/blob/ebdc57d8fcd53fe9bed4ecab6091fdc78f0a0037/pop-fe.py#L771
-#
-
 class Webman_pkg:
     def execute(self):
-
-
 
         with open(os.path.join(AppPaths.game_work_dir, 'pkg.json')) as f:
             json_data = json.load(f)
 
-        contentid = str(json_data['content_id'])
-        titleid = str(json_data['title_id'])
+        content_id = str(json_data['content_id'])
+        title_id = str(json_data['title_id'])
         filepath = str(json_data['path'])
         filename = str(json_data['filename'])
 
@@ -33,7 +25,7 @@ class Webman_pkg:
             if tmp_filename.upper().endswith(file_ext):
                 tmp_filename = tmp_filename[0:len(tmp_filename)-len(file_ext)]
                 break
-        pkg_name = tmp_filename.replace(' ', '_') + '_(' + titleid.replace('-', '') + ')' + '.pkg'
+        pkg_name = tmp_filename.replace(' ', '_') + '_(' + title_id.replace('-', '') + ')' + '.pkg'
         build_dir_path = os.path.join(AppPaths.game_work_dir, '..')
 
         print('DEBUG pkg_name: ' + pkg_name)
@@ -43,25 +35,7 @@ class Webman_pkg:
             print('DEBUG build_dir_path: ' + build_dir_path + ' is a path')
 
         print('Create PKG')
-        # if os.name == 'posix':
-        subprocess.call(['python3', 'resources/tools/ps3py/pkg.py', '-c', contentid, pkg_dir_path, pkg_name])
-        # else:
-        #     subprocess.call(['pkg.exe','-c', 'UP9000-%s_00-0000000000000001' % game_id,subdir + game_id, dest])
-        # temp_files.append(subdir + game_id + '/USRDIR/CONTENT')
-        # temp_files.append(subdir + game_id + '/USRDIR/SAVEDATA')
-        # temp_files.append(subdir + game_id + '/USRDIR')
-        # temp_files.append(subdir + game_id)
-        # print('Finished.', dest, 'created')
-        # for f in temp_files:
-        #     print('Deleting temp file', f) if verbose else None
-        #     try:
-        #         os.unlink(f)
-        #     except:
-        #         try:
-        #             os.rmdir(f)
-        #         except:
-        #             True
-
+        subprocess.call(['python3', 'resources/tools/ps3py/pkg.py', '-c', content_id, pkg_dir_path, pkg_name])
 
         if os.path.isdir(build_dir_path) and os.path.isfile(pkg_name):
             if os.path.isfile(os.path.join(build_dir_path, pkg_name)):
