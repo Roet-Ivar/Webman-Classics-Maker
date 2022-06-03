@@ -22,7 +22,8 @@ else:
         application_path = os.getcwd()
         running_mode = 'Interactive'
 
-class App:
+class AppPaths:
+    game_work_dir   = ''
     application_path = application_path
     # in application folder
     builds          = os.path.join(application_path, 'builds')
@@ -62,44 +63,43 @@ class App:
                     tmp_filename = filename[0:len(filename)-len(file_ext)]
                     break
             game_folder_name = tmp_filename.replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
-            game_build_dir = os.path.join(App.builds, game_folder_name)
+            game_build_dir = os.path.join(AppPaths.builds, game_folder_name)
             return game_build_dir
         else:
             return None
 
-    game_work_dir   = ''
 
-class Image:
-    images          = os.path.join(App.resources, 'images')
+class ImagePaths:
+    images          = os.path.join(AppPaths.resources, 'images')
     # in images
     misc            = os.path.join(images, 'misc')
     pkg             = os.path.join(images, 'pkg')
     xmb             = os.path.join(images, 'xmb')
 
-class Metadata:
+class MetadataPaths:
     launchbox_base_image_url = 'https://gamesdb.launchbox-app.com/games/images/'
 
-class Build:
+class BuildPaths:
     application_path = application_path
     zip_dir          = application_path
     release          = os.path.join(application_path, 'release')
-    util_scripts     = App.util_scripts
+    util_scripts     = AppPaths.util_scripts
     pyinstaller      = os.path.join(util_scripts, '_pyinstaller_and_release_scripts')
 
-    Param_SFO_Editor = os.path.join(App.tools, 'Param_SFO_Editor')
+    Param_SFO_Editor = os.path.join(AppPaths.tools, 'Param_SFO_Editor')
 
 class FtpSettings:
     # ftp settings
     import json
     import shutil
 
-    ftp_settings_path = os.path.join(App.settings, 'ftp_settings.cfg')
-    if not os.path.isdir(App.settings):
-        os.mkdir(App.settings)
-        if os.path.isfile(os.path.join(App.util_resources, 'ftp_settings.cfg.BAK')):
-            shutil.copyfile(os.path.join(App.util_resources, 'ftp_settings.cfg.BAK'), ftp_settings_path)
+    ftp_settings_path = os.path.join(AppPaths.settings, 'ftp_settings.cfg')
+    if not os.path.isdir(AppPaths.settings):
+        os.mkdir(AppPaths.settings)
+        if os.path.isfile(os.path.join(AppPaths.util_resources, 'ftp_settings.cfg.BAK')):
+            shutil.copyfile(os.path.join(AppPaths.util_resources, 'ftp_settings.cfg.BAK'), ftp_settings_path)
         else:
-            print('Error: ' + os.path.join(App.util_resources, 'ftp_settings.cfg.BAK') + ' could not be find.')
+            print('Error: ' + os.path.join(AppPaths.util_resources, 'ftp_settings.cfg.BAK') + ' could not be find.')
     with open(ftp_settings_path) as f:
         ftp_settings_file = json.load(f)
         f.close()
@@ -131,8 +131,8 @@ class GameListData:
     import json
     from shutil import copyfile
 
-    GAME_LIST_DATA_PATH = os.path.join(App.application_path, 'game_list_data.json')
-    GAME_LIST_DATA_BAK_PATH = os.path.join(App.util_resources, 'game_list_data.json.BAK')
+    GAME_LIST_DATA_PATH = os.path.join(AppPaths.application_path, 'game_list_data.json')
+    GAME_LIST_DATA_BAK_PATH = os.path.join(AppPaths.util_resources, 'game_list_data.json.BAK')
 
     game_list_data_json = None
     game_list_data_bak_json = None
@@ -157,7 +157,7 @@ class GameListData:
                 self.game_list_data_json = json.load(f)
         except Exception as e:
             print("""Error in 'game_list_data.json' contains incorrect json-syntax. Either remove it or find the error using json lint""")
-            print("Details: " + e.message)
+            print("Details: " + getattr(e, 'message', repr(e)))
         return self.game_list_data_json
 
     def duplicate_title_checker(self, title):
@@ -286,5 +286,5 @@ class GlobalDef:
                 shutil.copy2(s, d)
 
 
-if not os.path.exists(os.path.join(App.wcm_work_dir, 'pkg')):
-    os.makedirs(os.path.join(App.wcm_work_dir, 'pkg'))
+if not os.path.exists(os.path.join(AppPaths.wcm_work_dir, 'pkg')):
+    os.makedirs(os.path.join(AppPaths.wcm_work_dir, 'pkg'))

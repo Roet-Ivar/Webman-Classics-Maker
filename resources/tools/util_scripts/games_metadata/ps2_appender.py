@@ -1,5 +1,5 @@
 import json, os
-from global_paths import App as AppPaths
+from resources.tools.util_scripts import AppPaths
 
 with open(os.path.join(AppPaths.games_metadata, 'GamesIndex_2.json')) as f:
     pcsx2_all_list_data = json.load(f)

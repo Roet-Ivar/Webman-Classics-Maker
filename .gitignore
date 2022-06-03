@@ -2,7 +2,7 @@
 Build_Webman_PKG.exe
 Edit_Param_SFO.exe
 FTP_Game_List.exe
-Webman_Classics_Maker.exe
+webman-classics-maker.exe
 game_list.txt
 builds
 release
@@ -16,5 +16,5 @@ resources/tools/util_scripts/wcm_gui/work_dir/pkg/ICON0.PNG
 resources/tools/util_scripts/wcm_gui/work_dir/pkg.json
 resources/tools/util_scripts/wcm_gui/work_dir/preview.png
 game_list_data.json
-resources/tools/util_scripts/_pyinstaller_and_release_scripts/build/Webman_Classics_Maker.spec
-resources/tools/util_scripts/_pyinstaller_and_release_scripts/build/Webman_Classics_Maker/Webman_Classics_Maker.exe.manifest
+resources/tools/util_scripts/_pyinstaller_and_release_scripts/build/webman-classics-maker.spec
+resources/tools/util_scripts/_pyinstaller_and_release_scripts/build/webman-classics-maker/webman-classics-maker.exe.manifest

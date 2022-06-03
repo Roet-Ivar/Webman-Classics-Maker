@@ -1,5 +1,10 @@
 from __future__ import print_function
-import json, os, re, sys, time, traceback
+
+import json
+import os
+import re
+import sys
+
 try:
     # Python2
     import StringIO
@@ -8,10 +13,8 @@ except ImportError as e:
     import io
     from io import StringIO
 
-import PIL.Image as Image
 # pip install tqdm
 from tqdm import tqdm
-from shutil import copyfile
 
 # adding util_scripts depending on if it's an executable or if it's running from the wcm_gui
 if getattr(sys, 'frozen', False):
@@ -19,11 +22,10 @@ if getattr(sys, 'frozen', False):
 else:
     sys.path.append('..')
 
-from global_paths import App as AppPaths
-from global_paths import GlobalVar
-from global_paths import GlobalDef
-from global_paths import GameListData
-from global_paths import FtpSettings
+from resources.tools.util_scripts import AppPaths
+from resources.tools.util_scripts import GlobalVar
+from resources.tools.util_scripts import GameListData
+from resources.tools.util_scripts import FtpSettings
 
 sys.path.append(AppPaths.settings)
 
@@ -368,7 +370,7 @@ class FtpGameList():
 
         except Exception as e:
             print('ERROR could not parse platform')
-            print(e.message)
+            print(getattr(e, 'message', repr(e)))
 
         try:
             # if no offset
@@ -384,7 +386,7 @@ class FtpGameList():
 
         # retry connection
         except Exception as e:
-            print('DEBUG Error: ' + e.message)
+            print('DEBUG Error: ' + getattr(e, 'message', repr(e)))
             print('Connection timed out, re-connecting in ' + str(FtpSettings.ftp_timeout) + 's...\n')
 
             self.ftp = FtpSettings().get_ftp()
@@ -421,7 +423,7 @@ class FtpGameList():
         try:
             ftp.retrlines('MLSD ' + folder_path, stuff.append)
         except Exception as e:
-            print('DEBUG retrlines error: ' + e.message + '\n during command retrlines(\'MLSD ' + folder_path + '\')')
+            print('DEBUG retrlines error: ' + getattr(e, 'message', repr(e)) + '\n during command retrlines(\'MLSD ' + folder_path + '\')')
 
             try:
                 print('DEBUG retrying -> retrlines(\'MLSD ' + folder_path + '\')')
@@ -429,7 +431,7 @@ class FtpGameList():
                 self.ftp.retrlines('MLSD ' + folder_path, stuff.append)
 
             except Exception as e:
-                print('DEBUG retrlines error: ' + e.message + '\n during retry of command retrlines(\'MLSD ' + folder_path + '\')')
+                print('DEBUG retrlines error: ' + getattr(e, 'message', repr(e)) + '\n during retry of command retrlines(\'MLSD ' + folder_path + '\')')
                 return files
 
 
@@ -512,8 +514,8 @@ class FTPDataHandler:
                 data = conn.recv(1460)
             except Exception as e1:
                 error_msg = ''
-                if e1.message is not '':
-                    error_msg = e1.message
+                if getattr(e1, 'message', repr(e1)) is not '':
+                    error_msg = getattr(e1, 'message', repr(e1))
                 else:
                     error_msg = repr(e1)
                     # print('DEBUG ERROR traceback: ' + str(traceback.print_exc()))
@@ -580,8 +582,8 @@ class FTPDataHandler:
                                     pass
 
                         # Error 451 is normal when closing the connection
-                        if '451' not in e.message:
-                            print('DEBUG - connection ' + e.message + ' during data fetching of \'' + filename + '\'')
+                        if '451' not in getattr(e, 'message', repr(e)):
+                            print('DEBUG - connection ' + getattr(e, 'message', repr(e)) + ' during data fetching of \'' + filename + '\'')
                         break
 
         return game_title_id, icon0, pic0, pic1, pic2, at3, pam
@@ -609,7 +611,7 @@ def get_title_id_from_buffer(self, platform, buffer_data):
                 title_id = title_id[0:len(title_id)-1]
 
     except Exception as e:
-        print('ERROR -> get_title_id_from_buffer: ' + e.message)
+        print('ERROR -> get_title_id_from_buffer: ' + getattr(e, 'message', repr(e)))
     finally:
         return title_id
 
@@ -707,7 +709,7 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
         return self.icon0_image, self.pic0_image, self.pic1_image, self.pic2_image
 
     except Exception as e:
-        print('ERROR: get_png_from_buffer - ' + e.message)
+        print('ERROR: get_png_from_buffer - ' + getattr(e, 'message', repr(e)))
         return self.icon0_image, self.pic0_image, self.pic1_image, self.pic2_image
 
 
@@ -764,7 +766,7 @@ def get_PAM_from_buffer(self, platform, game_name, buffer_data):
         return self.pam_image
 
     except Exception as e:
-        print('ERROR: get_PAM_from_buffer - ' + e.message)
+        print('ERROR: get_PAM_from_buffer - ' + getattr(e, 'message', repr(e)))
         return self.pam_image
 
 
@@ -819,7 +821,7 @@ def get_AT3_from_buffer(self, platform, game_name, buffer_data):
         return self.at3_image
 
     except Exception as e:
-        print('ERROR: get_AT3_from_buffer - ' + e.message)
+        print('ERROR: get_AT3_from_buffer - ' + getattr(e, 'message', repr(e)))
         return self.at3_image
 
 def image_saver(ftp, platform_path, platform, game_build_dir, images):
@@ -857,7 +859,7 @@ def image_saver(ftp, platform_path, platform, game_build_dir, images):
         try:
             ftp.retrlines('MLSD ' + PS3_GAME_path, stuff.append)
         except Exception as e:
-            print('DEBUG image_saver - retrlines error: ' + e.message + '\n during command retrlines(\'MLSD ' + PS3_GAME_path + '\')')
+            print('DEBUG image_saver - retrlines error: ' + getattr(e, 'message', repr(e)) + '\n during command retrlines(\'MLSD ' + PS3_GAME_path + '\')')
             # retry
             print('Retrying ...')
             ftp.retrlines('MLSD ' + PS3_GAME_path, stuff.append)
@@ -880,7 +882,7 @@ def image_saver(ftp, platform_path, platform, game_build_dir, images):
                         ftp.retrbinary("RETR " + filepath, callback=data.append)
                         file_data_list[filename_list.index(pkg_fname)] = ''.join(data)
                     except Exception as e:
-                        print('DEBUG image_saver() - retrlines error: ' + e.message)
+                        print('DEBUG image_saver() - retrlines error: ' + getattr(e, 'message', repr(e)))
                         print('Skipping ' + pkg_fname + ' for ' + split_path[len(split_path) - 2])
                         continue
             # assign any all data values to our file variables

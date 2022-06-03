@@ -4,10 +4,15 @@ import traceback
 from write_json_to_param_sfo import Write_param_sfo
 from content_id_elf_replace import Elf_replace
 from edit_launch_txt import Edit_launch_txt
-from resign_eboot import Resign_eboot
-from webman_pkg import Webman_pkg
 
-from global_paths import App as AppPaths
+# if getattr(sys, 'frozen', False):
+from resign_eboot import Resign_eboot
+# else:
+# 	from resign_eboot_linux import Resign_eboot
+
+from create_pkg import Webman_pkg
+
+from resources.tools.util_scripts import AppPaths
 
 class Webman_PKG:
 	def build(self):
@@ -41,8 +46,8 @@ class Webman_PKG:
 			print('[5/5] Execution of \'webman_pkg.py\':              FAILED')
 			print('-----------------------------------------------------')
 			print('Could not build pkg and/or return pkg_name!')
-			if e.message:
-				print('ERROR: ' + e.message)
+			if getattr(e, 'message', repr(e)):
+				print('ERROR: ' + getattr(e, 'message', repr(e)))
 
 			if repr(e):
 				print('DEBUG ERROR traceback: ' + str(traceback.print_exc()))

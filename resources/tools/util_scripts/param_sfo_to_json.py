@@ -1,7 +1,7 @@
 from __future__ import print_function
 import os, json
 
-from global_paths import App as AppPaths
+from resources.tools.util_scripts import AppPaths
 
 class Param_to_json:
 	def execute(self):

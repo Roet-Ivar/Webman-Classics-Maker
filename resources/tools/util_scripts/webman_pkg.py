@@ -2,8 +2,8 @@
 from __future__ import with_statement
 from __future__ import print_function
 import struct, sys, os, shutil, json, re
-from global_paths import App as AppPaths
-from global_paths import GlobalVar
+from resources.tools.util_scripts import AppPaths
+from resources.tools.util_scripts import GlobalVar
 
 pkgcrypt_ver = 'py'
 
@@ -19,12 +19,12 @@ if struct.calcsize('P') * 8 == 64:
 else:
 	pkgcrypt_ver += '32'
 
-# if running the webman_classics_maker.exe from root
+# if running the webman-classics-maker.exe from root
 if getattr(sys, 'frozen', False):
     pkgcrypt_path = os.path.join(AppPaths.util_scripts, 'pkgcrypt', pkgcrypt_ver)
     sys.path.append(pkgcrypt_path)
 else:
-	# running webman_classics_maker.py from root
+	# running webman-classics-maker.py from root
 	pkgcrypt_path = os.path.join(AppPaths.pkgcrypt, pkgcrypt_ver)
 	sys.path.append(pkgcrypt_path)
 
@@ -348,7 +348,6 @@ except ImportError as e:
     # Python3
     import configparser
 
-import io
 import glob
 
 TYPE_NPDRMSELF = 0x1

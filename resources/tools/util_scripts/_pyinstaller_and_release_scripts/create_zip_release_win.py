@@ -1,9 +1,6 @@
 from __future__ import print_function
 import sys, os, zipfile
-import application_path
-from global_paths import Build as BuildPaths
-
-import pyinstaller_Webman_Classics_Maker_exe
+from ..global_paths import BuildPaths
 
 def zipdir(path, ziph):
 	# ziph is zipfile handle
@@ -80,14 +77,14 @@ def zipdir(path, ziph):
 				webman_classics_maker_exist = True
 
 	if((webman_classics_maker_exist) == False):
-		print("Warning: Couldn't find Webman_Classics_Maker.exe")
+		print("Warning: Couldn't find webman-classics-maker.exe")
 		print('Try rebuilding binaries using the included pyinstaller scripts.')
 		sys.exit()
 
 if __name__ == '__main__':
 
 	# windows release
-	zip_archive_name = 'webman_classics_maker_v2.2.x_win.zip'
+	zip_archive_name = 'webman-classics-maker_v2.2.x_win.zip'
 	zip_dir_path = BuildPaths.zip_dir
 	release_dir = BuildPaths.release
 
@@ -99,8 +96,8 @@ if __name__ == '__main__':
 	zipf.close()
 
 	print('The release archive has sucessfully been package and distributed to:\n' + '/release/' + zip_archive_name)
-	try:
-		# pause
-		input = raw_input
-	except NameError: pass
-	input('\npress ENTER to continue...')
+	# try:
+	# 	# pause
+	# 	input = raw_input
+	# except NameError: pass
+	# input('\npress ENTER to continue...')

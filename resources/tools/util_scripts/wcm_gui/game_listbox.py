@@ -1,4 +1,5 @@
 from __future__ import print_function
+
 try:
     # Python2
     from Tkinter import Frame, Scrollbar, Listbox, LEFT, RIGHT, Y, END, Label, Menu
@@ -7,11 +8,12 @@ except ImportError as e:
     from tkinter import Frame, Scrollbar, Listbox, LEFT, RIGHT, Y, END, Label, Menu
 
 import json, os, sys, shutil
-from shutil import copyfile
+
 sys.path.append('..')
-from global_paths import App as AppPaths
-from global_paths import GlobalVar
-from global_paths import GameListData
+from resources.tools.util_scripts import AppPaths
+from resources.tools.util_scripts import GlobalVar
+from resources.tools.util_scripts import GameListData
+
 
 class Gamelist():
     def __init__(self, drive, platform):
@@ -24,26 +26,26 @@ class Gamelist():
             self.drive_to_show = '/dev_' + drive.lower() + '/'
 
         self.platform_to_show = platform + '_games'
-        self.WCM_BASE_PATH  = AppPaths.wcm_gui
+        self.WCM_BASE_PATH = AppPaths.wcm_gui
         self.last_selection = (None, 0)
         self.list_of_items = []
 
-        self.selected_title_id   = None
-        self.selected_title      = None
-        self.selected_path       = None
-        self.selected_filename   = None
+        self.selected_title_id = None
+        self.selected_title = None
+        self.selected_path = None
+        self.selected_filename = None
         self.drive_system_path_array = None
 
         self.is_cleared = False
 
-
-    def create_main_frame(self, entry_field_title_id, entry_field_title, entry_field_filename, entry_field_iso_path, entry_field_platform, drive_system_array):
-        self.entry_field_title_id       = entry_field_title_id
-        self.entry_field_title          = entry_field_title
-        self.entry_field_filename       = entry_field_filename
-        self.entry_field_iso_path       = entry_field_iso_path
-        self.entry_field_platform       = entry_field_platform
-        self.drive_system_path_array    = drive_system_array
+    def create_main_frame(self, entry_field_title_id, entry_field_title, entry_field_filename, entry_field_iso_path,
+                          entry_field_platform, drive_system_array):
+        self.entry_field_title_id = entry_field_title_id
+        self.entry_field_title = entry_field_title
+        self.entry_field_filename = entry_field_filename
+        self.entry_field_iso_path = entry_field_iso_path
+        self.entry_field_platform = entry_field_platform
+        self.drive_system_path_array = drive_system_array
 
         self.corrected_index = []
         self.main_frame = Frame()
@@ -59,22 +61,17 @@ class Gamelist():
         # self.popup_menu.add_command(label="Select All",
         #                             command=self.select_all)
 
-
-
-
         s = Scrollbar(self.main_frame)
         self._listbox = Listbox(self.main_frame, width=465)
         self._listbox.bind('<Enter>', self._bound_to_mousewheel)
         self._listbox.bind('<Leave>', self._unbound_to_mousewheel)
-        self._listbox.bind("<Button-3>", self.popup) # Button-2 on Aqua
+        self._listbox.bind("<Button-3>", self.popup)  # Button-2 on Aqua
 
         s.pack(side=RIGHT, fill=Y)
         self._listbox.pack(side=LEFT, fill=Y)
 
         s['command'] = self._listbox.yview
         self._listbox['yscrollcommand'] = s.set
-
-
 
         # default filters
         if 'ALL_games' == self.platform_to_show:
@@ -92,7 +89,6 @@ class Gamelist():
 
         for x in range(19 - self._listbox.size()):
             self.add_item('')
-
 
         # adding shade to every other row of the list
         for x in range(0, self._listbox.size()):
@@ -116,7 +112,6 @@ class Gamelist():
                 self.is_cleared = False
                 self.last_selection = self.new_selection
 
-
     def entry_fields_update(self, new_selection):
         for platform in self.json_game_list_data:
 
@@ -126,11 +121,11 @@ class Gamelist():
 
                 match = self.selected_title == str(tmp_title)
                 if match:
-                    self.selected_title_id   = str(list_game['title_id']).replace('-', '')
-                    self.selected_title      = str(list_game['title'])
-                    self.selected_path       = str(list_game['path'])
-                    self.selected_filename   = str(list_game['filename'])
-                    self.selected_platform   = str(list_game['platform'])
+                    self.selected_title_id = str(list_game['title_id']).replace('-', '')
+                    self.selected_title = str(list_game['title'])
+                    self.selected_path = str(list_game['path'])
+                    self.selected_filename = str(list_game['filename'])
+                    self.selected_platform = str(list_game['platform'])
 
                     # parse drive and system from json data
                     path_array = list(filter(None, self.selected_path.split('/')))
@@ -138,8 +133,7 @@ class Gamelist():
                     self.drive_system_path_array[1] = path_array[1]
                     self.drive_system_path_array[2] = '/'.join(path_array[2:len(path_array)]).replace('//', '')
 
-
-                    self.entry_field_title_id.delete(0, len(self.entry_field_title_id.get())-1)
+                    self.entry_field_title_id.delete(0, len(self.entry_field_title_id.get()) - 1)
                     self.entry_field_title_id.delete(0, END)
                     self.entry_field_title_id.insert(0, self.selected_title_id)
 
@@ -153,8 +147,6 @@ class Gamelist():
                     self.entry_field_platform.insert(0, self.selected_platform)
 
                     return True
-
-
 
     def get_selected_path(self):
         return self.current_iso_path
@@ -205,7 +197,7 @@ class Gamelist():
         self._listbox.unbind_all("<MouseWheel>")
 
     def _on_mousewheel(self, event):
-        self._listbox.yview_scroll(int(-1*(event.delta/30)), "units")
+        self._listbox.yview_scroll(int(-1 * (event.delta / 30)), "units")
 
     def popup(self, event):
         try:
@@ -219,9 +211,17 @@ class Gamelist():
                 self.popup_menu.focus_set()
 
     def delete_selected(self):
-        import tkMessageBox
+        try:
+            # Python2
+            import tkMessageBox
+        except ImportError as e:
+            # Python3
+            import tkinter.messagebox as tkMessageBox
+
         game_folder_path = os.path.join(AppPaths.game_work_dir, '..')
-        response = tkMessageBox.askyesno('Delete game folder', 'Delete \'' + self.entry_field_title.get() + '\'?\n\nFolder path: ' + os.path.realpath(game_folder_path))
+        response = tkMessageBox.askyesno('Delete game folder',
+                                         'Delete \'' + self.entry_field_title.get() + '\'?\n\nFolder path: ' + os.path.realpath(
+                                             game_folder_path))
         # yes
         if response:
             # remove game from visual game list
@@ -231,7 +231,8 @@ class Gamelist():
 
             # remove game from json game list
             platform_key = self.entry_field_platform.get() + '_games'
-            self.json_game_list_data[platform_key] = [x for x in self.json_game_list_data[platform_key] if x['title'] != self.selected_title]
+            self.json_game_list_data[platform_key] = [x for x in self.json_game_list_data[platform_key] if
+                                                      x['title'] != self.selected_title]
 
             # update the json game list file
             with open(GameListData.GAME_LIST_DATA_PATH, 'w') as newFile:
@@ -246,7 +247,7 @@ class Gamelist():
                 # clear entry_fields
                 self.clear_entries_and_path()
                 # set cursor
-                self._listbox.select_set(removed_index) #This only sets focus on the first item.
+                self._listbox.select_set(removed_index)  # This only sets focus on the first item.
 
     def rename_selected(self):
         self.entry_field_title.selection_range(0, END)
@@ -255,17 +256,14 @@ class Gamelist():
     def select_all(self):
         self._listbox.selection_set(0, 'end')
 
-
     def clear_entries_and_path(self):
-        self.entry_field_title_id.delete(0, len(self.entry_field_title_id.get())-1)
+        self.entry_field_title_id.delete(0, len(self.entry_field_title_id.get()) - 1)
         self.entry_field_title_id.delete(0, END)
         self.entry_field_title.delete(0, END)
         self.entry_field_platform.delete(0, END)
         self.entry_field_filename.delete(0, END)
 
         self.is_cleared = True
-
-
 
     def get_selected_build_dir_path(self):
         self.build_dir_path = ''
@@ -278,10 +276,9 @@ class Gamelist():
             # removes the file extension from tmp_filename
             for file_ext in GlobalVar.file_extensions:
                 if filename.upper().endswith(file_ext):
-                    tmp_filename = filename[0:len(filename)-len(file_ext)]
+                    tmp_filename = filename[0:len(filename) - len(file_ext)]
                     break
             game_folder_name = tmp_filename.replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
 
             self.build_dir_path = os.path.join(build_base_path, game_folder_name)
         return self.build_dir_path
-

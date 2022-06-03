@@ -1,5 +1,8 @@
 from __future__ import print_function
-import sys, os
+
+import os
+import sys
+
 if getattr(sys, 'frozen', False):
     application_path = os.path.dirname(sys.executable)
     running_mode = 'Frozen/executable'
@@ -24,5 +27,5 @@ else:
         application_path = os.getcwd()
         running_mode = 'Interactive'
 
-    # adds util_scripts in order to have access to the global_paths
+# adds path to util_scripts in order to have access to the global_paths
 sys.path.append(os.path.join(application_path, 'resources', 'tools', 'util_scripts'))

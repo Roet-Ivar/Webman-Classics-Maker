@@ -1,7 +1,6 @@
 from __future__ import print_function
-import sys, os, zipfile
-import application_path
-from global_paths import Build as BuildPaths
+import os, zipfile
+from resources.tools.util_scripts import BuildPaths
 
 def zipdir(path, ziph):
 	# ziph is zipfile handle
@@ -67,8 +66,8 @@ def zipdir(path, ziph):
 			files.remove('Edit_Param_SFO.exe')
 		if 'FTP_Game_List.exe' in files:
 			files.remove('FTP_Game_List.exe')
-		if 'Webman_Classics_Maker.exe' in files:
-			files.remove('Webman_Classics_Maker.exe')
+		if 'webman-classics-maker.exe' in files:
+			files.remove('webman-classics-maker.exe')
 
 		for file in files:
 			if file.endswith('.zip') is not True and file.endswith('.pyc') is not True:
@@ -77,7 +76,7 @@ def zipdir(path, ziph):
 if __name__ == '__main__':
 
 	# Linux release
-	zip_archive_name = 'webman_classics_maker_v2.0_linux.zip'
+	zip_archive_name = 'webman-classics-maker_v2.2.x_linux.zip'
 	zip_dir_path = BuildPaths.zip_dir
 	release_dir = BuildPaths.release
 

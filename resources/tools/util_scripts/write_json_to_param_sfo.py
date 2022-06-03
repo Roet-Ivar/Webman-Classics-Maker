@@ -1,12 +1,15 @@
 from __future__ import print_function
 import os
 import json
-from global_paths import App as AppPaths
+from resources.tools.util_scripts import AppPaths
 
 class Write_param_sfo():
 	def execute(self):
 		# common paths
 		try:
+			print("DEBUG game_work_dir path: " + AppPaths.game_work_dir)
+			print("DEBUG wcm_gui path: " + AppPaths.wcm_gui)
+
 			with open(os.path.join(AppPaths.game_work_dir, 'pkg.json')) as f:
 				json_data = json.load(f)
 
