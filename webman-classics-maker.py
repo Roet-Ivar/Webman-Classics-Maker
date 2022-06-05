@@ -51,7 +51,6 @@ def __init_pkg_build_dir__():
 
 
 def __init_images__(self):
-
     # ui images
     self.image_xmb_icons = Image.open(os.path.join(ImagePaths.xmb, 'XMB_icons.png'))
     self.ps3_gametype_logo = Image.open(os.path.join(ImagePaths.xmb, 'ps3_type_logo.png'))
@@ -91,7 +90,6 @@ def __init_images__(self):
     # self.change_button_image = PhotoImage(self.make_smal_button('Change', font='arial.ttf', x=-3, y=0))
     self.fetch_button_image = PhotoImage(self.make_smal_button('Fetch', font='arial.ttf', x=3, y=0))
     self.refresh_button_image = PhotoImage(self.make_smal_button('Refresh', font='arial.ttf', x=-1, y=0))
-
 
     # pkg images
     self.pkg_icon0 = None
@@ -144,23 +142,23 @@ def get_ftp_pass_from_config():
 
 def __init_buttons__(self):
     # buttons
-    self.button_icon0	 = None
-    self.button_pic0	 = None
-    self.button_pic1	 = None
+    self.button_icon0 = None
+    self.button_pic0 = None
+    self.button_pic1 = None
 
-    self.button_HDD	 	 = None
-    self.button_USB	 	 = None
+    self.button_HDD = None
+    self.button_USB = None
 
-    self.button_PSP 	 = None
-    self.button_PSX 	 = None
-    self.button_PS2 	 = None
-    self.button_PS3 	 = None
+    self.button_PSP = None
+    self.button_PSX = None
+    self.button_PS2 = None
+    self.button_PS3 = None
 
-    self.build_button	 = None
-    self.fetch_button	 = None
-    self.refresh_button	 = None
+    self.build_button = None
+    self.fetch_button = None
+    self.refresh_button = None
 
-    self.drive_dropdown	 = None
+    self.drive_dropdown = None
     self.platform_dropdown = None
 
     # text tooltip messages
@@ -192,13 +190,13 @@ class Main:
         self.main_offset_y_pos = 50
 
         # common paths
-        self.WCM_BASE_PATH 		= AppPaths.wcm_gui
-        self.pkg_dir 			= AppPaths.pkg
-        self.wcm_work_dir 		= AppPaths.wcm_work_dir
-        self.wcm_pkg_dir 		= os.path.join(self.wcm_work_dir, 'pkg')
-        self.builds_path 		= AppPaths.builds
-        self.ftp_settings_path 	= os.path.join(AppPaths.settings, 'ftp_settings.cfg')
-        self.fonts_path 		= AppPaths.fonts
+        self.WCM_BASE_PATH = AppPaths.wcm_gui
+        self.pkg_dir = AppPaths.pkg
+        self.wcm_work_dir = AppPaths.wcm_work_dir
+        self.wcm_pkg_dir = os.path.join(self.wcm_work_dir, 'pkg')
+        self.builds_path = AppPaths.builds
+        self.ftp_settings_path = os.path.join(AppPaths.settings, 'ftp_settings.cfg')
+        self.fonts_path = AppPaths.fonts
 
         self.vcmd = self.main.register(self.dynamic_validate_title_id)
         self.vcmd2 = self.main.register(self.dynamic_validate_title_id)
@@ -225,8 +223,6 @@ class Main:
         self.canvas.pack(fill=BOTH, expand=YES)
         self.image_on_canvas = self.canvas.create_image(0, 0, anchor=NW, image=self.current_background)
 
-
-
         self.init_default_view(self.main)
         self.draw_background_on_canvas()
 
@@ -240,8 +236,6 @@ class Main:
 
         self.drive_dropdown = DriveDropdown(self.canvas, self.game_list_box).get_box()
         self.platform_dropdown = PlatformDropdown(self.canvas, self.game_list_box).get_box()
-
-
 
     def create_dropdowns(self):
         # ensure drive_dropdown into the listbox
@@ -344,8 +338,6 @@ class Main:
                                            os.path.join(self.fonts_path, tmp_font))
         return copy.copy(icon_bg_img)
 
-
-
     def load_default_pkg_images(self, filename):
         default_pkg_img_dir = os.path.join(ImagePaths.pkg, 'default')
         return Image.open(os.path.join(default_pkg_img_dir, filename)).convert("RGBA")
@@ -409,7 +401,8 @@ class Main:
                                        font=os.path.join(self.fonts_path, 'LLPIXEL3.ttf'))
 
         self.current_img = self.background_images[self.canvas_image_number]
-        self.current_img = self.current_img.resize((int(1920 * self.scaling), int(1080 * self.scaling)), Image.Resampling.LANCZOS)
+        self.current_img = self.current_img.resize((int(1920 * self.scaling), int(1080 * self.scaling)),
+                                                   Image.Resampling.LANCZOS)
 
         self.tv_frame = Image.open(
             os.path.join(ImagePaths.misc, 'tv_frame_1080_ps3_3.png')).resize(
@@ -440,21 +433,21 @@ class Main:
 
     def init_default_view(self, main):
         # Constants
-        self.text_device			= 'Device'
-        self.text_platform			= 'Type'
+        self.text_device = 'Device'
+        self.text_platform = 'Type'
 
-        self.text_title_id			= 'Title id'
-        self.text_title				= 'Title'
-        self.text_filename			= 'Filename'
-        self.text_iso_path			= 'Path'
+        self.text_title_id = 'Title id'
+        self.text_title = 'Title'
+        self.text_filename = 'Filename'
+        self.text_iso_path = 'Path'
 
-        self.text_ftp_game_list		= 'FTP Game list'
-        self.text_ps3_ip_label		= 'PS3-ip'
-        self.text_ps3_usr_label		= 'User'
-        self.text_ps3_pass_label	= 'Pass'
+        self.text_ftp_game_list = 'FTP Game list'
+        self.text_ps3_ip_label = 'PS3-ip'
+        self.text_ps3_usr_label = 'User'
+        self.text_ps3_pass_label = 'Pass'
 
         # Paddings
-        self.height_of_text		 = 15  # Font(font='Helvetica').metrics('linespace')
+        self.height_of_text = 15  # Font(font='Helvetica').metrics('linespace')
         self.dark_side_x_padding = 20
         self.dark_side_y_padding = 20
 
@@ -483,12 +476,12 @@ class Main:
         self.pic0_y_pos = 412
 
         # gamelist and entry fields
-        self.entry_field_title_id 	= Entry(main, validate='key', validatecommand=(self.vcmd, '%P'))
-        self.entry_field_title 		= Entry(main)
-        self.entry_field_filename 	= Entry(main)
-        self.entry_field_iso_path 	= Entry(main, state='readonly')
+        self.entry_field_title_id = Entry(main, validate='key', validatecommand=(self.vcmd, '%P'))
+        self.entry_field_title = Entry(main)
+        self.entry_field_filename = Entry(main)
+        self.entry_field_iso_path = Entry(main, state='readonly')
         # not visible in GUI
-        self.entry_field_platform   = Entry(main)
+        self.entry_field_platform = Entry(main)
 
         ##########################################################################
         # Adding an on_change-listener on 'entry_field_title'
@@ -551,8 +544,6 @@ class Main:
                                  command=lambda:
                                  self.on_system_button(self.drive_system_path_array[0], self.selection_system_list[3]))
 
-
-
         # build, save and remove buttons
         self.build_button = Button(main,
                                    image=self.build_button_image,
@@ -572,7 +563,6 @@ class Main:
                                    borderwidth=0,
                                    command=self.on_ftp_fetch_button,
                                    bg="#FBFCFB")
-
 
         self.refresh_button = Button(main,
                                      image=self.refresh_button_image,
@@ -643,11 +633,9 @@ class Main:
 
         self.button_spacing = 70
 
-
         # self.save_button.place(
         #     x=int((self.text_box_spacing + self.main_offset_x_pos) * scaling),
         #     y=int((self.iso_path_text_y_pos + 40) * scaling))
-
 
         self.build_button.place(
             x=int((self.text_box_spacing + self.main_offset_x_pos + 0 * 85) * self.scaling),
@@ -665,8 +653,6 @@ class Main:
             x=int((self.main_offset_x_pos + 80) * self.scaling),
             y=int((self.main_offset_y_pos + 855) * self.scaling))
 
-
-
     def init_draw_images_on_canvas(self, main, *args, **kwargs):
         tmp_image_icon0 = None
         img_to_be_changed = kwargs.get('img_to_be_changed', None)
@@ -683,10 +669,12 @@ class Main:
 
             if img_to_be_changed.lower() == 'pic1':
                 pic1_changed = True
-                self.draw_text_on_image_w_shadow(self.image_pic1, self.entry_field_title.get(), 745, 457, 32, 2, 'white', 'black')
+                self.draw_text_on_image_w_shadow(self.image_pic1, self.entry_field_title.get(), 745, 457, 32, 2,
+                                                 'white', 'black')
 
                 self.photo_image_pic1_xmb = PhotoImage(
-                    self.image_pic1.resize((int(1280 * self.scaling), int(720 * self.scaling)), Image.Resampling.LANCZOS))
+                    self.image_pic1.resize((int(1280 * self.scaling), int(720 * self.scaling)),
+                                           Image.Resampling.LANCZOS))
 
                 self.button_pic1.config(image=self.photo_image_pic1_xmb)
                 self.image_pic0 = self.image_pic0_ref
@@ -734,7 +722,6 @@ class Main:
             self.image_pic1_ref = Image.open(os.path.join(default_img_path, 'PIC1.PNG')).convert("RGBA")
             pic1_changed = True
 
-
         if pic1_changed:
             # draw xmb icons and system logo onto the background
             self.image_pic1.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
@@ -745,16 +732,15 @@ class Main:
             tmp_image_icon0 = Image.open(os.path.join(default_img_path, 'ICON0.PNG')).convert("RGBA")
             icon0_changed = True
 
-
         if pic1_changed or icon0_changed:
             # crop and blend ICON0 to the background
             tmp_icon0_bg = copy.copy(self.image_pic1_ref)
-            tmp_icon0_bg.paste(self.image_icon0.convert("RGBA"), (self.icon0_x_pos, self.icon0_y_pos), self.image_icon0.convert("RGBA"))
+            tmp_icon0_bg.paste(self.image_icon0.convert("RGBA"), (self.icon0_x_pos, self.icon0_y_pos),
+                               self.image_icon0.convert("RGBA"))
             # Image.crop((left, top, right, bottom))
             tmp_image_icon0 = tmp_icon0_bg.crop((self.icon0_x_pos, self.icon0_y_pos,
                                                  self.icon0_x_pos + self.image_icon0.width,
                                                  self.icon0_y_pos + self.image_icon0.height))
-
 
         # A PIC0 must be used for the GUI: either existing
         if os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC0.PNG')):
@@ -772,10 +758,8 @@ class Main:
         tmp_pic0_bg.paste(self.image_pic0, (self.pic0_x_pos, self.pic0_y_pos), self.image_pic0)
         # Image.crop((left, top, right, bottom))
         tmp_image_pic0 = tmp_pic0_bg.crop((self.pic0_x_pos, self.pic0_y_pos,
-                                               self.pic0_x_pos + self.image_pic0.width,
-                                               self.pic0_y_pos + self.image_pic0.height))
-
-
+                                           self.pic0_x_pos + self.image_pic0.width,
+                                           self.pic0_y_pos + self.image_pic0.height))
 
         # resize: ->853, ->480
         self.photoimage_pic1 = PhotoImage(
@@ -821,17 +805,18 @@ class Main:
 
         self.photo_image_pic0 = PhotoImage(self.image_pic0_resize)
         self.button_pic0 = Button(main,
-                                   image=self.photo_image_pic0,
-                                   highlightthickness=0,
-                                   bd=0,
-                                   command=lambda: self.image_replace_browser(main))
+                                  image=self.photo_image_pic0,
+                                  highlightthickness=0,
+                                  bd=0,
+                                  command=lambda: self.image_replace_browser(main))
         CreateToolTip(self.button_pic0, self.PIC0_TOOLTIP_MSG)
-
 
         # finally placing ICON0, PIC0 and PIC1 onto the canvas
         self.button_pic1.place(x=self.pic1_button_x_pos * self.scaling, y=self.pic1_button_y_pos * self.scaling)
-        self.button_pic0.place(x=int(self.pic0_button_x_pos * self.scaling), y=int(self.pic0_button_y_pos * self.scaling))
-        self.button_icon0.place(x=int(self.icon0_button_x_pos * self.scaling), y=int(self.icon0_button_y_pos * self.scaling))
+        self.button_pic0.place(x=int(self.pic0_button_x_pos * self.scaling),
+                               y=int(self.pic0_button_y_pos * self.scaling))
+        self.button_icon0.place(x=int(self.icon0_button_x_pos * self.scaling),
+                                y=int(self.icon0_button_y_pos * self.scaling))
 
     def draw_text_on_image(self, image, text, text_x, text_y, text_size, text_color):
         font = ImageFont.truetype(os.path.join(self.fonts_path, 'SCE-PS3.ttf'), text_size)
@@ -880,13 +865,13 @@ class Main:
         return draw.text((text_x, text_y), text, fill=text_color, font=font)
 
     # def init_main_window_buttons(self, main):
-        # button to change image
-        # self.change_button = Button(main,
-        # 							borderwidth=0,
-        # 							image=self.images_function_button[3],
-        # 							command=self.on_change_button,
-        # 							bd=1)
-        # self.change_button.place(x=40 + 13, y=1)
+    # button to change image
+    # self.change_button = Button(main,
+    # 							borderwidth=0,
+    # 							image=self.images_function_button[3],
+    # 							command=self.on_change_button,
+    # 							bd=1)
+    # self.change_button.place(x=40 + 13, y=1)
 
     def on_change_button(self):
         # next image
@@ -916,16 +901,16 @@ class Main:
         self.drive_system_path_array[0] = drive_choice
 
         current_iso_path = '/' + '/'.join([self.drive_system_path_array[0],
-                                     self.drive_system_path_array[1],
-                                     self.drive_system_path_array[2],
-                                     self.entry_field_filename.get()]).replace('//', '/')
+                                           self.drive_system_path_array[1],
+                                           self.drive_system_path_array[2],
+                                           self.entry_field_filename.get()]).replace('//', '/')
 
         self.update_iso_path_entry_field(current_iso_path)
 
     def on_system_button(self, drive_choice, system_choice):
         # print('DEBUG on_system_button')
         # if system_choice in self.entry_field_iso_path.get():
-            # print('DEBUG ' + '\'' + system_choice + '\'' + ' already set')
+        # print('DEBUG ' + '\'' + system_choice + '\'' + ' already set')
 
         # print('DEBUG system_choice: ' + system_choice)
         self.drive_system_path_array[1] = system_choice
@@ -940,7 +925,8 @@ class Main:
         # Replace current drive
         if drive_choice not in current_iso_path:
             print('DEBUG drive_choice not in current_iso_path')
-            print('DEBUG ' + '\'' + self.drive_system_path_array[0] + '\'' + ' changed -> ' + '\'' + drive_choice + '\'')
+            print(
+                'DEBUG ' + '\'' + self.drive_system_path_array[0] + '\'' + ' changed -> ' + '\'' + drive_choice + '\'')
             current_iso_path = current_iso_path.replace(self.drive_system_path_array[0], drive_choice)
             self.update_iso_path_entry_field(current_iso_path)
             self.drive_system_path_array[0] = drive_choice
@@ -948,11 +934,11 @@ class Main:
         # Replace current system
         if system_choice not in current_iso_path:
             print('DEBUG system_choice not in current_iso_path')
-            print('DEBUG ' + '\'' + self.drive_system_path_array[1] + '\'' + ' changed -> ' + '\'' + system_choice + '\'')
+            print(
+                'DEBUG ' + '\'' + self.drive_system_path_array[1] + '\'' + ' changed -> ' + '\'' + system_choice + '\'')
             current_iso_path = current_iso_path.replace(self.drive_system_path_array[1], system_choice)
             self.update_iso_path_entry_field(current_iso_path)
             self.drive_system_path_array[1] = system_choice
-
 
     def on_save_button(self):
         if self.validate_fields():
@@ -995,13 +981,11 @@ class Main:
             self.__init_pkg_images__()
             self.init_draw_images_on_canvas(self.main)
 
-
     def update_iso_path_entry_field(self, iso_path):
-            self.entry_field_iso_path.config(state='normal')
-            self.entry_field_iso_path.delete(0, END)
-            self.entry_field_iso_path.insert(0, iso_path.replace('//','/'))
-            self.entry_field_iso_path.config(state='readonly')
-
+        self.entry_field_iso_path.config(state='normal')
+        self.entry_field_iso_path.delete(0, END)
+        self.entry_field_iso_path.insert(0, iso_path.replace('//', '/'))
+        self.entry_field_iso_path.config(state='readonly')
 
     # Dynamic update of the game title on to the PIC1 image
     def dynamic_title_to_pic1(self, event):
@@ -1013,9 +997,8 @@ class Main:
         self.photo_image_pic1_xmb = PhotoImage(tmp_img)
         self.button_pic1.config(image=self.photo_image_pic1_xmb)
         self.init_draw_images_on_canvas(self.main)
-        #TODO: this might be more optimized somewhere else
+        # TODO: this might be more optimized somewhere else
         self.update_game_build_path()
-
 
     def image_replace_browser(self, main):
         image = askopenfile(mode='rb', title='Browse an image', filetypes=[('PNG image', '.PNG')])
@@ -1117,28 +1100,29 @@ class Main:
             return True
 
         if len(tmp_name) < 1:
-            self.filename_error_msg = 'DEBUG The file must have a name and any of the following extensions' + str(GlobalVar.file_extensions)
-            print(self.filename_error_msg)
+            filename_error_msg = 'DEBUG The file must have a name and any of the following extensions' + str(
+                GlobalVar.file_extensions)
+            print(filename_error_msg)
             self.entry_field_filename.focus_set()
             self.entry_field_filename.icursor(0)
             return False
 
         elif str(tmp_name).endswith(GlobalVar.file_extensions):
-            self.filename_error_msg = 'DEBUG The image file must have a name'
-            print(self.filename_error_msg)
+            filename_error_msg = 'DEBUG The image file must have a name'
+            print(filename_error_msg)
             self.entry_field_filename.focus_set()
             self.entry_field_filename.icursor(0)
             return False
 
         else:
-            self.filename_error_msg = 'DEBUG Filename \'' + filename + '\'' + ' must end on ' + str(GlobalVar.file_extensions)
-            print(self.filename_error_msg)
+            filename_error_msg = 'DEBUG Filename \'' + filename + '\'' + ' must end on ' + str(
+                GlobalVar.file_extensions)
+            print(filename_error_msg)
             self.entry_field_filename.focus_set()
             self.entry_field_filename.icursor(0)
             return False
 
     def validate_fields(self):
-        # do stuff
         if self.validate_title_id_on_save():
             print('DEBUG: Title_id: OK')
         else:
@@ -1148,9 +1132,9 @@ class Main:
         else:
             return False
         if self.validate_filename_on_save():
-           print('DEBUG: Title_id: OK')
+            print('DEBUG: Title_id: OK')
         else:
-           return False
+            return False
 
         return True
 
@@ -1199,7 +1183,8 @@ class Main:
         if self.entry_field_platform.get() in {'GAMES', 'GAMEZ'}:
             path = '/'.join(self.entry_field_iso_path.get().split('/')[:-1])
             test_path1 = '/'.join(json_game_list[platform_key][0]['path'].split('/')[:-1])
-            json_game_list[platform_key] = [x for x in json_game_list[platform_key] if '/'.join(x['path'].split('/')[:-1]) != path]
+            json_game_list[platform_key] = [x for x in json_game_list[platform_key] if
+                                            '/'.join(x['path'].split('/')[:-1]) != path]
             print("test_path1: " + test_path1)
         else:
             path = self.entry_field_iso_path.get()
@@ -1207,12 +1192,14 @@ class Main:
             print("test_path2: " + test_path2)
             for test in json_game_list[platform_key]:
                 if 'kingdom' in test['filename'].lower():
-                    print(str(test['path'] +test['filename']))
+                    print(str(test['path'] + test['filename']))
 
-            json_game_list[platform_key] = [x for x in json_game_list[platform_key] if str(x['path'] + x['filename']) != path]
+            json_game_list[platform_key] = [x for x in json_game_list[platform_key] if
+                                            str(x['path'] + x['filename']) != path]
 
         # update path to game work_dir
-        AppPaths.game_work_dir = os.path.join(AppPaths().get_game_build_dir(self.entry_field_title_id.get(), self.entry_field_filename.get()), 'work_dir')
+        AppPaths.game_work_dir = os.path.join(
+            AppPaths().get_game_build_dir(self.entry_field_title_id.get(), self.entry_field_filename.get()), 'work_dir')
         if current_work_dir != AppPaths.game_work_dir:
             new_game_build_path = os.path.join(AppPaths.game_work_dir, '..')
             if not os.path.exists(new_game_build_path):
@@ -1241,12 +1228,11 @@ class Main:
             # GameListData.game_list_data_json = GameListData().get_game_list()
 
         # change Appdata.work_dir
-        AppPaths.game_work_dir = os.path.join(AppPaths().get_game_build_dir(self.entry_field_title_id.get(), self.entry_field_filename.get()), 'work_dir')
-
+        AppPaths.game_work_dir = os.path.join(
+            AppPaths().get_game_build_dir(self.entry_field_title_id.get(), self.entry_field_filename.get()), 'work_dir')
 
         # refresh the GUI list
         self.on_game_list_refresh()
-
 
     def on_build_button(self):
         __init_pkg_build_dir__()
@@ -1275,7 +1261,8 @@ class Main:
                 default_img_path = os.path.join(AppPaths.resources, 'images', 'pkg', 'default')
                 if not os.path.isfile(os.path.join(default_img_path, platform, 'ICON0.PNG')):
                     platform = ''
-                shutil.copyfile(os.path.join(default_img_path, platform, 'ICON0.PNG'), os.path.join(self.pkg_dir, 'ICON0.PNG'))
+                shutil.copyfile(os.path.join(default_img_path, platform, 'ICON0.PNG'),
+                                os.path.join(self.pkg_dir, 'ICON0.PNG'))
 
             if os.path.isfile(os.path.join(game_pkg_dir, 'PIC0.PNG')):
                 shutil.copyfile(os.path.join(game_pkg_dir, 'PIC0.PNG'), os.path.join(self.pkg_dir, 'PIC0.PNG'))
@@ -1305,7 +1292,8 @@ class Main:
                         else:
                             pkg_remote_path = '/' + install_path + '/'
 
-                        response = messagebox.askyesno('Build status: success', 'Build done!\nDo you want to remote-install the pkg?\n\nLocation: ' + pkg_remote_path + '/' + pkg_name)
+                        response = messagebox.askyesno('Build status: success',
+                                                       'Build done!\nDo you want to remote-install the pkg?\n\nLocation: ' + pkg_remote_path + '/' + pkg_name)
                         # yes
                         if response:
                             pkg_local_path = os.path.join(AppPaths.game_work_dir, '../', pkg_name)
@@ -1327,10 +1315,6 @@ class Main:
             else:
                 messagebox.showerror("Build status: fail", "Build failed!\nSee error log.")
 
-
-
-
-
     def on_ftp_fetch_button(self):
         # save the ps3-ip field to config file
         if self.entry_field_ftp_ip.get() != '':
@@ -1342,7 +1326,6 @@ class Main:
         else:
             print('DEBUG cannot connect with empty ip.')
 
-
     def save_ftp_fields_on_fetch(self):
         # open make changes to existing settings file
         with open(self.ftp_settings_path, 'r') as settings_file:
@@ -1351,7 +1334,7 @@ class Main:
             json_settings_data['ftp_user'] = str(self.entry_field_ftp_user.get())
             json_settings_data['ftp_password'] = str(self.entry_field_ftp_pass.get())
             settings_file.close()
-            
+
         # write changes to file
         with open(self.ftp_settings_path, 'w') as save_settings_file:
             new_json_data = json.dumps(json_settings_data, indent=4, separators=(",", ":"))
@@ -1363,20 +1346,20 @@ class Main:
         FtpSettings.ftp_user = str(self.entry_field_ftp_user.get())
         FtpSettings.ftp_password = str(self.entry_field_ftp_pass.get())
 
-
-
     def save_preview_image(self):
         # making a preview print of the game canvas
 
         # check for PIC1 as background for the preview
         if os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC1.PNG')):
             pic1_img = Image.open(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC1.PNG')).convert("RGBA")
-            preview_img = Image.open(os.path.join(AppPaths.resources, 'images', 'pkg', 'default', 'PIC1.PNG')).convert("RGBA")
+            preview_img = Image.open(os.path.join(AppPaths.resources, 'images', 'pkg', 'default', 'PIC1.PNG')).convert(
+                "RGBA")
             preview_img.paste(pic1_img, (0, 0), pic1_img)
 
         else:
             # if not, use a default background as PIC1
-            preview_img = Image.open(os.path.join(AppPaths.resources, 'images', 'pkg', 'default', 'PIC1.PNG')).convert("RGBA")
+            preview_img = Image.open(os.path.join(AppPaths.resources, 'images', 'pkg', 'default', 'PIC1.PNG')).convert(
+                "RGBA")
 
         # check for PIC0 as background for the preview
         if os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC0.PNG')):
@@ -1428,17 +1411,18 @@ class Main:
         json_data['filename'] = str(self.entry_field_filename.get())
         json_data['platform'] = str(self.entry_field_platform.get())
         if str(self.entry_field_platform.get()) in {'GAMES', 'GAMEZ'}:
-            json_data['path'] = str(self.entry_field_iso_path.get()).replace(str(self.entry_field_filename.get()), '').replace('//', '/')
+            json_data['path'] = str(self.entry_field_iso_path.get()).replace(str(self.entry_field_filename.get()),
+                                                                             '').replace('//', '/')
         else:
             json_data['path'] = str(self.entry_field_iso_path.get()).replace(str(self.entry_field_filename.get()), '')
 
         return json_data
 
     def save_pkg_info_to_json(self):
-            json_data = self.entry_fields_to_json(os.path.join(AppPaths.util_resources, 'pkg.json.BAK'))
-            newFile = open(os.path.join(AppPaths.game_work_dir, 'pkg.json'), "w")
-            json_text = json.dumps(json_data, indent=4, separators=(",", ":"))
-            newFile.write(json_text)
+        json_data = self.entry_fields_to_json(os.path.join(AppPaths.util_resources, 'pkg.json.BAK'))
+        newFile = open(os.path.join(AppPaths.game_work_dir, 'pkg.json'), "w")
+        json_text = json.dumps(json_data, indent=4, separators=(",", ":"))
+        newFile.write(json_text)
 
     def transfer_pkg(self, pkg_local_path, pkg_remote_path, pkg_name):
         # setup connection to FTP
@@ -1453,7 +1437,7 @@ class Main:
             print("DEBUG: Transfer succeeded")
             # messagebox.showinfo('Status: transfer complete', 'transfer of ' + pkg_name + ' to ' + remote_path + ' complete')
         except Exception as e:
-            print ('ERROR: Transfer failed')
+            print('ERROR: Transfer failed')
             print(getattr(e, 'message', repr(e)))
 
     def remote_install_pkg(self, pkg_remote_path, pkg_name):
@@ -1461,7 +1445,7 @@ class Main:
             ps3_lan_ip = FtpSettings.ps3_lan_ip
             pkg_ps3_path = pkg_remote_path + '/' + pkg_name
             # webcommand = '/install_ps3' + urllib.parse.quote(pkg_ps3_path) # + '?restart.ps3'
-            webcommand = '/install.ps3' + urllib.parse.quote(pkg_ps3_path) # + ';/refresh.ps3?xmb'
+            webcommand = '/install.ps3' + urllib.parse.quote(pkg_ps3_path)  # + ';/refresh.ps3?xmb'
             webcommand_url = 'http://' + str(ps3_lan_ip) + webcommand
             print('DEBUG webcommand_url: ' + webcommand_url)
             response = urlopen(webcommand_url)
@@ -1478,13 +1462,15 @@ class Main:
             print('DEBUG ERROR traceback: ' + str(traceback.print_exc()))
             print(getattr(ez, 'message', repr(ez)))
 
+
 class CreateToolTip(object):
     """
     create a tooltip for a given widget
     """
+
     def __init__(self, widget, text='widget info'):
-        self.waittime = 350     #miliseconds
-        self.wraplength = 180   #pixels
+        self.waittime = 350  # miliseconds
+        self.wraplength = 180  # pixels
         self.widget = widget
         self.text = text
         self.widget.bind("<Enter>", self.enter)
@@ -1522,14 +1508,15 @@ class CreateToolTip(object):
         self.tw.wm_geometry("+%d+%d" % (x, y))
         label = tk.Label(self.tw, text=self.text, justify='left',
                          background="#ffffff", relief='solid', borderwidth=1,
-                         wraplength = self.wraplength)
+                         wraplength=self.wraplength)
         label.pack(ipadx=1)
 
     def hidetip(self):
         tw = self.tw
-        self.tw= None
+        self.tw = None
         if tw:
             tw.destroy()
+
 
 # setup properties
 main_window = Tk()
