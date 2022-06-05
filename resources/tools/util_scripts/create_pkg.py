@@ -4,8 +4,8 @@ import shutil
 import subprocess
 import sys
 
-from global_paths import GlobalVar
-from global_paths import AppPaths
+from resources.tools.util_scripts.global_paths import GlobalVar
+from resources.tools.util_scripts.global_paths import AppPaths
 
 class Webman_pkg:
     def execute(self):

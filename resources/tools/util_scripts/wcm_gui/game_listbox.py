@@ -1,31 +1,23 @@
-from __future__ import print_function
-
-try:
-    # Python2
-    from Tkinter import Frame, Scrollbar, Listbox, LEFT, RIGHT, Y, END, Label, Menu
-except ImportError as e:
-    # Python3
-    from tkinter import Frame, Scrollbar, Listbox, LEFT, RIGHT, Y, END, Label, Menu
-
-import json, os, sys, shutil
-
-sys.path.append('..')
-from global_paths import AppPaths
-from global_paths  import GlobalVar
-from global_paths  import GameListData
+import json
+import os
+import shutil
+from tkinter import Frame, Scrollbar, Listbox, LEFT, RIGHT, Y, END, Label, Menu, Entry
+from resources.tools.util_scripts.global_paths import AppPaths
+from resources.tools.util_scripts.global_paths import GlobalVar
+from resources.tools.util_scripts.global_paths import GameListData
 
 
-class Gamelist():
-    def __init__(self, drive, platform):
-        GameListData.game_list_data_json = GameListData().get_game_list()
-        self.json_game_list_data = GameListData.game_list_data_json
+class Gamelist:
+    def __init__(self, wcm):
+        self.main_frame = Frame()
+        self._listbox = Listbox(self.main_frame, width=465)
+        self.context_menu = Menu(self.main_frame, tearoff=0)
 
-        if drive == 'USB(*)':
-            self.drive_to_show = '/dev_' + drive.lower().replace('(*)', '')
-        else:
-            self.drive_to_show = '/dev_' + drive.lower() + '/'
+        self.corrected_index = []
+        self.json_game_list_data = GameListData().get_game_list()
 
-        self.platform_to_show = platform + '_games'
+        self.platform_to_show = 'ALL_games'
+        self.drive_to_show = '/dev_all/'
         self.WCM_BASE_PATH = AppPaths.wcm_gui
         self.last_selection = (None, 0)
         self.list_of_items = []
@@ -38,31 +30,25 @@ class Gamelist():
 
         self.is_cleared = False
 
-    def create_main_frame(self, entry_field_title_id, entry_field_title, entry_field_filename, entry_field_iso_path,
-                          entry_field_platform, drive_system_array):
-        self.entry_field_title_id = entry_field_title_id
-        self.entry_field_title = entry_field_title
-        self.entry_field_filename = entry_field_filename
-        self.entry_field_iso_path = entry_field_iso_path
-        self.entry_field_platform = entry_field_platform
-        self.drive_system_path_array = drive_system_array
+        # entry fields
+        self.entry_field_title_id = wcm.entry_field_title_id
+        self.entry_field_title = wcm.entry_field_title
+        self.entry_field_filename = wcm.entry_field_filename
+        self.entry_field_iso_path = wcm.entry_field_iso_path
+        self.entry_field_platform = wcm.entry_field_platform
+        # not visible in GUI
+        self.drive_system_path_array = wcm.drive_system_path_array
 
-        self.corrected_index = []
-        self.main_frame = Frame()
+        self.create_listbox(wcm)
 
-        self.popup_menu = Menu(self.main_frame, tearoff=0)
+    def create_listbox(self, wcm):
 
-        self.popup_menu.add_command(label="Delete",
-                                    command=self.delete_selected)
-        self.popup_menu.add_command(label="Rename",
-                                    command=self.rename_selected)
-        # self.popup_menu.add_command(label="Refetch",
-        #                             command=self.refetch)
-        # self.popup_menu.add_command(label="Select All",
-        #                             command=self.select_all)
+        self.context_menu.add_command(label="Delete",
+                                      command=self.delete_selected)
+        self.context_menu.add_command(label="Rename",
+                                      command=self.rename_selected)
 
         s = Scrollbar(self.main_frame)
-        self._listbox = Listbox(self.main_frame, width=465)
         self._listbox.bind('<Enter>', self._bound_to_mousewheel)
         self._listbox.bind('<Leave>', self._unbound_to_mousewheel)
         self._listbox.bind("<Button-3>", self.popup)  # Button-2 on Aqua
@@ -97,8 +83,19 @@ class Gamelist():
             else:
                 self._listbox.itemconfig(x, {'fg': 'white'}, background='#001F4C')
 
+        self._listbox.config(selectmode='SINGLE',
+                             activestyle='dotbox',
+                             borderwidth=0)
+
         self.label = Label(self.main_frame)
         self.selection_poller()
+
+        self.main_frame.place(x=int(wcm.main_offset_x_pos * wcm.scaling),
+                              y=wcm.main_offset_y_pos + 220,
+                              width=270,
+                              height=300)
+
+
 
         return self.main_frame
 
@@ -206,9 +203,9 @@ class Gamelist():
             self._listbox.activate(self._listbox.nearest(event.y))
         finally:
             if self._listbox.get(self._listbox.curselection()[0]) is not '':
-                self.popup_menu.tk_popup(event.x_root + 43, event.y_root + 12, 0)
-                self.popup_menu.grab_release()
-                self.popup_menu.focus_set()
+                self.context_menu.tk_popup(event.x_root + 43, event.y_root + 12, 0)
+                self.context_menu.grab_release()
+                self.context_menu.focus_set()
 
     def delete_selected(self):
         try:

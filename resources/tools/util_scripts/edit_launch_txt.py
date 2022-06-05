@@ -2,7 +2,7 @@ import json
 import os
 import urllib
 import urllib.parse
-from global_paths import AppPaths
+from resources.tools.util_scripts.global_paths import AppPaths
 
 class Edit_launch_txt:
 	def execute(self):

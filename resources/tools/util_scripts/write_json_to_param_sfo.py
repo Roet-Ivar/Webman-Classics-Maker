@@ -1,7 +1,7 @@
 from __future__ import print_function
 import os
 import json
-from global_paths import AppPaths
+from resources.tools.util_scripts.global_paths import AppPaths
 
 class Write_param_sfo():
 	def execute(self):

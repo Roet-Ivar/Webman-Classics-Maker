@@ -1,6 +1,6 @@
 import os
 import json
-from global_paths import AppPaths
+from resources.tools.util_scripts.global_paths import AppPaths
 
 class Elf_replace:
 	def execute(self):

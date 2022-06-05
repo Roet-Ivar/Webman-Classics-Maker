@@ -2,7 +2,7 @@ import json, os
 import sys
 import subprocess
 from shutil import copyfile
-from global_paths import AppPaths
+from resources.tools.util_scripts.global_paths import AppPaths
 
 class Resign_eboot:
 	def execute(self):

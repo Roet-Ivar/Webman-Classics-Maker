@@ -1,17 +1,15 @@
 import traceback
-
-from write_json_to_param_sfo import Write_param_sfo
-from content_id_elf_replace import Elf_replace
-from edit_launch_txt import Edit_launch_txt
+from resources.tools.util_scripts.write_json_to_param_sfo import Write_param_sfo
+from resources.tools.util_scripts.content_id_elf_replace import Elf_replace
+from resources.tools.util_scripts.edit_launch_txt import Edit_launch_txt
 
 # if getattr(sys, 'frozen', False):
-from resign_eboot import Resign_eboot
+from resources.tools.util_scripts.resign_eboot import Resign_eboot
 # else:
 # 	from resign_eboot_linux import Resign_eboot
 
-from create_pkg import Webman_pkg
-
-from global_paths import AppPaths
+from resources.tools.util_scripts.create_pkg import Webman_pkg
+from resources.tools.util_scripts.global_paths import AppPaths
 
 class Webman_PKG:
 	def build(self):

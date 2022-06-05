@@ -4,14 +4,7 @@ import json
 import os
 import re
 import sys
-
-try:
-    # Python2
-    import StringIO
-except ImportError as e:
-    # Python3
-    import io
-    from io import StringIO
+from io import StringIO
 
 # pip install tqdm
 from tqdm import tqdm
@@ -22,10 +15,10 @@ if getattr(sys, 'frozen', False):
 else:
     sys.path.append('..')
 
-from global_paths import AppPaths
-from global_paths import GlobalVar
-from global_paths import GameListData
-from global_paths import FtpSettings
+from resources.tools.util_scripts.global_paths import AppPaths, GlobalDef
+from resources.tools.util_scripts.global_paths import GlobalVar
+from resources.tools.util_scripts.global_paths import GameListData
+from resources.tools.util_scripts.global_paths import FtpSettings
 
 sys.path.append(AppPaths.settings)
 
