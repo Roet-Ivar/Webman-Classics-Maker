@@ -55,28 +55,6 @@ def __init_images__(self):
     self.image_xmb_icons = Image.open(os.path.join(ImagePaths.xmb, 'XMB_icons.png'))
     self.ps3_gametype_logo = Image.open(os.path.join(ImagePaths.xmb, 'ps3_type_logo.png'))
 
-    # # button images
-    # self.images_logo_drive = []
-    # self.images_logo_drive.append(PhotoImage(self.make_button_smallest('HDD', font='conthrax-sb.ttf', x=-1, y=-2)))
-    # self.images_logo_drive.append(PhotoImage(self.make_button_smallest('USB', font='conthrax-sb.ttf', x=-1, y=-2)))
-    #
-    # self.images_logo_system = []
-    # self.images_logo_system.append(PhotoImage(self.make_button_smallest('PSP', font='conthrax-sb.ttf', x=-1, y=-2)))
-    # self.images_logo_system.append(PhotoImage(self.make_button_smallest('PSX', font='conthrax-sb.ttf', x=-1, y=-2)))
-    # self.images_logo_system.append(PhotoImage(self.make_button_smallest('PS2', font='conthrax-sb.ttf', x=-1, y=-2)))
-    # self.images_logo_system.append(PhotoImage(self.make_button_smallest('PS3', font='conthrax-sb.ttf', x=-1, y=-2)))
-    #
-    # self.images_function_button = []
-    # self.images_function_button.append(PhotoImage(self.make_smal_button('Build', font='arial.ttf', x=3, y=0)))
-    # self.images_function_button.append(PhotoImage(self.make_smal_button('Add', font='arial.ttf', x=3, y=0)))
-    # self.images_function_button.append(PhotoImage(self.make_smal_button('Save', font='arial.ttf', x=3, y=0)))
-    # # self.images_function_button.append(PhotoImage(self.small_button_maker('Quit', font='arial.ttf', x=3, y=0)))
-    # # self.images_function_button.append(PhotoImage(self.small_button_maker('Change', font='arial.ttf', x=-3, y=0)))
-    #
-    # self.images_gamelist_button = []
-    # self.images_gamelist_button.append(PhotoImage(self.make_smal_button('Fetch', font='arial.ttf', x=3, y=0)))
-    # self.images_gamelist_button.append(PhotoImage(self.make_smal_button('Refresh', font='arial.ttf', x=-1, y=0)))
-
     self.hdd_button_image = PhotoImage(self.make_button_smallest('HDD', font='conthrax-sb.ttf', x=-1, y=-2))
     self.usb_button_image = PhotoImage(self.make_button_smallest('USB', font='conthrax-sb.ttf', x=-1, y=-2))
     self.psp_button_image = PhotoImage(self.make_button_smallest('PSP', font='conthrax-sb.ttf', x=-1, y=-2))
@@ -180,11 +158,8 @@ class Main:
 
         # window metrics
         self.scaling = 720.0 / 1080.0
-        self.canvas_height = int(1080 * self.scaling)
-        self.canvas_width = int(1920 * self.scaling)
-
-        self.main_window_width = int(1920 * self.scaling)
         self.main_window_height = int(1080 * self.scaling)
+        self.main_window_width = int(1920 * self.scaling)
 
         self.main_offset_x_pos = 1450
         self.main_offset_y_pos = 50
@@ -213,17 +188,18 @@ class Main:
 
         __init_buttons__(self)
 
-        # canvas as background_image
-        self.canvas = Canvas(self.main,
-                             width=self.canvas_width,
-                             height=self.canvas_height,
-                             borderwidth=0,
-                             highlightthickness=0)
+        # init canvas for the background image
+        self.main_canvas = Canvas(self.main,
+                                  width=self.main_window_width,
+                                  height=self.main_window_height,
+                                  borderwidth=0,
+                                  highlightthickness=0)
 
-        self.canvas.pack(fill=BOTH, expand=YES)
-        self.image_on_canvas = self.canvas.create_image(0, 0, anchor=NW, image=self.current_background)
+        self.main_canvas.pack(fill=BOTH, expand=YES)
 
         self.init_default_view(self.main)
+
+        # self.background_image = self.canvas.create_image(0, 0, anchor=NW, image=self.current_background)
         self.draw_background_on_canvas()
 
         # init gamelist and filters
@@ -234,18 +210,18 @@ class Main:
         self.game_list_box = self.game_list.get_listbox()
         self.create_dropdowns()
 
-        self.drive_dropdown = DriveDropdown(self.canvas, self.game_list_box).get_box()
-        self.platform_dropdown = PlatformDropdown(self.canvas, self.game_list_box).get_box()
+        self.drive_dropdown = DriveDropdown(self.main_canvas, self.game_list_box).get_box()
+        self.platform_dropdown = PlatformDropdown(self.main_canvas, self.game_list_box).get_box()
 
     def create_dropdowns(self):
         # ensure drive_dropdown into the listbox
         if self.drive_dropdown is None:
-            self.drive_dropdown = DriveDropdown(self.canvas, self.game_list_box).get_box()
+            self.drive_dropdown = DriveDropdown(self.main_canvas, self.game_list_box).get_box()
         self.drive_dropdown.bind("<<ComboboxSelected>>", self.dropdown_filter_callback)
 
         # ensure platform_dropdown into the listbox
         if self.platform_dropdown is None:
-            self.platform_dropdown = PlatformDropdown(self.canvas, self.game_list_box).get_box()
+            self.platform_dropdown = PlatformDropdown(self.main_canvas, self.game_list_box).get_box()
         self.platform_dropdown.bind("<<ComboboxSelected>>", self.dropdown_filter_callback)
 
     def dropdown_filter_callback(self, event):
@@ -412,9 +388,9 @@ class Main:
         self.current_background = PhotoImage(self.current_img)
 
         try:
-            self.canvas.itemconfig(self.image_on_canvas, image=self.current_background)
+            self.main_canvas.itemconfig(self.background_image, image=self.current_background)
         except:
-            self.image_on_canvas = self.canvas.create_image(0, 0, anchor=NW, image=self.current_background)
+            self.background_image = self.main_canvas.create_image(0, 0, anchor=NW, image=self.current_background)
 
     def load_backgrounds(self):
         base_path = os.path.join(ImagePaths.images, 'backgrounds')
@@ -1271,9 +1247,15 @@ class Main:
                 shutil.copyfile(os.path.join(game_pkg_dir, 'PIC1.PNG'), os.path.join(self.pkg_dir, 'PIC1.PNG'))
 
             # builds pkg and reads the pkg filename
-            webman_pkg = Webman_PKG()
+            # TODO: investigate why these steps are necessary due to popup
+            # temporary fix for bug where images disappeared after build
+            self.init_default_view(self.main)
+            self.draw_background_on_canvas()
 
+            webman_pkg = Webman_PKG()
             pkg_name = webman_pkg.build()
+
+
             if pkg_name != None:
                 # making sure default work_dir and pkg directories exists
                 if not os.path.exists(game_pkg_dir):
