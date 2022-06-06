@@ -40,6 +40,9 @@ from PIL import Image, ImageDraw, ImageFont
 from PIL.ImageTk import PhotoImage
 
 
+
+
+
 def __init_pkg_build_dir__():
     if os.path.isdir(AppPaths.pkg):
         if 'webman-classics-maker' in AppPaths.pkg.lower():
@@ -61,30 +64,26 @@ def __init_images__(self):
     self.psx_button_image = PhotoImage(self.make_button_smallest('PSX', font='conthrax-sb.ttf', x=-1, y=-2))
     self.ps2_button_image = PhotoImage(self.make_button_smallest('PS2', font='conthrax-sb.ttf', x=-1, y=-2))
     self.ps3_button_image = PhotoImage(self.make_button_smallest('PS3', font='conthrax-sb.ttf', x=-1, y=-2))
-    self.build_button_image = PhotoImage(self.make_smal_button('Build', font='arial.ttf', x=3, y=0))
-    self.add_button_image = PhotoImage(self.make_smal_button('Add', font='arial.ttf', x=3, y=0))
-    self.save_button_image = PhotoImage(self.make_smal_button('Save', font='arial.ttf', x=3, y=0))
+    self.build_button_image = PhotoImage(self.small_button_maker('Build', font='arial.ttf', x=3, y=0))
+    self.add_button_image = PhotoImage(self.small_button_maker('Add', font='arial.ttf', x=3, y=0))
+    self.save_button_image = PhotoImage(self.small_button_maker('Save', font='arial.ttf', x=3, y=0))
     # self.quit_button_image = PhotoImage(self.make_smal_button('Quit', font='arial.ttf', x=3, y=0))
     # self.change_button_image = PhotoImage(self.make_smal_button('Change', font='arial.ttf', x=-3, y=0))
-    self.fetch_button_image = PhotoImage(self.make_smal_button('Fetch', font='arial.ttf', x=3, y=0))
-    self.refresh_button_image = PhotoImage(self.make_smal_button('Refresh', font='arial.ttf', x=-1, y=0))
+    self.fetch_button_image = PhotoImage(self.small_button_maker('Fetch', font='arial.ttf', x=3, y=0))
+    self.refresh_button_image = PhotoImage(self.small_button_maker('Refresh', font='arial.ttf', x=-1, y=0))
 
     # pkg images
     self.pkg_icon0 = None
     self.pkg_pic0 = None
     self.pkg_pic1 = None
 
-    icon0_filename = 'ICON0.PNG'
-    pic0_filename = 'PIC0.PNG'
-    pic1_filename = 'PIC1.PNG'
-
-    self.image_icon0 = self.load_default_pkg_images(icon0_filename)
+    self.image_icon0 = get_default_image('ICON0.PNG')
     self.image_icon0_ref = copy.copy(self.image_icon0)
 
-    self.image_pic0 = self.load_default_pkg_images(pic0_filename)
+    self.image_pic0 = get_default_image('PIC0.PNG')
     self.image_pic0_ref = copy.copy(self.image_pic0)
 
-    self.image_pic1 = self.load_default_pkg_images(pic1_filename)
+    self.image_pic1 = get_default_image('PIC1.PNG')
     self.image_pic1_ref = copy.copy(self.image_pic1)
     self.image_pic1_w_title = copy.copy(self.image_pic1)
 
@@ -118,38 +117,9 @@ def get_ftp_pass_from_config():
     return FtpSettings.ftp_password
 
 
-def __init_buttons__(self):
-    # buttons
-    self.button_icon0 = None
-    self.button_pic0 = None
-    self.button_pic1 = None
-
-    self.button_HDD = None
-    self.button_USB = None
-
-    self.button_PSP = None
-    self.button_PSX = None
-    self.button_PS2 = None
-    self.button_PS3 = None
-
-    self.build_button = None
-    self.fetch_button = None
-    self.refresh_button = None
-
-    self.drive_dropdown = None
-    self.platform_dropdown = None
-
-    # text tooltip messages
-    self.USB_BUTTON_TOOLTIP_MSG = "Toggle USB port (0-3)"
-
-    self.BUILD_BUTTON_TOOLTIP_MSG = "Save & Build pkg"
-    self.SAVE_BUTTON_TOOLTIP_MSG = "Save data"
-    self.FETCH_BUTTON_TOOLTIP_MSG = "Fetch gamelist and images over FTP"
-    self.REFRESH_BUTTON_TOOLTIP_MSG = "Refresh gamelist from disk"
-
-    self.ICON0_TOOLTIP_MSG = "Click to replace ICON0"
-    self.PIC0_TOOLTIP_MSG = "Click to replace  PIC0"
-    self.PIC1_TOOLTIP_MSG = "Click to replace  PIC1"
+def get_default_image(filename):
+    default_pkg_img_dir = os.path.join(ImagePaths.pkg, 'default')
+    return Image.open(os.path.join(default_pkg_img_dir, filename)).convert("RGBA")
 
 
 class Main:
@@ -183,10 +153,27 @@ class Main:
         self.entry_field_iso_path = None
         self.usb_port_number = 0
 
+        # self.button_icon0 = None
+        # self.button_pic0 = None
+        # self.button_pic1 = None
+        #
+        # self.hdd_button = None
+        # self.usb_button = None
+        #
+        # self.psp_button = None
+        # self.psx_button = None
+        # self.ps2_button = None
+        # self.ps3_button = None
+        #
+        # self.build_button = None
+        # self.fetch_button = None
+        # self.refresh_button = None
+        #
+        self.drive_dropdown = None
+        self.platform_dropdown = None
+
         # gui assets
         __init_images__(self)
-
-        __init_buttons__(self)
 
         # init canvas for the background image
         self.main_canvas = Canvas(self.main,
@@ -197,10 +184,12 @@ class Main:
 
         self.main_canvas.pack(fill=BOTH, expand=YES)
 
-        self.init_default_view(self.main)
+        self.__init_entry_field__()
+        self.__init_buttons__()
+        self.__draw_pkg_images_on_canvas__(self.main)
+        self.__draw_background_on_canvas__()
 
-        # self.background_image = self.canvas.create_image(0, 0, anchor=NW, image=self.current_background)
-        self.draw_background_on_canvas()
+
 
         # init gamelist and filters
         self.list_filter_drive = 'ALL'
@@ -212,6 +201,179 @@ class Main:
 
         self.drive_dropdown = DriveDropdown(self.main_canvas, self.game_list_box).get_box()
         self.platform_dropdown = PlatformDropdown(self.main_canvas, self.game_list_box).get_box()
+
+    def __init_entry_field__(self):
+        # paddings
+        self.text_box_x_padding = 20
+        self.text_box_y_padding = 20
+        self.text_box_spacing = 7 * self.text_box_x_padding
+
+        # coordinates
+        self.text_height = 15  # Font(font='Helvetica').metrics('linespace')
+        self.device_text_y_pos = self.main_offset_y_pos + self.text_height
+        self.type_text_y_pos = self.text_box_y_padding + self.device_text_y_pos + self.text_height
+        self.title_id_text_y_pos = self.text_box_y_padding + 7 + self.type_text_y_pos + self.text_height + 2
+        self.title_text_y_pos = self.text_box_y_padding + self.title_id_text_y_pos + self.text_height
+        self.filename_text_y_pos = self.text_box_y_padding + self.title_text_y_pos + self.text_height
+        self.iso_path_text_y_pos = self.text_box_y_padding + self.filename_text_y_pos + self.text_height - 1
+
+        # entry fields
+        self.entry_field_title_id = Entry(self.main, validate='key', validatecommand=(self.vcmd, '%P'))
+        self.entry_field_title = Entry(self.main)
+        self.entry_field_filename = Entry(self.main)
+        self.entry_field_iso_path = Entry(self.main, state='readonly')
+        # not visible in GUI
+        self.entry_field_platform = Entry(self.main)
+
+        ##########################################################################
+        # Adding an on_change-listener on 'entry_field_title'
+        self.generate_on_change(self.entry_field_title)
+        self.entry_field_title.bind('<<Change>>', self.dynamic_title_to_pic1)
+        ###########################################################################
+        # Adding an on_change-listener on 'entry_field_filename'
+        self.generate_on_change(self.entry_field_filename)
+        self.entry_field_filename.bind('<<Change>>', self.dynamic_filename_and_path)
+        ###########################################################################
+
+        self.entry_field_ftp_ip = Entry(self.main)
+        self.entry_field_ftp_ip.insert(0, get_ftp_ip_from_config())
+
+        self.entry_field_ftp_user = Entry(self.main)
+        self.entry_field_ftp_user.insert(0, get_ftp_user_from_config())
+
+        self.entry_field_ftp_pass = Entry(self.main)
+        self.entry_field_ftp_pass.insert(0, get_ftp_pass_from_config())
+
+        # system choice buttons
+        self.selection_drive_list = ['dev_hdd0',
+                                     'dev_usb000', 'dev_usb001', 'dev_usb002',
+                                     'dev_usb003']
+        self.selection_system_list = ['PSPISO', 'PSXISO', 'PS2ISO', 'PS3ISO']
+        self.drive_path = self.selection_drive_list[0]  # drive should be toggled by buttons
+
+        # Entry field placements
+        entry_field_width = 200
+        self.entry_field_title_id.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * self.scaling),
+                                        y=int(self.title_id_text_y_pos * self.scaling),
+                                        width=entry_field_width)
+
+        self.entry_field_title.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * self.scaling),
+                                     y=int(self.title_text_y_pos * self.scaling),
+                                     width=entry_field_width)
+
+        self.entry_field_filename.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * self.scaling),
+                                        y=int(self.filename_text_y_pos * self.scaling),
+                                        width=entry_field_width)
+
+        self.entry_field_iso_path.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * self.scaling),
+                                        y=int(self.iso_path_text_y_pos * self.scaling),
+                                        width=entry_field_width)
+
+        self.entry_field_ftp_ip.place(x=int((self.main_offset_x_pos + 90) * self.scaling),
+                                      y=int((self.main_offset_y_pos + 815) * self.scaling),
+                                      width=90)
+
+        self.entry_field_ftp_user.place(x=int((self.main_offset_x_pos + 320) * self.scaling),
+                                        y=int((self.main_offset_y_pos + 815) * self.scaling),
+                                        width=60)
+
+        self.entry_field_ftp_pass.place(x=int((self.main_offset_x_pos + 320) * self.scaling),
+                                        y=int((self.main_offset_y_pos + 850) * self.scaling),
+                                        width=60)
+
+    def __init_buttons__(self):
+        self.hdd_button = Button(self.main,
+                                 image=self.hdd_button_image,
+                                 borderwidth=1,
+                                 command=lambda: self.on_drive_button(self.selection_drive_list[0]))
+
+        self.usb_button = Button(self.main,
+                                 image=self.usb_button_image,
+                                 borderwidth=1,
+                                 command=lambda:
+                                 self.on_drive_button(self.selection_drive_list[self.usb_port_number + 1]))
+
+        self.psp_button = Button(self.main,
+                                 image=self.psp_button_image,
+                                 borderwidth=1,
+                                 command=lambda:
+                                 self.on_system_button(self.drive_system_path_array[0], self.selection_system_list[0]))
+
+        self.psx_button = Button(self.main,
+                                 image=self.psx_button_image,
+                                 borderwidth=1,
+                                 command=lambda:
+                                 self.on_system_button(self.drive_system_path_array[0], self.selection_system_list[1]))
+
+        self.ps2_button = Button(self.main,
+                                 image=self.ps2_button_image,
+                                 borderwidth=1,
+                                 command=lambda:
+                                 self.on_system_button(self.drive_system_path_array[0], self.selection_system_list[2]))
+
+        self.ps3_button = Button(self.main,
+                                 image=self.ps3_button_image,
+                                 borderwidth=1,
+                                 command=lambda:
+                                 self.on_system_button(self.drive_system_path_array[0], self.selection_system_list[3]))
+
+        self.build_button = Button(self.main,
+                                   image=self.build_button_image,
+                                   borderwidth=0,
+                                   command=self.on_build_button,
+                                   bg="#FBFCFB")
+
+        self.save_button = Button(self.main,
+                                  image=self.save_button_image,
+                                  borderwidth=0,
+                                  command=self.on_save_button,
+                                  bg="#FBFCFB")
+
+        self.fetch_button = Button(self.main,
+                                   image=self.fetch_button_image,
+                                   borderwidth=0,
+                                   command=self.on_ftp_fetch_button,
+                                   bg="#FBFCFB")
+
+        self.refresh_button = Button(self.main,
+                                     image=self.refresh_button_image,
+                                     borderwidth=0,
+                                     command=self.on_game_list_refresh,
+                                     bg="#FBFCFB")
+
+        # button tooltips
+        CreateToolTip(self.usb_button, "Toggle USB port [0-3]")
+        CreateToolTip(self.build_button, "Save & Build pkg")
+        CreateToolTip(self.save_button, "Save to builds folder")
+        CreateToolTip(self.fetch_button, "Fetch gamelist and images over FTP")
+        CreateToolTip(self.refresh_button, "Refresh gamelist from disk")
+
+        # Button placements
+        x1 = (self.text_box_spacing + self.main_offset_x_pos + 0 * 75) * self.scaling
+        y1 = self.device_text_y_pos * self.scaling
+
+        x2 = (self.text_box_spacing + self.main_offset_x_pos + 1 * 75) * self.scaling
+        y2 = self.type_text_y_pos * self.scaling
+
+        x3 = (self.text_box_spacing + self.main_offset_x_pos + 2 * 75) * self.scaling
+        y3 = (self.iso_path_text_y_pos + 40) * self.scaling
+
+        x4 = (self.text_box_spacing + self.main_offset_x_pos + 3 * 75) * self.scaling
+        y4 = (self.main_offset_y_pos + 855) * self.scaling
+
+        self.hdd_button.place(x=int(x1), y=int(y1))
+        self.usb_button.place(x=int(x2), y=int(y1))
+
+        self.psp_button.place(x=int(x1), y=int(y2))
+        self.psx_button.place(x=int(x2), y=int(y2))
+        self.ps2_button.place(x=int(x3), y=int(y2))
+        self.ps3_button.place(x=int(x4), y=int(y2))
+
+        self.build_button.place(x=int(x1), y=int(y3))
+        self.save_button.place(x=int(x2 + 10), y=int(y3))
+
+        self.fetch_button.place(x=int(self.main_offset_x_pos * self.scaling), y=int(y4))
+        self.refresh_button.place(x=int(self.main_offset_x_pos * self.scaling + 60), y=int(y4))
 
     def create_dropdowns(self):
         # ensure drive_dropdown into the listbox
@@ -271,7 +433,7 @@ class Main:
 
         return copy.copy(icon_bg_img)
 
-    def make_smal_button(self, text, **args):
+    def small_button_maker(self, text, **args):
         font = None
         x = None
         y = None
@@ -314,11 +476,20 @@ class Main:
                                            os.path.join(self.fonts_path, tmp_font))
         return copy.copy(icon_bg_img)
 
-    def load_default_pkg_images(self, filename):
-        default_pkg_img_dir = os.path.join(ImagePaths.pkg, 'default')
-        return Image.open(os.path.join(default_pkg_img_dir, filename)).convert("RGBA")
+    def __draw_background_on_canvas__(self):
+        self.text_device = 'Device'
+        self.text_platform = 'Type'
 
-    def draw_background_on_canvas(self):
+        self.text_title_id = 'Title id'
+        self.text_title = 'Title'
+        self.text_filename = 'Filename'
+        self.text_iso_path = 'Path'
+
+        self.text_ftp_game_list = 'FTP Game list'
+        self.text_ps3_ip_label = 'PS3-ip'
+        self.text_ps3_usr_label = 'User'
+        self.text_ps3_pass_label = 'Pass'
+
         self.current_img = self.background_images[self.canvas_image_number]
         webman_logo = Image.open(os.path.join(ImagePaths.misc, 'webman_text_icon_bw.png')).resize(
             (int(464 * 0.45), int(255 * 0.45)))
@@ -407,229 +578,23 @@ class Main:
                             tmp_img.paste(dark, (width - (480 + 8), 12), dark)
                             self.background_images.append(tmp_img)
 
-    def init_default_view(self, main):
-        # Constants
-        self.text_device = 'Device'
-        self.text_platform = 'Type'
 
-        self.text_title_id = 'Title id'
-        self.text_title = 'Title'
-        self.text_filename = 'Filename'
-        self.text_iso_path = 'Path'
+    def __draw_pkg_images_on_canvas__(self, *args, **kwargs):
+        # image buttons coordinates (w/ scaling)
+        self.pic1_button_x_pos = 75 * self.scaling
+        self.pic1_button_y_pos = 175 * self.scaling
+        self.pic0_button_x_pos = 573 * self.scaling
+        self.pic0_button_y_pos = 450 * self.scaling
+        self.icon0_button_x_pos = 344 * self.scaling
+        self.icon0_button_y_pos = 454 * self.scaling
 
-        self.text_ftp_game_list = 'FTP Game list'
-        self.text_ps3_ip_label = 'PS3-ip'
-        self.text_ps3_usr_label = 'User'
-        self.text_ps3_pass_label = 'Pass'
-
-        # Paddings
-        self.height_of_text = 15  # Font(font='Helvetica').metrics('linespace')
-        self.dark_side_x_padding = 20
-        self.dark_side_y_padding = 20
-
-        self.text_box_spacing = 7 * self.dark_side_x_padding
-
-        # gui text coordinates
-        self.device_text_y_pos = self.main_offset_y_pos + self.height_of_text
-        self.type_text_y_pos = self.dark_side_y_padding + self.device_text_y_pos + self.height_of_text
-        self.title_id_text_y_pos = self.dark_side_y_padding + 7 + self.type_text_y_pos + self.height_of_text + 2
-        self.title_text_y_pos = self.dark_side_y_padding + self.title_id_text_y_pos + self.height_of_text
-        self.filename_text_y_pos = self.dark_side_y_padding + self.title_text_y_pos + self.height_of_text
-        self.iso_path_text_y_pos = self.dark_side_y_padding + self.filename_text_y_pos + self.height_of_text - 1
-
-        # image buttons coordinates (w/o res scaling)
-        self.pic1_button_x_pos = 75
-        self.pic1_button_y_pos = 175
-        self.pic0_button_x_pos = 573
-        self.pic0_button_y_pos = 450
-        self.icon0_button_x_pos = 344
-        self.icon0_button_y_pos = 454
-
-        # image coordinates for the gui
+        # image coordinates for the gui (w/o scaling)
         self.icon0_x_pos = 405
         self.icon0_y_pos = 416
         self.pic0_x_pos = 750
         self.pic0_y_pos = 412
 
-        # gamelist and entry fields
-        self.entry_field_title_id = Entry(main, validate='key', validatecommand=(self.vcmd, '%P'))
-        self.entry_field_title = Entry(main)
-        self.entry_field_filename = Entry(main)
-        self.entry_field_iso_path = Entry(main, state='readonly')
-        # not visible in GUI
-        self.entry_field_platform = Entry(main)
-
-        ##########################################################################
-        # Adding an on_change-listener on 'entry_field_title'
-        self.generate_on_change(self.entry_field_title)
-        self.entry_field_title.bind('<<Change>>', self.dynamic_title_to_pic1)
-        ###########################################################################
-        # Adding an on_change-listener on 'entry_field_filename'
-        self.generate_on_change(self.entry_field_filename)
-        self.entry_field_filename.bind('<<Change>>', self.dynamic_filename_and_path)
-        ###########################################################################
-
-        self.entry_field_ftp_ip = Entry(main)
-        self.entry_field_ftp_ip.insert(0, get_ftp_ip_from_config())
-
-        self.entry_field_ftp_user = Entry(main)
-        self.entry_field_ftp_user.insert(0, get_ftp_user_from_config())
-
-        self.entry_field_ftp_pass = Entry(main)
-        self.entry_field_ftp_pass.insert(0, get_ftp_pass_from_config())
-
-        # system choice buttons
-        self.selection_drive_list = ['dev_hdd0',
-                                     'dev_usb000', 'dev_usb001', 'dev_usb002',
-                                     'dev_usb003']  # usb port 'x' should be selected through a list
-        self.selection_system_list = ['PSPISO', 'PSXISO', 'PS2ISO', 'PS3ISO']
-        self.drive_path = self.selection_drive_list[0]  # drive should be toggled by buttons
-
-        self.button_HDD = Button(main,
-                                 image=self.hdd_button_image,
-                                 borderwidth=1,
-                                 command=lambda: self.on_drive_button(self.selection_drive_list[0]))
-
-        self.button_USB = Button(main,
-                                 image=self.usb_button_image,
-                                 borderwidth=1,
-                                 command=lambda:
-                                 self.on_drive_button(self.selection_drive_list[self.usb_port_number + 1]))
-
-        self.button_PSP = Button(main,
-                                 image=self.psp_button_image,
-                                 borderwidth=1,
-                                 command=lambda:
-                                 self.on_system_button(self.drive_system_path_array[0], self.selection_system_list[0]))
-
-        self.button_PSX = Button(main,
-                                 image=self.psx_button_image,
-                                 borderwidth=1,
-                                 command=lambda:
-                                 self.on_system_button(self.drive_system_path_array[0], self.selection_system_list[1]))
-
-        self.button_PS2 = Button(main,
-                                 image=self.ps2_button_image,
-                                 borderwidth=1,
-                                 command=lambda:
-                                 self.on_system_button(self.drive_system_path_array[0], self.selection_system_list[2]))
-
-        self.button_PS3 = Button(main,
-                                 image=self.ps3_button_image,
-                                 borderwidth=1,
-                                 command=lambda:
-                                 self.on_system_button(self.drive_system_path_array[0], self.selection_system_list[3]))
-
-        # build, save and remove buttons
-        self.build_button = Button(main,
-                                   image=self.build_button_image,
-                                   borderwidth=0,
-                                   command=self.on_build_button,
-                                   bg="#FBFCFB")
-
-        self.save_button = Button(main,
-                                  image=self.save_button_image,
-                                  borderwidth=0,
-                                  command=self.on_save_button,
-                                  bg="#FBFCFB")
-
-        # ftp list buttons
-        self.fetch_button = Button(main,
-                                   image=self.fetch_button_image,
-                                   borderwidth=0,
-                                   command=self.on_ftp_fetch_button,
-                                   bg="#FBFCFB")
-
-        self.refresh_button = Button(main,
-                                     image=self.refresh_button_image,
-                                     borderwidth=0,
-                                     command=self.on_game_list_refresh,
-                                     bg="#FBFCFB")
-
-        # button tooltips
-        CreateToolTip(self.button_USB, self.USB_BUTTON_TOOLTIP_MSG)
-
-        CreateToolTip(self.build_button, self.BUILD_BUTTON_TOOLTIP_MSG)
-        CreateToolTip(self.save_button, self.SAVE_BUTTON_TOOLTIP_MSG)
-
-        CreateToolTip(self.fetch_button, self.FETCH_BUTTON_TOOLTIP_MSG)
-        CreateToolTip(self.refresh_button, self.REFRESH_BUTTON_TOOLTIP_MSG)
-
-        # Entry field placements
-        entry_field_width = 200
-        self.entry_field_title_id.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * self.scaling),
-                                        y=int(self.title_id_text_y_pos * self.scaling),
-                                        width=entry_field_width)
-
-        self.entry_field_title.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * self.scaling),
-                                     y=int(self.title_text_y_pos * self.scaling),
-                                     width=entry_field_width)
-
-        self.entry_field_filename.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * self.scaling),
-                                        y=int(self.filename_text_y_pos * self.scaling),
-                                        width=entry_field_width)
-
-        self.entry_field_iso_path.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * self.scaling),
-                                        y=int(self.iso_path_text_y_pos * self.scaling),
-                                        width=entry_field_width)
-
-        self.entry_field_ftp_ip.place(x=int((self.main_offset_x_pos + 90) * self.scaling),
-                                      y=int((self.main_offset_y_pos + 815) * self.scaling),
-                                      width=90)
-
-        self.entry_field_ftp_user.place(x=int((self.main_offset_x_pos + 320) * self.scaling),
-                                        y=int((self.main_offset_y_pos + 815) * self.scaling),
-                                        width=60)
-
-        self.entry_field_ftp_pass.place(x=int((self.main_offset_x_pos + 320) * self.scaling),
-                                        y=int((self.main_offset_y_pos + 850) * self.scaling),
-                                        width=60)
-
-        # Button placements
-        self.button_HDD.place(x=int((self.text_box_spacing + self.main_offset_x_pos + 0 * 75) * self.scaling),
-                              y=int(self.device_text_y_pos * self.scaling))
-
-        self.button_USB.place(x=int((self.text_box_spacing + self.main_offset_x_pos + 1 * 75) * self.scaling),
-                              y=int(self.device_text_y_pos * self.scaling))
-
-        self.button_PSP.place(x=int((self.text_box_spacing + self.main_offset_x_pos + 0 * 75) * self.scaling),
-                              y=int(self.type_text_y_pos * self.scaling))
-
-        self.button_PSX.place(x=int((self.text_box_spacing + self.main_offset_x_pos + 1 * 75) * self.scaling),
-                              y=int(self.type_text_y_pos * self.scaling))
-
-        self.button_PS2.place(x=int((self.text_box_spacing + self.main_offset_x_pos + 2 * 75) * self.scaling),
-                              y=int(self.type_text_y_pos * self.scaling))
-
-        self.button_PS3.place(x=int((self.text_box_spacing + self.main_offset_x_pos + 3 * 75) * self.scaling),
-                              y=int(self.type_text_y_pos * self.scaling))
-
-        # draws ICON0, PIC0 and PIC1 on the canvas
-        self.init_draw_images_on_canvas(main)
-
-        self.button_spacing = 70
-
-        # self.save_button.place(
-        #     x=int((self.text_box_spacing + self.main_offset_x_pos) * scaling),
-        #     y=int((self.iso_path_text_y_pos + 40) * scaling))
-
-        self.build_button.place(
-            x=int((self.text_box_spacing + self.main_offset_x_pos + 0 * 85) * self.scaling),
-            y=int((self.iso_path_text_y_pos + 40) * self.scaling))
-
-        self.fetch_button.place(
-            x=int((self.main_offset_x_pos) * self.scaling),
-            y=int((self.main_offset_y_pos + 855) * self.scaling))
-
-        self.save_button.place(
-            x=int((self.text_box_spacing + self.main_offset_x_pos + 1 * 85) * self.scaling),
-            y=int((self.iso_path_text_y_pos + 40) * self.scaling))
-
-        self.refresh_button.place(
-            x=int((self.main_offset_x_pos + 80) * self.scaling),
-            y=int((self.main_offset_y_pos + 855) * self.scaling))
-
-    def init_draw_images_on_canvas(self, main, *args, **kwargs):
+        # self.draw_background_on_canvas()
         tmp_image_icon0 = None
         img_to_be_changed = kwargs.get('img_to_be_changed', None)
         pkg_build_path = kwargs.get('pkg_build_path', None)
@@ -713,6 +678,7 @@ class Main:
             tmp_icon0_bg = copy.copy(self.image_pic1_ref)
             tmp_icon0_bg.paste(self.image_icon0.convert("RGBA"), (self.icon0_x_pos, self.icon0_y_pos),
                                self.image_icon0.convert("RGBA"))
+
             # Image.crop((left, top, right, bottom))
             tmp_image_icon0 = tmp_icon0_bg.crop((self.icon0_x_pos, self.icon0_y_pos,
                                                  self.icon0_x_pos + self.image_icon0.width,
@@ -741,13 +707,13 @@ class Main:
         self.photoimage_pic1 = PhotoImage(
             self.image_pic1.resize((int(1280 * self.scaling), int(720 * self.scaling)), Image.Resampling.LANCZOS))
 
-        self.button_pic1 = Button(main,
+        self.button_pic1 = Button(self.main,
                                   image=self.photoimage_pic1,
                                   highlightthickness=0,
                                   bd=0,
-                                  command=lambda: self.image_replace_browser(main))
+                                  command=lambda: self.image_replace_browser(self.main))
 
-        CreateToolTip(self.button_pic1, self.PIC1_TOOLTIP_MSG)
+        CreateToolTip(self.button_pic1, "Click to replace  PIC1")
 
         # ICON0 resizing
         icon0_x_scale = self.main_window_width / self.image_pic1.width * self.scaling
@@ -761,12 +727,13 @@ class Main:
             (self.icon0_new_dim[0], self.icon0_new_dim[1]), Image.Resampling.LANCZOS)
 
         self.photoimage_icon0 = PhotoImage(self.image_icon0_resize)
-        self.button_icon0 = Button(main,
+        self.button_icon0 = Button(self.main,
                                    image=self.photoimage_icon0,
                                    highlightthickness=0,
                                    bd=0,
-                                   command=lambda: self.image_replace_browser(main))
-        CreateToolTip(self.button_icon0, self.ICON0_TOOLTIP_MSG)
+                                   command=lambda: self.image_replace_browser(self.main))
+
+        CreateToolTip(self.button_icon0, "Click to replace ICON0")
 
         # PIC0 resizing
         pic0_x_scale = self.main_window_width / self.image_pic1.width * self.scaling
@@ -780,19 +747,19 @@ class Main:
             (self.pic0_new_dim[0], self.pic0_new_dim[1]), Image.Resampling.LANCZOS)
 
         self.photo_image_pic0 = PhotoImage(self.image_pic0_resize)
-        self.button_pic0 = Button(main,
+        self.button_pic0 = Button(self.main,
                                   image=self.photo_image_pic0,
                                   highlightthickness=0,
                                   bd=0,
-                                  command=lambda: self.image_replace_browser(main))
-        CreateToolTip(self.button_pic0, self.PIC0_TOOLTIP_MSG)
+                                  command=lambda: self.image_replace_browser(self.main))
+        CreateToolTip(self.button_pic0, "Click to replace  PIC0")
 
         # finally placing ICON0, PIC0 and PIC1 onto the canvas
-        self.button_pic1.place(x=self.pic1_button_x_pos * self.scaling, y=self.pic1_button_y_pos * self.scaling)
-        self.button_pic0.place(x=int(self.pic0_button_x_pos * self.scaling),
-                               y=int(self.pic0_button_y_pos * self.scaling))
-        self.button_icon0.place(x=int(self.icon0_button_x_pos * self.scaling),
-                                y=int(self.icon0_button_y_pos * self.scaling))
+        self.button_pic1.place(x=self.pic1_button_x_pos, y=self.pic1_button_y_pos)
+        self.button_pic0.place(x=int(self.pic0_button_x_pos),
+                               y=int(self.pic0_button_y_pos))
+        self.button_icon0.place(x=int(self.icon0_button_x_pos),
+                                y=int(self.icon0_button_y_pos))
 
     def draw_text_on_image(self, image, text, text_x, text_y, text_size, text_color):
         font = ImageFont.truetype(os.path.join(self.fonts_path, 'SCE-PS3.ttf'), text_size)
@@ -840,24 +807,15 @@ class Main:
             draw.text((text_x + adj, text_y - adj), text, font=font, fill=shadow_color)
         return draw.text((text_x, text_y), text, fill=text_color, font=font)
 
-    # def init_main_window_buttons(self, main):
-    # button to change image
-    # self.change_button = Button(main,
-    # 							borderwidth=0,
-    # 							image=self.images_function_button[3],
-    # 							command=self.on_change_button,
-    # 							bd=1)
-    # self.change_button.place(x=40 + 13, y=1)
-
     def on_change_button(self):
         # next image
         self.canvas_image_number += 1
 
-        # return to first image
+        # cycle back to first image
         if self.canvas_image_number == len(self.background_images):
             self.canvas_image_number = 0
 
-        self.draw_background_on_canvas()
+        self.__draw_background_on_canvas__()
 
     def on_drive_button(self, drive_choice):
         print('DEBUG on_drive_button')
@@ -928,7 +886,7 @@ class Main:
         if selected_path != '':
             AppPaths.game_work_dir = os.path.join(self.game_list.get_selected_build_dir_path(), 'work_dir')
             build_dir_pkg_path = os.path.join(AppPaths.game_work_dir, 'pkg')
-        self.init_draw_images_on_canvas(self.main, pkg_build_path=build_dir_pkg_path)
+        self.__draw_pkg_images_on_canvas__(self.main, pkg_build_path=build_dir_pkg_path)
 
     # Dynamic update of the 'entry_field_filename' into the 'entry_field_iso_path'
     def dynamic_filename_and_path(self, event):
@@ -953,9 +911,12 @@ class Main:
         self.update_iso_path_entry_field(iso_path)
 
         if iso_path == '':
+            # TODO: make sense if this part, needed?
+
             # re-draw work_dir image on canvas
-            self.__init_pkg_images__()
-            self.init_draw_images_on_canvas(self.main)
+            # __init_images__(self)
+            # self.draw_background_on_canvas()
+            print()
 
     def update_iso_path_entry_field(self, iso_path):
         self.entry_field_iso_path.config(state='normal')
@@ -972,7 +933,7 @@ class Main:
         tmp_img = tmp_img.resize((int(1280 * self.scaling), int(720 * self.scaling)), Image.Resampling.LANCZOS)
         self.photo_image_pic1_xmb = PhotoImage(tmp_img)
         self.button_pic1.config(image=self.photo_image_pic1_xmb)
-        self.init_draw_images_on_canvas(self.main)
+        self.__draw_pkg_images_on_canvas__(self.main)
         # TODO: this might be more optimized somewhere else
         self.update_game_build_path()
 
@@ -993,7 +954,7 @@ class Main:
                 img_to_be_changed = 'pic1'
 
             # # re-draw work_dir image on canvas
-            self.init_draw_images_on_canvas(main, img_to_be_changed=img_to_be_changed)
+            self.__draw_pkg_images_on_canvas__(main, img_to_be_changed=img_to_be_changed)
 
     def generate_on_change(self, obj):
         obj.tk.eval('''
@@ -1249,12 +1210,16 @@ class Main:
             # builds pkg and reads the pkg filename
             # TODO: investigate why these steps are necessary due to popup
             # temporary fix for bug where images disappeared after build
-            self.init_default_view(self.main)
-            self.draw_background_on_canvas()
+            # self.init_default_view(self.main)
+            # self.init_draw_images_on_canvas(self.main)
+
+            # TODO: draw icons here (extract logic from init_default_view)
+            # self.draw_background_on_canvas()
+            # self.__init_default_view__()
+            # self.__init_buttons__()
 
             webman_pkg = Webman_PKG()
             pkg_name = webman_pkg.build()
-
 
             if pkg_name != None:
                 # making sure default work_dir and pkg directories exists
