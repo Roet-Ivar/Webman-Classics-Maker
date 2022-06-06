@@ -256,6 +256,7 @@ class GlobalVar:
                       ('tmp/wmtmp/', 'NTFS'),
                       ('GAMES/', 'GAMES')]
 
+
 class GlobalDef:
     def copytree(self, src, dst, symlinks=False, ignore=None):
         import shutil

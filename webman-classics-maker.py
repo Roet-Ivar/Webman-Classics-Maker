@@ -2,7 +2,6 @@
 import copy
 import json
 import os
-import sys
 import shutil
 import traceback
 import urllib.parse
@@ -26,10 +25,12 @@ from resources.tools.util_scripts.wcm_gui.ftp_game_data_fetcher import FtpGameLi
 from resources.tools.util_scripts.wcm_gui.game_listbox import Gamelist
 
 if getattr(sys, 'frozen', False):
+    import sys
     sys.path.append(os.path.join(os.path.dirname(sys.executable), 'resources', 'tools', 'util_scripts'))
     sys.path.append(os.path.join(os.path.dirname(sys.executable), 'resources', 'tools', 'util_scripts', 'wcm_gui'))
 else:
     # running webman_classics_maker.py from root
+    import sys
     app_full_path = os.path.realpath(__file__)
     application_path = os.path.dirname(app_full_path)
     sys.path.append(os.path.join(application_path, 'resources', 'tools', 'util_scripts'))
@@ -38,9 +39,6 @@ else:
 # pip install Pillow
 from PIL import Image, ImageDraw, ImageFont
 from PIL.ImageTk import PhotoImage
-
-
-
 
 
 def __init_pkg_build_dir__():
@@ -53,48 +51,6 @@ def __init_pkg_build_dir__():
                          os.path.join(AppPaths.resources, 'pkg'))
 
 
-def __init_images__(self):
-    # ui images
-    self.image_xmb_icons = Image.open(os.path.join(ImagePaths.xmb, 'XMB_icons.png'))
-    self.ps3_gametype_logo = Image.open(os.path.join(ImagePaths.xmb, 'ps3_type_logo.png'))
-
-    self.hdd_button_image = PhotoImage(self.make_button_smallest('HDD', font='conthrax-sb.ttf', x=-1, y=-2))
-    self.usb_button_image = PhotoImage(self.make_button_smallest('USB', font='conthrax-sb.ttf', x=-1, y=-2))
-    self.psp_button_image = PhotoImage(self.make_button_smallest('PSP', font='conthrax-sb.ttf', x=-1, y=-2))
-    self.psx_button_image = PhotoImage(self.make_button_smallest('PSX', font='conthrax-sb.ttf', x=-1, y=-2))
-    self.ps2_button_image = PhotoImage(self.make_button_smallest('PS2', font='conthrax-sb.ttf', x=-1, y=-2))
-    self.ps3_button_image = PhotoImage(self.make_button_smallest('PS3', font='conthrax-sb.ttf', x=-1, y=-2))
-    self.build_button_image = PhotoImage(self.small_button_maker('Build', font='arial.ttf', x=3, y=0))
-    self.add_button_image = PhotoImage(self.small_button_maker('Add', font='arial.ttf', x=3, y=0))
-    self.save_button_image = PhotoImage(self.small_button_maker('Save', font='arial.ttf', x=3, y=0))
-    # self.quit_button_image = PhotoImage(self.make_smal_button('Quit', font='arial.ttf', x=3, y=0))
-    # self.change_button_image = PhotoImage(self.make_smal_button('Change', font='arial.ttf', x=-3, y=0))
-    self.fetch_button_image = PhotoImage(self.small_button_maker('Fetch', font='arial.ttf', x=3, y=0))
-    self.refresh_button_image = PhotoImage(self.small_button_maker('Refresh', font='arial.ttf', x=-1, y=0))
-
-    # pkg images
-    self.pkg_icon0 = None
-    self.pkg_pic0 = None
-    self.pkg_pic1 = None
-
-    self.image_icon0 = get_default_image('ICON0.PNG')
-    self.image_icon0_ref = copy.copy(self.image_icon0)
-
-    self.image_pic0 = get_default_image('PIC0.PNG')
-    self.image_pic0_ref = copy.copy(self.image_pic0)
-
-    self.image_pic1 = get_default_image('PIC1.PNG')
-    self.image_pic1_ref = copy.copy(self.image_pic1)
-    self.image_pic1_w_title = copy.copy(self.image_pic1)
-
-    # ui background image
-    self.background_images = []
-    self.load_backgrounds()
-    self.canvas_image_number = 0
-    self.current_img = self.background_images[self.canvas_image_number]
-    self.current_background = PhotoImage(self.current_img)
-
-
 def __init_wcm_work_dir__(self):
     # clean and init wcm_work_dir in startup
     if os.path.isdir(AppPaths.wcm_work_dir):
@@ -102,7 +58,7 @@ def __init_wcm_work_dir__(self):
             shutil.rmtree(AppPaths.wcm_work_dir)
     if not os.path.isdir(os.path.join(AppPaths.wcm_work_dir, 'pkg')):
         os.makedirs(os.path.join(AppPaths.wcm_work_dir, 'pkg'))
-        __init_images__(self)
+        # __init_images__(self)
 
 
 def get_ftp_ip_from_config():
@@ -130,7 +86,6 @@ class Main:
         self.scaling = 720.0 / 1080.0
         self.main_window_height = int(1080 * self.scaling)
         self.main_window_width = int(1920 * self.scaling)
-
         self.main_offset_x_pos = 1450
         self.main_offset_y_pos = 50
 
@@ -143,72 +98,82 @@ class Main:
         self.ftp_settings_path = os.path.join(AppPaths.settings, 'ftp_settings.cfg')
         self.fonts_path = AppPaths.fonts
 
-        self.vcmd = self.main.register(self.dynamic_validate_title_id)
-        self.vcmd2 = self.main.register(self.dynamic_validate_title_id)
-        self.title_id_maxlength = len('PKGLAUNCH')
-        self.tmp_title_id = ''
-        self.global_platform_paths = GlobalVar.platform_paths
-
-        self.drive_system_path_array = ['drive', 'system', 'path']
-        self.entry_field_iso_path = None
-        self.usb_port_number = 0
-
-        # self.button_icon0 = None
-        # self.button_pic0 = None
-        # self.button_pic1 = None
-        #
-        # self.hdd_button = None
-        # self.usb_button = None
-        #
-        # self.psp_button = None
-        # self.psx_button = None
-        # self.ps2_button = None
-        # self.ps3_button = None
-        #
-        # self.build_button = None
-        # self.fetch_button = None
-        # self.refresh_button = None
-        #
+        # init images and canvas for the gui
         self.drive_dropdown = None
         self.platform_dropdown = None
+        self.main_canvas = None
 
-        # gui assets
-        __init_images__(self)
+        self.__init_images_and_canvas__()
+        self.__draw_background_on_canvas__()
+        self.__draw_pkg_images_on_canvas__()
+        self.__init_entry_field__()
+        self.__init_buttons__()
 
-        # init canvas for the background image
+        # init gamelist and filters
+        self.game_list = Gamelist(self)
+        self.game_list_box = self.game_list.get_listbox()
+
+        self.create_dropdowns()
+        self.drive_dropdown = DriveDropdown(self.main_canvas, self.game_list_box).get_box()
+        self.platform_dropdown = PlatformDropdown(self.main_canvas, self.game_list_box).get_box()
+
+    def __init_images_and_canvas__(self):
+        # ui images
+        self.image_xmb_icons = Image.open(os.path.join(ImagePaths.xmb, 'XMB_icons.png'))
+        self.ps3_gametype_logo = Image.open(os.path.join(ImagePaths.xmb, 'ps3_type_logo.png'))
+
+        self.hdd_button_image = PhotoImage(self.make_button_smallest('HDD', font='conthrax-sb.ttf', x=-1, y=-2))
+        self.usb_button_image = PhotoImage(self.make_button_smallest('USB', font='conthrax-sb.ttf', x=-1, y=-2))
+        self.psp_button_image = PhotoImage(self.make_button_smallest('PSP', font='conthrax-sb.ttf', x=-1, y=-2))
+        self.psx_button_image = PhotoImage(self.make_button_smallest('PSX', font='conthrax-sb.ttf', x=-1, y=-2))
+        self.ps2_button_image = PhotoImage(self.make_button_smallest('PS2', font='conthrax-sb.ttf', x=-1, y=-2))
+        self.ps3_button_image = PhotoImage(self.make_button_smallest('PS3', font='conthrax-sb.ttf', x=-1, y=-2))
+        self.build_button_image = PhotoImage(self.small_button_maker('Build', font='arial.ttf', x=3, y=0))
+        self.add_button_image = PhotoImage(self.small_button_maker('Add', font='arial.ttf', x=3, y=0))
+        self.save_button_image = PhotoImage(self.small_button_maker('Save', font='arial.ttf', x=3, y=0))
+        # self.quit_button_image = PhotoImage(self.make_smal_button('Quit', font='arial.ttf', x=3, y=0))
+        # self.change_button_image = PhotoImage(self.make_smal_button('Change', font='arial.ttf', x=-3, y=0))
+        self.fetch_button_image = PhotoImage(self.small_button_maker('Fetch', font='arial.ttf', x=3, y=0))
+        self.refresh_button_image = PhotoImage(self.small_button_maker('Refresh', font='arial.ttf', x=-1, y=0))
+
+        self.image_icon0 = get_default_image('ICON0.PNG')
+        self.image_icon0_ref = copy.copy(self.image_icon0)
+
+        self.image_pic0 = get_default_image('PIC0.PNG')
+        self.image_pic0_ref = copy.copy(self.image_pic0)
+
+        self.image_pic1 = get_default_image('PIC1.PNG')
+        self.image_pic1_ref = copy.copy(self.image_pic1)
+        self.image_pic1_w_title = copy.copy(self.image_pic1)
+
+        # ui background image
+        self.background_images = []
+        self.load_backgrounds()
+        self.canvas_image_number = 0
+        self.current_img = self.background_images[self.canvas_image_number]
+        self.current_background = PhotoImage(self.current_img)
+
         self.main_canvas = Canvas(self.main,
                                   width=self.main_window_width,
                                   height=self.main_window_height,
                                   borderwidth=0,
                                   highlightthickness=0)
-
         self.main_canvas.pack(fill=BOTH, expand=YES)
-
-        self.__init_entry_field__()
-        self.__init_buttons__()
-        self.__draw_pkg_images_on_canvas__(self.main)
-        self.__draw_background_on_canvas__()
-
-
-
-        # init gamelist and filters
-        self.list_filter_drive = 'ALL'
-        self.list_filter_platform = 'ALL'
-
-        self.game_list = Gamelist(self)
-        self.game_list_box = self.game_list.get_listbox()
-        self.create_dropdowns()
-
-        self.drive_dropdown = DriveDropdown(self.main_canvas, self.game_list_box).get_box()
-        self.platform_dropdown = PlatformDropdown(self.main_canvas, self.game_list_box).get_box()
+        self.background_image = self.main_canvas.create_image(0, 0, anchor=NW, image=self.current_background)
 
     def __init_entry_field__(self):
+        self.usb_port_number = 0
+        self.drive_system_path_array = ['drive', 'system', 'path']
+
+        self.vcmd = self.main.register(self.dynamic_validate_title_id)
+        self.vcmd2 = self.main.register(self.dynamic_validate_title_id)
+
         # paddings
         self.text_box_x_padding = 20
         self.text_box_y_padding = 20
         self.text_box_spacing = 7 * self.text_box_x_padding
 
-        # coordinates
+        # # coordinates
         self.text_height = 15  # Font(font='Helvetica').metrics('linespace')
         self.device_text_y_pos = self.main_offset_y_pos + self.text_height
         self.type_text_y_pos = self.text_box_y_padding + self.device_text_y_pos + self.text_height
@@ -490,6 +455,20 @@ class Main:
         self.text_ps3_usr_label = 'User'
         self.text_ps3_pass_label = 'Pass'
 
+        # paddings
+        self.text_box_x_padding = 20
+        self.text_box_y_padding = 20
+        self.text_box_spacing = 7 * self.text_box_x_padding
+
+        # coordinates
+        self.text_height = 15  # Font(font='Helvetica').metrics('linespace')
+        self.device_text_y_pos = self.main_offset_y_pos + self.text_height
+        self.type_text_y_pos = self.text_box_y_padding + self.device_text_y_pos + self.text_height
+        self.title_id_text_y_pos = self.text_box_y_padding + 7 + self.type_text_y_pos + self.text_height + 2
+        self.title_text_y_pos = self.text_box_y_padding + self.title_id_text_y_pos + self.text_height
+        self.filename_text_y_pos = self.text_box_y_padding + self.title_text_y_pos + self.text_height
+        self.iso_path_text_y_pos = self.text_box_y_padding + self.filename_text_y_pos + self.text_height - 1
+
         self.current_img = self.background_images[self.canvas_image_number]
         webman_logo = Image.open(os.path.join(ImagePaths.misc, 'webman_text_icon_bw.png')).resize(
             (int(464 * 0.45), int(255 * 0.45)))
@@ -557,11 +536,7 @@ class Main:
         self.current_img.paste(self.tv_frame, (int(45 * self.scaling), int(143 * self.scaling)), self.tv_frame)
 
         self.current_background = PhotoImage(self.current_img)
-
-        try:
-            self.main_canvas.itemconfig(self.background_image, image=self.current_background)
-        except:
-            self.background_image = self.main_canvas.create_image(0, 0, anchor=NW, image=self.current_background)
+        self.main_canvas.itemconfig(self.background_image, image=self.current_background)
 
     def load_backgrounds(self):
         base_path = os.path.join(ImagePaths.images, 'backgrounds')
@@ -646,12 +621,15 @@ class Main:
         else:
             # extract the platform name by using the path
             platform = ''
-            if self.entry_field_platform == 'NTFS':
-                match = re.search('(?<=\[).*?(?=\])', str(self.entry_field_filename.get()))
-                if match is not None:
-                    donor_platform = filter(lambda x: match.group() in x[0], self.global_platform_paths)
-                    if donor_platform:
-                        platform = list(donor_platform)[0][1]
+            try:
+                if self.entry_field_platform == 'NTFS':
+                    match = re.search('(?<=\[).*?(?=\])', str(self.entry_field_filename.get()))
+                    if match is not None:
+                        donor_platform = filter(lambda x: match.group() in x[0],  GlobalVar.platform_paths)
+                        if donor_platform:
+                            platform = list(donor_platform)[0][1]
+            except AttributeError:
+                platform = ''
 
             self.image_icon0 = Image.open(os.path.join(default_img_path, platform, 'ICON0.PNG')).convert("RGBA")
             self.image_icon0_ref = Image.open(os.path.join(default_img_path, 'ICON0.PNG')).convert("RGBA")
@@ -886,7 +864,7 @@ class Main:
         if selected_path != '':
             AppPaths.game_work_dir = os.path.join(self.game_list.get_selected_build_dir_path(), 'work_dir')
             build_dir_pkg_path = os.path.join(AppPaths.game_work_dir, 'pkg')
-        self.__draw_pkg_images_on_canvas__(self.main, pkg_build_path=build_dir_pkg_path)
+        self.__draw_pkg_images_on_canvas__(pkg_build_path=build_dir_pkg_path)
 
     # Dynamic update of the 'entry_field_filename' into the 'entry_field_iso_path'
     def dynamic_filename_and_path(self, event):
@@ -933,7 +911,7 @@ class Main:
         tmp_img = tmp_img.resize((int(1280 * self.scaling), int(720 * self.scaling)), Image.Resampling.LANCZOS)
         self.photo_image_pic1_xmb = PhotoImage(tmp_img)
         self.button_pic1.config(image=self.photo_image_pic1_xmb)
-        self.__draw_pkg_images_on_canvas__(self.main)
+        self.__draw_pkg_images_on_canvas__()
         # TODO: this might be more optimized somewhere else
         self.update_game_build_path()
 
@@ -954,7 +932,7 @@ class Main:
                 img_to_be_changed = 'pic1'
 
             # # re-draw work_dir image on canvas
-            self.__draw_pkg_images_on_canvas__(main, img_to_be_changed=img_to_be_changed)
+            self.__draw_pkg_images_on_canvas__(img_to_be_changed=img_to_be_changed)
 
     def generate_on_change(self, obj):
         obj.tk.eval('''
@@ -992,7 +970,7 @@ class Main:
             P = re.sub(r'[^a-zA-Z0-9 -]', '', P)
 
             self.entry_field_title_id.delete(0, END)
-            self.entry_field_title_id.insert(0, P[0:self.title_id_maxlength])
+            self.entry_field_title_id.insert(0, P[0:9])
             main_window.after_idle(lambda: self.entry_field_title_id.config(validate='key'))
             return True
         else:
@@ -1004,7 +982,7 @@ class Main:
         title_id = title_id.replace('_', '')
         title_id = title_id.replace('-', '')
 
-        if len(title_id) != self.title_id_maxlength:
+        if len(title_id) != 9:
             self.title_id_error_msg = 'Title id must be 9 characters long.'
             print(self.title_id_error_msg)
             self.entry_field_title_id.focus_set()
@@ -1087,7 +1065,7 @@ class Main:
                 if self.entry_field_platform == 'NTFS':
                     match = re.search('(?<=\[).*?(?=\])', str(self.entry_field_filename.get()))
                     if match != None:
-                        donor_platform = filter(lambda x: match.group() in x[0], self.global_platform_paths)
+                        donor_platform = filter(lambda x: match.group() in x[0],  GlobalVar.platform_paths)
                         if donor_platform:
                             platform = list(donor_platform)[0][1]
 
@@ -1190,7 +1168,7 @@ class Main:
                     match = re.search('(?<=\[).*?(?=\])', str(self.entry_field_filename.get()))
                     if match != None:
                         # donor platform could be PS3 for game_name.NTFS[PS3]
-                        donor_platform = filter(lambda x: match.group() in x[0], self.global_platform_paths)
+                        donor_platform = filter(lambda x: match.group() in x[0],  GlobalVar.platform_paths)
                         if donor_platform:
                             platform = list(donor_platform)[0][1]
 
@@ -1208,18 +1186,7 @@ class Main:
                 shutil.copyfile(os.path.join(game_pkg_dir, 'PIC1.PNG'), os.path.join(self.pkg_dir, 'PIC1.PNG'))
 
             # builds pkg and reads the pkg filename
-            # TODO: investigate why these steps are necessary due to popup
-            # temporary fix for bug where images disappeared after build
-            # self.init_default_view(self.main)
-            # self.init_draw_images_on_canvas(self.main)
-
-            # TODO: draw icons here (extract logic from init_default_view)
-            # self.draw_background_on_canvas()
-            # self.__init_default_view__()
-            # self.__init_buttons__()
-
-            webman_pkg = Webman_PKG()
-            pkg_name = webman_pkg.build()
+            pkg_name = Webman_PKG().build()
 
             if pkg_name != None:
                 # making sure default work_dir and pkg directories exists
