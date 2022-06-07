@@ -130,26 +130,18 @@ class Gamelist:
                     self.drive_system_path_array[1] = path_array[1]
                     self.drive_system_path_array[2] = '/'.join(path_array[2:len(path_array)]).replace('//', '')
 
-                    self.entry_field_title_id.config(state='normal')
                     self.entry_field_title_id.delete(0, len(self.entry_field_title_id.get()) - 1)
                     self.entry_field_title_id.delete(0, END)
                     self.entry_field_title_id.insert(0, self.selected_title_id)
-                    self.entry_field_title_id.config(state='readonly')
 
-                    self.entry_field_title.config(state='normal')
                     self.entry_field_title.delete(0, END)
                     self.entry_field_title.insert(0, self.selected_title)
-                    self.entry_field_title.config(state='readonly')
 
-                    self.entry_field_filename.config(state='normal')
                     self.entry_field_filename.delete(0, END)
                     self.entry_field_filename.insert(0, self.selected_filename)
-                    self.entry_field_filename.config(state='readonly')
 
-                    self.entry_field_platform.config(state='normal')
                     self.entry_field_platform.delete(0, END)
                     self.entry_field_platform.insert(0, self.selected_platform)
-                    self.entry_field_platform.config(state='readonly')
 
                     return True
 
@@ -270,20 +262,19 @@ class Gamelist:
 
         self.is_cleared = True
 
-    def get_selected_build_dir_path(self):
+    def get_selected_build_dir_path(self, selected_filename, selected_title_id):
         self.build_dir_path = ''
         if self.selected_filename not in {'', None}:
-            filename = self.selected_filename
-            title_id = self.selected_title_id.replace('-', '')
+            filename = selected_filename
             build_base_path = AppPaths.builds
 
-            tmp_filename = filename
+            tmp_filename = selected_filename
             # removes the file extension from tmp_filename
             for file_ext in GlobalVar.file_extensions:
                 if filename.upper().endswith(file_ext):
                     tmp_filename = filename[0:len(filename) - len(file_ext)]
                     break
-            game_folder_name = tmp_filename.replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
+            game_folder_name = tmp_filename.replace(' ', '_') + '_(' + selected_title_id.replace('-', '') + ')'
 
             self.build_dir_path = os.path.join(build_base_path, game_folder_name)
         return self.build_dir_path

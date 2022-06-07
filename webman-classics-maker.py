@@ -60,6 +60,22 @@ def __init_tmp_work_dir__():
         os.makedirs(os.path.join(AppPaths.tmp_work_dir, 'pkg'))
 
 
+def get_build_dir_path(self, filename, title_id):
+    self.build_dir_path = ''
+    if filename not in {'', None}:
+        build_base_path = AppPaths.builds
+        tmp_filename = filename
+        # removes the file extension from tmp_filename
+        for file_ext in GlobalVar.file_extensions:
+            if filename.upper().endswith(file_ext):
+                tmp_filename = filename[0:len(filename) - len(file_ext)]
+                break
+        game_folder_name = tmp_filename.replace(' ', '_') + '_(' + title_id.replace('-', '') + ')'
+
+        self.build_dir_path = os.path.join(build_base_path, game_folder_name)
+    return self.build_dir_path
+
+
 def get_ftp_ip_from_config():
     return FtpSettings.ps3_lan_ip
 
@@ -851,9 +867,9 @@ class Main:
     # Dynamic update of the pkg path for showing fetched images
     def update_game_build_path(self):
         # ask gamelist to return selected path
-        selected_path = self.game_list.get_selected_build_dir_path()
+        selected_path = get_build_dir_path(self, str(self.entry_field_filename.get()), str(self.entry_field_title_id.get()))
         if selected_path != '':
-            AppPaths.game_work_dir = os.path.join(self.game_list.get_selected_build_dir_path(), 'work_dir')
+            AppPaths.game_work_dir = os.path.join(selected_path, 'work_dir')
             self.game_pkg_dir = os.path.join(AppPaths.game_work_dir, 'pkg')
 
         self.__draw_pkg_images_on_canvas__(pkg_build_path=self.game_pkg_dir)
@@ -1074,6 +1090,12 @@ class Main:
     def save_work_dir(self):
         if self.validate_fields():
             if not os.path.exists(AppPaths.game_work_dir):
+                if AppPaths.game_work_dir == '':
+                    # we need to build the path first
+                    selected_path = self.game_list.get_selected_build_dir_path(str(self.entry_field_filename.get()), str(self.entry_field_title_id.get()))
+                    AppPaths.game_work_dir = os.path.join(selected_path, 'work_dir')
+                    self.game_pkg_dir = os.path.join(AppPaths.game_work_dir, 'pkg')
+                print('Trying to create: ' + str(os.path.join(AppPaths.game_work_dir, 'pkg')))
                 os.makedirs(os.path.join(AppPaths.game_work_dir, 'pkg'))
 
             # make sure we have the mandatory ICON0 in the build_dir
@@ -1095,7 +1117,7 @@ class Main:
             self.save_pkg_info_to_json()
 
             # clean up the temp work dir
-            # __init_tmp_work_dir__()
+            __init_tmp_work_dir__()
 
             return True
         else:
