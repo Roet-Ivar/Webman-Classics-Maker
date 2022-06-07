@@ -131,7 +131,7 @@ class FtpSettings:
     def get_ftp(self):
         from ftplib import FTP
         print('Connection attempt to ' + self.ps3_lan_ip + ', timeout set to ' + str(self.ftp_timeout) + 's...\n')
-        ftp = FTP(self.ps3_lan_ip, timeout=self.ftp_timeout)
+        ftp = FTP(self.ps3_lan_ip, timeout=self.ftp_timeout, encoding='ISO-8859-1')
         ftp.set_pasv=self.ftp_pasv_mode
         ftp.login(user='', passwd='')
         ftp.voidcmd('TYPE I')
