@@ -51,14 +51,15 @@ class FtpGameList():
                 self.selected_drives.remove(('/dev_hdd0/', 'HDD0'))
         # single drive choice
         else:
-            self.selected_drives.extend(filter(lambda x: str(selected_drive) == x[1], self.global_drive_paths))
+            self.selected_drives.extend(list(filter(lambda x: str(selected_drive) == x[1], self.global_drive_paths)))
 
         # add all drive paths based on choice from platform filter
         if 'ALL' in selected_platform:
             self.platform_filter.extend(self.global_platform_paths)
         # single platform choice
         else:
-            self.platform_filter.extend(filter(lambda x: str(selected_platform) == x[1], self.global_platform_paths))
+            self.platform_filter.extend(
+                list(filter(lambda x: str(selected_platform) == x[1], self.global_platform_paths)))
 
         # messages
         self.PAUSE_MESSAGE = 'Press ENTER to continue...'
@@ -197,13 +198,12 @@ class FtpGameList():
                     game_exist = True
                     pass
 
-
             # .NTFS[xxx] gets a donor platform for metadata scraping
             if new_game_platform == 'NTFS':
                 match = re.search('(?<=\[).*?(?=\])', new_game_filename)
                 if match is not None:
                     # These will not match: '.NTFS[BDISO]', '.NTFS[DVDISO]', '.NTFS[BDFILE]',
-                    tmp_platform = filter(lambda x: match.group() in x[0], self.global_platform_paths)
+                    tmp_platform = list(filter(lambda x: match.group() in x[0], self.global_platform_paths))
                     if tmp_platform:
                         new_game_platform = tmp_platform[0][1]
             # GAMES get the PS3 metadata
@@ -345,7 +345,7 @@ class FtpGameList():
         try:
             split_folder_path = game_filepath.split('/')
             platform_str = split_folder_path[2] + '/'
-            platform_match = filter(lambda x: platform_str in x[0], self.global_platform_paths)
+            platform_match = list(filter(lambda x: platform_str in x[0], self.global_platform_paths))
             platform = str(platform_match[0][1])
 
             original_platform = platform
@@ -354,7 +354,7 @@ class FtpGameList():
                 match = re.search('(?<=\[).*?(?=\])', game_filename)
                 if match is not None:
                     # These will not match: '.NTFS[BDISO]', '.NTFS[DVDISO]', '.NTFS[BDFILE]',
-                    donor_platform = filter(lambda x: match.group() in x[0], self.global_platform_paths)
+                    donor_platform = list(filter(lambda x: match.group() in x[0], self.global_platform_paths))
                     if donor_platform:
                         platform = donor_platform[0][1]
             elif platform in {'GAMES', 'GAMEZ'}:
@@ -504,11 +504,12 @@ class FTPDataHandler:
         if rest * 1024 > file_size_bytes:
             rest = 0
 
-        def fill_buffer(self, received):
+        def fill_buffer(self, rec):
+            received = rec.decode('ISO-8859-1')
             if self.chunk_size <= 0:
                 return True
             else:
-                self.sio.write(unicode(received, errors='replace'))
+                self.sio.write(received)
             self.chunk_size -= len(received)
 
         game_title_id = ''
@@ -647,8 +648,8 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
 
         # these byte sequences are standard start and end of PNGs
         def png_finder(data, image_name):
-            index_png_start = data.find(b'\x89\x50\x4E\x47\x0D\x0A\x1A\x0A')
-            png_end_seq = b'\x49\x45\x4E\x44\xAE\x42\x60\x82'
+            index_png_start = data.find((b'\x89\x50\x4E\x47\x0D\x0A\x1A\x0A').decode('ISO-8859-1'))
+            png_end_seq = b'\x49\x45\x4E\x44\xAE\x42\x60\x82'.decode('ISO-8859-1')
             index_png_end = data.find(png_end_seq, index_png_start)
 
             self.image_duplicate = False
@@ -658,7 +659,7 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
                     import PIL.Image as Image
                     import io
 
-                    png_byte_array = data[index_png_start:index_png_end + len(png_end_seq)]
+                    png_byte_array = data[index_png_start:index_png_end + len(png_end_seq)].encode('ISO-8859-1')
                     tmp_image = Image.open(io.BytesIO(png_byte_array)).convert("RGBA")
                     self.img_name = None
 
@@ -670,7 +671,7 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
                                 self.icon0_image = png_byte_array
                                 self.has_icon0 = True
 
-                        # this is background image PSP
+                        # this is background image for PSP
                         elif tmp_image.size == (480, 272):
                             self.img_name = 'PIC1.PNG'
                             if not self.has_pic1:
@@ -716,7 +717,7 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
 
                 return False
 
-        while png_finder(self.data, self.image_name):
+        while png_finder(str(self.data), self.image_name):
             print('DEBUG Found ' + self.img_name + ' for \'' + game_name + '\'')
 
         return self.icon0_image, self.pic0_image, self.pic1_image, self.pic2_image
@@ -726,7 +727,6 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
         return self.icon0_image, self.pic0_image, self.pic1_image, self.pic2_image
 
 
-# TODO The sum of the sizes of SND0.AT3 + ICON1.PAM can't be larger than 2.4MB
 def get_PAM_from_buffer(self, platform, game_name, buffer_data):
     self.platform = platform
     self.data = buffer_data
@@ -740,19 +740,19 @@ def get_PAM_from_buffer(self, platform, game_name, buffer_data):
         # these byte sequences are standard start and end of PNGs
         def PAM_finder(data, image_name, pam_size):
 
-            index_pam_start = data.find(b'\x50\x41\x4D\x46\x30\x30\x34\x31')
-            pam_stop_seq = b'\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF'
+            index_pam_start = data.find(b'\x50\x41\x4D\x46\x30\x30\x34\x31'.decode('ISO-8859-1'))
+            pam_stop_seq = b'\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF'.decode('ISO-8859-1')
 
             self.image_name = image_name
             if index_pam_start > -1:
                 # TODO: make more solid somehow?
-                index_png_start = data.find(b'\x89\x50\x4E\x47\x0D\x0A\x1A\x0A', index_pam_start)
+                index_png_start = data.find(b'\x89\x50\x4E\x47\x0D\x0A\x1A\x0A'.decode('ISO-8859-1'), index_pam_start)
 
                 # find the last occurrence of the stop sequence and use as eof
                 index_pam_end = index_pam_start + data[index_pam_start:index_png_start].rfind(pam_stop_seq) + len(
                     pam_stop_seq)
                 if index_pam_end > -1:
-                    tmp_image = data[index_pam_start:index_pam_end]
+                    tmp_image = data[index_pam_start:index_pam_end].encode('ISO-8859-1')
                     self.pam_size = len(tmp_image)
 
                     # PAM image PS3
@@ -764,7 +764,7 @@ def get_PAM_from_buffer(self, platform, game_name, buffer_data):
 
                     if self.img_name is not None:
                         # crop data for next iteration
-                        self.data = data[index_pam_end:len(data) - 1]
+                        self.data = data[index_pam_end:len(data) - 1].encode('ISO-8859-1')
                         return True
 
                 return False
@@ -797,8 +797,8 @@ def get_AT3_from_buffer(self, platform, game_name, buffer_data):
 
         # these byte sequences are standard start and end of PNGs
         def AT3_finder(data, image_name, file_size):
-            index_at3_start = data.find(b'\x57\x41\x56\x45\x66\x6D\x74\x20') - 8
-            at3_stop_seq = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+            index_at3_start = data.find(b'\x57\x41\x56\x45\x66\x6D\x74\x20'.decode('ISO-8859-1')) - 8
+            at3_stop_seq = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'.decode('ISO-8859-1')
 
             self.image_name = image_name
             if index_at3_start > -1:
@@ -806,7 +806,7 @@ def get_AT3_from_buffer(self, platform, game_name, buffer_data):
                 index_at3_end = index_at3_start + data[index_at3_start:].find(at3_stop_seq)
 
                 if index_at3_end > -1:
-                    tmp_image = data[index_at3_start:index_at3_end]
+                    tmp_image = data[index_at3_start:index_at3_end].encode('ISO-8859-1')
                     self.at3_size = len(tmp_image)
 
                     # AT3 image PS3
@@ -818,7 +818,7 @@ def get_AT3_from_buffer(self, platform, game_name, buffer_data):
 
                     if self.img_name is not None:
                         # crop data for next iteration
-                        self.data = data[index_at3_end:len(data) - 1]
+                        self.data = data[index_at3_end:len(data) - 1].encode('ISO-8859-1')
                         return True
 
                 return False
@@ -989,13 +989,13 @@ def image_saver(ftp, platform_path, platform, game_build_dir, images):
 def param_sfo_parser(param_data):
     title_id = None
     title = None
-    filtered_data_list = filter(None,  param_data.split(b'\x00'))
+    filtered_data_list = list(filter(None,  param_data.split(b'\x00')))
     for fd in filtered_data_list:
         id_match  = re.search('\w{4}\d{5}$', fd)
         if id_match:
             title_id = id_match.group()
             try:
-                title = filtered_data_list[filtered_data_list.index(title_id) -1]
+                title = str(filtered_data_list[filtered_data_list.index(title_id) - 1])
             except:
                 title = None
             break

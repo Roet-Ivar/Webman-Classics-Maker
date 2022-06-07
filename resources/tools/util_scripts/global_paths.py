@@ -194,10 +194,10 @@ class GameListData:
         for _platform in self.game_list_data_json:
             for game_json in self.game_list_data_json[_platform]:
                 dup_match = re.search('^' + title + '\s(\()\d{1,3}?(\))$', game_json['title'])
-                if title == game_json['title'] or dup_match:
-                    dup_list.append(game_json['title'].encode('utf-8').strip())
+                if title == str(game_json['title']) or str(dup_match):
+                    dup_list.append(str(game_json['title']).strip())
         # if there they are the same, append suffix ' (1)'
-        if len(dup_list) == 1 and dup_list[0] == title:
+        if len(dup_list) == 1 and str(dup_list[0]) == title:
             title = title + ' (1)'
         # if more than one we need to figure out what suffix to append
         elif len(dup_list) > 1:
@@ -210,7 +210,7 @@ class GameListData:
                     new_number = dup_match.group()
                     pre_string = str(dup).replace('(' + new_number + ')', '')
                     # title should match the pre_string w/o '(#)' pattern
-                    if title == pre_string.strip() and new_number > curr_dup_number:
+                    if title == pre_string.strip() and int(new_number) > curr_dup_number:
                         curr_dup_number += 1
                         suf_string = '(' + str(curr_dup_number) + ')'
                         new_title = pre_string + suf_string

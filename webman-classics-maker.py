@@ -632,7 +632,7 @@ class Main:
                 if self.entry_field_platform == 'NTFS':
                     match = re.search('(?<=\[).*?(?=\])', str(self.entry_field_filename.get()))
                     if match is not None:
-                        donor_platform = filter(lambda x: match.group() in x[0],  GlobalVar.platform_paths)
+                        donor_platform = list(filter(lambda x: match.group() in x[0],  GlobalVar.platform_paths))
                         if donor_platform:
                             platform = list(donor_platform)[0][1]
             except AttributeError:
@@ -1104,7 +1104,7 @@ class Main:
                 if self.entry_field_platform == 'NTFS':
                     match = re.search('(?<=\[).*?(?=\])', str(self.entry_field_filename.get()))
                     if match != None:
-                        donor_platform = filter(lambda x: match.group() in x[0],  GlobalVar.platform_paths)
+                        donor_platform = list(filter(lambda x: match.group() in x[0],  GlobalVar.platform_paths))
                         if donor_platform:
                             platform = list(donor_platform)[0][1]
 
@@ -1210,7 +1210,7 @@ class Main:
                     match = re.search('(?<=\[).*?(?=\])', str(self.entry_field_filename.get()))
                     if match != None:
                         # donor platform could be PS3 for game_name.NTFS[PS3]
-                        donor_platform = filter(lambda x: match.group() in x[0],  GlobalVar.platform_paths)
+                        donor_platform = list(filter(lambda x: match.group() in x[0],  GlobalVar.platform_paths))
                         if donor_platform:
                             platform = list(donor_platform)[0][1]
 
