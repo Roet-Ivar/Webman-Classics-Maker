@@ -130,18 +130,26 @@ class Gamelist:
                     self.drive_system_path_array[1] = path_array[1]
                     self.drive_system_path_array[2] = '/'.join(path_array[2:len(path_array)]).replace('//', '')
 
+                    self.entry_field_title_id.config(state='normal')
                     self.entry_field_title_id.delete(0, len(self.entry_field_title_id.get()) - 1)
                     self.entry_field_title_id.delete(0, END)
                     self.entry_field_title_id.insert(0, self.selected_title_id)
+                    self.entry_field_title_id.config(state='readonly')
 
+                    self.entry_field_title.config(state='normal')
                     self.entry_field_title.delete(0, END)
                     self.entry_field_title.insert(0, self.selected_title)
+                    self.entry_field_title.config(state='readonly')
 
+                    self.entry_field_filename.config(state='normal')
                     self.entry_field_filename.delete(0, END)
                     self.entry_field_filename.insert(0, self.selected_filename)
+                    self.entry_field_filename.config(state='readonly')
 
+                    self.entry_field_platform.config(state='normal')
                     self.entry_field_platform.delete(0, END)
                     self.entry_field_platform.insert(0, self.selected_platform)
+                    self.entry_field_platform.config(state='readonly')
 
                     return True
 

@@ -51,14 +51,13 @@ def __init_pkg_build_dir__():
                          os.path.join(AppPaths.resources, 'pkg'))
 
 
-def __init_wcm_work_dir__(self):
-    # clean and init wcm_work_dir in startup
-    if os.path.isdir(AppPaths.wcm_work_dir):
-        if 'webman-classics-maker' in AppPaths.wcm_work_dir.lower():
-            shutil.rmtree(AppPaths.wcm_work_dir)
-    if not os.path.isdir(os.path.join(AppPaths.wcm_work_dir, 'pkg')):
-        os.makedirs(os.path.join(AppPaths.wcm_work_dir, 'pkg'))
-        # __init_images__(self)
+def __init_tmp_work_dir__():
+    # clean and init tmp_work_dir in startup
+    if os.path.isdir(AppPaths.tmp_work_dir):
+        if 'webman-classics-maker' in AppPaths.tmp_work_dir.lower():
+            shutil.rmtree(AppPaths.tmp_work_dir)
+    if not os.path.isdir(os.path.join(AppPaths.tmp_work_dir, 'pkg')):
+        os.makedirs(os.path.join(AppPaths.tmp_work_dir, 'pkg'))
 
 
 def get_ftp_ip_from_config():
@@ -92,11 +91,26 @@ class Main:
         # common paths
         self.WCM_BASE_PATH = AppPaths.wcm_gui
         self.pkg_dir = AppPaths.pkg
-        self.wcm_work_dir = AppPaths.wcm_work_dir
-        self.wcm_pkg_dir = os.path.join(self.wcm_work_dir, 'pkg')
+        self.tmp_work_dir = AppPaths.tmp_work_dir
+        self.tmp_pkg_dir = os.path.join(self.tmp_work_dir, 'pkg')
         self.builds_path = AppPaths.builds
         self.ftp_settings_path = os.path.join(AppPaths.settings, 'ftp_settings.cfg')
         self.fonts_path = AppPaths.fonts
+        self.game_pkg_dir = os.path.join(AppPaths.game_work_dir, 'pkg')
+
+        # paddings
+        self.text_box_x_padding = 20
+        self.text_box_y_padding = 20
+        self.text_box_spacing = 7 * self.text_box_x_padding
+
+        # coordinates
+        self.text_height = 15  # Font(font='Helvetica').metrics('linespace')
+        self.device_text_y_pos = self.main_offset_y_pos + self.text_height
+        self.type_text_y_pos = self.text_box_y_padding + self.device_text_y_pos + self.text_height
+        self.title_id_text_y_pos = self.text_box_y_padding + 7 + self.type_text_y_pos + self.text_height + 2
+        self.title_text_y_pos = self.text_box_y_padding + self.title_id_text_y_pos + self.text_height
+        self.filename_text_y_pos = self.text_box_y_padding + self.title_text_y_pos + self.text_height
+        self.iso_path_text_y_pos = self.text_box_y_padding + self.filename_text_y_pos + self.text_height - 1
 
         # init images and canvas for the gui
         self.drive_dropdown = None
@@ -168,20 +182,6 @@ class Main:
         self.vcmd = self.main.register(self.dynamic_validate_title_id)
         self.vcmd2 = self.main.register(self.dynamic_validate_title_id)
 
-        # paddings
-        self.text_box_x_padding = 20
-        self.text_box_y_padding = 20
-        self.text_box_spacing = 7 * self.text_box_x_padding
-
-        # # coordinates
-        self.text_height = 15  # Font(font='Helvetica').metrics('linespace')
-        self.device_text_y_pos = self.main_offset_y_pos + self.text_height
-        self.type_text_y_pos = self.text_box_y_padding + self.device_text_y_pos + self.text_height
-        self.title_id_text_y_pos = self.text_box_y_padding + 7 + self.type_text_y_pos + self.text_height + 2
-        self.title_text_y_pos = self.text_box_y_padding + self.title_id_text_y_pos + self.text_height
-        self.filename_text_y_pos = self.text_box_y_padding + self.title_text_y_pos + self.text_height
-        self.iso_path_text_y_pos = self.text_box_y_padding + self.filename_text_y_pos + self.text_height - 1
-
         # entry fields
         self.entry_field_title_id = Entry(self.main, validate='key', validatecommand=(self.vcmd, '%P'))
         self.entry_field_title = Entry(self.main)
@@ -218,31 +218,35 @@ class Main:
 
         # Entry field placements
         entry_field_width = 200
-        self.entry_field_title_id.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * self.scaling),
+        x1 = int((self.text_box_spacing + self.main_offset_x_pos) * self.scaling)
+        x2 = int((self.main_offset_x_pos + 90) * self.scaling)
+        x3 = int((self.main_offset_x_pos + 320) * self.scaling)
+
+        self.entry_field_title_id.place(x=x1,
                                         y=int(self.title_id_text_y_pos * self.scaling),
                                         width=entry_field_width)
 
-        self.entry_field_title.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * self.scaling),
+        self.entry_field_title.place(x=x1,
                                      y=int(self.title_text_y_pos * self.scaling),
                                      width=entry_field_width)
 
-        self.entry_field_filename.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * self.scaling),
+        self.entry_field_filename.place(x=x1,
                                         y=int(self.filename_text_y_pos * self.scaling),
                                         width=entry_field_width)
 
-        self.entry_field_iso_path.place(x=int((self.text_box_spacing + self.main_offset_x_pos) * self.scaling),
+        self.entry_field_iso_path.place(x=x1,
                                         y=int(self.iso_path_text_y_pos * self.scaling),
                                         width=entry_field_width)
 
-        self.entry_field_ftp_ip.place(x=int((self.main_offset_x_pos + 90) * self.scaling),
+        self.entry_field_ftp_ip.place(x=x2,
                                       y=int((self.main_offset_y_pos + 815) * self.scaling),
                                       width=90)
 
-        self.entry_field_ftp_user.place(x=int((self.main_offset_x_pos + 320) * self.scaling),
+        self.entry_field_ftp_user.place(x=x3,
                                         y=int((self.main_offset_y_pos + 815) * self.scaling),
                                         width=60)
 
-        self.entry_field_ftp_pass.place(x=int((self.main_offset_x_pos + 320) * self.scaling),
+        self.entry_field_ftp_pass.place(x=x3,
                                         y=int((self.main_offset_y_pos + 850) * self.scaling),
                                         width=60)
 
@@ -455,20 +459,6 @@ class Main:
         self.text_ps3_usr_label = 'User'
         self.text_ps3_pass_label = 'Pass'
 
-        # paddings
-        self.text_box_x_padding = 20
-        self.text_box_y_padding = 20
-        self.text_box_spacing = 7 * self.text_box_x_padding
-
-        # coordinates
-        self.text_height = 15  # Font(font='Helvetica').metrics('linespace')
-        self.device_text_y_pos = self.main_offset_y_pos + self.text_height
-        self.type_text_y_pos = self.text_box_y_padding + self.device_text_y_pos + self.text_height
-        self.title_id_text_y_pos = self.text_box_y_padding + 7 + self.type_text_y_pos + self.text_height + 2
-        self.title_text_y_pos = self.text_box_y_padding + self.title_id_text_y_pos + self.text_height
-        self.filename_text_y_pos = self.text_box_y_padding + self.title_text_y_pos + self.text_height
-        self.iso_path_text_y_pos = self.text_box_y_padding + self.filename_text_y_pos + self.text_height - 1
-
         self.current_img = self.background_images[self.canvas_image_number]
         webman_logo = Image.open(os.path.join(ImagePaths.misc, 'webman_text_icon_bw.png')).resize(
             (int(464 * 0.45), int(255 * 0.45)))
@@ -553,8 +543,7 @@ class Main:
                             tmp_img.paste(dark, (width - (480 + 8), 12), dark)
                             self.background_images.append(tmp_img)
 
-
-    def __draw_pkg_images_on_canvas__(self, *args, **kwargs):
+    def __draw_pkg_images_on_canvas__(self, **kwargs):
         # image buttons coordinates (w/ scaling)
         self.pic1_button_x_pos = 75 * self.scaling
         self.pic1_button_y_pos = 175 * self.scaling
@@ -583,6 +572,7 @@ class Main:
         print('image to be changed: ' + str(img_to_be_changed))
         if img_to_be_changed not in {'', None}:
 
+            # re-draw gui images
             if img_to_be_changed.lower() == 'pic1':
                 pic1_changed = True
                 self.draw_text_on_image_w_shadow(self.image_pic1, self.entry_field_title.get(), 745, 457, 32, 2,
@@ -592,9 +582,11 @@ class Main:
                     self.image_pic1.resize((int(1280 * self.scaling), int(720 * self.scaling)),
                                            Image.Resampling.LANCZOS))
 
-                self.button_pic1.config(image=self.photo_image_pic1_xmb)
+                # self.button_pic1.config(image=self.photo_image_pic1_xmb)
                 self.image_pic0 = self.image_pic0_ref
                 self.image_icon0 = self.image_icon0_ref
+
+
 
             elif img_to_be_changed.lower() == 'pic0':
                 self.image_pic0 = self.image_pic0_ref
@@ -662,7 +654,7 @@ class Main:
                                                  self.icon0_x_pos + self.image_icon0.width,
                                                  self.icon0_y_pos + self.image_icon0.height))
 
-        # A PIC0 must be used for the GUI: either existing
+        # A PIC0 is mandatory for the gui
         if os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC0.PNG')):
             tmp_pic0_bg = copy.copy(self.image_pic1)
         # or make with title text
@@ -859,12 +851,12 @@ class Main:
     # Dynamic update of the pkg path for showing fetched images
     def update_game_build_path(self):
         # ask gamelist to return selected path
-        build_dir_pkg_path = None
         selected_path = self.game_list.get_selected_build_dir_path()
         if selected_path != '':
             AppPaths.game_work_dir = os.path.join(self.game_list.get_selected_build_dir_path(), 'work_dir')
-            build_dir_pkg_path = os.path.join(AppPaths.game_work_dir, 'pkg')
-        self.__draw_pkg_images_on_canvas__(pkg_build_path=build_dir_pkg_path)
+            self.game_pkg_dir = os.path.join(AppPaths.game_work_dir, 'pkg')
+
+        self.__draw_pkg_images_on_canvas__(pkg_build_path=self.game_pkg_dir)
 
     # Dynamic update of the 'entry_field_filename' into the 'entry_field_iso_path'
     def dynamic_filename_and_path(self, event):
@@ -926,10 +918,31 @@ class Main:
                 self.image_icon0 = Image.open(image)
                 self.image_icon0_ref = copy.copy(self.image_icon0)
                 img_to_be_changed = 'icon0'
+
+                # save new image to both pkg folders
+                if os.path.exists(self.game_pkg_dir):
+                    self.image_icon0.save(os.path.join(self.game_pkg_dir, 'ICON0.PNG'))
+                self.image_icon0.save(os.path.join(self.tmp_pkg_dir, 'ICON0.PNG'))
+
             elif 'pic1' in image.name.lower():
                 self.image_pic1 = Image.open(image)
                 self.image_pic1_ref = Image.open(image)
                 img_to_be_changed = 'pic1'
+
+                # save new image to both pkg folders
+                if os.path.exists(self.game_pkg_dir):
+                    self.image_pic1.save(os.path.join(self.game_pkg_dir, 'PIC1.PNG'))
+                self.image_pic1.save(os.path.join(self.tmp_pkg_dir, 'PIC1.PNG'))
+
+            elif 'pic0' in image.name.lower():
+                self.image_pic0 = Image.open(image)
+                self.image_pic0_ref = Image.open(image)
+                img_to_be_changed = 'pic0'
+
+                # save new image to both pkg folders
+                if os.path.exists(self.game_pkg_dir):
+                    self.image_pic0.save(os.path.join(self.game_pkg_dir, 'PIC0.PNG'))
+                self.image_pic0.save(os.path.join(self.tmp_pkg_dir, 'PIC0.PNG'))
 
             # # re-draw work_dir image on canvas
             self.__draw_pkg_images_on_canvas__(img_to_be_changed=img_to_be_changed)
@@ -1038,6 +1051,11 @@ class Main:
             return False
 
     def validate_fields(self):
+        # if AppPaths.game_work_dir != '':
+        #     print('DEBUG: work_dir: OK')
+        # else:
+        #     return False
+
         if self.validate_title_id_on_save():
             print('DEBUG: Title_id: OK')
         else:
@@ -1077,7 +1095,7 @@ class Main:
             self.save_pkg_info_to_json()
 
             # clean up the temp work dir
-            __init_wcm_work_dir__(self)
+            # __init_tmp_work_dir__()
 
             return True
         else:
@@ -1150,17 +1168,20 @@ class Main:
         self.on_game_list_refresh()
 
     def on_build_button(self):
-        __init_pkg_build_dir__()
+        self.update_game_build_path()
 
         if self.save_work_dir():
+
             if not os.path.exists(self.pkg_dir):
                 os.makedirs(self.pkg_dir)
             if not os.path.exists(AppPaths.game_work_dir):
                 os.makedirs(AppPaths.game_work_dir)
 
-            game_pkg_dir = os.path.join(AppPaths.game_work_dir, 'pkg')
-            if os.path.isfile(os.path.join(game_pkg_dir, 'ICON0.PNG')):
-                shutil.copyfile(os.path.join(game_pkg_dir, 'ICON0.PNG'), os.path.join(self.pkg_dir, 'ICON0.PNG'))
+            __init_pkg_build_dir__()
+
+            self.game_pkg_dir = os.path.join(AppPaths.game_work_dir, 'pkg')
+            if os.path.isfile(os.path.join(self.game_pkg_dir, 'ICON0.PNG')):
+                shutil.copyfile(os.path.join(self.game_pkg_dir, 'ICON0.PNG'), os.path.join(self.pkg_dir, 'ICON0.PNG'))
             else:
                 # extract the platform name by using the path
                 platform = ''
@@ -1179,22 +1200,22 @@ class Main:
                 shutil.copyfile(os.path.join(default_img_path, platform, 'ICON0.PNG'),
                                 os.path.join(self.pkg_dir, 'ICON0.PNG'))
 
-            if os.path.isfile(os.path.join(game_pkg_dir, 'PIC0.PNG')):
-                shutil.copyfile(os.path.join(game_pkg_dir, 'PIC0.PNG'), os.path.join(self.pkg_dir, 'PIC0.PNG'))
+            if os.path.isfile(os.path.join(self.game_pkg_dir, 'PIC0.PNG')):
+                shutil.copyfile(os.path.join(self.game_pkg_dir, 'PIC0.PNG'), os.path.join(self.pkg_dir, 'PIC0.PNG'))
 
-            if os.path.isfile(os.path.join(game_pkg_dir, 'PIC1.PNG')):
-                shutil.copyfile(os.path.join(game_pkg_dir, 'PIC1.PNG'), os.path.join(self.pkg_dir, 'PIC1.PNG'))
+            if os.path.isfile(os.path.join(self.game_pkg_dir, 'PIC1.PNG')):
+                shutil.copyfile(os.path.join(self.game_pkg_dir, 'PIC1.PNG'), os.path.join(self.pkg_dir, 'PIC1.PNG'))
 
             # builds pkg and reads the pkg filename
             pkg_name = Webman_PKG().build()
 
             if pkg_name != None:
                 # making sure default work_dir and pkg directories exists
-                if not os.path.exists(game_pkg_dir):
-                    os.makedirs(game_pkg_dir)
+                if not os.path.exists(self.game_pkg_dir):
+                    os.makedirs(self.game_pkg_dir)
 
                     # saving the build content in the game build folder
-                    GlobalDef().copytree(AppPaths.pkg, game_pkg_dir)
+                    GlobalDef().copytree(AppPaths.pkg, self.game_pkg_dir)
 
                 if os.path.isdir(AppPaths.game_work_dir):
                     def popup():

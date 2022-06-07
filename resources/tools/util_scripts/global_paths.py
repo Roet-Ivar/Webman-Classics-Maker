@@ -21,6 +21,7 @@ else:
         application_path = os.getcwd()
         running_mode = 'Interactive'
 
+
 class AppPaths:
     game_work_dir   = ''
     application_path = application_path
@@ -50,11 +51,14 @@ class AppPaths:
     wcm_gui         = os.path.join(util_scripts, 'wcm_gui')
 
     # in wcm_gui
-    wcm_work_dir    = os.path.join(wcm_gui, 'work_dir')
+    tmp_work_dir    = os.path.join(wcm_gui, 'tmp_work_dir')
 
     # variable game work dir
     def get_game_build_dir(self, title_id, filename):
-        if title_id is not None and title_id is not '':
+        title_id = str(title_id or '')
+        filename = str(filename or '')
+
+        if title_id != '' and title_id != '':
             tmp_filename = filename
             # removes the file extension from tmp_filename
             for file_ext in GlobalVar.file_extensions:
@@ -75,8 +79,10 @@ class ImagePaths:
     pkg             = os.path.join(images, 'pkg')
     xmb             = os.path.join(images, 'xmb')
 
+
 class MetadataPaths:
     launchbox_base_image_url = 'https://gamesdb.launchbox-app.com/games/images/'
+
 
 class BuildPaths:
     application_path = application_path
@@ -86,6 +92,7 @@ class BuildPaths:
     pyinstaller      = os.path.join(util_scripts, '_pyinstaller_and_release_scripts')
 
     Param_SFO_Editor = os.path.join(AppPaths.tools, 'Param_SFO_Editor')
+
 
 class FtpSettings:
     # ftp settings
@@ -161,6 +168,13 @@ class GameListData:
 
     def duplicate_title_checker(self, title):
         import re
+        import json
+
+        if self.game_list_data_json is None:
+            with open(self.GAME_LIST_DATA_PATH) as f:
+                self.game_list_data_json = json.load(f)
+
+
         # check for duplicates of the same title
         dup_list = []
         for _platform in self.game_list_data_json:
@@ -198,6 +212,7 @@ class GameListData:
         title = title.replace('  ', ' ')
         title = title.strip().encode('utf-8')
         return title
+
 
 class GlobalVar:
     file_extensions = ('.BIN',
@@ -286,5 +301,5 @@ class GlobalDef:
                 shutil.copy2(s, d)
 
 
-if not os.path.exists(os.path.join(AppPaths.wcm_work_dir, 'pkg')):
-    os.makedirs(os.path.join(AppPaths.wcm_work_dir, 'pkg'))
+if not os.path.exists(os.path.join(AppPaths.tmp_work_dir, 'pkg')):
+    os.makedirs(os.path.join(AppPaths.tmp_work_dir, 'pkg'))
