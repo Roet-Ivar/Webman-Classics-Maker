@@ -6,6 +6,7 @@ import shutil
 import traceback
 import urllib.parse
 from urllib.request import urlopen
+import sys
 
 # sudo apt-get install python3-tk
 import tkinter as tk
@@ -25,12 +26,10 @@ from resources.tools.util_scripts.wcm_gui.ftp_game_data_fetcher import FtpGameLi
 from resources.tools.util_scripts.wcm_gui.game_listbox import Gamelist
 
 if getattr(sys, 'frozen', False):
-    import sys
     sys.path.append(os.path.join(os.path.dirname(sys.executable), 'resources', 'tools', 'util_scripts'))
     sys.path.append(os.path.join(os.path.dirname(sys.executable), 'resources', 'tools', 'util_scripts', 'wcm_gui'))
 else:
     # running webman_classics_maker.py from root
-    import sys
     app_full_path = os.path.realpath(__file__)
     application_path = os.path.dirname(app_full_path)
     sys.path.append(os.path.join(application_path, 'resources', 'tools', 'util_scripts'))
@@ -1344,7 +1343,11 @@ class Main:
         else:
             self.list_filter_drive = self.drive_dropdown.get()
             self.list_filter_platform = self.platform_dropdown.get()
+
+        self.game_list = Gamelist(self)
+        self.game_list_box = self.game_list.get_listbox()
         self.create_dropdowns()
+
 
     def entry_fields_to_json(self, json_data_path):
         json_data = None

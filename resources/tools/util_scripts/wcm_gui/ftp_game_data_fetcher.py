@@ -22,8 +22,14 @@ from resources.tools.util_scripts.global_paths import FtpSettings
 
 sys.path.append(AppPaths.settings)
 
+
 class FtpGameList():
     def __init__(self, selected_drive, selected_platform):
+        # open a copy of the current gamelist from disk
+        self.json_game_list_data = GameListData().get_game_list_data_json()
+        # open a copy of an empty backup  from disk
+        self.new_json_game_list_data = GameListData().get_game_list_data_json_bak()
+
         # drive and platforms to fetch
         self.global_drive_paths = GlobalVar.drive_paths
         self.global_platform_paths = GlobalVar.platform_paths
@@ -55,18 +61,18 @@ class FtpGameList():
             self.platform_filter.extend(filter(lambda x: str(selected_platform) == x[1], self.global_platform_paths))
 
         # messages
-        self.PAUSE_MESSAGE              = 'Press ENTER to continue...'
-        self.CONNECTION_ERROR_MESSAGE   = "TIPS: Check your PS3 ip-address in webMan VSH menu (hold SELECT on the XMB)"
+        self.PAUSE_MESSAGE = 'Press ENTER to continue...'
+        self.CONNECTION_ERROR_MESSAGE = "TIPS: Check your PS3 ip-address in webMan VSH menu (hold SELECT on the XMB)"
         self.TITLE_ID_EXCEPTION_MESSAGE = """Exception: 'get_image' failed during regex operation."""
 
         # platform ISO paths
-        self.PSPISO_lines  = []
-        self.PSXISO_lines  = []
-        self.PS2ISO_lines  = []
-        self.PS3ISO_lines  = []
+        self.PSPISO_lines = []
+        self.PSXISO_lines = []
+        self.PS2ISO_lines = []
+        self.PS3ISO_lines = []
         self.NTFS_lines = []
         self.GAMES_lines = []
-        self.ALL_lines  = []
+        self.ALL_lines = []
 
         # singular instances
         self.total_lines_count = 0
@@ -104,7 +110,7 @@ class FtpGameList():
                     elif 'PS3ISO' == platform[1]:
                         self.ftp_walk(self.ftp, drive[0] + platform[0], self.PS3ISO_lines)
                     elif 'NTFS' == platform[1] and 'HDD0' in drive[1]:
-                            self.ftp_walk(self.ftp, drive[0] + platform[0], self.NTFS_lines)
+                        self.ftp_walk(self.ftp, drive[0] + platform[0], self.NTFS_lines)
                     elif 'GAMES' == platform[1]:
                         self.ftp_walk(self.ftp, drive[0] + platform[0], self.GAMES_lines)
                         self.ftp_walk(self.ftp, drive[0] + 'GAMEZ/', self.GAMES_lines)
@@ -131,20 +137,14 @@ class FtpGameList():
 
             return
 
-        # open a copy of the current gamelist from disk
-        self.json_game_list_data = GameListData.game_list_data_json
-        # open a copy of an empty gamelist from disk
-        self.new_json_game_list_data = GameListData.game_list_data_bak_json
-
         # append the current platform data to the new list
         for platform in self.json_game_list_data:
             self.new_platform_list_data = self.json_game_list_data_builder(str(platform).split('_')[0])
 
         # save updated gamelist to disk
-        with open(GameListData.GAME_LIST_DATA_PATH, 'w') as newFile:
+        with open(os.path.join(AppPaths.application_path, 'game_list_data.json'), 'w') as newFile:
             json_text = json.dumps(self.json_game_list_data, indent=4, separators=(",", ":"))
             newFile.write(json_text)
-
 
     def json_game_list_data_builder(self, original_platform):
         platform_list = original_platform + '_games'
@@ -172,12 +172,13 @@ class FtpGameList():
         at3 = None
         pam = None
 
-        for new_game_path in tqdm(filtered_platform, desc='Fetching ' + original_platform, bar_format="{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt} [{elapsed}]\n"):
+        for new_game_path in tqdm(filtered_platform, desc='Fetching ' + original_platform,
+                                  bar_format="{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt} [{elapsed}]\n"):
             game_exist = False
-            new_game_dir_path = os.path.dirname(new_game_path).__add__('/')
-            new_game_filename = os.path.basename(new_game_path)
-            new_game_platform_path = new_game_dir_path
-            new_game_platform = original_platform
+            new_game_dir_path = str(os.path.dirname(new_game_path).__add__('/'))
+            new_game_filename = str(os.path.basename(new_game_path))
+            new_game_platform_path = str(new_game_dir_path)
+            new_game_platform = str(original_platform)
 
             # check if game exist
             for game_json in self.json_game_list_data[platform_list]:
@@ -210,7 +211,6 @@ class FtpGameList():
                 donor_platform = 'PS3ISO'
                 new_game_platform = donor_platform
 
-
             # if not, add it
             if not game_exist:
                 # parsing of PARAM.SFO will provide appropriate title_id and title for the GUI
@@ -235,16 +235,17 @@ class FtpGameList():
                     if title is None:
                         title = '[' + title_id + ']'
                     new_game_filename = ''.join(e for e in title if e.isalnum()) + ' [' + title_id + ']'
-                    new_game_filename = new_game_filename.replace(' ', '_')
+                    new_game_filename = str(new_game_filename).replace(' ', '_')
 
                 else:
-                    title_id, icon0, pic0, pic1, pic2, at3, pam = self.get_game_data(new_game_dir_path, new_game_filename)
+                    title_id, icon0, pic0, pic1, pic2, at3, pam = self.get_game_data(new_game_dir_path,
+                                                                                     new_game_filename)
                     title = new_game_filename.strip()
 
                 # removes the file extension and use it as title
                 for file_ext in GlobalVar.file_extensions:
                     if new_game_filename.upper().endswith(file_ext):
-                        title = title[0:len(title)-len(file_ext)]
+                        title = str(title[0:len(title) - len(file_ext)])
                         break
 
                 # removes parenthesis & brackets including their content
@@ -254,10 +255,10 @@ class FtpGameList():
                     title = tmp_title
 
                 # check for for match the platform game database
-                if title_id is not None and title_id is not '':
+                if title_id is not None and title_id != '':
                     # read platform db
                     platform_db_file = new_game_platform.replace('ISO', '') + '_all_title_ids.json'
-                    with open(os.path.join(AppPaths.games_metadata, platform_db_file)) as f:
+                    with open(os.path.join(AppPaths.games_metadata, platform_db_file), encoding="utf8") as f:
                         self.json_platform_metadata = json.load(f)
 
                     for game_json in self.json_platform_metadata['games']:
@@ -267,14 +268,14 @@ class FtpGameList():
 
                         if title_id == game_json['title_id']:
                             if new_game_platform == 'PSPISO' or new_game_platform == 'PSXISO' or new_game_platform == 'PS2ISO':
-                                title = game_json['title'].encode('utf-8').strip()
+                                title = str(game_json['title']).strip()
 
                                 if game_json['meta_data_link'] is not None:
                                     meta_data_link = game_json['meta_data_link']
 
                             elif new_game_platform == 'PS3ISO':
                                 # use the first element for English
-                                title = game_json['locale'][0]['title'].encode('utf-8').strip()
+                                title = str(game_json['locale'][0]['title']).strip()
                             break
 
                 title = GameListData().duplicate_title_checker(title)
@@ -307,20 +308,19 @@ class FtpGameList():
                     "path": new_game_platform_path,
                     "meta_data_link": meta_data_link})
 
-                print('DEBUG \'' + new_game_filename + '\' got the title \'' + str(title) + '\'' + '\n')
-                print("Added '" + str(title) + "' to the list:\n"
+                print('DEBUG \'' + new_game_filename + '\' got the title \'' + title + '\'' + '\n')
+                print("Added '" + title + "' to the list:\n"
                       + 'Platform: ' + new_game_platform + '\n'
                       + 'Filename: ' + new_game_filename + '\n'
-                      + 'Title id: ' + str(title_id) + '\n')
-
-
+                      + 'Title id: ' + title_id + '\n')
 
             # save data to game build folder here
             game_build_dir = AppPaths().get_game_build_dir(title_id, new_game_filename)
 
             if game_build_dir is not None:
                 # save images to game work folders
-                image_saver(self.ftp, new_game_platform_path, new_game_platform, game_build_dir, [icon0, pic0, pic1, pic2, at3, pam])
+                image_saver(self.ftp, new_game_platform_path, new_game_platform, game_build_dir,
+                            [icon0, pic0, pic1, pic2, at3, pam])
 
             # reset game data for next iteration
             title = None
@@ -367,15 +367,24 @@ class FtpGameList():
 
         try:
             # if no offset
-            title_id, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform, FtpSettings.ftp_chunk_size_kb, 0, self.game_count, FtpSettings.ftp_retry_count)
+            title_id, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform,
+                                                                                          FtpSettings.ftp_chunk_size_kb,
+                                                                                          0, self.game_count,
+                                                                                          FtpSettings.ftp_retry_count)
 
             # make another fetch with rest offset for PSP images
             if platform == 'PSPISO':
-                not_used, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform, FtpSettings.ftp_chunk_size_kb, FtpSettings.ftp_psp_png_offset_kb, self.game_count, FtpSettings.ftp_retry_count)
+                not_used, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform,
+                                                                                              FtpSettings.ftp_chunk_size_kb,
+                                                                                              FtpSettings.ftp_psp_png_offset_kb,
+                                                                                              self.game_count,
+                                                                                              FtpSettings.ftp_retry_count)
 
             # PS3 guitar hero games needs a larger chunk to find the PIC1
             elif platform == 'PS3ISO' and 'guitar' in game_filename.lower():
-                not_used, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform, 6000, 0, self.game_count, FtpSettings.ftp_retry_count)
+                not_used, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform,
+                                                                                              6000, 0, self.game_count,
+                                                                                              FtpSettings.ftp_retry_count)
 
         # retry connection
         except Exception as e:
@@ -385,21 +394,30 @@ class FtpGameList():
             self.ftp = FtpSettings().get_ftp()
             self.data_chunk = FTPDataHandler(self.ftp, self.total_lines_count)
 
-            title_id, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform, FtpSettings.ftp_chunk_size_kb, 0, self.game_count, FtpSettings.ftp_retry_count)
+            title_id, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform,
+                                                                                          FtpSettings.ftp_chunk_size_kb,
+                                                                                          0, self.game_count,
+                                                                                          FtpSettings.ftp_retry_count)
 
             # make another fetch with rest offset for PSP images
             if platform == 'PSPISO':
-                title_id, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform, FtpSettings.ftp_chunk_size_kb, FtpSettings.ftp_psp_png_offset_kb, self.game_count, FtpSettings.ftp_retry_count)
+                title_id, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform,
+                                                                                              FtpSettings.ftp_chunk_size_kb,
+                                                                                              FtpSettings.ftp_psp_png_offset_kb,
+                                                                                              self.game_count,
+                                                                                              FtpSettings.ftp_retry_count)
 
             # PS3 guitar hero games needs a larger chunk to find the PIC1
             elif platform == 'PS3ISO' and 'guitar' in game_filename.lower():
-                not_used, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform, 6000, 0, self.game_count, FtpSettings.ftp_retry_count)
+                not_used, icon0, pic0, pic1, pic2, at3, pam = self.data_chunk.ftp_buffer_data(game_filepath, platform,
+                                                                                              6000, 0, self.game_count,
+                                                                                              FtpSettings.ftp_retry_count)
 
         return title_id, icon0, pic0, pic1, pic2, at3, pam
 
     def ftp_walk(self, ftp, folder_path, files):
         print('DEBUG adding: ' + folder_path + ' for scanning')
-        depth = len(folder_path.split('/')) -2
+        depth = len(folder_path.split('/')) - 2
         extensions = GlobalVar.file_extensions
         ftp_folder_depth = FtpSettings.ftp_folder_depth
 
@@ -416,7 +434,8 @@ class FtpGameList():
         try:
             ftp.retrlines('MLSD ' + folder_path, stuff.append)
         except Exception as e:
-            print('DEBUG retrlines error: ' + getattr(e, 'message', repr(e)) + '\n during command retrlines(\'MLSD ' + folder_path + '\')')
+            print('DEBUG retrlines error: ' + getattr(e, 'message', repr(
+                e)) + '\n during command retrlines(\'MLSD ' + folder_path + '\')')
 
             try:
                 print('DEBUG retrying -> retrlines(\'MLSD ' + folder_path + '\')')
@@ -424,21 +443,20 @@ class FtpGameList():
                 self.ftp.retrlines('MLSD ' + folder_path, stuff.append)
 
             except Exception as e:
-                print('DEBUG retrlines error: ' + getattr(e, 'message', repr(e)) + '\n during retry of command retrlines(\'MLSD ' + folder_path + '\')')
+                print('DEBUG retrlines error: ' + getattr(e, 'message', repr(
+                    e)) + '\n during retry of command retrlines(\'MLSD ' + folder_path + '\')')
                 return files
-
-
 
         for item in stuff:
             split_item = item.split(';')
             # check if it's a dir or a file
             if split_item[0] == 'type=dir':
-                dirs.append(split_item[len(split_item)-1].strip())
+                dirs.append(split_item[len(split_item) - 1].strip())
 
             elif split_item[0] == 'type=file':
                 # a file must have at least size of 1 byte
                 if 'size=' in split_item[1] and int(split_item[1].replace('size=', '')) > 0:
-                    filename = split_item[len(split_item)-1].strip()
+                    filename = split_item[len(split_item) - 1].strip()
 
                     # make sure that .BIN.ENC files has capitalized extension
                     if filename.upper().endswith('.BIN.ENC'):
@@ -490,15 +508,14 @@ class FTPDataHandler:
             if self.chunk_size <= 0:
                 return True
             else:
-                self.sio.write(received)
+                self.sio.write(unicode(received, errors='replace'))
             self.chunk_size -= len(received)
 
-
         game_title_id = ''
-        self.sio = StringIO.StringIO()
+        self.sio = StringIO()
         self.chunk_size = chunk_size * 1024
 
-        offset = max(rest*1024, 0)
+        offset = max(rest * 1024, 0)
         conn = self.ftp_instance.transfercmd('RETR ' + filepath, rest=offset)
         retry_cnt = 0
         while 1:
@@ -507,7 +524,7 @@ class FTPDataHandler:
                 data = conn.recv(1460)
             except Exception as e1:
                 error_msg = ''
-                if getattr(e1, 'message', repr(e1)) is not '':
+                if getattr(e1, 'message', repr(e1)) != '':
                     error_msg = getattr(e1, 'message', repr(e1))
                 else:
                     error_msg = repr(e1)
@@ -567,16 +584,18 @@ class FTPDataHandler:
                                 pam = get_PAM_from_buffer(self, platform, filename, self.data_chunk)
 
                                 try:
-                                    at3_size_KB = int(len(at3)*0.978/1000)
-                                    pam_size_KB = int(len(at3)*0.978/1000)
+                                    at3_size_KB = int(len(at3) * 0.978 / 1000)
+                                    pam_size_KB = int(len(at3) * 0.978 / 1000)
                                     if at3_size_KB + pam_size_KB > 24000:
-                                        print("ERROR: the sum of the sizes of SND0.AT3 + ICON1.PAM can't be larger than 2.4MB")
+                                        print(
+                                            "ERROR: the sum of the sizes of SND0.AT3 + ICON1.PAM can't be larger than 2.4MB")
                                 except:
                                     pass
 
                         # Error 451 is normal when closing the connection
                         if '451' not in getattr(e, 'message', repr(e)):
-                            print('DEBUG - connection ' + getattr(e, 'message', repr(e)) + ' during data fetching of \'' + filename + '\'')
+                            print('DEBUG - connection ' + getattr(e, 'message', repr(
+                                e)) + ' during data fetching of \'' + filename + '\'')
                         break
 
         return game_title_id, icon0, pic0, pic1, pic2, at3, pam
@@ -601,12 +620,13 @@ def get_title_id_from_buffer(self, platform, buffer_data):
         elif platform == 'PSPISO':
             for m in re.finditer("""\w{4}-\d{5}\|""", buffer_data):
                 title_id = str(m.group(0)).strip()
-                title_id = title_id[0:len(title_id)-1]
+                title_id = title_id[0:len(title_id) - 1]
 
     except Exception as e:
         print('ERROR -> get_title_id_from_buffer: ' + getattr(e, 'message', repr(e)))
     finally:
         return title_id
+
 
 def get_png_from_buffer(self, platform, game_name, buffer_data):
     self.platform = platform
@@ -691,7 +711,7 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
 
                     if self.img_name is not None:
                         # crop data for next iteration
-                        self.data = data[index_png_end:len(data)-1]
+                        self.data = data[index_png_end:len(data) - 1]
                         return True
 
                 return False
@@ -729,7 +749,8 @@ def get_PAM_from_buffer(self, platform, game_name, buffer_data):
                 index_png_start = data.find(b'\x89\x50\x4E\x47\x0D\x0A\x1A\x0A', index_pam_start)
 
                 # find the last occurrence of the stop sequence and use as eof
-                index_pam_end = index_pam_start + data[index_pam_start:index_png_start].rfind(pam_stop_seq) + len(pam_stop_seq)
+                index_pam_end = index_pam_start + data[index_pam_start:index_png_start].rfind(pam_stop_seq) + len(
+                    pam_stop_seq)
                 if index_pam_end > -1:
                     tmp_image = data[index_pam_start:index_pam_end]
                     self.pam_size = len(tmp_image)
@@ -743,7 +764,7 @@ def get_PAM_from_buffer(self, platform, game_name, buffer_data):
 
                     if self.img_name is not None:
                         # crop data for next iteration
-                        self.data = data[index_pam_end:len(data)-1]
+                        self.data = data[index_pam_end:len(data) - 1]
                         return True
 
                 return False
@@ -751,7 +772,7 @@ def get_PAM_from_buffer(self, platform, game_name, buffer_data):
         while PAM_finder(self.data, self.image_name, self.pam_size):
             # if int(self.pam_size) > 0:
             #     print('DEBUG ICON1.PAM size: ' + str(int(self.pam_size*0.978/1000)) + 'KB')
-            if int(self.pam_size*0.978/1000) > 24000:
+            if int(self.pam_size * 0.978 / 1000) > 24000:
                 print('''ERROR The size of ICON1.PAM can't be larger than 2.4MB.''')
 
             print('DEBUG Found ' + self.img_name + ' for \'' + game_name + '\'')
@@ -773,6 +794,7 @@ def get_AT3_from_buffer(self, platform, game_name, buffer_data):
         self.at3_image = None
         self.image_name = None
         self.at3_size = 0
+
         # these byte sequences are standard start and end of PNGs
         def AT3_finder(data, image_name, file_size):
             index_at3_start = data.find(b'\x57\x41\x56\x45\x66\x6D\x74\x20') - 8
@@ -787,7 +809,6 @@ def get_AT3_from_buffer(self, platform, game_name, buffer_data):
                     tmp_image = data[index_at3_start:index_at3_end]
                     self.at3_size = len(tmp_image)
 
-
                     # AT3 image PS3
                     if tmp_image is not None:
                         self.img_name = 'SND0.AT3'
@@ -797,7 +818,7 @@ def get_AT3_from_buffer(self, platform, game_name, buffer_data):
 
                     if self.img_name is not None:
                         # crop data for next iteration
-                        self.data = data[index_at3_end:len(data)-1]
+                        self.data = data[index_at3_end:len(data) - 1]
                         return True
 
                 return False
@@ -805,7 +826,7 @@ def get_AT3_from_buffer(self, platform, game_name, buffer_data):
         while AT3_finder(self.data, self.image_name, self.at3_size):
             # if int(self.at3_size) > 0:
             #      print('DEBUG SND0.AT3 size: ' + str(int(self.at3_size*0.978/1000)) + 'KB')
-            if int(self.at3_size*0.978/1000) > 24000:
+            if int(self.at3_size * 0.978 / 1000) > 24000:
                 print('''ERROR The size of SND0.AT3 can't be larger than 2.4MB.''')
 
             print('DEBUG Found ' + self.img_name + ' for \'' + game_name + '\'')
@@ -816,6 +837,7 @@ def get_AT3_from_buffer(self, platform, game_name, buffer_data):
     except Exception as e:
         print('ERROR: get_AT3_from_buffer - ' + getattr(e, 'message', repr(e)))
         return self.at3_image
+
 
 def image_saver(ftp, platform_path, platform, game_build_dir, images):
     import shutil
@@ -852,7 +874,8 @@ def image_saver(ftp, platform_path, platform, game_build_dir, images):
         try:
             ftp.retrlines('MLSD ' + PS3_GAME_path, stuff.append)
         except Exception as e:
-            print('DEBUG image_saver - retrlines error: ' + getattr(e, 'message', repr(e)) + '\n during command retrlines(\'MLSD ' + PS3_GAME_path + '\')')
+            print('DEBUG image_saver - retrlines error: ' + getattr(e, 'message', repr(
+                e)) + '\n during command retrlines(\'MLSD ' + PS3_GAME_path + '\')')
             # retry
             print('Retrying ...')
             ftp.retrlines('MLSD ' + PS3_GAME_path, stuff.append)
@@ -863,7 +886,7 @@ def image_saver(ftp, platform_path, platform, game_build_dir, images):
             for item in stuff:
                 split_item = item.split(';')
                 if split_item[0] == 'type=file':
-                    fetched_files.append(split_item[len(split_item)-1].strip())
+                    fetched_files.append(str(split_item[len(split_item) - 1]).strip())
             # fetch the files that match our filename_list
             filename_list = ['ICON0.PNG', 'PIC0.PNG', 'PIC1.PNG', 'PIC2.PNG', 'SND0.AT3', 'ICON1.PAM']
             file_data_list = [None, None, None, None, None, None]
@@ -881,16 +904,16 @@ def image_saver(ftp, platform_path, platform, game_build_dir, images):
             # assign any all data values to our file variables
             icon0, pic0, pic1, pic2, at3, pam = file_data_list
 
-
     # platforms such as PSP needs rescaling of images
     if icon0 is not None:
         icon0_image = Image.open(io.BytesIO(icon0)).convert("RGBA")
 
         if platform == 'PSPISO':
-            t_icon0 = Image.open(os.path.join(AppPaths.application_path, 'resources', 'images', 'pkg', 'default', 'transparent_ICON0.PNG')).convert("RGBA")
-            icon0_image = icon0_image.resize((int(icon0_image.width*2), int(icon0_image.height*2)), Image.ANTIALIAS)
-            x_pos = (t_icon0.width - icon0_image.width)/2
-            y_pos = (t_icon0.height - icon0_image.height)/2
+            t_icon0 = Image.open(os.path.join(AppPaths.application_path, 'resources', 'images', 'pkg', 'default',
+                                              'transparent_ICON0.PNG')).convert("RGBA")
+            icon0_image = icon0_image.resize((int(icon0_image.width * 2), int(icon0_image.height * 2)), Image.ANTIALIAS)
+            x_pos = (t_icon0.width - icon0_image.width) / 2
+            y_pos = (t_icon0.height - icon0_image.height) / 2
             t_icon0.paste(icon0_image, (x_pos, y_pos), icon0_image)
 
             t_icon0.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON0.PNG'))
@@ -902,15 +925,16 @@ def image_saver(ftp, platform_path, platform, game_build_dir, images):
         icon0_platform_path = os.path.join(default_pkg_img_dir, platform, 'ICON0.PNG')
         if not os.path.isfile(icon0_platform_path):
             platform = ''
-        shutil.copyfile(os.path.join(default_pkg_img_dir, platform, 'ICON0.PNG'), os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON0.PNG'))
-
+        shutil.copyfile(os.path.join(default_pkg_img_dir, platform, 'ICON0.PNG'),
+                        os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON0.PNG'))
 
     if pic0 is not None:
         pic0_image = Image.open(io.BytesIO(pic0)).convert("RGBA")
         if platform == 'PSPISO':
-            t_pic0 = Image.open(os.path.join(AppPaths.application_path, 'resources', 'images', 'pkg', 'default', 'transparent_PIC0.PNG')).convert("RGBA")
-            x_pos = (t_pic0.width - pic0_image.width)/2
-            y_pos = (t_pic0.height - pic0_image.height)/2
+            t_pic0 = Image.open(os.path.join(AppPaths.application_path, 'resources', 'images', 'pkg', 'default',
+                                             'transparent_PIC0.PNG')).convert("RGBA")
+            x_pos = (t_pic0.width - pic0_image.width) / 2
+            y_pos = (t_pic0.height - pic0_image.height) / 2
             t_pic0.paste(pic0_image, (x_pos, y_pos), pic0_image)
 
             t_pic0.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC0.PNG'))
@@ -922,10 +946,11 @@ def image_saver(ftp, platform_path, platform, game_build_dir, images):
     if pic1 is not None:
         pic1_image = Image.open(io.BytesIO(pic1)).convert("RGBA")
         if platform == 'PSPISO':
-            t_pic1 = Image.open(os.path.join(AppPaths.application_path, 'resources', 'images', 'pkg', 'default', 'transparent_PIC1.PNG')).convert("RGBA")
-            pic1_image = pic1_image.resize((int(pic1_image.width*3), int(pic1_image.height*3)), Image.ANTIALIAS)
-            x_pos = (t_pic1.width - pic1_image.width)/2
-            y_pos = (t_pic1.height - pic1_image.height)/2
+            t_pic1 = Image.open(os.path.join(AppPaths.application_path, 'resources', 'images', 'pkg', 'default',
+                                             'transparent_PIC1.PNG')).convert("RGBA")
+            pic1_image = pic1_image.resize((int(pic1_image.width * 3), int(pic1_image.height * 3)), Image.ANTIALIAS)
+            x_pos = (t_pic1.width - pic1_image.width) / 2
+            y_pos = (t_pic1.height - pic1_image.height) / 2
             t_pic1.paste(pic1_image, (x_pos, y_pos), pic1_image)
 
             t_pic1.save(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC1.PNG'))
@@ -933,7 +958,6 @@ def image_saver(ftp, platform_path, platform, game_build_dir, images):
             pic1_file = open(os.path.join(game_build_dir, 'work_dir', 'pkg', 'PIC1.PNG'), "wb")
             pic1_file.write(pic1)
             pic1_file.close()
-
 
     if pic2 is not None:
         if platform == 'PS3ISO':

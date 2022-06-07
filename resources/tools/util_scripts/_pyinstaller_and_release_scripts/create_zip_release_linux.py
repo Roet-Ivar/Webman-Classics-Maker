@@ -1,4 +1,6 @@
-import os, zipfile
+import os
+import zipfile
+
 from global_paths import BuildPaths
 
 def zipdir(path, ziph):
@@ -88,7 +90,7 @@ if __name__ == '__main__':
 
 
 	print('The release archive has sucessfully been package and distributed to:\n' + '/release/' + zip_archive_name)
-	try:
-		input = raw_input
-	except NameError: pass
-	input('\npress ENTER to continue...')
+	# try:
+	# 	input = raw_input
+	# except NameError: pass
+	# input('\npress ENTER to continue...')

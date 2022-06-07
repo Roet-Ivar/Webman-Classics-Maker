@@ -1,4 +1,8 @@
-import sys, os
+import sys
+import os
+import json
+from shutil import copyfile
+
 if getattr(sys, 'frozen', False):
     application_path = os.path.join(os.path.dirname(sys.executable))
     running_mode = 'Frozen/executable'
@@ -133,45 +137,55 @@ class FtpSettings:
         ftp.voidcmd('TYPE I')
         return ftp
 
+
 class GameListData:
-    import json
-    from shutil import copyfile
+    def __init__(self):
+        self.game_list_data_json = None
+        self.game_list_data_bak_json = None
 
-    GAME_LIST_DATA_PATH = os.path.join(AppPaths.application_path, 'game_list_data.json')
-    GAME_LIST_DATA_BAK_PATH = os.path.join(AppPaths.util_resources, 'game_list_data.json.BAK')
+        # open a copy of the current gamelist from disk
+        try:
+            with open(os.path.join(AppPaths.application_path, 'game_list_data.json'), encoding="utf8") as f1:
+                self.game_list_data_json = json.load(f1)
+            with open(os.path.join(AppPaths.util_resources, 'game_list_data.json.BAK'), encoding="utf8") as f2:
+                self.game_list_data_bak_json = json.load(f2)
+        except Exception as e:
+            print(getattr(e, 'message', repr(e)))
 
-    game_list_data_json = None
-    game_list_data_bak_json = None
 
-    # open a copy of the current gamelist from disk
-    try:
-        with open(GAME_LIST_DATA_BAK_PATH) as f:
-            game_list_data_bak_json = json.load(f)
-    except Exception as e:
-        print('ERROR: could not parse ' + GAME_LIST_DATA_BAK_PATH + ' to ' + game_list_data_bak_json)
+    def get_game_list_data_json(self):
+        return self.game_list_data_json
 
+    def get_game_list_data_json_bak(self):
+        return self.game_list_data_bak_json
 
     def get_game_list(self):
         import json
         import shutil
         # makes sure there is a json_game_list file
-        if not os.path.isfile(self.GAME_LIST_DATA_PATH):
-            shutil.copyfile(self.GAME_LIST_DATA_BAK_PATH, self.GAME_LIST_DATA_PATH)
+        GAME_LIST_DATA_PATH = os.path.join(AppPaths.application_path, 'game_list_data.json')
+        GAME_LIST_DATA_BAK_PATH = os.path.join(AppPaths.util_resources, 'game_list_data.json.BAK')
+
+        if not os.path.isfile(GAME_LIST_DATA_PATH):
+            shutil.copyfile(GAME_LIST_DATA_BAK_PATH, GAME_LIST_DATA_PATH)
 
         try:
-            with open(self.GAME_LIST_DATA_PATH) as f:
+            with open(GAME_LIST_DATA_PATH) as f:
                 self.game_list_data_json = json.load(f)
         except Exception as e:
             print("""Error in 'game_list_data.json' contains incorrect json-syntax. Either remove it or find the error using json lint""")
             print("Details: " + getattr(e, 'message', repr(e)))
         return self.game_list_data_json
 
-    def duplicate_title_checker(self, title):
+    def duplicate_title_checker(self, title_in):
         import re
         import json
+        GAME_LIST_DATA_PATH = os.path.join(AppPaths.application_path, 'game_list_data.json')
+
+        title = str(title_in)
 
         if self.game_list_data_json is None:
-            with open(self.GAME_LIST_DATA_PATH) as f:
+            with open(GAME_LIST_DATA_PATH) as f:
                 self.game_list_data_json = json.load(f)
 
 
@@ -210,7 +224,7 @@ class GameListData:
                         break
 
         title = title.replace('  ', ' ')
-        title = title.strip().encode('utf-8')
+        title = title.strip()
         return title
 
 

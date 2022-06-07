@@ -1,10 +1,15 @@
-import sys, os, zipfile
-from ..global_paths import BuildPaths
+import os
+import sys
+import zipfile
+
+import add_application_path
+from global_paths import BuildPaths
+
 
 def zipdir(path, ziph):
 	# ziph is zipfile handle
 	webman_classics_maker_exist = False
-	webman_classic_exe = 'Webman_Classics_Maker.exe'
+	webman_classic_exe = 'webman-classics-maker.exe'
 
 	# TODO: No more CHDIR plz!
 	# files folders to exclude
@@ -58,6 +63,8 @@ def zipdir(path, ziph):
 			files.remove('game_list_data.json')
 		if 'ftp_settings.cfg' in files:
 			files.remove('ftp_settings.cfg')
+		if 'startup.ogg' in files:
+			files.remove('startup.ogg')
 
 
 		# exclude old webMan tools for a slimmer release
