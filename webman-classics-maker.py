@@ -131,33 +131,14 @@ class Main:
         # init images and canvas for the gui
         self.drive_dropdown = None
         self.platform_dropdown = None
-
         self.main_canvas = None
+
         self.__init_images_and_canvas__()
         self.__draw_background_on_canvas__()
         self.__draw_pkg_images_on_canvas__()
         self.__init_entry_field__()
         self.__init_buttons__()
-
-        # init gamelist and filters
-        self.list_filter_drive = 'all'
-        self.list_filter_platform = 'ALL'
-
-        self.game_list = Gamelist(self)
-        self.game_list.create_listbox(self, platform=self.list_filter_platform, drive=self.list_filter_drive)
-        self.game_list_box = self.game_list.get_listbox()
-
-        # self.game_list_box.place(x=int(self.main_offset_x_pos * self.scaling),
-        #                       y=self.main_offset_y_pos + 220,
-        #                       width=270,
-        #                       height=300)
-
-        # self.create_dropdowns()
-        # self.bind_filter_dropdowns()
-        # self.drive_dropdown = DriveDropdown(self.main_canvas, self.game_list_box).get_box()
-        # self.platform_dropdown = PlatformDropdown(self.main_canvas, self.game_list_box).get_box()
-
-        self.bind_filter_dropdowns()
+        self.__init_game_list__()
 
 
     @property
@@ -344,7 +325,7 @@ class Main:
         self.refresh_button = Button(self.main,
                                      image=self.refresh_button_image,
                                      borderwidth=0,
-                                     command=self.on_game_list_refresh,
+                                     command=self.__init_game_list__,
                                      bg="#FBFCFB")
 
         # button tooltips
@@ -406,13 +387,7 @@ class Main:
                 self.list_filter_drive = 'HDD0'
                 self.drive_dropdown.set('HDD0')
 
-        self.game_list = Gamelist(self)
-        self.game_list.create_listbox(self,
-                                      self.list_filter_platform,
-                                      self.list_filter_drive)
-
-        self.game_list_box = self.game_list.get_listbox()
-        self.game_list_box.focus()
+        self.game_list = Gamelist(self, self.list_filter_platform, self.list_filter_drive)
 
 
     def make_button_smallest(self, text, **args):
@@ -1220,9 +1195,6 @@ class Main:
         AppPaths.game_work_dir = os.path.join(
             AppPaths().get_game_build_dir(self.entry_field_title_id.get(), self.entry_field_filename.get()), 'work_dir')
 
-        # refresh the GUI list
-        self.on_game_list_refresh()
-
     def on_build_button(self):
         self.update_game_build_path()
 
@@ -1313,7 +1285,7 @@ class Main:
             ftp_game_list = FtpGameList(self.drive_dropdown.get(), self.platform_dropdown.get())
             ftp_game_list.execute(self.drive_dropdown.get(), self.platform_dropdown.get())
 
-            self.on_game_list_refresh()
+            self.__init_game_list__()
         else:
             print('DEBUG cannot connect with empty ip.') if self._verbose else None
 
@@ -1371,18 +1343,16 @@ class Main:
         preview_img.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
         preview_img.save(os.path.join(AppPaths.game_work_dir, '..', 'preview.png'))
 
-    def on_game_list_refresh(self):
+    def __init_game_list__(self):
         if not self.platform_dropdown:
             self.list_filter_drive = 'all'
-            self.list_filter_platform = 'ALL'
+            self.list_filter_platform = 'all'
         else:
             self.list_filter_drive = self.drive_dropdown.get()
             self.list_filter_platform = self.platform_dropdown.get()
-        #
-        # self.game_list = Gamelist(self)
-        # self.game_list_box = self.game_list.get_listbox()
+
+        self.game_list = Gamelist(self)
         self.bind_filter_dropdowns()
-        # self.game_list.create_listbox(self)
 
     def entry_fields_to_json(self, json_data_path):
         json_data = None

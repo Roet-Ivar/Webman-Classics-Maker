@@ -8,7 +8,7 @@ from resources.tools.util_scripts.global_paths import GameListData
 
 
 class Gamelist:
-    def __init__(self, wcm):
+    def __init__(self, wcm, platform='all', drive='all'):
         self.main_frame = Frame()
         self._listbox = Listbox(self.main_frame, width=465)
         self.context_menu = Menu(self.main_frame, tearoff=0)
@@ -37,7 +37,7 @@ class Gamelist:
         # not visible in GUI
         self.drive_system_path_array = wcm.drive_system_path_array
 
-        # self.create_listbox(wcm, platform_str='ALL_games', drive_str='/dev_all/')
+        self.create_listbox(wcm, platform, drive)
 
     def create_listbox(self, wcm, platform, drive):
         platform_str = '{}_games'.format(str(platform).upper())
@@ -128,7 +128,7 @@ class Gamelist:
                     self.selected_title = str(list_game['title'])
                     self.selected_path = str(list_game['path'])
                     self.selected_filename = str(list_game['filename'])
-                    self.selected_platform = str(list_game['platform_str'])
+                    self.selected_platform = str(list_game['platform'])
 
                     # parse drive_str and system from json data
                     path_array = list(filter(None, self.selected_path.split('/')))
