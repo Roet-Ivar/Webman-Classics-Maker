@@ -97,6 +97,7 @@ class Main:
     def __init__(self):
         self.main = main_window
         self._verbose = True
+
         # window metrics
         self.scaling = 720.0 / 1080.0
         self.main_window_height = int(1080 * self.scaling)
@@ -136,10 +137,9 @@ class Main:
         self.__init_images_and_canvas__()
         self.__draw_background_on_canvas__()
         self.__draw_pkg_images_on_canvas__()
-        self.__init_entry_field__()
+        self.__init_entry_fields__()
         self.__init_buttons__()
-        self.__init_game_list__()
-
+        self.__init_gamelist__()
 
     @property
     def verbose(self):
@@ -190,10 +190,10 @@ class Main:
                                   height=self.main_window_height,
                                   borderwidth=0,
                                   highlightthickness=0)
-        self.main_canvas.pack(fill=BOTH, expand=YES)
-        self.background_image = self.main_canvas.create_image(0, 0, anchor=NW, image=self.current_background)
 
-    def __init_entry_field__(self):
+        self.main_canvas.pack(fill=BOTH, expand=YES)
+
+    def __init_entry_fields__(self):
         self.usb_port_number = 0
         self.drive_system_path_array = ['drive_str', 'system', 'path']
 
@@ -325,7 +325,7 @@ class Main:
         self.refresh_button = Button(self.main,
                                      image=self.refresh_button_image,
                                      borderwidth=0,
-                                     command=self.__init_game_list__,
+                                     command=self.__init_gamelist__,
                                      bg="#FBFCFB")
 
         # button tooltips
@@ -387,7 +387,7 @@ class Main:
                 self.list_filter_drive = 'HDD0'
                 self.drive_dropdown.set('HDD0')
 
-        self.game_list = Gamelist(self, self.list_filter_platform, self.list_filter_drive)
+        self.gamelist = Gamelist(self, self.list_filter_platform, self.list_filter_drive)
 
 
     def make_button_smallest(self, text, **args):
@@ -544,6 +544,7 @@ class Main:
             (int(1990 * self.scaling), int(1327 * self.scaling)), Image.Resampling.LANCZOS)
         self.current_img.paste(self.tv_frame, (int(45 * self.scaling), int(143 * self.scaling)), self.tv_frame)
 
+        self.background_image = self.main_canvas.create_image(0, 0, anchor=NW, image=self.current_background)
         self.current_background = PhotoImage(self.current_img)
         self.main_canvas.itemconfig(self.background_image, image=self.current_background)
 
@@ -1098,8 +1099,8 @@ class Main:
             if not os.path.exists(AppPaths.game_work_dir):
                 if AppPaths.game_work_dir == '':
                     # we need to build the path first
-                    selected_path = self.game_list.get_selected_build_dir_path(str(self.entry_field_filename.get()),
-                                                                               str(self.entry_field_title_id.get()))
+                    selected_path = self.gamelist.get_selected_build_dir_path(str(self.entry_field_filename.get()),
+                                                                              str(self.entry_field_title_id.get()))
                     AppPaths.game_work_dir = os.path.join(selected_path, 'work_dir')
                     self.game_pkg_dir = os.path.join(AppPaths.game_work_dir, 'pkg')
                 print('Trying to create: ' + str(os.path.join(AppPaths.game_work_dir, 'pkg'))) if self._verbose else None
@@ -1246,30 +1247,24 @@ class Main:
                     GlobalDef().copytree(AppPaths.pkg, self.game_pkg_dir)
 
                 if os.path.isdir(AppPaths.game_work_dir):
-                    def popup():
-                        install_path = self.drive_system_path_array[0]
-                        remote_path = ''
-                        if 'hdd0' in install_path:
-                            pkg_remote_path = '/' + install_path + '/packages'
-                        # usb
-                        else:
-                            pkg_remote_path = '/' + install_path + '/'
+                    install_path = self.drive_system_path_array[0]
+                    if 'hdd0' in install_path:
+                        pkg_remote_path = '/' + install_path + '/packages'
+                    # any usb
+                    else:
+                        pkg_remote_path = '/' + install_path + '/'
 
-                        response = messagebox.askyesno('Build status: success',
-                                                       'Build done!\nDo you want to remote-install the pkg?\n\nLocation: ' + pkg_remote_path + '/' + pkg_name)
-                        # yes
-                        if response:
-                            pkg_local_path = os.path.join(AppPaths.game_work_dir, '../', pkg_name)
+                    response = messagebox.askyesno('Build status: success',
+                                                   'Build done!\nDo you want to remote-install the pkg?\n\nLocation: ' + pkg_remote_path + '/' + pkg_name)
+                    # yes
+                    if response:
+                        pkg_local_path = os.path.join(AppPaths.game_work_dir, '../', pkg_name)
 
-                            self.transfer_pkg(pkg_local_path, pkg_remote_path, pkg_name)
-                            self.remote_install_pkg(pkg_remote_path, pkg_name)
-
-                    # execute def popup()
-                    popup()
+                        self.transfer_pkg(pkg_local_path, pkg_remote_path, pkg_name)
+                        self.remote_install_pkg(pkg_remote_path, pkg_name)
 
                     # open builds folder in windows explorer
                     if 'win' in sys.platform:
-                        # print('DEBUG opening folder: ' + os.path.join(AppPaths.game_work_dir, '..')) if self._verbose else None
                         try:
                             os.startfile(os.path.join(AppPaths.game_work_dir, '../'))
                         except:
@@ -1279,15 +1274,19 @@ class Main:
                 messagebox.showerror("Build status: fail", "Build failed!\nSee error log.")
 
     def on_ftp_fetch_button(self):
-        # save the ps3-ip field to config file
-        if self.entry_field_ftp_ip.get() != '':
-            self.save_ftp_fields_on_fetch()
-            ftp_game_list = FtpGameList(self.drive_dropdown.get(), self.platform_dropdown.get())
-            ftp_game_list.execute(self.drive_dropdown.get(), self.platform_dropdown.get())
+        response = messagebox.askyesno('FTP fetch',
+                                       'OBS! This will overwrite your current gamelist, continue?')
+        # yes
+        if response:
+            # save the ps3-ip field to config file
+            if self.entry_field_ftp_ip.get() != '':
+                self.save_ftp_fields_on_fetch()
+                ftp_game_list = FtpGameList(self.drive_dropdown.get(), self.platform_dropdown.get())
+                ftp_game_list.execute(self.drive_dropdown.get(), self.platform_dropdown.get())
 
-            self.__init_game_list__()
-        else:
-            print('DEBUG cannot connect with empty ip.') if self._verbose else None
+                self.__init_gamelist__()
+            else:
+                print('DEBUG cannot connect with empty ip.') if self._verbose else None
 
     def save_ftp_fields_on_fetch(self):
         # open make changes to existing settings file
@@ -1343,7 +1342,7 @@ class Main:
         preview_img.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
         preview_img.save(os.path.join(AppPaths.game_work_dir, '..', 'preview.png'))
 
-    def __init_game_list__(self):
+    def __init_gamelist__(self):
         if not self.platform_dropdown:
             self.list_filter_drive = 'all'
             self.list_filter_platform = 'all'
@@ -1351,7 +1350,7 @@ class Main:
             self.list_filter_drive = self.drive_dropdown.get()
             self.list_filter_platform = self.platform_dropdown.get()
 
-        self.game_list = Gamelist(self)
+        self.gamelist = Gamelist(self)
         self.bind_filter_dropdowns()
 
     def entry_fields_to_json(self, json_data_path):

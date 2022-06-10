@@ -51,7 +51,7 @@ class Gamelist:
         s = Scrollbar(self.main_frame)
         self._listbox.bind('<Enter>', self._bound_to_mousewheel)
         self._listbox.bind('<Leave>', self._unbound_to_mousewheel)
-        self._listbox.bind("<Button-3>", self.popup)  # Button-2 on Aqua
+        self._listbox.bind("<Button-3>", self.contextmenu)  # Button-2 on Aqua
 
         s.pack(side=RIGHT, fill=Y)
         self._listbox.pack(side=LEFT, fill=Y)
@@ -202,7 +202,7 @@ class Gamelist:
     def _on_mousewheel(self, event):
         self._listbox.yview_scroll(int(-1 * (event.delta / 30)), "units")
 
-    def popup(self, event):
+    def contextmenu(self, event):
         try:
             self._listbox.selection_clear(0, END)
             self._listbox.selection_set(self._listbox.nearest(event.y))
@@ -222,9 +222,8 @@ class Gamelist:
             import tkinter.messagebox as tkMessageBox
 
         game_folder_path = os.path.join(AppPaths.game_work_dir, '..')
-        response = tkMessageBox.askyesno('Delete game folder',
-                                         'Delete \'' + self.entry_field_title.get() + '\'?\n\nFolder path: ' + os.path.realpath(
-                                             game_folder_path))
+        response = tkMessageBox.askyesno('Delete game',
+                                         'Delete \'' + self.entry_field_title.get() + '\'and its data?')
         # yes
         if response:
             # remove game from visual game list
