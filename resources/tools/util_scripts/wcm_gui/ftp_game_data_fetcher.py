@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import json
 import os
 import re
@@ -36,6 +34,8 @@ class FtpGameList():
 
         self.selected_drives = []
         self.platform_filter = []
+        
+        self.coding = GlobalVar.coding
 
         # add all drive paths based on choice from drive filter
         if any(x in selected_drive for x in ['ALL']):
@@ -138,9 +138,9 @@ class FtpGameList():
 
             return
 
-        # append the current platform data to the new list
+        # append the current platform games to the new list
         for platform in self.json_game_list_data:
-            self.new_platform_list_data = self.json_game_list_data_builder(str(platform).split('_')[0])
+            self.json_game_list_data_builder(str(platform.split('_')[0]))
 
         # save updated gamelist to disk
         with open(os.path.join(AppPaths.application_path, 'game_list_data.json'), 'w') as newFile:
@@ -181,7 +181,7 @@ class FtpGameList():
             new_game_platform_path = str(new_game_dir_path)
             new_game_platform = str(original_platform)
 
-            # check if game exist
+            # pre-check if game already exist
             for game_json in self.json_game_list_data[platform_list]:
                 existing_game_path = str(os.path.join(game_json['path'], game_json['filename']))
 
@@ -192,8 +192,6 @@ class FtpGameList():
 
                 if new_game_path == existing_game_path:
                     self.game_count += 1
-                    # if self.total_lines_count > 0:
-                    #     print('DEBUG PROGRESS: ' + "{:.0%}".format(float(self.game_count).__div__(float(self.total_lines_count))) + ' (' + str(self.game_count) + '/' + str(self.total_lines_count) + ')')
                     print('\nDEBUG skipping ' + new_game_filename + ', already fetched\n')
                     game_exist = True
                     pass
@@ -213,12 +211,12 @@ class FtpGameList():
 
             # if not, add it
             if not game_exist:
-                # parsing of PARAM.SFO will provide appropriate title_id and title for the GUI
+                # parsing PARAM.SFO should provide correct title_id and title for the GUI
                 if original_platform in {'GAMES', 'GAMEZ'}:
                     data = []
                     PARAM_SFO_PATH = new_game_platform_path + 'PARAM.SFO'
                     self.ftp.retrbinary("RETR " + PARAM_SFO_PATH, callback=data.append)
-                    title_id, title = param_sfo_parser(''.join(data))
+                    title_id, title = param_sfo_parser(b''.join(data))
 
                     # if title_id still None, get it from the folder name
                     if title_id is None:
@@ -228,7 +226,7 @@ class FtpGameList():
                             title_id = id_match.group(0)
                         else:
                             print('DEBUG: Folder-game in: ' + new_game_dir_path
-                                  + ' does not contain title_id in folder name\n skipping metadata')
+                                  + ' does not contain mandatory \'title_id\' in its folder name\n skipping metadata')
                             self.game_count += 1
                             break
 
@@ -254,7 +252,7 @@ class FtpGameList():
                 if tmp_title != '':
                     title = tmp_title
 
-                # check for for match the platform game database
+                # check for a match in the platform game database
                 if title_id is not None and title_id != '':
                     # read platform db
                     platform_db_file = new_game_platform.replace('ISO', '') + '_all_title_ids.json'
@@ -282,8 +280,6 @@ class FtpGameList():
 
                 # add game to list of new games
                 self.game_count += 1
-                # if self.total_lines_count > 0:
-                #     print('DEBUG PROGRESS: ' + "{:.0%}".format(float(self.game_count).__div__(float(self.total_lines_count))) + ' (' + str(self.game_count) + '/' + str(self.total_lines_count) + ')')
 
                 if new_game_platform != original_platform:
                     if original_platform in {'GAMES', 'GAMEZ'}:
@@ -346,7 +342,7 @@ class FtpGameList():
             split_folder_path = game_filepath.split('/')
             platform_str = split_folder_path[2] + '/'
             platform_match = list(filter(lambda x: platform_str in x[0], self.global_platform_paths))
-            platform = str(platform_match[0][1])
+            platform = platform_match[0][1]
 
             original_platform = platform
             # this is where .NTFS[xxx] files need a donor platform
@@ -478,11 +474,38 @@ class FtpGameList():
 
 class FTPDataHandler:
     def __init__(self, ftp, total_lines):
+        self.coding = GlobalVar.coding
         self.global_platform_paths = GlobalVar.platform_paths
         self.ftp_instance = ftp
         self.ftp_instance.voidcmd('TYPE I')
         self.null = None
         self.total_lines = total_lines
+
+        self.data = None
+        self.platform = None
+        self.image_duplicate = None
+        self.image_name = None
+        self.current_image_name = None
+
+        self.icon0_image = None
+        self.has_icon0 = None
+
+        self.pic0_image = None
+        self.has_pic0 = None
+
+        self.pic1_image = None
+        self.has_pic1 = None
+
+        self.pic2_image = None
+        self.has_pic2 = None
+
+        self.has_at3 = None
+        self.at3_image = None
+        self.at3_size = None
+
+        self.has_pam = None
+        self.pam_image = None
+        self.pam_size = None
 
     def ftp_buffer_data(self, filepath, platform, chunk_size, rest, game_count, ftp_retry_count):
         icon0 = None
@@ -505,7 +528,7 @@ class FTPDataHandler:
             rest = 0
 
         def fill_buffer(self, rec):
-            received = rec.decode('ISO-8859-1')
+            received = rec.decode(self.coding)
             if self.chunk_size <= 0:
                 return True
             else:
@@ -547,11 +570,9 @@ class FTPDataHandler:
                     print('ERROR could not refetch ' + filename + ', skipping metadata')
                     break
 
-            # if None: refetch has failed => skip game by breaking the loop
+            # if None: re-fetch attempt has failed => skip game by breaking the loop
             if data is None:
                 game_count += 1
-                # if self.total_lines > 0:
-                #      print('DEBUG PROGRESS: ' + "{:.0%}".format(float(game_count).__div__(float(self.total_lines))) + ' (' + str(game_count) + '/' + str(self.total_lines) + ')')
                 break
             else:
                 if fill_buffer(self, data):
@@ -581,7 +602,7 @@ class FTPDataHandler:
                             icon0, pic0, pic1, pic2 = get_png_from_buffer(self, platform, filename, self.data_chunk)
 
                             if platform == 'PS3ISO':
-                                at3 = get_AT3_from_buffer(self, platform, filename, self.data_chunk)
+                                at3 = get_at3_from_buffer(self, platform, filename, self.data_chunk)
                                 pam = get_PAM_from_buffer(self, platform, filename, self.data_chunk)
 
                                 try:
@@ -648,8 +669,8 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
 
         # these byte sequences are standard start and end of PNGs
         def png_finder(data, image_name):
-            index_png_start = data.find((b'\x89\x50\x4E\x47\x0D\x0A\x1A\x0A').decode('ISO-8859-1'))
-            png_end_seq = b'\x49\x45\x4E\x44\xAE\x42\x60\x82'.decode('ISO-8859-1')
+            index_png_start = data.find((b'\x89\x50\x4E\x47\x0D\x0A\x1A\x0A').decode(self.coding))
+            png_end_seq = b'\x49\x45\x4E\x44\xAE\x42\x60\x82'.decode(self.coding)
             index_png_end = data.find(png_end_seq, index_png_start)
 
             self.image_duplicate = False
@@ -659,21 +680,21 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
                     import PIL.Image as Image
                     import io
 
-                    png_byte_array = data[index_png_start:index_png_end + len(png_end_seq)].encode('ISO-8859-1')
+                    png_byte_array = data[index_png_start:index_png_end + len(png_end_seq)].encode(self.coding)
                     tmp_image = Image.open(io.BytesIO(png_byte_array)).convert("RGBA")
-                    self.img_name = None
+                    self.current_image_name = None
 
                     if self.platform == 'PSPISO':
                         # icon image PSP
                         if tmp_image.size == (144, 80):
-                            self.img_name = 'ICON0.PNG'
+                            self.current_image_name = 'ICON0.PNG'
                             if not self.has_icon0:
                                 self.icon0_image = png_byte_array
                                 self.has_icon0 = True
 
                         # this is background image for PSP
                         elif tmp_image.size == (480, 272):
-                            self.img_name = 'PIC1.PNG'
+                            self.current_image_name = 'PIC1.PNG'
                             if not self.has_pic1:
                                 self.pic1_image = png_byte_array
                                 self.has_pic1 = True
@@ -682,7 +703,7 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
                     elif self.platform == 'PS3ISO':
                         # icon image PS3
                         if tmp_image.size == (320, 176):
-                            self.img_name = 'ICON0.PNG'
+                            self.current_image_name = 'ICON0.PNG'
                             if not self.has_icon0:
                                 self.icon0_image = png_byte_array
                                 self.has_icon0 = True
@@ -690,7 +711,7 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
 
                         # when multiple pic0 we pic the first for English
                         elif tmp_image.size == (1000, 560):
-                            self.img_name = 'PIC0.PNG'
+                            self.current_image_name = 'PIC0.PNG'
                             if not self.has_pic0:
                                 self.pic0_image = png_byte_array
                                 self.has_pic0 = True
@@ -698,19 +719,19 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
 
                         # this is background image PS3
                         elif tmp_image.size == (1920, 1080):
-                            self.img_name = 'PIC1.PNG'
+                            self.current_image_name = 'PIC1.PNG'
                             if not self.has_pic1:
                                 self.pic1_image = png_byte_array
                                 self.has_pic1 = True
 
                         # PIC2 is variant of the PIC0 for 4:3 screens
                         elif tmp_image.size == (310, 250):
-                            self.img_name = 'PIC2.PNG'
+                            self.current_image_name = 'PIC2.PNG'
                             if not self.has_pic2:
                                 self.pic2_image = png_byte_array
                                 self.has_pic2 = True
 
-                    if self.img_name is not None:
+                    if self.current_image_name is not None:
                         # crop data for next iteration
                         self.data = data[index_png_end:len(data) - 1]
                         return True
@@ -718,7 +739,7 @@ def get_png_from_buffer(self, platform, game_name, buffer_data):
                 return False
 
         while png_finder(str(self.data), self.image_name):
-            print('DEBUG Found ' + self.img_name + ' for \'' + game_name + '\'')
+            print('DEBUG Found ' + self.current_image_name + ' for \'' + game_name + '\'')
 
         return self.icon0_image, self.pic0_image, self.pic1_image, self.pic2_image
 
@@ -740,31 +761,31 @@ def get_PAM_from_buffer(self, platform, game_name, buffer_data):
         # these byte sequences are standard start and end of PNGs
         def PAM_finder(data, image_name, pam_size):
 
-            index_pam_start = data.find(b'\x50\x41\x4D\x46\x30\x30\x34\x31'.decode('ISO-8859-1'))
-            pam_stop_seq = b'\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF'.decode('ISO-8859-1')
+            index_pam_start = data.find(b'\x50\x41\x4D\x46\x30\x30\x34\x31'.decode(self.coding))
+            pam_stop_seq = b'\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF'.decode(self.coding)
 
             self.image_name = image_name
             if index_pam_start > -1:
                 # TODO: make more solid somehow?
-                index_png_start = data.find(b'\x89\x50\x4E\x47\x0D\x0A\x1A\x0A'.decode('ISO-8859-1'), index_pam_start)
+                index_png_start = data.find(b'\x89\x50\x4E\x47\x0D\x0A\x1A\x0A'.decode(self.coding), index_pam_start)
 
                 # find the last occurrence of the stop sequence and use as eof
                 index_pam_end = index_pam_start + data[index_pam_start:index_png_start].rfind(pam_stop_seq) + len(
                     pam_stop_seq)
                 if index_pam_end > -1:
-                    tmp_image = data[index_pam_start:index_pam_end].encode('ISO-8859-1')
+                    tmp_image = data[index_pam_start:index_pam_end].encode(self.coding)
                     self.pam_size = len(tmp_image)
 
                     # PAM image PS3
                     if tmp_image is not None:
-                        self.img_name = 'ICON1.PAM'
+                        self.current_image_name = 'ICON1.PAM'
                         if not self.has_pam:
                             self.pam_image = tmp_image
                             self.has_pam = True
 
-                    if self.img_name is not None:
+                    if self.current_image_name is not None:
                         # crop data for next iteration
-                        self.data = data[index_pam_end:len(data) - 1].encode('ISO-8859-1')
+                        self.data = data[index_pam_end:len(data) - 1].encode(self.coding)
                         return True
 
                 return False
@@ -775,7 +796,7 @@ def get_PAM_from_buffer(self, platform, game_name, buffer_data):
             if int(self.pam_size * 0.978 / 1000) > 24000:
                 print('''ERROR The size of ICON1.PAM can't be larger than 2.4MB.''')
 
-            print('DEBUG Found ' + self.img_name + ' for \'' + game_name + '\'')
+            print('DEBUG Found ' + self.current_image_name + ' for \'' + game_name + '\'')
 
         return self.pam_image
 
@@ -785,20 +806,21 @@ def get_PAM_from_buffer(self, platform, game_name, buffer_data):
 
 
 # TODO The sum of the sizes of SND0.AT3 + ICON1.PAM can't be larger than 2.4MB
-def get_AT3_from_buffer(self, platform, game_name, buffer_data):
+def get_at3_from_buffer(self, platform, game_name, buffer_data):
     self.platform = platform
     self.data = buffer_data
+    self.at3_image = ''
 
     try:
         self.has_at3 = False
-        self.at3_image = None
         self.image_name = None
         self.at3_size = 0
+        self.at3_image = None
 
         # these byte sequences are standard start and end of PNGs
-        def AT3_finder(data, image_name, file_size):
-            index_at3_start = data.find(b'\x57\x41\x56\x45\x66\x6D\x74\x20'.decode('ISO-8859-1')) - 8
-            at3_stop_seq = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'.decode('ISO-8859-1')
+        def at3_finder(data, image_name, file_size):
+            index_at3_start = data.find(b'\x57\x41\x56\x45\x66\x6D\x74\x20'.decode(self.coding)) - 8
+            at3_stop_seq = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'.decode(self.coding)
 
             self.image_name = image_name
             if index_at3_start > -1:
@@ -806,37 +828,38 @@ def get_AT3_from_buffer(self, platform, game_name, buffer_data):
                 index_at3_end = index_at3_start + data[index_at3_start:].find(at3_stop_seq)
 
                 if index_at3_end > -1:
-                    tmp_image = data[index_at3_start:index_at3_end].encode('ISO-8859-1')
+                    tmp_image = data[index_at3_start:index_at3_end].encode(self.coding)
                     self.at3_size = len(tmp_image)
 
                     # AT3 image PS3
                     if tmp_image is not None:
-                        self.img_name = 'SND0.AT3'
+                        self.current_image_name = 'SND0.AT3'
                         if not self.has_at3:
                             self.at3_image = tmp_image
                             self.has_at3 = True
 
-                    if self.img_name is not None:
+                    if self.current_image_name is not None:
                         # crop data for next iteration
-                        self.data = data[index_at3_end:len(data) - 1].encode('ISO-8859-1')
+                        self.data = data[index_at3_end:len(data) - 1].encode(self.coding)
                         return True
 
                 return False
 
-        while AT3_finder(self.data, self.image_name, self.at3_size):
+        while at3_finder(self.data, self.image_name, self.at3_size):
             # if int(self.at3_size) > 0:
             #      print('DEBUG SND0.AT3 size: ' + str(int(self.at3_size*0.978/1000)) + 'KB')
             if int(self.at3_size * 0.978 / 1000) > 24000:
                 print('''ERROR The size of SND0.AT3 can't be larger than 2.4MB.''')
 
-            print('DEBUG Found ' + self.img_name + ' for \'' + game_name + '\'')
+            print('DEBUG Found ' + self.current_image_name + ' for \'' + game_name + '\'')
             break
 
-        return self.at3_image
+        # return self.at3_image
 
     except Exception as e:
         print('ERROR: get_AT3_from_buffer - ' + getattr(e, 'message', repr(e)))
-        return self.at3_image
+
+    return self.at3_image
 
 
 def image_saver(ftp, platform_path, platform, game_build_dir, images):
@@ -873,6 +896,7 @@ def image_saver(ftp, platform_path, platform, game_build_dir, images):
         stuff = []
         try:
             ftp.retrlines('MLSD ' + PS3_GAME_path, stuff.append)
+
         except Exception as e:
             print('DEBUG image_saver - retrlines error: ' + getattr(e, 'message', repr(
                 e)) + '\n during command retrlines(\'MLSD ' + PS3_GAME_path + '\')')
@@ -895,8 +919,9 @@ def image_saver(ftp, platform_path, platform, game_build_dir, images):
                     try:
                         data = []
                         filepath = PS3_GAME_path + pkg_fname
-                        ftp.retrbinary("RETR " + filepath, callback=data.append)
-                        file_data_list[filename_list.index(pkg_fname)] = ''.join(data)
+                        ftp.retrbinary("RETR " + filepath, data.append)
+                        file_data_list[filename_list.index(pkg_fname)] = b''.join(data)
+                        # file_data_list[filename_list.index(pkg_fname)] = data
                     except Exception as e:
                         print('DEBUG image_saver() - retrlines error: ' + getattr(e, 'message', repr(e)))
                         print('Skipping ' + pkg_fname + ' for ' + split_path[len(split_path) - 2])
@@ -991,7 +1016,7 @@ def param_sfo_parser(param_data):
     title = None
     filtered_data_list = list(filter(None,  param_data.split(b'\x00')))
     for fd in filtered_data_list:
-        id_match  = re.search('\w{4}\d{5}$', fd)
+        id_match  = re.search('\w{4}\d{5}$', fd.decode('ISO-8859-1'))
         if id_match:
             title_id = id_match.group()
             try:

@@ -1,4 +1,3 @@
-from __future__ import print_function
 import os
 import json
 from resources.tools.util_scripts.global_paths import AppPaths

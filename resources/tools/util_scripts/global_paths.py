@@ -229,6 +229,7 @@ class GameListData:
 
 
 class GlobalVar:
+    coding = 'ISO-8859-1'
     file_extensions = ('.BIN',
                        '.BIN.ENC',
                        '.MDF',

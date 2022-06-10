@@ -16,8 +16,6 @@ class Gamelist:
         self.corrected_index = []
         self.json_game_list_data = GameListData().get_game_list()
 
-        self.platform_to_show = 'ALL_games'
-        self.drive_to_show = '/dev_all/'
         self.WCM_BASE_PATH = AppPaths.wcm_gui
         self.last_selection = (None, 0)
         self.list_of_items = []
@@ -39,9 +37,11 @@ class Gamelist:
         # not visible in GUI
         self.drive_system_path_array = wcm.drive_system_path_array
 
-        self.create_listbox(wcm)
+        # self.create_listbox(wcm, platform_str='ALL_games', drive_str='/dev_all/')
 
-    def create_listbox(self, wcm):
+    def create_listbox(self, wcm, platform, drive):
+        platform_str = '{}_games'.format(str(platform).upper())
+        drive_str = '/dev_{}/'.format(str(drive).lower())
 
         self.context_menu.add_command(label="Delete",
                                       command=self.delete_selected)
@@ -60,18 +60,21 @@ class Gamelist:
         self._listbox['yscrollcommand'] = s.set
 
         # default filters
-        if 'ALL_games' == self.platform_to_show:
+        if 'ALL_games' == platform_str:
             # iterate all platforms
-            for platform in self.json_game_list_data:
-                for list_game in self.json_game_list_data[platform]:
-                    # titles in the list has been designed to be unique
-                    if '/dev_all/' == self.drive_to_show or self.drive_to_show in list_game['path']:
+            for platform_str in self.json_game_list_data:
+                for list_game in self.json_game_list_data[platform_str]:
+                    # titles names in the list has been designed to be unique
+                    if '/dev_all/' == drive_str or drive_str in list_game['path']:
                         self.add_item(list_game['title'])
+                        print('added: {}'.format(list_game['title']))
 
         else:
-            for list_game in self.json_game_list_data[self.platform_to_show]:
-                if '/dev_all/' == self.drive_to_show or self.drive_to_show in list_game['path']:
+            for list_game in self.json_game_list_data[platform_str]:
+                if '/dev_all/' == drive_str or drive_str in list_game['path']:
                     self.add_item(list_game['title'])
+                    print('added: {}'.format(list_game['title']))
+
 
         for x in range(19 - self._listbox.size()):
             self.add_item('')
@@ -96,6 +99,9 @@ class Gamelist:
                               height=300)
 
 
+        # self.create_listbox(wcm)
+        # items = self.get_items()
+        print('items: {}'.format(self.list_of_items))
 
         return self.main_frame
 
@@ -122,9 +128,9 @@ class Gamelist:
                     self.selected_title = str(list_game['title'])
                     self.selected_path = str(list_game['path'])
                     self.selected_filename = str(list_game['filename'])
-                    self.selected_platform = str(list_game['platform'])
+                    self.selected_platform = str(list_game['platform_str'])
 
-                    # parse drive and system from json data
+                    # parse drive_str and system from json data
                     path_array = list(filter(None, self.selected_path.split('/')))
                     self.drive_system_path_array[0] = path_array[0]
                     self.drive_system_path_array[1] = path_array[1]

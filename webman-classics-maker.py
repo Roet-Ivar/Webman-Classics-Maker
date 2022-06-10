@@ -7,6 +7,7 @@ import traceback
 import urllib.parse
 from urllib.request import urlopen
 import sys
+import re
 
 # sudo apt-get install python3-tk
 import tkinter as tk
@@ -95,7 +96,7 @@ def get_default_image(filename):
 class Main:
     def __init__(self):
         self.main = main_window
-
+        self._verbose = True
         # window metrics
         self.scaling = 720.0 / 1080.0
         self.main_window_height = int(1080 * self.scaling)
@@ -130,8 +131,8 @@ class Main:
         # init images and canvas for the gui
         self.drive_dropdown = None
         self.platform_dropdown = None
-        self.main_canvas = None
 
+        self.main_canvas = None
         self.__init_images_and_canvas__()
         self.__draw_background_on_canvas__()
         self.__draw_pkg_images_on_canvas__()
@@ -139,12 +140,33 @@ class Main:
         self.__init_buttons__()
 
         # init gamelist and filters
+        self.list_filter_drive = 'all'
+        self.list_filter_platform = 'ALL'
+
         self.game_list = Gamelist(self)
+        self.game_list.create_listbox(self, platform=self.list_filter_platform, drive=self.list_filter_drive)
         self.game_list_box = self.game_list.get_listbox()
 
-        self.create_dropdowns()
-        self.drive_dropdown = DriveDropdown(self.main_canvas, self.game_list_box).get_box()
-        self.platform_dropdown = PlatformDropdown(self.main_canvas, self.game_list_box).get_box()
+        # self.game_list_box.place(x=int(self.main_offset_x_pos * self.scaling),
+        #                       y=self.main_offset_y_pos + 220,
+        #                       width=270,
+        #                       height=300)
+
+        # self.create_dropdowns()
+        # self.bind_filter_dropdowns()
+        # self.drive_dropdown = DriveDropdown(self.main_canvas, self.game_list_box).get_box()
+        # self.platform_dropdown = PlatformDropdown(self.main_canvas, self.game_list_box).get_box()
+
+        self.bind_filter_dropdowns()
+
+
+    @property
+    def verbose(self):
+        return self._verbose
+
+    @verbose.setter
+    def verbose(self, value):
+        self._verbose = value
 
     def __init_images_and_canvas__(self):
         # ui images
@@ -192,7 +214,7 @@ class Main:
 
     def __init_entry_field__(self):
         self.usb_port_number = 0
-        self.drive_system_path_array = ['drive', 'system', 'path']
+        self.drive_system_path_array = ['drive_str', 'system', 'path']
 
         self.vcmd = self.main.register(self.dynamic_validate_title_id)
         self.vcmd2 = self.main.register(self.dynamic_validate_title_id)
@@ -229,7 +251,7 @@ class Main:
                                      'dev_usb000', 'dev_usb001', 'dev_usb002',
                                      'dev_usb003']
         self.selection_system_list = ['PSPISO', 'PSXISO', 'PS2ISO', 'PS3ISO']
-        self.drive_path = self.selection_drive_list[0]  # drive should be toggled by buttons
+        self.drive_path = self.selection_drive_list[0]  # drive_str should be toggled by buttons
 
         # Entry field placements
         entry_field_width = 200
@@ -359,15 +381,15 @@ class Main:
         self.fetch_button.place(x=int(self.main_offset_x_pos * self.scaling), y=int(y4))
         self.refresh_button.place(x=int(self.main_offset_x_pos * self.scaling + 60), y=int(y4))
 
-    def create_dropdowns(self):
+    def bind_filter_dropdowns(self):
         # ensure drive_dropdown into the listbox
         if self.drive_dropdown is None:
-            self.drive_dropdown = DriveDropdown(self.main_canvas, self.game_list_box).get_box()
+            self.drive_dropdown = DriveDropdown(self.main_canvas).get_dropdown()
         self.drive_dropdown.bind("<<ComboboxSelected>>", self.dropdown_filter_callback)
 
         # ensure platform_dropdown into the listbox
         if self.platform_dropdown is None:
-            self.platform_dropdown = PlatformDropdown(self.main_canvas, self.game_list_box).get_box()
+            self.platform_dropdown = PlatformDropdown(self.main_canvas).get_dropdown()
         self.platform_dropdown.bind("<<ComboboxSelected>>", self.dropdown_filter_callback)
 
     def dropdown_filter_callback(self, event):
@@ -378,13 +400,20 @@ class Main:
         elif dropdown_name == 'platform_dropdown':
             self.list_filter_platform = event.widget.get()
             self.platform_dropdown.set(self.list_filter_platform)
+
             # NTFS can only be used combined with HDD0
             if 'NTFS' == self.list_filter_platform:
                 self.list_filter_drive = 'HDD0'
                 self.drive_dropdown.set('HDD0')
 
-        self.create_dropdowns()
+        self.game_list = Gamelist(self)
+        self.game_list.create_listbox(self,
+                                      self.list_filter_platform,
+                                      self.list_filter_drive)
+
+        self.game_list_box = self.game_list.get_listbox()
         self.game_list_box.focus()
+
 
     def make_button_smallest(self, text, **args):
         font = None
@@ -584,7 +613,7 @@ class Main:
         icon0_changed = False
 
         # TODO image replace browser: missing the title text!
-        print('image to be changed: ' + str(img_to_be_changed))
+        print('image to be changed: ' + str(img_to_be_changed)) if self._verbose else None
         if img_to_be_changed not in {'', None}:
 
             # re-draw gui images
@@ -626,13 +655,13 @@ class Main:
                     pic1_changed = True
 
         else:
-            # extract the platform name by using the path
+            # extract the platform_str name by using the path
             platform = ''
             try:
                 if self.entry_field_platform == 'NTFS':
                     match = re.search('(?<=\[).*?(?=\])', str(self.entry_field_filename.get()))
                     if match is not None:
-                        donor_platform = list(filter(lambda x: match.group() in x[0],  GlobalVar.platform_paths))
+                        donor_platform = list(filter(lambda x: match.group() in x[0], GlobalVar.platform_paths))
                         if donor_platform:
                             platform = list(donor_platform)[0][1]
             except AttributeError:
@@ -753,7 +782,7 @@ class Main:
 
     def draw_text_on_image_w_font(self, image, text, text_x, text_y, text_size, text_color, font):
         if not os.path.isfile(font):
-            print('ERROR: font does not exist')
+            print('ERROR: font does not exist') if self._verbose else None
         font = ImageFont.truetype(font, text_size)
         draw = ImageDraw.Draw(image)
         return draw.text((text_x, text_y), text, fill=text_color, font=font)
@@ -803,20 +832,20 @@ class Main:
         self.__draw_background_on_canvas__()
 
     def on_drive_button(self, drive_choice):
-        print('DEBUG on_drive_button')
-        # Check if same drive already set
+        print('DEBUG on_drive_button') if self._verbose else None
+        # Check if same drive_str already set
         if drive_choice in self.entry_field_iso_path.get():
-            # print('DEBUG ' + '\'' + drive_choice + '\'' + ' already set')
+            # print('DEBUG ' + '\'' + drive_choice + '\'' + ' already set') if self._verbose else None
             # if dev_usb### already set -> iterate port (0-3)
             if 'dev_usb00' in drive_choice:
                 self.usb_port_number = self.usb_port_number + 1
 
                 if self.usb_port_number > 3:
                     self.usb_port_number = 0
-                # print('DEBUG usb_port_number: ' + str(self.usb_port_number))
+                # print('DEBUG usb_port_number: ' + str(self.usb_port_number)) if self._verbose else None
                 drive_choice = 'dev_usb00' + str(self.usb_port_number)
 
-        # print('DEBUG drive_choice: ' + drive_choice)
+        # print('DEBUG drive_choice: ' + drive_choice) if self._verbose else None
         self.drive_system_path_array[0] = drive_choice
 
         current_iso_path = '/' + '/'.join([self.drive_system_path_array[0],
@@ -827,11 +856,11 @@ class Main:
         self.update_iso_path_entry_field(current_iso_path)
 
     def on_system_button(self, drive_choice, system_choice):
-        # print('DEBUG on_system_button')
+        # print('DEBUG on_system_button') if self._verbose else None
         # if system_choice in self.entry_field_iso_path.get():
-        # print('DEBUG ' + '\'' + system_choice + '\'' + ' already set')
+        # print('DEBUG ' + '\'' + system_choice + '\'' + ' already set') if self._verbose else None
 
-        # print('DEBUG system_choice: ' + system_choice)
+        # print('DEBUG system_choice: ' + system_choice) if self._verbose else None
         self.drive_system_path_array[1] = system_choice
 
         current_iso_path = '/' + '/'.join([self.drive_system_path_array[0],
@@ -841,20 +870,24 @@ class Main:
 
         self.update_iso_path_entry_field(current_iso_path)
 
-        # Replace current drive
+        # Replace current drive_str
         if drive_choice not in current_iso_path:
-            print('DEBUG drive_choice not in current_iso_path')
-            print(
-                'DEBUG ' + '\'' + self.drive_system_path_array[0] + '\'' + ' changed -> ' + '\'' + drive_choice + '\'')
+            print('DEBUG drive_choice not in current_iso_path') if self._verbose else None
+
+            print('DEBUG ' + '\'' + self.drive_system_path_array[0] + '\'' +
+                  ' changed -> ' + '\'' + drive_choice + '\'') if self._verbose else None
+
             current_iso_path = current_iso_path.replace(self.drive_system_path_array[0], drive_choice)
             self.update_iso_path_entry_field(current_iso_path)
             self.drive_system_path_array[0] = drive_choice
 
         # Replace current system
         if system_choice not in current_iso_path:
-            print('DEBUG system_choice not in current_iso_path')
-            print(
-                'DEBUG ' + '\'' + self.drive_system_path_array[1] + '\'' + ' changed -> ' + '\'' + system_choice + '\'')
+            print('DEBUG system_choice not in current_iso_path') if self._verbose else None
+
+            print('DEBUG ' + '\'' + self.drive_system_path_array[1] + '\'' +
+                  ' changed -> ' + '\'' + system_choice + '\'') if self._verbose else None
+
             current_iso_path = current_iso_path.replace(self.drive_system_path_array[1], system_choice)
             self.update_iso_path_entry_field(current_iso_path)
             self.drive_system_path_array[1] = system_choice
@@ -866,7 +899,8 @@ class Main:
     # Dynamic update of the pkg path for showing fetched images
     def update_game_build_path(self):
         # ask gamelist to return selected path
-        selected_path = get_build_dir_path(self, str(self.entry_field_filename.get()), str(self.entry_field_title_id.get()))
+        selected_path = get_build_dir_path(self, str(self.entry_field_filename.get()),
+                                           str(self.entry_field_title_id.get()))
         if selected_path != '':
             AppPaths.game_work_dir = os.path.join(selected_path, 'work_dir')
             self.game_pkg_dir = os.path.join(AppPaths.game_work_dir, 'pkg')
@@ -897,11 +931,10 @@ class Main:
 
         if iso_path == '':
             # TODO: make sense if this part, needed?
-
+            print()
             # re-draw work_dir image on canvas
             # __init_images__(self)
             # self.draw_background_on_canvas()
-            print()
 
     def update_iso_path_entry_field(self, iso_path):
         self.entry_field_iso_path.config(state='normal')
@@ -915,10 +948,10 @@ class Main:
         # self, image, text, text_x, text_y, text_size, text_outline, text_color,
         self.draw_text_on_image_w_shadow(tmp_img, self.entry_field_title.get(), 760, 487, 32, 2, 'white', 'black')
         self.image_pic1_w_title = copy.copy(tmp_img)
-        tmp_img = tmp_img.resize((int(1280 * self.scaling), int(720 * self.scaling)), Image.Resampling.LANCZOS)
+        tmp_img = tmp_img.resize((int(1280 * self.scaling), int(720 * self.scaling)), Image.LANCZOS)
         self.photo_image_pic1_xmb = PhotoImage(tmp_img)
         self.button_pic1.config(image=self.photo_image_pic1_xmb)
-        self.__draw_pkg_images_on_canvas__()
+        # self.__draw_pkg_images_on_canvas__()
         # TODO: this might be more optimized somewhere else
         self.update_game_build_path()
 
@@ -926,7 +959,7 @@ class Main:
         image = askopenfile(mode='rb', title='Browse an image', filetypes=[('PNG image', '.PNG')])
         if image is not None:
             img_to_be_changed = None
-            print('DEBUG image content:' + image.name)
+            print('DEBUG image content:' + image.name) if self._verbose else None
 
             # Clear and replace image
             if 'icon0' in image.name.lower():
@@ -991,7 +1024,6 @@ class Main:
 
     # Dynamic validation of title id
     def dynamic_validate_title_id(self, P):
-        import re
         if len(P) > 0:
             P = P.upper()
             P = P.replace('-', '')
@@ -1012,7 +1044,7 @@ class Main:
 
         if len(title_id) != 9:
             self.title_id_error_msg = 'Title id must be 9 characters long.'
-            print(self.title_id_error_msg)
+            print(self.title_id_error_msg) if self._verbose else None
             self.entry_field_title_id.focus_set()
             self.entry_field_title_id.selection_range(0, END)
             return False
@@ -1024,7 +1056,7 @@ class Main:
             return True
         else:
             self.title_error_msg = 'Title cannot be empty.'
-            print(self.title_error_msg)
+            print(self.title_error_msg) if self._verbose else None
             self.entry_field_title.focus_set()
             self.entry_field_title.icursor(0)
             return False
@@ -1033,7 +1065,7 @@ class Main:
     def validate_filename_on_save(self):
         filename = self.entry_field_filename.get()
         tmp_name = filename
-        # platform type GAMES has no file extension
+        # platform_str type GAMES has no file extension
         if self.entry_field_platform.get() == 'GAMES' and len(tmp_name) > 0:
             main_window.focus()
             return True
@@ -1045,14 +1077,14 @@ class Main:
         if len(tmp_name) < 1:
             filename_error_msg = 'DEBUG The file must have a name and any of the following extensions' + str(
                 GlobalVar.file_extensions)
-            print(filename_error_msg)
+            print(filename_error_msg) if self._verbose else None
             self.entry_field_filename.focus_set()
             self.entry_field_filename.icursor(0)
             return False
 
         elif str(tmp_name).endswith(GlobalVar.file_extensions):
             filename_error_msg = 'DEBUG The image file must have a name'
-            print(filename_error_msg)
+            print(filename_error_msg) if self._verbose else None
             self.entry_field_filename.focus_set()
             self.entry_field_filename.icursor(0)
             return False
@@ -1060,27 +1092,27 @@ class Main:
         else:
             filename_error_msg = 'DEBUG Filename \'' + filename + '\'' + ' must end on ' + str(
                 GlobalVar.file_extensions)
-            print(filename_error_msg)
+            print(filename_error_msg) if self._verbose else None
             self.entry_field_filename.focus_set()
             self.entry_field_filename.icursor(0)
             return False
 
     def validate_fields(self):
         # if AppPaths.game_work_dir != '':
-        #     print('DEBUG: work_dir: OK')
+        #     print('DEBUG: work_dir: OK') if self._verbose else None
         # else:
         #     return False
 
         if self.validate_title_id_on_save():
-            print('DEBUG: Title_id: OK')
+            print('DEBUG: Title_id: OK') if self._verbose else None
         else:
             return False
         if self.validate_title_on_save():
-            print('DEBUG: Title: OK')
+            print('DEBUG: Title: OK') if self._verbose else None
         else:
             return False
         if self.validate_filename_on_save():
-            print('DEBUG: Title_id: OK')
+            print('DEBUG: Title_id: OK') if self._verbose else None
         else:
             return False
 
@@ -1091,10 +1123,11 @@ class Main:
             if not os.path.exists(AppPaths.game_work_dir):
                 if AppPaths.game_work_dir == '':
                     # we need to build the path first
-                    selected_path = self.game_list.get_selected_build_dir_path(str(self.entry_field_filename.get()), str(self.entry_field_title_id.get()))
+                    selected_path = self.game_list.get_selected_build_dir_path(str(self.entry_field_filename.get()),
+                                                                               str(self.entry_field_title_id.get()))
                     AppPaths.game_work_dir = os.path.join(selected_path, 'work_dir')
                     self.game_pkg_dir = os.path.join(AppPaths.game_work_dir, 'pkg')
-                print('Trying to create: ' + str(os.path.join(AppPaths.game_work_dir, 'pkg')))
+                print('Trying to create: ' + str(os.path.join(AppPaths.game_work_dir, 'pkg'))) if self._verbose else None
                 os.makedirs(os.path.join(AppPaths.game_work_dir, 'pkg'))
 
             # make sure we have the mandatory ICON0 in the build_dir
@@ -1104,7 +1137,7 @@ class Main:
                 if self.entry_field_platform == 'NTFS':
                     match = re.search('(?<=\[).*?(?=\])', str(self.entry_field_filename.get()))
                     if match != None:
-                        donor_platform = list(filter(lambda x: match.group() in x[0],  GlobalVar.platform_paths))
+                        donor_platform = list(filter(lambda x: match.group() in x[0], GlobalVar.platform_paths))
                         if donor_platform:
                             platform = list(donor_platform)[0][1]
 
@@ -1139,14 +1172,14 @@ class Main:
             test_path1 = '/'.join(json_game_list[platform_key][0]['path'].split('/')[:-1])
             json_game_list[platform_key] = [x for x in json_game_list[platform_key] if
                                             '/'.join(x['path'].split('/')[:-1]) != path]
-            print("test_path1: " + test_path1)
+            print("test_path1: " + test_path1) if self._verbose else None
         else:
             path = self.entry_field_iso_path.get()
             test_path2 = json_game_list[platform_key][0]['path'] + json_game_list[platform_key][0]['filename']
-            print("test_path2: " + test_path2)
+            print("test_path2: " + test_path2) if self._verbose else None
             for test in json_game_list[platform_key]:
                 if 'kingdom' in test['filename'].lower():
-                    print(str(test['path'] + test['filename']))
+                    print(str(test['path'] + test['filename'])) if self._verbose else None
 
             json_game_list[platform_key] = [x for x in json_game_list[platform_key] if
                                             str(x['path'] + x['filename']) != path]
@@ -1166,7 +1199,9 @@ class Main:
                 shutil.rmtree(os.path.join(current_work_dir, ''))
 
         # dup check title against list and update the title
-        title = GameListData().duplicate_title_checker(self.entry_field_title.get())
+        title = GameListData().duplicate_title_fixer(self.entry_field_title.get(),
+                                                     self.entry_field_iso_path.get(),
+                                                     self.entry_field_filename.get())
         self.entry_field_title.delete(0, END)
         self.entry_field_title.insert(0, title)
 
@@ -1204,17 +1239,17 @@ class Main:
             if os.path.isfile(os.path.join(self.game_pkg_dir, 'ICON0.PNG')):
                 shutil.copyfile(os.path.join(self.game_pkg_dir, 'ICON0.PNG'), os.path.join(self.pkg_dir, 'ICON0.PNG'))
             else:
-                # extract the platform name by using the path
+                # extract the platform_str name by using the path
                 platform = ''
                 if self.entry_field_platform == 'NTFS':
                     match = re.search('(?<=\[).*?(?=\])', str(self.entry_field_filename.get()))
                     if match != None:
-                        # donor platform could be PS3 for game_name.NTFS[PS3]
-                        donor_platform = list(filter(lambda x: match.group() in x[0],  GlobalVar.platform_paths))
+                        # donor platform_str could be PS3 for game_name.NTFS[PS3]
+                        donor_platform = list(filter(lambda x: match.group() in x[0], GlobalVar.platform_paths))
                         if donor_platform:
                             platform = list(donor_platform)[0][1]
 
-                # platform is used to determine which ICON0 should be used
+                # platform_str is used to determine which ICON0 should be used
                 default_img_path = os.path.join(AppPaths.resources, 'images', 'pkg', 'default')
                 if not os.path.isfile(os.path.join(default_img_path, platform, 'ICON0.PNG')):
                     platform = ''
@@ -1262,11 +1297,11 @@ class Main:
 
                     # open builds folder in windows explorer
                     if 'win' in sys.platform:
-                        # print('DEBUG opening folder: ' + os.path.join(AppPaths.game_work_dir, '..'))
+                        # print('DEBUG opening folder: ' + os.path.join(AppPaths.game_work_dir, '..')) if self._verbose else None
                         try:
                             os.startfile(os.path.join(AppPaths.game_work_dir, '../'))
                         except:
-                            print('ERROR: Could open the pkg build dir from Windows explorer')
+                            print('ERROR: Could open the pkg build dir from Windows explorer') if self._verbose else None
 
             else:
                 messagebox.showerror("Build status: fail", "Build failed!\nSee error log.")
@@ -1276,11 +1311,11 @@ class Main:
         if self.entry_field_ftp_ip.get() != '':
             self.save_ftp_fields_on_fetch()
             ftp_game_list = FtpGameList(self.drive_dropdown.get(), self.platform_dropdown.get())
-            ftp_game_list.execute()
+            ftp_game_list.execute(self.drive_dropdown.get(), self.platform_dropdown.get())
 
             self.on_game_list_refresh()
         else:
-            print('DEBUG cannot connect with empty ip.')
+            print('DEBUG cannot connect with empty ip.') if self._verbose else None
 
     def save_ftp_fields_on_fetch(self):
         # open make changes to existing settings file
@@ -1338,16 +1373,16 @@ class Main:
 
     def on_game_list_refresh(self):
         if not self.platform_dropdown:
-            self.list_filter_drive = 'ALL'
+            self.list_filter_drive = 'all'
             self.list_filter_platform = 'ALL'
         else:
             self.list_filter_drive = self.drive_dropdown.get()
             self.list_filter_platform = self.platform_dropdown.get()
-
-        self.game_list = Gamelist(self)
-        self.game_list_box = self.game_list.get_listbox()
-        self.create_dropdowns()
-
+        #
+        # self.game_list = Gamelist(self)
+        # self.game_list_box = self.game_list.get_listbox()
+        self.bind_filter_dropdowns()
+        # self.game_list.create_listbox(self)
 
     def entry_fields_to_json(self, json_data_path):
         json_data = None
@@ -1357,8 +1392,8 @@ class Main:
                     json_data = json.load(f)
                     f.close()
             except ValueError as e:
-                print("ERROR: File write error.")
-                print(getattr(e, 'message', repr(e)))
+                print("ERROR: File write error.") if self._verbose else None
+                print(getattr(e, 'message', repr(e))) if self._verbose else None
 
         json_data['title'] = str(self.entry_field_title.get())
 
@@ -1369,7 +1404,7 @@ class Main:
 
         json_data['content_id'] = 'UP0001-' + str(json_data['title_id']) + '_00-0000000000000000'
         json_data['filename'] = str(self.entry_field_filename.get())
-        json_data['platform'] = str(self.entry_field_platform.get())
+        json_data['platform_str'] = str(self.entry_field_platform.get())
         if str(self.entry_field_platform.get()) in {'GAMES', 'GAMEZ'}:
             json_data['path'] = str(self.entry_field_iso_path.get()).replace(str(self.entry_field_filename.get()),
                                                                              '').replace('//', '/')
@@ -1394,11 +1429,11 @@ class Main:
             ftp.storbinary('STOR ' + pkg_name, pkg_local_file)
             ftp.quit()
 
-            print("DEBUG: Transfer succeeded")
+            print("DEBUG: Transfer succeeded") if self._verbose else None
             # messagebox.showinfo('Status: transfer complete', 'transfer of ' + pkg_name + ' to ' + remote_path + ' complete')
         except Exception as e:
-            print('ERROR: Transfer failed')
-            print(getattr(e, 'message', repr(e)))
+            print('ERROR: Transfer failed') if self._verbose else None
+            print(getattr(e, 'message', repr(e))) if self._verbose else None
 
     def remote_install_pkg(self, pkg_remote_path, pkg_name):
         try:
@@ -1407,20 +1442,19 @@ class Main:
             # webcommand = '/install_ps3' + urllib.parse.quote(pkg_ps3_path) # + '?restart.ps3'
             webcommand = '/install.ps3' + urllib.parse.quote(pkg_ps3_path)  # + ';/refresh.ps3?xmb'
             webcommand_url = 'http://' + str(ps3_lan_ip) + webcommand
-            print('DEBUG webcommand_url: ' + webcommand_url)
+            print('DEBUG webcommand_url: ' + webcommand_url) if self._verbose else None
             response = urlopen(webcommand_url)
             status_code = response.getcode()
-            print('DEBUG status_code: ' + str(status_code))
+            print('DEBUG status_code: ' + str(status_code)) if self._verbose else None
             if status_code == 200:
                 messagebox.showinfo('Status: pkg installed', 'Install completed!')
-            # 400 webman => faulty path => Error
-            # 404 webman => faulty command => Not found
-            # 200 OK
-            print()
+            # status 400: webman => faulty path => Error
+            # status 404: webman => faulty command => Not found
+            # status 200: OK
         except Exception as ez:
-            print('ERROR: could not install pkg')
-            print('DEBUG ERROR traceback: ' + str(traceback.print_exc()))
-            print(getattr(ez, 'message', repr(ez)))
+            print('ERROR: could not install pkg') if self._verbose else None
+            print('DEBUG ERROR traceback: ' + str(traceback.print_exc())) if self._verbose else None
+            print(getattr(ez, 'message', repr(ez))) if self._verbose else None
 
 
 class CreateToolTip(object):
@@ -1485,20 +1519,9 @@ main_window.title('Webman Classics Maker')
 
 # icon upper left corner
 if "linux" in sys.platform:
-    print('DEBUG Running Linux')
     main_window.iconbitmap('@' + os.path.join(ImagePaths.misc, 'webman_icon.xbm'))
 elif 'win' in sys.platform:
-    print('DEBUG Running Windows')
     main_window.iconbitmap(os.path.join(ImagePaths.misc, 'webman.ico'))
-
-else:
-    print('DEBUG Running ' + str(sys.platform))
-
-# scaling = 720.0 / 1080.0
-# canvas_width = int(1920 * scaling)
-# canvas_height = int(1080 * scaling)
-# main_window_width = int(1920 * scaling)
-# main_window_height = int(1080 * scaling)
 
 Main()
 main_window.mainloop()
