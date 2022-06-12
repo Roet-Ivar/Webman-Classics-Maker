@@ -21,45 +21,53 @@ from resources.tools.util_scripts.global_paths import FtpSettings
 sys.path.append(AppPaths.settings)
 
 
-class FtpGameList():
+def __drive_selection_request__(selected_drive, selected_platform):
+    # drive_str and platforms to fetch
+    global_drive_paths = GlobalVar.drive_paths
+    global_platform_paths = GlobalVar.platform_paths
+
+    selected_drives = []
+    platform_filter = []
+
+    # add all drive_str paths based on choice from drive_str filter
+    if any(x in selected_drive for x in ['ALL']):
+        selected_drives.extend(GlobalVar.drive_paths)
+        if selected_drives.count(('/dev_usb(*)/', 'USB(*)')) > 0:
+            selected_drives.remove(('/dev_usb(*)/', 'USB(*)'))
+
+    elif any(x in selected_drive for x in ['USB(*)']):
+        selected_drives.extend(GlobalVar.drive_paths)
+        if selected_drives.count(('/dev_usb(*)/', 'USB(*)')) > 0:
+            selected_drives.remove(('/dev_usb(*)/', 'USB(*)'))
+        if selected_drives.count(('/dev_hdd0/', 'HDD0')) > 0:
+            selected_drives.remove(('/dev_hdd0/', 'HDD0'))
+    # single drive_str choice
+    else:
+        selected_drives.extend(list(filter(lambda x: str(selected_drive) == x[1], global_drive_paths)))
+
+    # add all drive_str paths based on choice from platform filter
+    if 'ALL' in selected_platform:
+        platform_filter.extend(global_platform_paths)
+    # single platform choice
+    else:
+        platform_filter.extend(
+            list(filter(lambda x: str(selected_platform) == x[1], global_platform_paths)))
+
+    return platform_filter
+
+
+class FtpGameList:
+
     def __init__(self, selected_drive, selected_platform):
+        self.selected_drive = selected_drive
+        self.selected_platform = selected_platform
+
         # open a copy of the current gamelist from disk
         self.json_game_list_data = GameListData().get_game_list_data_json()
         # open a copy of an empty backup  from disk
         self.new_json_game_list_data = GameListData().get_game_list_data_json_bak()
 
-        # drive and platforms to fetch
-        self.global_drive_paths = GlobalVar.drive_paths
-        self.global_platform_paths = GlobalVar.platform_paths
-
-        self.selected_drives = []
-        self.platform_filter = []
-        
         self.coding = GlobalVar.coding
-
-        # add all drive paths based on choice from drive filter
-        if any(x in selected_drive for x in ['ALL']):
-            self.selected_drives.extend(GlobalVar.drive_paths)
-            if self.selected_drives.count(('/dev_usb(*)/', 'USB(*)')) > 0:
-                self.selected_drives.remove(('/dev_usb(*)/', 'USB(*)'))
-
-        elif any(x in selected_drive for x in ['USB(*)']):
-            self.selected_drives.extend(GlobalVar.drive_paths)
-            if self.selected_drives.count(('/dev_usb(*)/', 'USB(*)')) > 0:
-                self.selected_drives.remove(('/dev_usb(*)/', 'USB(*)'))
-            if self.selected_drives.count(('/dev_hdd0/', 'HDD0')) > 0:
-                self.selected_drives.remove(('/dev_hdd0/', 'HDD0'))
-        # single drive choice
-        else:
-            self.selected_drives.extend(list(filter(lambda x: str(selected_drive) == x[1], self.global_drive_paths)))
-
-        # add all drive paths based on choice from platform filter
-        if 'ALL' in selected_platform:
-            self.platform_filter.extend(self.global_platform_paths)
-        # single platform choice
-        else:
-            self.platform_filter.extend(
-                list(filter(lambda x: str(selected_platform) == x[1], self.global_platform_paths)))
 
         # messages
         self.PAUSE_MESSAGE = 'Press ENTER to continue...'
@@ -82,26 +90,27 @@ class FtpGameList():
         self.ftp = None
         self.data_chunk = None
 
-    def execute(self):
+    def execute(self, selected_drives, selected_platforms):
         try:
             self.ftp = FtpSettings().get_ftp()
-            # get a listing of active drives
+            # get a listing of active drives from the machine
             active_drives_list = []
             self.ftp.retrlines('MLSD /', active_drives_list.append)
 
             # filter out all active drives that are also selected
-            filtered_drives = []
-            for sd in self.selected_drives:
+            drives_response = []
+            for sd in selected_drives:
                 for a in active_drives_list:
                     ad = '/' + str(a).split(';')[6].strip() + '/'
                     if sd[0] == ad:
-                        print('DEBUG adding drive: ' + ad + ' for scanning')
-                        filtered_drives.append(sd)
-            if len(filtered_drives) < 1:
+                        print('DEBUG adding drive_str: ' + ad + ' for scanning')
+                        drives_response.append(sd)
+            if len(drives_response) < 1:
                 print('''DEBUG: The USB port you're trying to scan is not active''')
 
-            for drive in filtered_drives:
-                for platform in self.platform_filter:
+            platforms_request = __drive_selection_request__(selected_drives, selected_platforms)
+            for drive in drives_response:
+                for platform in platforms_request:
                     if 'PSPISO' == platform[1]:
                         self.ftp_walk(self.ftp, drive[0] + platform[0], self.PSPISO_lines)
                     elif 'PSXISO' == platform[1]:
@@ -172,29 +181,14 @@ class FtpGameList():
         pic2 = None
         at3 = None
         pam = None
+        skip_already_fetched = False # should be an option
 
         for new_game_path in tqdm(filtered_platform, desc='Fetching ' + original_platform,
                                   bar_format="{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt} [{elapsed}]\n"):
-            game_exist = False
             new_game_dir_path = str(os.path.dirname(new_game_path).__add__('/'))
             new_game_filename = str(os.path.basename(new_game_path))
             new_game_platform_path = str(new_game_dir_path)
             new_game_platform = str(original_platform)
-
-            # pre-check if game already exist
-            for game_json in self.json_game_list_data[platform_list]:
-                existing_game_path = str(os.path.join(game_json['path'], game_json['filename']))
-
-                if new_game_platform in {'GAMES', 'GAMEZ'}:
-                    # Since GAMES-folders get variations of the titles we will compare their base paths
-                    new_game_path = '/'.join(new_game_path.split('/')[:-2]) + '/'
-                    existing_game_path = '/'.join(existing_game_path.split('/')[:-1]) + '/'
-
-                if new_game_path == existing_game_path:
-                    self.game_count += 1
-                    print('\nDEBUG skipping ' + new_game_filename + ', already fetched\n')
-                    game_exist = True
-                    pass
 
             # .NTFS[xxx] gets a donor platform for metadata scraping
             if new_game_platform == 'NTFS':
@@ -210,7 +204,7 @@ class FtpGameList():
                 new_game_platform = donor_platform
 
             # if not, add it
-            if not game_exist:
+            if not skip_already_fetched:
                 # parsing PARAM.SFO should provide correct title_id and title for the GUI
                 if original_platform in {'GAMES', 'GAMEZ'}:
                     data = []
@@ -218,12 +212,12 @@ class FtpGameList():
                     self.ftp.retrbinary("RETR " + PARAM_SFO_PATH, callback=data.append)
                     title_id, title = param_sfo_parser(b''.join(data))
 
-                    # if title_id still None, get it from the folder name
+                    # if title_id still None, try get it from the folder name
                     if title_id is None:
-                        id_match = re.search('(\w{4}\d{5})', new_game_dir_path)
+                        title_id_match = re.search('(\w{4}\d{5})', new_game_dir_path)
                         # find title_id in folder name
-                        if id_match:
-                            title_id = id_match.group(0)
+                        if title_id_match:
+                            title_id = title_id_match.group(0)
                         else:
                             print('DEBUG: Folder-game in: ' + new_game_dir_path
                                   + ' does not contain mandatory \'title_id\' in its folder name\n skipping metadata')
@@ -275,8 +269,6 @@ class FtpGameList():
                                 # use the first element for English
                                 title = str(game_json['locale'][0]['title']).strip()
                             break
-
-                title = GameListData().duplicate_title_checker(title)
 
                 # add game to list of new games
                 self.game_count += 1
@@ -340,8 +332,8 @@ class FtpGameList():
 
         try:
             split_folder_path = game_filepath.split('/')
-            platform_str = split_folder_path[2] + '/'
-            platform_match = list(filter(lambda x: platform_str in x[0], self.global_platform_paths))
+            platform = split_folder_path[2] + '/'
+            platform_match = list(filter(lambda x: platform in x[0], self.global_platform_paths))
             platform = platform_match[0][1]
 
             original_platform = platform
@@ -479,7 +471,7 @@ class FTPDataHandler:
         self.ftp_instance = ftp
         self.ftp_instance.voidcmd('TYPE I')
         self.null = None
-        self.total_lines = total_lines
+        self.lines_count = total_lines
 
         self.data = None
         self.platform = None

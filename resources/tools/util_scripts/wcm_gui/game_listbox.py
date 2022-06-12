@@ -24,7 +24,9 @@ class Gamelist:
         self.selected_title = None
         self.selected_path = None
         self.selected_filename = None
+        self.selected_platform = None
         self.drive_system_path_array = None
+        self.new_selection = None
 
         self.is_cleared = False
 
@@ -66,13 +68,13 @@ class Gamelist:
                 for list_game in self.json_game_list_data[platform_str]:
                     # titles names in the list has been designed to be unique
                     if '/dev_all/' == drive_str or drive_str in list_game['path']:
-                        self.add_item(list_game['title'])
+                        self.add_item(list_game)
                         print('added: {}'.format(list_game['title']))
 
         else:
             for list_game in self.json_game_list_data[platform_str]:
                 if '/dev_all/' == drive_str or drive_str in list_game['path']:
-                    self.add_item(list_game['title'])
+                    self.add_item(list_game)
                     print('added: {}'.format(list_game['title']))
 
 
@@ -182,13 +184,24 @@ class Gamelist:
 
     def add_item(self, item):
         if item != '':
-            self.list_of_items = self._listbox.get(0, END)
-            # getting ascending index in order to sort alphabetically
-            index = self.get_ascending_index(self.list_of_items, item)
+            title = self.title_checker(item['title'])
+            if title != item['title']:
+                item['title'] = title
+                path = item['path'].split('/')[2] + '_games'
 
-            self._listbox.insert(index, item)
+                # update duplicate title so the list can yield json data
+                for i in range(len(self.json_game_list_data[path])):
+                    if self.json_game_list_data[path][i]['title'] == item['title']:
+                        self.json_game_list_data[path][i]['title'] = item['title']
+
+            self.list_of_items = self._listbox.get(0, END)
+
+            # getting ascending index in order to sort alphabetically
+            index = self.get_ascending_index(self.list_of_items, title)
+
+            self._listbox.insert(index, title)
         else:
-            self._listbox.insert(END, item)
+            self._listbox.insert(END, '')
 
     def get_items(self):
         return self.list_of_items
@@ -214,12 +227,7 @@ class Gamelist:
                 self.context_menu.focus_set()
 
     def delete_selected(self):
-        try:
-            # Python2
-            import tkMessageBox
-        except ImportError as e:
-            # Python3
-            import tkinter.messagebox as tkMessageBox
+        import tkinter.messagebox as tkMessageBox
 
         game_folder_path = os.path.join(AppPaths.game_work_dir, '..')
         response = tkMessageBox.askyesno('Delete game',
@@ -283,3 +291,25 @@ class Gamelist:
 
             self.build_dir_path = os.path.join(build_base_path, game_folder_name)
         return self.build_dir_path
+
+    def title_checker(self, game_title):
+        import re
+        current_gamelist = self._listbox.get(0, END);
+
+        def fix_title(in_title):
+            if in_title not in current_gamelist:
+                return in_title
+            else:
+                dup_match = re.search('(?<=\()\d{1,3}?(?=\))', in_title)
+                if dup_match:
+                    dup_num = int(dup_match.group())
+                    in_title = str(in_title).replace('(' + str(dup_num) + ')', '(' + str(dup_num+1) + ')')
+                else:
+                    in_title = in_title + ' (1)'
+            return fix_title(in_title)
+
+        # check if duplicates already made (#)
+        if game_title in current_gamelist:
+            game_title = fix_title(game_title)
+        return game_title
+
