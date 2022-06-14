@@ -43,6 +43,7 @@ def __init_pkg_build_dir__():
             shutil.rmtree(AppPaths.pkg)
     if not os.path.isdir(AppPaths.pkg):
         os.makedirs(AppPaths.pkg)
+
     GlobalDef().copytree(os.path.join(AppPaths.util_resources, 'pkg_dir_bak'),
                          os.path.join(AppPaths.resources, 'pkg'))
 
@@ -628,7 +629,7 @@ class Main:
 
         # init pkg images
         else:
-            # extract the platform_str name by using the path
+            # extract the platform name by using the path
             platform = ''
             try:
                 if self.entry_field_platform == 'NTFS':
@@ -1036,7 +1037,7 @@ class Main:
     def validate_filename_on_save(self):
         filename = self.entry_field_filename.get()
         tmp_name = filename
-        # platform_str type GAMES has no file extension
+        # platform 'GAMES' has no file extension
         if self.entry_field_platform.get() == 'GAMES' and len(tmp_name) > 0:
             main_window.focus()
             return True
@@ -1207,17 +1208,17 @@ class Main:
             if os.path.isfile(os.path.join(self.game_pkg_dir, 'ICON0.PNG')):
                 shutil.copyfile(os.path.join(self.game_pkg_dir, 'ICON0.PNG'), os.path.join(self.pkg_dir, 'ICON0.PNG'))
             else:
-                # extract the platform_str name by using the path
+                # extract the platform name by using the path
                 platform = ''
                 if self.entry_field_platform == 'NTFS':
                     match = re.search('(?<=\[).*?(?=\])', str(self.entry_field_filename.get()))
                     if match != None:
-                        # donor platform_str could be PS3 for game_name.NTFS[PS3]
+                        # donor platform could be PS3 for game_name.NTFS[PS3]
                         donor_platform = list(filter(lambda x: match.group() in x[0], GlobalVar.platform_paths))
                         if donor_platform:
                             platform = list(donor_platform)[0][1]
 
-                # platform_str is used to determine which ICON0 should be used
+                # platform is used to determine which ICON0 should be used
                 default_img_path = os.path.join(AppPaths.resources, 'images', 'pkg', 'default')
                 if not os.path.isfile(os.path.join(default_img_path, platform, 'ICON0.PNG')):
                     platform = ''
@@ -1368,7 +1369,7 @@ class Main:
 
         json_data['content_id'] = 'UP0001-' + str(json_data['title_id']) + '_00-0000000000000000'
         json_data['filename'] = str(self.entry_field_filename.get())
-        json_data['platform_str'] = str(self.entry_field_platform.get())
+        json_data['platform'] = str(self.entry_field_platform.get())
         if str(self.entry_field_platform.get()) in {'GAMES', 'GAMEZ'}:
             json_data['path'] = str(self.entry_field_iso_path.get()).replace(str(self.entry_field_filename.get()),
                                                                              '').replace('//', '/')

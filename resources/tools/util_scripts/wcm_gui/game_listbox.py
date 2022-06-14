@@ -1,10 +1,9 @@
 import json
 import os
 import shutil
+import sys
 from tkinter import Frame, Scrollbar, Listbox, LEFT, RIGHT, Y, END, Label, Menu, Entry
-from resources.tools.util_scripts.global_paths import AppPaths
-from resources.tools.util_scripts.global_paths import GlobalVar
-from resources.tools.util_scripts.global_paths import GameListData
+from resources.tools.util_scripts.global_paths import AppPaths, GlobalVar, GameListData
 
 
 class Gamelist:
@@ -44,6 +43,10 @@ class Gamelist:
     def create_listbox(self, wcm, platform, drive):
         platform_str = '{}_games'.format(str(platform).upper())
         drive_str = '/dev_{}/'.format(str(drive).lower())
+
+        if 'win' in sys.platform:
+            self.context_menu.add_command(label="Open",
+                                          command=self.open_selected)
 
         self.context_menu.add_command(label="Delete",
                                       command=self.delete_selected)
@@ -225,6 +228,14 @@ class Gamelist:
                 self.context_menu.tk_popup(event.x_root + 43, event.y_root + 12, 0)
                 self.context_menu.grab_release()
                 self.context_menu.focus_set()
+
+    def open_selected(self):
+        # open builds folder in windows explorer
+        if 'win' in sys.platform:
+            try:
+                os.startfile(os.path.join(AppPaths.game_work_dir, '../'))
+            except:
+                print('ERROR: Could open the pkg build dir from Windows explorer') if self._verbose else None
 
     def delete_selected(self):
         import tkinter.messagebox as tkMessageBox
