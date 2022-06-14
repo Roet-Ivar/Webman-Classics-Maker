@@ -9,6 +9,7 @@ import os
 import getopt
 import io
 import glob
+import re
 
 TYPE_NPDRMSELF = 0x1
 TYPE_RAW = 0x3
@@ -321,6 +322,9 @@ def unpack(filename):
 					print(fileD)
 				fileD.dump(directory, decData, header)
 def getFiles(files, folder, original):
+	# in case pkg_dir_path contains [] we glob won't like it'
+	folder = re.sub('([\[\]])','[\\1]',folder)
+
 	oldfolder = folder
 	foundFiles = glob.glob( os.path.join(folder, '*') )
 	sortedList = []
