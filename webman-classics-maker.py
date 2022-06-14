@@ -15,13 +15,9 @@ from tkinter import *
 from tkinter import messagebox
 from tkinter.filedialog import askopenfile
 
-from resources.tools.util_scripts.global_paths import AppPaths
-from resources.tools.util_scripts.global_paths import ImagePaths
-from resources.tools.util_scripts.global_paths import GlobalVar
-from resources.tools.util_scripts.global_paths import FtpSettings
-from resources.tools.util_scripts.global_paths import GameListData
-from resources.tools.util_scripts.global_paths import GlobalDef
+from resources.tools.util_scripts.global_paths import AppPaths, ImagePaths, GlobalVar, GlobalDef, FtpSettings, GameListData
 from resources.tools.util_scripts.build_all_scripts import Webman_PKG
+
 from resources.tools.util_scripts.wcm_gui.drop_down import DriveDropdown, PlatformDropdown
 from resources.tools.util_scripts.wcm_gui.ftp_game_data_fetcher import FtpGameList
 from resources.tools.util_scripts.wcm_gui.game_listbox import Gamelist
@@ -171,12 +167,12 @@ class Main:
         self.image_icon0 = get_default_image('ICON0.PNG')
         self.image_icon0_ref = copy.copy(self.image_icon0)
 
-        self.image_pic0 = get_default_image('PIC0.PNG')
-        self.image_pic0_ref = copy.copy(self.image_pic0)
+        self.gui_pic0 = get_default_image('PIC0.PNG')
+        self.gui_pic0_ref = copy.copy(self.gui_pic0)
 
-        self.image_pic1 = get_default_image('PIC1.PNG')
-        self.image_pic1_ref = copy.copy(self.image_pic1)
-        self.image_pic1_w_title = copy.copy(self.image_pic1)
+        self.gui_pic1 = get_default_image('PIC1.PNG')
+        self.gui_pic1_ref = copy.copy(self.gui_pic1)
+        self.image_pic1_w_title = copy.copy(self.gui_pic1)
 
         # ui background image
         self.background_images = []
@@ -228,11 +224,9 @@ class Main:
         self.entry_field_ftp_pass.insert(0, get_ftp_pass_from_config())
 
         # system choice buttons
-        self.selection_drive_list = ['dev_hdd0',
-                                     'dev_usb000', 'dev_usb001', 'dev_usb002',
-                                     'dev_usb003']
-        self.selection_system_list = ['PSPISO', 'PSXISO', 'PS2ISO', 'PS3ISO']
-        self.drive_path = self.selection_drive_list[0]  # drive_str should be toggled by buttons
+        self.selection_drive_list = GlobalVar.drive_paths[1]
+        self.selection_system_list = GlobalVar.drive_paths[0]
+        self.drive_path = self.selection_drive_list[0]  # drive should be toggled by buttons
 
         # Entry field placements
         entry_field_width = 200
@@ -388,7 +382,6 @@ class Main:
                 self.drive_dropdown.set('HDD0')
 
         self.gamelist = Gamelist(self, self.list_filter_platform, self.list_filter_drive)
-
 
     def make_button_smallest(self, text, **args):
         font = None
@@ -578,10 +571,9 @@ class Main:
         self.pic0_x_pos = 750
         self.pic0_y_pos = 412
 
-        # self.draw_background_on_canvas()
         tmp_image_icon0 = None
         img_to_be_changed = kwargs.get('img_to_be_changed', None)
-        pkg_build_path = kwargs.get('pkg_build_path', None)
+        game_pkg_dir = kwargs.get('game_pkg_dir', '')
         default_img_path = os.path.join(AppPaths.resources, 'images', 'pkg', 'default')
 
         pic1_changed = False
@@ -595,41 +587,46 @@ class Main:
             # re-draw gui images
             if img_to_be_changed.lower() == 'pic1':
                 pic1_changed = True
-                self.draw_text_on_image_w_shadow(self.image_pic1, self.entry_field_title.get(), 745, 457, 32, 2,
+                self.draw_text_on_image_w_shadow(self.gui_pic1, self.entry_field_title.get(), 745, 457, 32, 2,
                                                  'white', 'black')
 
                 self.photo_image_pic1_xmb = PhotoImage(
-                    self.image_pic1.resize((int(1280 * self.scaling), int(720 * self.scaling)),
-                                           Image.Resampling.LANCZOS))
+                    self.gui_pic1.resize((int(1280 * self.scaling), int(720 * self.scaling)),
+                                         Image.Resampling.LANCZOS))
 
-                # self.button_pic1.config(image=self.photo_image_pic1_xmb)
-                self.image_pic0 = self.image_pic0_ref
+                self.gui_pic0 = self.gui_pic0_ref
                 self.image_icon0 = self.image_icon0_ref
 
-
-
             elif img_to_be_changed.lower() == 'pic0':
-                self.image_pic0 = self.image_pic0_ref
+                self.gui_pic0 = self.gui_pic0_ref
                 pic0_changed = True
 
+        if os.path.exists(game_pkg_dir) and img_to_be_changed is None:
 
-        # check if xmb_icons needs to be re-drawn
-        elif pkg_build_path not in {'', None}:
-            if os.path.exists(pkg_build_path):
-                # draw PIC1 from pkg_dir and then xmb icons and system logo onto the pkg  background
-                if os.path.isfile(os.path.join(pkg_build_path, 'ICON0.PNG')):
-                    icon0_changed = True
-                    self.image_icon0 = Image.open(os.path.join(pkg_build_path, 'ICON0.PNG')).convert("RGBA")
+            # draw PIC1 from pkg_dir and then xmb icons and system logo onto the pkg  background
+            if os.path.isfile(os.path.join(game_pkg_dir, 'ICON0.PNG')):
+                icon0_changed = True
+                self.image_icon0 = Image.open(os.path.join(game_pkg_dir, 'ICON0.PNG')).convert("RGBA")
 
-                if os.path.isfile(os.path.join(pkg_build_path, 'PIC0.PNG')):
-                    pic0_changed = True
-                    self.image_pic0 = Image.open(os.path.join(pkg_build_path, 'PIC0.PNG')).convert("RGBA")
+            if os.path.isfile(os.path.join(game_pkg_dir, 'PIC0.PNG')):
+                pic0_changed = True
+                self.gui_pic0 = Image.open(os.path.join(game_pkg_dir, 'PIC0.PNG')).convert("RGBA")
+            else:
+                self.gui_pic0 = Image.open(os.path.join(default_img_path, 'PIC0.PNG')).convert("RGBA")
+                self.gui_pic0_ref = Image.open(os.path.join(default_img_path, 'PIC0.PNG')).convert("RGBA")
+                pic0_changed = True
 
-                if os.path.isfile(os.path.join(pkg_build_path, 'PIC1.PNG')):
-                    self.image_pic1 = Image.open(os.path.join(pkg_build_path, 'PIC1.PNG')).convert("RGBA")
-                    self.image_pic1_ref = Image.open(os.path.join(pkg_build_path, 'PIC1.PNG')).convert("RGBA")
-                    pic1_changed = True
+            if os.path.isfile(os.path.join(game_pkg_dir, 'PIC1.PNG')):
+                self.gui_pic1 = Image.open(os.path.join(game_pkg_dir, 'PIC1.PNG')).convert("RGBA")
+                self.gui_pic1_ref = Image.open(os.path.join(game_pkg_dir, 'PIC1.PNG')).convert("RGBA")
+                pic1_changed = True
+            else:
+                self.gui_pic1 = Image.open(os.path.join(default_img_path, 'PIC1.PNG')).convert("RGBA")
+                self.gui_pic1_ref = Image.open(os.path.join(default_img_path, 'PIC1.PNG')).convert("RGBA")
+                pic1_changed = True
 
+
+        # init pkg images
         else:
             # extract the platform_str name by using the path
             platform = ''
@@ -646,17 +643,17 @@ class Main:
             self.image_icon0 = Image.open(os.path.join(default_img_path, platform, 'ICON0.PNG')).convert("RGBA")
             self.image_icon0_ref = Image.open(os.path.join(default_img_path, 'ICON0.PNG')).convert("RGBA")
 
-            self.image_pic0 = Image.open(os.path.join(default_img_path, 'PIC0.PNG')).convert("RGBA")
-            self.image_pic0_ref = Image.open(os.path.join(default_img_path, 'PIC0.PNG')).convert("RGBA")
+            self.gui_pic0 = Image.open(os.path.join(default_img_path, 'PIC0.PNG')).convert("RGBA")
+            self.gui_pic0_ref = Image.open(os.path.join(default_img_path, 'PIC0.PNG')).convert("RGBA")
 
-            self.image_pic1 = Image.open(os.path.join(default_img_path, 'PIC1.PNG')).convert("RGBA")
-            self.image_pic1_ref = Image.open(os.path.join(default_img_path, 'PIC1.PNG')).convert("RGBA")
+            self.gui_pic1 = Image.open(os.path.join(default_img_path, 'PIC1.PNG')).convert("RGBA")
+            self.gui_pic1_ref = Image.open(os.path.join(default_img_path, 'PIC1.PNG')).convert("RGBA")
             pic1_changed = True
 
         if pic1_changed:
             # draw xmb icons and system logo onto the background
-            self.image_pic1.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
-            self.image_pic0.paste(self.ps3_gametype_logo, (1180, 525), self.ps3_gametype_logo)
+            self.gui_pic1.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
+            self.gui_pic0.paste(self.ps3_gametype_logo, (1180, 525), self.ps3_gametype_logo)
 
         # ICON0 is mandatory
         if not os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'ICON.PNG')):
@@ -665,7 +662,7 @@ class Main:
 
         if pic1_changed or icon0_changed:
             # crop and blend ICON0 to the background
-            tmp_icon0_bg = copy.copy(self.image_pic1_ref)
+            tmp_icon0_bg = copy.copy(self.gui_pic1_ref)
             tmp_icon0_bg.paste(self.image_icon0.convert("RGBA"), (self.icon0_x_pos, self.icon0_y_pos),
                                self.image_icon0.convert("RGBA"))
 
@@ -675,11 +672,11 @@ class Main:
                                                  self.icon0_y_pos + self.image_icon0.height))
 
         # A PIC0 is mandatory for the gui
-        if os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC0.PNG')):
-            tmp_pic0_bg = copy.copy(self.image_pic1)
+        if os.path.isfile(os.path.join(game_pkg_dir, 'PIC0.PNG')):
+            tmp_pic0_bg = copy.copy(self.gui_pic1)
         # or make with title text
         else:
-            # else use background w/ title
+            # else init background w/ title
             tmp_pic0_bg = copy.copy(self.image_pic1_w_title)
             # add ps3 system logo
             tmp_pic0_bg.paste(self.ps3_gametype_logo, (1180, 525), self.ps3_gametype_logo)
@@ -687,15 +684,15 @@ class Main:
             self.draw_text_on_image_w_shadow(tmp_pic0_bg, "11/11/2006 00:00", 760, 522, 20, 1, 'white', 'black')
 
         # Image.paste(im1, (left, top, right, bottom), im1)
-        tmp_pic0_bg.paste(self.image_pic0, (self.pic0_x_pos, self.pic0_y_pos), self.image_pic0)
+        tmp_pic0_bg.paste(self.gui_pic0, (self.pic0_x_pos, self.pic0_y_pos), self.gui_pic0)
         # Image.crop((left, top, right, bottom))
         tmp_image_pic0 = tmp_pic0_bg.crop((self.pic0_x_pos, self.pic0_y_pos,
-                                           self.pic0_x_pos + self.image_pic0.width,
-                                           self.pic0_y_pos + self.image_pic0.height))
+                                           self.pic0_x_pos + self.gui_pic0.width,
+                                           self.pic0_y_pos + self.gui_pic0.height))
 
         # resize: ->853, ->480
         self.photoimage_pic1 = PhotoImage(
-            self.image_pic1.resize((int(1280 * self.scaling), int(720 * self.scaling)), Image.Resampling.LANCZOS))
+            self.gui_pic1.resize((int(1280 * self.scaling), int(720 * self.scaling)), Image.Resampling.LANCZOS))
 
         self.button_pic1 = Button(self.main,
                                   image=self.photoimage_pic1,
@@ -706,8 +703,8 @@ class Main:
         CreateToolTip(self.button_pic1, "Click to replace  PIC1")
 
         # ICON0 resizing
-        icon0_x_scale = self.main_window_width / self.image_pic1.width * self.scaling
-        icon0_y_scale = self.main_window_height / self.image_pic1.height * self.scaling
+        icon0_x_scale = self.main_window_width / self.gui_pic1.width * self.scaling
+        icon0_y_scale = self.main_window_height / self.gui_pic1.height * self.scaling
 
         self.icon0_new_dim = (
             int(icon0_x_scale * tmp_image_icon0.width), int(icon0_y_scale * tmp_image_icon0.height))
@@ -726,8 +723,8 @@ class Main:
         CreateToolTip(self.button_icon0, "Click to replace ICON0")
 
         # PIC0 resizing
-        pic0_x_scale = self.main_window_width / self.image_pic1.width * self.scaling
-        pic0_y_scale = self.main_window_height / self.image_pic1.height * self.scaling
+        pic0_x_scale = self.main_window_width / self.gui_pic1.width * self.scaling
+        pic0_y_scale = self.main_window_height / self.gui_pic1.height * self.scaling
 
         self.pic0_new_dim = (
             int(pic0_x_scale * tmp_image_pic0.width), int(pic0_y_scale * tmp_image_pic0.height))
@@ -881,7 +878,7 @@ class Main:
             AppPaths.game_work_dir = os.path.join(selected_path, 'work_dir')
             self.game_pkg_dir = os.path.join(AppPaths.game_work_dir, 'pkg')
 
-        self.__draw_pkg_images_on_canvas__(pkg_build_path=self.game_pkg_dir)
+        self.__draw_pkg_images_on_canvas__(game_pkg_dir=self.game_pkg_dir)
 
     # Dynamic update of the 'entry_field_filename' into the 'entry_field_iso_path'
     def dynamic_filename_and_path(self, event):
@@ -920,15 +917,13 @@ class Main:
 
     # Dynamic update of the game title on to the PIC1 image
     def dynamic_title_to_pic1(self, event):
-        tmp_img = self.image_pic1
+        tmp_img = self.gui_pic1
         # self, image, text, text_x, text_y, text_size, text_outline, text_color,
         self.draw_text_on_image_w_shadow(tmp_img, self.entry_field_title.get(), 760, 487, 32, 2, 'white', 'black')
         self.image_pic1_w_title = copy.copy(tmp_img)
-        tmp_img = tmp_img.resize((int(1280 * self.scaling), int(720 * self.scaling)), Image.LANCZOS)
+        tmp_img = tmp_img.resize((int(1280 * self.scaling), int(720 * self.scaling)), Image.Resampling.LANCZOS)
         self.photo_image_pic1_xmb = PhotoImage(tmp_img)
         self.button_pic1.config(image=self.photo_image_pic1_xmb)
-        # self.__draw_pkg_images_on_canvas__()
-        # TODO: this might be more optimized somewhere else
         self.update_game_build_path()
 
     def image_replace_browser(self, main):
@@ -949,24 +944,24 @@ class Main:
                 self.image_icon0.save(os.path.join(self.tmp_pkg_dir, 'ICON0.PNG'))
 
             elif 'pic1' in image.name.lower():
-                self.image_pic1 = Image.open(image)
-                self.image_pic1_ref = Image.open(image)
+                self.gui_pic1 = Image.open(image)
+                self.gui_pic1_ref = Image.open(image)
                 img_to_be_changed = 'pic1'
 
                 # save new image to both pkg folders
                 if os.path.exists(self.game_pkg_dir):
-                    self.image_pic1.save(os.path.join(self.game_pkg_dir, 'PIC1.PNG'))
-                self.image_pic1.save(os.path.join(self.tmp_pkg_dir, 'PIC1.PNG'))
+                    self.gui_pic1.save(os.path.join(self.game_pkg_dir, 'PIC1.PNG'))
+                self.gui_pic1.save(os.path.join(self.tmp_pkg_dir, 'PIC1.PNG'))
 
             elif 'pic0' in image.name.lower():
-                self.image_pic0 = Image.open(image)
-                self.image_pic0_ref = Image.open(image)
+                self.gui_pic0 = Image.open(image)
+                self.gui_pic0_ref = Image.open(image)
                 img_to_be_changed = 'pic0'
 
                 # save new image to both pkg folders
                 if os.path.exists(self.game_pkg_dir):
-                    self.image_pic0.save(os.path.join(self.game_pkg_dir, 'PIC0.PNG'))
-                self.image_pic0.save(os.path.join(self.tmp_pkg_dir, 'PIC0.PNG'))
+                    self.gui_pic0.save(os.path.join(self.game_pkg_dir, 'PIC0.PNG'))
+                self.gui_pic0.save(os.path.join(self.tmp_pkg_dir, 'PIC0.PNG'))
 
             # # re-draw work_dir image on canvas
             self.__draw_pkg_images_on_canvas__(img_to_be_changed=img_to_be_changed)
@@ -1132,7 +1127,7 @@ class Main:
             return False
 
     def save_entry_to_game_list(self):
-        json_game_list = GameListData().get_game_list()
+        json_game_list = GameListData().get_game_list_from_disk()
         current_work_dir = AppPaths.game_work_dir
         # save all changes to the current work_dir
         if self.save_work_dir():
@@ -1275,7 +1270,7 @@ class Main:
 
     def on_ftp_fetch_button(self):
         response = messagebox.askyesno('FTP fetch',
-                                       'OBS! This will overwrite your current gamelist, continue?')
+                                       'This will overwrite your current gamelist, continue?')
         # yes
         if response:
             # save the ps3-ip field to config file

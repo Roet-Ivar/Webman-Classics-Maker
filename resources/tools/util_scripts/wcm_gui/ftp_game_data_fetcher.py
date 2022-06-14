@@ -13,19 +13,13 @@ if getattr(sys, 'frozen', False):
 else:
     sys.path.append('..')
 
-from resources.tools.util_scripts.global_paths import AppPaths, GlobalDef
-from resources.tools.util_scripts.global_paths import GlobalVar
-from resources.tools.util_scripts.global_paths import GameListData
-from resources.tools.util_scripts.global_paths import FtpSettings
+from resources.tools.util_scripts.global_paths import AppPaths, GlobalDef, GlobalVar, GameListData, FtpSettings
 
 sys.path.append(AppPaths.settings)
 
 
-def __drive_selection_request__(selected_drive, selected_platform):
+def __drive_selection_handler__(selected_drive, selected_platform):
     # drive_str and platforms to fetch
-    global_drive_paths = GlobalVar.drive_paths
-    global_platform_paths = GlobalVar.platform_paths
-
     selected_drives = []
     platform_filter = []
 
@@ -41,19 +35,19 @@ def __drive_selection_request__(selected_drive, selected_platform):
             selected_drives.remove(('/dev_usb(*)/', 'USB(*)'))
         if selected_drives.count(('/dev_hdd0/', 'HDD0')) > 0:
             selected_drives.remove(('/dev_hdd0/', 'HDD0'))
-    # single drive_str choice
+    # single drive_str choice, i.e. not 'ALL'
     else:
-        selected_drives.extend(list(filter(lambda x: str(selected_drive) == x[1], global_drive_paths)))
+        selected_drives.extend(list(filter(lambda x: str(selected_drive) == x[1], GlobalVar.drive_paths)))
 
     # add all drive_str paths based on choice from platform filter
     if 'ALL' in selected_platform:
-        platform_filter.extend(global_platform_paths)
+        platform_filter.extend(GlobalVar.platform_paths)
     # single platform choice
     else:
         platform_filter.extend(
-            list(filter(lambda x: str(selected_platform) == x[1], global_platform_paths)))
+            list(filter(lambda x: str(selected_platform) == x[1], GlobalVar.platform_paths)))
 
-    return platform_filter
+    return [selected_drives, platform_filter]
 
 
 class FtpGameList:
@@ -61,11 +55,9 @@ class FtpGameList:
     def __init__(self, selected_drive, selected_platform):
         self.selected_drive = selected_drive
         self.selected_platform = selected_platform
-
-        # open a copy of the current gamelist from disk
-        self.json_game_list_data = GameListData().get_game_list_data_json()
-        # open a copy of an empty backup  from disk
-        self.new_json_game_list_data = GameListData().get_game_list_data_json_bak()
+        
+        self.game_list_data_json = GameListData().get_game_list_from_disk()
+        self.new_game_list_data_json = GameListData().get_game_list_data_json_bak()
 
         self.coding = GlobalVar.coding
 
@@ -90,7 +82,7 @@ class FtpGameList:
         self.ftp = None
         self.data_chunk = None
 
-    def execute(self, selected_drives, selected_platforms):
+    def execute(self, selected_drive, selected_platform):
         try:
             self.ftp = FtpSettings().get_ftp()
             # get a listing of active drives from the machine
@@ -98,19 +90,22 @@ class FtpGameList:
             self.ftp.retrlines('MLSD /', active_drives_list.append)
 
             # filter out all active drives that are also selected
-            drives_response = []
+            _drives_platforms = __drive_selection_handler__(selected_drive, selected_platform)
+            selected_drives = _drives_platforms[0]
+            filtered_drive_list = []
             for sd in selected_drives:
                 for a in active_drives_list:
                     ad = '/' + str(a).split(';')[6].strip() + '/'
                     if sd[0] == ad:
                         print('DEBUG adding drive_str: ' + ad + ' for scanning')
-                        drives_response.append(sd)
-            if len(drives_response) < 1:
+                        filtered_drive_list.append(sd)
+            if len(filtered_drive_list) < 1:
                 print('''DEBUG: The USB port you're trying to scan is not active''')
 
-            platforms_request = __drive_selection_request__(selected_drives, selected_platforms)
-            for drive in drives_response:
-                for platform in platforms_request:
+            # fetch the requested paths from the PS3
+            selected_platforms  = _drives_platforms[1]
+            for drive in filtered_drive_list:
+                for platform in selected_platforms:
                     if 'PSPISO' == platform[1]:
                         self.ftp_walk(self.ftp, drive[0] + platform[0], self.PSPISO_lines)
                     elif 'PSXISO' == platform[1]:
@@ -136,7 +131,7 @@ class FtpGameList:
             for p in self.ALL_lines:
                 self.total_lines_count += len(p)
 
-            # after retrieving the list of file paths we fetch the actual data
+            # after retrieving the list of filepaths we now request the actual data
             self.data_chunk = FTPDataHandler(self.ftp, self.total_lines_count)
 
         except Exception as e:
@@ -148,15 +143,15 @@ class FtpGameList:
             return
 
         # append the current platform games to the new list
-        for platform in self.json_game_list_data:
-            self.json_game_list_data_builder(str(platform.split('_')[0]))
+        for platform in self.game_list_data_json:
+            self.game_list_data_builder(str(platform.split('_')[0]))
 
         # save updated gamelist to disk
         with open(os.path.join(AppPaths.application_path, 'game_list_data.json'), 'w') as newFile:
-            json_text = json.dumps(self.json_game_list_data, indent=4, separators=(",", ":"))
+            json_text = json.dumps(self.game_list_data_json, indent=4, separators=(",", ":"))
             newFile.write(json_text)
 
-    def json_game_list_data_builder(self, original_platform):
+    def game_list_data_builder(self, original_platform):
         platform_list = original_platform + '_games'
         filtered_platform = None
         if 'PSPISO' in platform_list:
@@ -181,7 +176,9 @@ class FtpGameList:
         pic2 = None
         at3 = None
         pam = None
-        skip_already_fetched = False # should be an option
+
+        game_exist = False
+        skip_already_fetched = False  # should be a config option
 
         for new_game_path in tqdm(filtered_platform, desc='Fetching ' + original_platform,
                                   bar_format="{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt} [{elapsed}]\n"):
@@ -195,7 +192,7 @@ class FtpGameList:
                 match = re.search('(?<=\[).*?(?=\])', new_game_filename)
                 if match is not None:
                     # These will not match: '.NTFS[BDISO]', '.NTFS[DVDISO]', '.NTFS[BDFILE]',
-                    tmp_platform = list(filter(lambda x: match.group() in x[0], self.global_platform_paths))
+                    tmp_platform = list(filter(lambda x: match.group() in x[0], GlobalVar.platform_paths))
                     if tmp_platform:
                         new_game_platform = tmp_platform[0][1]
             # GAMES get the PS3 metadata
@@ -203,8 +200,24 @@ class FtpGameList:
                 donor_platform = 'PS3ISO'
                 new_game_platform = donor_platform
 
-            # if not, add it
+
+            # check if game already exist
             if not skip_already_fetched:
+                for game_json in self.game_list_data_json[platform_list]:
+                    existing_game_path = str(os.path.join(game_json['path'], game_json['filename']))
+
+                    if new_game_platform in {'GAMES', 'GAMEZ'}:
+                        # Since GAMES-folders get variations of the titles we will compare their base paths
+                        new_game_path = '/'.join(new_game_path.split('/')[:-2]) + '/'
+                        existing_game_path = '/'.join(existing_game_path.split('/')[:-1]) + '/'
+
+                    if new_game_path == existing_game_path:
+                        self.game_count += 1
+                        print('\nDEBUG skipping ' + new_game_filename + ', already fetched\n')
+                        game_exist = True
+                        pass
+
+            if not game_exist:
                 # parsing PARAM.SFO should provide correct title_id and title for the GUI
                 if original_platform in {'GAMES', 'GAMEZ'}:
                     data = []
@@ -279,7 +292,7 @@ class FtpGameList:
                         new_game_platform_path = '/'.join(split_path[0:len(split_path) - 2]) + '/'
                     new_game_platform = original_platform
 
-                self.new_json_game_list_data[platform_list].append({
+                self.new_game_list_data_json[platform_list].append({
                     "title_id": title_id,
                     "title": title,
                     "platform": new_game_platform,
@@ -288,7 +301,7 @@ class FtpGameList:
                     "meta_data_link": meta_data_link})
 
                 # also append it to the existing list for next iteration
-                self.json_game_list_data[platform_list].append({
+                self.game_list_data_json[platform_list].append({
                     "title_id": title_id,
                     "title": title,
                     "platform": new_game_platform,
@@ -316,7 +329,7 @@ class FtpGameList:
             meta_data_link = None
             new_game_platform = original_platform
 
-        return self.new_json_game_list_data
+        return self.new_game_list_data_json
 
     def get_game_data(self, platform_path, game_filename):
         title_id = None
@@ -333,7 +346,7 @@ class FtpGameList:
         try:
             split_folder_path = game_filepath.split('/')
             platform = split_folder_path[2] + '/'
-            platform_match = list(filter(lambda x: platform in x[0], self.global_platform_paths))
+            platform_match = list(filter(lambda x: platform in x[0], GlobalVar.platform_paths))
             platform = platform_match[0][1]
 
             original_platform = platform
@@ -342,7 +355,7 @@ class FtpGameList:
                 match = re.search('(?<=\[).*?(?=\])', game_filename)
                 if match is not None:
                     # These will not match: '.NTFS[BDISO]', '.NTFS[DVDISO]', '.NTFS[BDFILE]',
-                    donor_platform = list(filter(lambda x: match.group() in x[0], self.global_platform_paths))
+                    donor_platform = list(filter(lambda x: match.group() in x[0], GlobalVar.platform_paths))
                     if donor_platform:
                         platform = donor_platform[0][1]
             elif platform in {'GAMES', 'GAMEZ'}:
@@ -467,7 +480,7 @@ class FtpGameList:
 class FTPDataHandler:
     def __init__(self, ftp, total_lines):
         self.coding = GlobalVar.coding
-        self.global_platform_paths = GlobalVar.platform_paths
+        GlobalVar.platform_paths = GlobalVar.platform_paths
         self.ftp_instance = ftp
         self.ftp_instance.voidcmd('TYPE I')
         self.null = None
@@ -996,7 +1009,7 @@ def image_saver(ftp, platform_path, platform, game_build_dir, images):
             pam_file.write(pam)
             pam_file.close()
 
-    # TODO: PMF
+    # TODO: PMF (310x180)
     # elif platform == 'PSPISO':
     #     # for .PMF we need to save the binary data to a file
     #     pmf_file = open(os.path.join(game_build_dir, 'work_dir', 'pkg', 'ICON0.PMF'), "wb")
@@ -1008,7 +1021,7 @@ def param_sfo_parser(param_data):
     title = None
     filtered_data_list = list(filter(None,  param_data.split(b'\x00')))
     for fd in filtered_data_list:
-        id_match  = re.search('\w{4}\d{5}$', fd.decode('ISO-8859-1'))
+        id_match = re.search('\w{4}\d{5}$', fd.decode('ISO-8859-1'))
         if id_match:
             title_id = id_match.group()
             try:

@@ -14,7 +14,7 @@ class Gamelist:
         self.context_menu = Menu(self.main_frame, tearoff=0)
 
         self.corrected_index = []
-        self.json_game_list_data = GameListData().get_game_list()
+        self.json_game_list_data = GameListData().get_game_list_from_disk()
 
         self.WCM_BASE_PATH = AppPaths.wcm_gui
         self.last_selection = (None, 0)
