@@ -41,16 +41,17 @@ https://github.com/aldostools/webMAN-MOD
 ---------------------------------------------------------------------------------------------------	
 # TROUBLESHOOTING
 	
-* If you hear three rapid beeps: Probably misspelled path to the ISO, double check it (case sensitive)!
+* If you hear three fast beeps: Probably a misspelled path to the ISO, double check it (case sensitive)!
 * Games only mounts but doesn't automatically start: the timings on the webcommand are not enough for
-your HDD read speeds, see the forum thread for mor info!  	
+your HDD read speeds, see the forum thread for mor info.  	
 ---------------------------------------------------------------------------------------------------
 
-# Windows dev environment setup 
+# Dev environment setup 
 
-* install python2.7.xx x86_64 (https://www.python.org/downloads/release/python-2715/)
-* pip install pillow (often bundled in the windows version)
+* install python3.9+ x86_64 (https://www.python.org/downloads/release/python-390/)
+* pip install Pillow (might be bundled in the windows version)
 * pip install pyinstaller
+* pip install tqdm
 
 **Building the executable**
 
@@ -62,13 +63,10 @@ your HDD read speeds, see the forum thread for mor info!
 # Linux dev environment setup
 
 * sudo apt-get update
-* sudo apt-get install python2.7
-* sudo apt-get install python-tk
+* sudo apt-get install python3.9
+* sudo apt-get install python3-tk
 * sudo apt-get install python-pip
-* pip install pillow
+* pip install Pillow
 * pip install pyinstaller
-
-**Building executables**
-
-Right now you can't build any executables for linux
+* pip install tqdm
 
