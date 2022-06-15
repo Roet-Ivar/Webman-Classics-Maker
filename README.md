@@ -66,6 +66,7 @@ your HDD read speeds, see the forum thread for mor info.
 * sudo apt-get install python3.9
 * sudo apt-get install python3-tk
 * sudo apt-get install python-pip
+* sudo apt-get install python3.9-dev
 * pip install Pillow
 * pip install pyinstaller
 * pip install tqdm
