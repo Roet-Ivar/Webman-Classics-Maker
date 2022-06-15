@@ -18,8 +18,8 @@ https://github.com/naehrwert/scetool
 * OpenSCETool (oscetool):
 https://github.com/spacemanspiff/oscetool
 
-* PSL1GHT PS3py (pkgcrypt)
-https://github.com/HACKERCHANNEL/PSL1GHT/tree/master/tools/PS3Py
+* PSL1GHT pkgcrypt (python3 version)
+https://github.com/lephilousophe/PSL1GHT/tree/use-python3/tools/ps3py
 
 * PARAM_SFO_EDITOR (Aldos PS3 tool collection)
 https://www.aldostools.org/
