@@ -322,11 +322,10 @@ def unpack(filename):
 					print(fileD)
 				fileD.dump(directory, decData, header)
 def getFiles(files, folder, original):
-	# in case pkg_dir_path contains [] we glob won't like it'
-	folder = re.sub('([\[\]])','[\\1]',folder)
-
+	# brackets in glob.glob are used for character classes (e.g. [a-z]), so they need to be escaped
+	folder = glob.escape(folder)
 	oldfolder = folder
-	foundFiles = glob.glob( os.path.join(folder, '*') )
+	foundFiles = glob.glob(os.path.join(folder, '*') )
 	sortedList = []
 	for filepath in foundFiles:
 		if not os.path.isdir(filepath):
