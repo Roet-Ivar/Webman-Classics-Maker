@@ -114,7 +114,7 @@ class Gamelist:
         self.label.after(200, self.selection_poller)
         self.new_selection = self._listbox.curselection()
         # cursor har been initiated
-        if self._listbox.curselection() is not ():
+        if self._listbox.curselection() != ():
             if self.new_selection[0] is not self.last_selection[0] or self.is_cleared:
                 self.entry_fields_update(self.new_selection)
                 self.is_cleared = False
@@ -141,15 +141,19 @@ class Gamelist:
                     self.drive_system_path_array[1] = path_array[1]
                     self.drive_system_path_array[2] = '/'.join(path_array[2:len(path_array)]).replace('//', '')
 
+                    self.entry_field_title_id.config(state='normal')
                     self.entry_field_title_id.delete(0, len(self.entry_field_title_id.get()) - 1)
                     self.entry_field_title_id.delete(0, END)
                     self.entry_field_title_id.insert(0, self.selected_title_id)
+                    self.entry_field_title_id.config(state='readonly')
 
                     self.entry_field_title.delete(0, END)
                     self.entry_field_title.insert(0, self.selected_title)
 
+                    self.entry_field_filename.config(state='normal')
                     self.entry_field_filename.delete(0, END)
                     self.entry_field_filename.insert(0, self.selected_filename)
+                    self.entry_field_filename.config(state='readonly')
 
                     self.entry_field_platform.delete(0, END)
                     self.entry_field_platform.insert(0, self.selected_platform)
@@ -224,7 +228,7 @@ class Gamelist:
             self._listbox.selection_set(self._listbox.nearest(event.y))
             self._listbox.activate(self._listbox.nearest(event.y))
         finally:
-            if self._listbox.get(self._listbox.curselection()[0]) is not '':
+            if self._listbox.get(self._listbox.curselection()[0]) != '':
                 self.context_menu.tk_popup(event.x_root + 43, event.y_root + 12, 0)
                 self.context_menu.grab_release()
                 self.context_menu.focus_set()
@@ -235,7 +239,7 @@ class Gamelist:
             try:
                 os.startfile(os.path.join(AppPaths.game_work_dir, '../'))
             except:
-                print('ERROR: Could open the pkg build dir from Windows explorer') if self._verbose else None
+                print('ERROR: Could open the tmp_pkg_dir build dir from Windows explorer') if self._verbose else None
 
     def delete_selected(self):
         import tkinter.messagebox as tkMessageBox
@@ -261,7 +265,7 @@ class Gamelist:
                 newFile.write(json_text)
 
             # remove the game build folder too
-            if AppPaths.game_work_dir != os.path.join(AppPaths.wcm_gui, 'work_dir'):
+            if AppPaths.game_work_dir != AppPaths.wcm_work_dir:
                 if os.path.isdir(game_folder_path):
                     if 'webman-classics-maker' in game_folder_path:
                         shutil.rmtree(game_folder_path)

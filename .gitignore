@@ -8,13 +8,9 @@ builds
 release
 .idea/
 venv/
+_work_dir
 Webman-Classics-Maker.iml
 settings/ftp_settings.cfg
-resources/tools/util_scripts/wcm_gui/work_dir/pkg/PIC1.PNG
-resources/tools/util_scripts/wcm_gui/work_dir/pkg/PIC0.PNG
-resources/tools/util_scripts/wcm_gui/work_dir/pkg/ICON0.PNG
-resources/tools/util_scripts/wcm_gui/work_dir/pkg.json
-resources/tools/util_scripts/wcm_gui/work_dir/preview.png
 game_list_data.json
 resources/tools/util_scripts/_pyinstaller_and_release_scripts/build/webman-classics-maker.spec
 resources/tools/util_scripts/_pyinstaller_and_release_scripts/build/webman-classics-maker/webman-classics-maker.exe.manifest

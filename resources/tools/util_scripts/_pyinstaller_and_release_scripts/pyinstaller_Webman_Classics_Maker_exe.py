@@ -35,15 +35,20 @@ p = subprocess.call(app + ' ' + args)
 
 
 # clean up residuals from pyinstaller
-if os.path.isdir('build'):
-    rmtree('build')
-if os.path.isdir('__pycache__'):
-    rmtree('__pycache__')
+def clean_up(path):
+    if os.path.isdir(os.path.join(path, 'build')):
+        rmtree(os.path.join(path, 'build'))
+    if os.path.isdir(os.path.join(path, '__pycache__')):
+        rmtree(os.path.join(path, '__pycache__'))
 
-for root, dirs, files in os.walk('.'):
-    for file in files:
-        if 'pyc' in str(file):
-            os.remove(file)
+    # for root, dirs, files in os.walk('.'):
+    #     for file in files:
+    #         if 'pyc' in str(file):
+    #             os.remove(file)
+
+
+clean_up('..')
+clean_up('.')
 
 # open builds folder in windows explorer
 if 'win' in sys.platform:

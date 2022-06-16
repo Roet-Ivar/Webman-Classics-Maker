@@ -41,11 +41,11 @@ class Write_param_sfo():
 				newFileByteArray = bytearray(file)
 				newFile.write(newFileByteArray)
 
-				print('\n\n[1/5] Execution of \'write_json_to_param_sfo.py\': DONE')
+				print('\n\n[1/5] Execution of \'json_to_param_sfo.py\': DONE')
 				print('-----------------------------------------------------')
 				return True
 		except Exception as e:
-			print('\n\n[1/5] Execution of \'write_json_to_param_sfo.py\': FAILED')
+			print('\n\n[1/5] Execution of \'json_to_param_sfo.py\': FAILED')
 			print(getattr(e, 'message', repr(e)))
 			print('-----------------------------------------------------')
 			return False

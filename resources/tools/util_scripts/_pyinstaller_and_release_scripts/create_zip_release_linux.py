@@ -28,8 +28,8 @@ def zipdir(path, ziph):
 			dirs.remove('icons')
 		if 'tv_frames' in dirs:
 			dirs.remove('tv_frames')
-		if 'work_dir' in dirs:
 			dirs.remove('work_dir')
+		if 'wcm_work_dir' in dirs:
 		if 'xmb_capture' in dirs:
 			dirs.remove('xmb_capture')
 		if 'burnout_3_example' in dirs:
@@ -87,7 +87,6 @@ if __name__ == '__main__':
 	zipf = zipfile.ZipFile(os.path.join(release_dir, zip_archive_name), 'w', zipfile.ZIP_DEFLATED)
 	zipdir(zip_dir_path, zipf)
 	zipf.close()
-
 
 	print('The release archive has sucessfully been package and distributed to:\n' + '/release/' + zip_archive_name)
 	# try:

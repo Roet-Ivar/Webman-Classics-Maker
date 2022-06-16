@@ -1,5 +1,5 @@
 import traceback
-from resources.tools.util_scripts.write_json_to_param_sfo import Write_param_sfo
+from resources.tools.util_scripts.json_to_param_sfo import Write_param_sfo
 from resources.tools.util_scripts.content_id_elf_replace import Elf_replace
 from resources.tools.util_scripts.edit_launch_txt import Edit_launch_txt
 

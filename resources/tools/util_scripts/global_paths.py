@@ -28,21 +28,23 @@ else:
 
 class AppPaths:
     game_work_dir = ''
+    game_pkg_dir = os.path.join(game_work_dir, 'pkg')
     application_path = application_path
     # in application folder
     builds = os.path.join(application_path, 'builds')
     release = os.path.join(application_path, 'release')
     resources = os.path.join(application_path, 'resources')
     settings = os.path.join(application_path, 'settings')
+    tmp_work_dir = os.path.join(application_path, '_work_dir')
+    tmp_pkg_dir = os.path.join(tmp_work_dir, 'pkg')
 
     # in resources
     fonts = os.path.join(resources, 'fonts')
     images = os.path.join(resources, 'images')
-    pkg = os.path.join(resources, 'pkg')
     tools = os.path.join(resources, 'tools')
 
-    # in pkg
-    USRDIR = os.path.join(pkg, 'USRDIR')
+    # in tmp_pkg_dir
+    USRDIR = os.path.join(tmp_pkg_dir, 'USRDIR')
 
     # in tools
     scetool = os.path.join(tools, 'scetool')
@@ -53,9 +55,6 @@ class AppPaths:
     games_metadata = os.path.join(util_scripts, 'games_metadata')
     pkgcrypt = os.path.join(util_scripts, 'pkgcrypt')
     wcm_gui = os.path.join(util_scripts, 'wcm_gui')
-
-    # in wcm_gui
-    tmp_work_dir = os.path.join(wcm_gui, 'tmp_work_dir')
 
     # variable game work dir
     def get_game_build_dir(self, title_id, filename):
@@ -266,5 +265,5 @@ class GlobalDef:
                 shutil.copy2(s, d)
 
 
-if not os.path.exists(os.path.join(AppPaths.tmp_work_dir, 'pkg')):
-    os.makedirs(os.path.join(AppPaths.tmp_work_dir, 'pkg'))
+if not os.path.exists(AppPaths.tmp_pkg_dir):
+    os.makedirs(AppPaths.tmp_pkg_dir)

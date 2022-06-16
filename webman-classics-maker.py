@@ -37,19 +37,19 @@ from PIL import Image, ImageDraw, ImageFont
 from PIL.ImageTk import PhotoImage
 
 
-def __init_pkg_build_dir__():
-    if os.path.isdir(AppPaths.pkg):
-        if 'webman-classics-maker' in AppPaths.pkg.lower():
-            shutil.rmtree(AppPaths.pkg)
-    if not os.path.isdir(AppPaths.pkg):
-        os.makedirs(AppPaths.pkg)
+def __init_tmp_pkg_dir__():
+    if os.path.isdir(AppPaths.tmp_work_dir):
+        if 'webman-classics-maker' in AppPaths.tmp_work_dir.lower():
+            shutil.rmtree(AppPaths.tmp_work_dir)
+    if not os.path.isdir(AppPaths.tmp_pkg_dir):
+        os.makedirs(AppPaths.tmp_pkg_dir)
 
     GlobalDef().copytree(os.path.join(AppPaths.util_resources, 'pkg_dir_bak'),
-                         os.path.join(AppPaths.resources, 'pkg'))
+                         os.path.join(AppPaths.tmp_pkg_dir))
 
 
 def __init_tmp_work_dir__():
-    # clean and init tmp_work_dir in startup
+    # clean and init wcm_work_dir in startup
     if os.path.isdir(AppPaths.tmp_work_dir):
         if 'webman-classics-maker' in AppPaths.tmp_work_dir.lower():
             shutil.rmtree(AppPaths.tmp_work_dir)
@@ -104,9 +104,9 @@ class Main:
 
         # common paths
         self.WCM_BASE_PATH = AppPaths.wcm_gui
-        self.pkg_dir = AppPaths.pkg
+        # self.tmp_pkg_dir = AppPaths.tmp_pkg_dir
         self.tmp_work_dir = AppPaths.tmp_work_dir
-        self.tmp_pkg_dir = os.path.join(self.tmp_work_dir, 'pkg')
+        self.tmp_pkg_dir = AppPaths.tmp_pkg_dir
         self.builds_path = AppPaths.builds
         self.ftp_settings_path = os.path.join(AppPaths.settings, 'ftp_settings.cfg')
         self.fonts_path = AppPaths.fonts
@@ -131,6 +131,7 @@ class Main:
         self.platform_dropdown = None
         self.main_canvas = None
 
+        __init_tmp_pkg_dir__()
         self.__init_images_and_canvas__()
         self.__draw_background_on_canvas__()
         self.__draw_pkg_images_on_canvas__()
@@ -325,7 +326,7 @@ class Main:
 
         # button tooltips
         CreateToolTip(self.usb_button, "Toggle USB port [0-3]")
-        CreateToolTip(self.build_button, "Save & Build pkg")
+        CreateToolTip(self.build_button, "Save & Build tmp_pkg_dir")
         CreateToolTip(self.save_button, "Save to builds folder")
         CreateToolTip(self.fetch_button, "Fetch gamelist and images over FTP")
         CreateToolTip(self.refresh_button, "Refresh gamelist from disk")
@@ -574,7 +575,7 @@ class Main:
 
         tmp_image_icon0 = None
         img_to_be_changed = kwargs.get('img_to_be_changed', None)
-        game_pkg_dir = kwargs.get('game_pkg_dir', '')
+        game_pkg_dir = kwargs.get('game_pkg_dir', AppPaths.tmp_pkg_dir)
         default_img_path = os.path.join(AppPaths.resources, 'images', 'pkg', 'default')
 
         pic1_changed = False
@@ -585,7 +586,7 @@ class Main:
         print('image to be changed: ' + str(img_to_be_changed)) if self._verbose else None
         if img_to_be_changed not in {'', None}:
 
-            # re-draw gui images
+            # PIC1/background needs the title text to be rendered
             if img_to_be_changed.lower() == 'pic1':
                 pic1_changed = True
                 self.draw_text_on_image_w_shadow(self.gui_pic1, self.entry_field_title.get(), 745, 457, 32, 2,
@@ -601,10 +602,14 @@ class Main:
             elif img_to_be_changed.lower() == 'pic0':
                 self.gui_pic0 = self.gui_pic0_ref
                 pic0_changed = True
+            # elif img_to_be_changed.lower() == 'icon0':
+            #     self.gui_icon0 = self.gui_icon0_ref
+            #     icon0_changed = True
 
+        # draw image from game_pkg_dir
         if os.path.exists(game_pkg_dir) and img_to_be_changed is None:
 
-            # draw PIC1 from pkg_dir and then xmb icons and system logo onto the pkg  background
+            # draw PIC1 from pkg_dir and then xmb icons and system logo onto the tmp_pkg_dir  background
             if os.path.isfile(os.path.join(game_pkg_dir, 'ICON0.PNG')):
                 icon0_changed = True
                 self.image_icon0 = Image.open(os.path.join(game_pkg_dir, 'ICON0.PNG')).convert("RGBA")
@@ -627,7 +632,7 @@ class Main:
                 pic1_changed = True
 
 
-        # init pkg images
+        # init tmp_pkg_dir images
         else:
             # extract the platform name by using the path
             platform = ''
@@ -870,7 +875,7 @@ class Main:
         if self.validate_fields():
             self.save_entry_to_game_list()
 
-    # Dynamic update of the pkg path for showing fetched images
+    # Dynamic update of the tmp_pkg_dir path for showing fetched images
     def update_game_build_path(self):
         # ask gamelist to return selected path
         selected_path = get_build_dir_path(self, str(self.entry_field_filename.get()),
@@ -906,7 +911,7 @@ class Main:
         if iso_path == '':
             # TODO: make sense if this part, needed?
             print()
-            # re-draw work_dir image on canvas
+            # re-draw wcm_work_dir image on canvas
             # __init_images__(self)
             # self.draw_background_on_canvas()
 
@@ -939,7 +944,7 @@ class Main:
                 self.image_icon0_ref = copy.copy(self.image_icon0)
                 img_to_be_changed = 'icon0'
 
-                # save new image to both pkg folders
+                # save new image to both tmp_pkg_dir folders
                 if os.path.exists(self.game_pkg_dir):
                     self.image_icon0.save(os.path.join(self.game_pkg_dir, 'ICON0.PNG'))
                 self.image_icon0.save(os.path.join(self.tmp_pkg_dir, 'ICON0.PNG'))
@@ -949,7 +954,7 @@ class Main:
                 self.gui_pic1_ref = Image.open(image)
                 img_to_be_changed = 'pic1'
 
-                # save new image to both pkg folders
+                # save new image to both tmp_pkg_dir folders
                 if os.path.exists(self.game_pkg_dir):
                     self.gui_pic1.save(os.path.join(self.game_pkg_dir, 'PIC1.PNG'))
                 self.gui_pic1.save(os.path.join(self.tmp_pkg_dir, 'PIC1.PNG'))
@@ -959,12 +964,12 @@ class Main:
                 self.gui_pic0_ref = Image.open(image)
                 img_to_be_changed = 'pic0'
 
-                # save new image to both pkg folders
+                # save new image to both tmp_pkg_dir folders
                 if os.path.exists(self.game_pkg_dir):
                     self.gui_pic0.save(os.path.join(self.game_pkg_dir, 'PIC0.PNG'))
                 self.gui_pic0.save(os.path.join(self.tmp_pkg_dir, 'PIC0.PNG'))
 
-            # # re-draw work_dir image on canvas
+            # # re-draw wcm_work_dir image on canvas
             self.__draw_pkg_images_on_canvas__(img_to_be_changed=img_to_be_changed)
 
     def generate_on_change(self, obj):
@@ -1070,10 +1075,10 @@ class Main:
             return False
 
     def validate_fields(self):
-        # if AppPaths.game_work_dir != '':
-        #     print('DEBUG: work_dir: OK') if self._verbose else None
-        # else:
-        #     return False
+        if AppPaths.game_work_dir != '':
+            print('DEBUG: wcm_work_dir: OK') if self._verbose else None
+        else:
+            return False
 
         if self.validate_title_id_on_save():
             print('DEBUG: Title_id: OK') if self._verbose else None
@@ -1097,9 +1102,9 @@ class Main:
                     # we need to build the path first
                     selected_path = self.gamelist.get_selected_build_dir_path(str(self.entry_field_filename.get()),
                                                                               str(self.entry_field_title_id.get()))
-                    AppPaths.game_work_dir = os.path.join(selected_path, 'work_dir')
+                    AppPaths.game_work_dir = os.path.join(selected_path, 'wcm_work_dir')
                     self.game_pkg_dir = os.path.join(AppPaths.game_work_dir, 'pkg')
-                print('Trying to create: ' + str(os.path.join(AppPaths.game_work_dir, 'pkg'))) if self._verbose else None
+                print('Creating game_work_dir: ' + str(os.path.join(AppPaths.game_work_dir, 'pkg'))) if self._verbose else None
                 os.makedirs(os.path.join(AppPaths.game_work_dir, 'pkg'))
 
             # make sure we have the mandatory ICON0 in the build_dir
@@ -1130,40 +1135,40 @@ class Main:
     def save_entry_to_game_list(self):
         json_game_list = GameListData().get_game_list_from_disk()
         current_work_dir = AppPaths.game_work_dir
-        # save all changes to the current work_dir
+        # save all changes to the current wcm_work_dir
         if self.save_work_dir():
-            if not os.path.exists(self.pkg_dir):
-                os.makedirs(self.pkg_dir)
+            if not os.path.exists(self.tmp_pkg_dir):
+                os.makedirs(self.tmp_pkg_dir)
             if not os.path.exists(AppPaths.game_work_dir):
                 os.makedirs(current_work_dir)
 
         # if filepath already exist, remove game from json game list so we can update it
-        platform_key = self.entry_field_platform.get() + '_games'
+        platform = self.entry_field_platform.get() + '_games'
         if self.entry_field_platform.get() in {'GAMES', 'GAMEZ'}:
             path = '/'.join(self.entry_field_iso_path.get().split('/')[:-1])
-            test_path1 = '/'.join(json_game_list[platform_key][0]['path'].split('/')[:-1])
-            json_game_list[platform_key] = [x for x in json_game_list[platform_key] if
+            test_path1 = '/'.join(json_game_list[platform][0]['path'].split('/')[:-1])
+            json_game_list[platform] = [x for x in json_game_list[platform] if
                                             '/'.join(x['path'].split('/')[:-1]) != path]
             print("test_path1: " + test_path1) if self._verbose else None
         else:
             path = self.entry_field_iso_path.get()
-            test_path2 = json_game_list[platform_key][0]['path'] + json_game_list[platform_key][0]['filename']
+            test_path2 = json_game_list[platform][0]['path'] + json_game_list[platform][0]['filename']
             print("test_path2: " + test_path2) if self._verbose else None
-            for test in json_game_list[platform_key]:
+            for test in json_game_list[platform]:
                 if 'kingdom' in test['filename'].lower():
                     print(str(test['path'] + test['filename'])) if self._verbose else None
 
-            json_game_list[platform_key] = [x for x in json_game_list[platform_key] if
+            json_game_list[platform] = [x for x in json_game_list[platform] if
                                             str(x['path'] + x['filename']) != path]
 
-        # update path to game work_dir
+        # update path to game wcm_work_dir
         AppPaths.game_work_dir = os.path.join(
-            AppPaths().get_game_build_dir(self.entry_field_title_id.get(), self.entry_field_filename.get()), 'work_dir')
+            AppPaths().get_game_build_dir(self.entry_field_title_id.get(), self.entry_field_filename.get()), 'wcm_work_dir')
         if current_work_dir != AppPaths.game_work_dir:
             new_game_build_path = os.path.join(AppPaths.game_work_dir, '..')
             if not os.path.exists(new_game_build_path):
                 os.mkdir(new_game_build_path)
-            # copy old work_dir to new work_dir
+            # copy old wcm_work_dir to new wcm_work_dir
             GlobalDef().copytree(os.path.join(current_work_dir, ''), AppPaths.game_work_dir)
 
             # remove old folder build folder
@@ -1179,7 +1184,7 @@ class Main:
 
         # add new data to the game list
         new_data_json = self.entry_fields_to_json(os.path.join(AppPaths.util_resources, 'game_structure.json.BAK'))
-        json_game_list[platform_key].append(new_data_json)
+        json_game_list[platform].append(new_data_json)
 
         # update the json game list file
         with open(GameListData.GAME_LIST_DATA_PATH, 'w') as newFile:
@@ -1188,25 +1193,25 @@ class Main:
 
             # GameListData.game_list_data_json = GameListData().get_game_list()
 
-        # change Appdata.work_dir
+        # change Appdata.wcm_work_dir
         AppPaths.game_work_dir = os.path.join(
-            AppPaths().get_game_build_dir(self.entry_field_title_id.get(), self.entry_field_filename.get()), 'work_dir')
+            AppPaths().get_game_build_dir(self.entry_field_title_id.get(), self.entry_field_filename.get()), 'wcm_work_dir')
 
     def on_build_button(self):
         self.update_game_build_path()
 
         if self.save_work_dir():
 
-            if not os.path.exists(self.pkg_dir):
-                os.makedirs(self.pkg_dir)
+            if not os.path.exists(self.tmp_pkg_dir):
+                os.makedirs(self.tmp_pkg_dir)
             if not os.path.exists(AppPaths.game_work_dir):
                 os.makedirs(AppPaths.game_work_dir)
 
-            __init_pkg_build_dir__()
+            __init_tmp_pkg_dir__()
 
             self.game_pkg_dir = os.path.join(AppPaths.game_work_dir, 'pkg')
             if os.path.isfile(os.path.join(self.game_pkg_dir, 'ICON0.PNG')):
-                shutil.copyfile(os.path.join(self.game_pkg_dir, 'ICON0.PNG'), os.path.join(self.pkg_dir, 'ICON0.PNG'))
+                shutil.copyfile(os.path.join(self.game_pkg_dir, 'ICON0.PNG'), os.path.join(self.tmp_pkg_dir, 'ICON0.PNG'))
             else:
                 # extract the platform name by using the path
                 platform = ''
@@ -1223,24 +1228,24 @@ class Main:
                 if not os.path.isfile(os.path.join(default_img_path, platform, 'ICON0.PNG')):
                     platform = ''
                 shutil.copyfile(os.path.join(default_img_path, platform, 'ICON0.PNG'),
-                                os.path.join(self.pkg_dir, 'ICON0.PNG'))
+                                os.path.join(self.tmp_pkg_dir, 'ICON0.PNG'))
 
             if os.path.isfile(os.path.join(self.game_pkg_dir, 'PIC0.PNG')):
-                shutil.copyfile(os.path.join(self.game_pkg_dir, 'PIC0.PNG'), os.path.join(self.pkg_dir, 'PIC0.PNG'))
+                shutil.copyfile(os.path.join(self.game_pkg_dir, 'PIC0.PNG'), os.path.join(self.tmp_pkg_dir, 'PIC0.PNG'))
 
             if os.path.isfile(os.path.join(self.game_pkg_dir, 'PIC1.PNG')):
-                shutil.copyfile(os.path.join(self.game_pkg_dir, 'PIC1.PNG'), os.path.join(self.pkg_dir, 'PIC1.PNG'))
+                shutil.copyfile(os.path.join(self.game_pkg_dir, 'PIC1.PNG'), os.path.join(self.tmp_pkg_dir, 'PIC1.PNG'))
 
-            # builds pkg and reads the pkg filename
+            # builds tmp_pkg_dir and reads the tmp_pkg_dir filename
             pkg_name = Webman_PKG().build()
 
             if pkg_name != None:
-                # making sure default work_dir and pkg directories exists
+                # making sure default wcm_work_dir and tmp_pkg_dir directories exists
                 if not os.path.exists(self.game_pkg_dir):
                     os.makedirs(self.game_pkg_dir)
 
                     # saving the build content in the game build folder
-                    GlobalDef().copytree(AppPaths.pkg, self.game_pkg_dir)
+                    GlobalDef().copytree(AppPaths.tmp_pkg_dir, self.game_pkg_dir)
 
                 if os.path.isdir(AppPaths.game_work_dir):
                     install_path = self.drive_system_path_array[0]
@@ -1251,7 +1256,7 @@ class Main:
                         pkg_remote_path = '/' + install_path + '/'
 
                     response = messagebox.askyesno('Build status: success',
-                                                   'Build done!\nDo you want to remote-install the pkg?\n\nLocation: ' + pkg_remote_path + '/' + pkg_name)
+                                                   'Build done!\nDo you want to remote-install the tmp_pkg_dir?\n\nLocation: ' + pkg_remote_path + '/' + pkg_name)
                     # yes
                     if response:
                         pkg_local_path = os.path.join(AppPaths.game_work_dir, '../', pkg_name)
@@ -1264,7 +1269,7 @@ class Main:
                         try:
                             os.startfile(os.path.join(AppPaths.game_work_dir, '../'))
                         except:
-                            print('ERROR: Could open the pkg build dir from Windows explorer') if self._verbose else None
+                            print('ERROR: Could open the tmp_pkg_dir build dir from Windows explorer') if self._verbose else None
 
             else:
                 messagebox.showerror("Build status: fail", "Build failed!\nSee error log.")
@@ -1389,7 +1394,7 @@ class Main:
         try:
             ftp = FtpSettings().get_ftp()
             pkg_local_file = open(pkg_local_path, "rb")
-            # go to path and transfer the pkg
+            # go to path and transfer the tmp_pkg_dir
             ftp.cwd(pkg_remote_path)
             ftp.storbinary('STOR ' + pkg_name, pkg_local_file)
             ftp.quit()
@@ -1412,12 +1417,12 @@ class Main:
             status_code = response.getcode()
             print('DEBUG status_code: ' + str(status_code)) if self._verbose else None
             if status_code == 200:
-                messagebox.showinfo('Status: pkg installed', 'Install completed!')
+                messagebox.showinfo('Status: tmp_pkg_dir installed', 'Install completed!')
             # status 400: webman => faulty path => Error
             # status 404: webman => faulty command => Not found
             # status 200: OK
         except Exception as ez:
-            print('ERROR: could not install pkg') if self._verbose else None
+            print('ERROR: could not install tmp_pkg_dir') if self._verbose else None
             print('DEBUG ERROR traceback: ' + str(traceback.print_exc())) if self._verbose else None
             print(getattr(ez, 'message', repr(ez))) if self._verbose else None
 

@@ -35,6 +35,7 @@ class Webman_pkg:
             print('DEBUG build_dir_path: ' + build_dir_path + ' is a path')
 
         print('Create PKG')
+        # check if pkgcrypt built first
         subprocess.call(['python3', 'resources/tools/ps3py/pkg.py', '-c', content_id, pkg_dir_path, pkg_name])
 
         if os.path.isdir(build_dir_path) and os.path.isfile(pkg_name):
@@ -42,13 +43,13 @@ class Webman_pkg:
                 os.remove(os.path.join(build_dir_path, pkg_name))
             shutil.move(pkg_name, build_dir_path)
 
-            print('[5/5] Execution of \'webman_pkg.py\':              DONE')
+            print('[5/5] Execution of \'create_pkg.py\':              DONE')
             print('-----------------------------------------------------')
             print('Package created in: ' + build_dir_path + '/' + pkg_name + '\n')
             return pkg_name
 
         else:
-            print('[5/5] Execution of \'webman_pkg.py\':              FAILED')
+            print('[5/5] Execution of \'create_pkg.py\':              FAILED')
             print('-----------------------------------------------------')
             raise Exception('pkg_name: ' + pkg_name +
                         ',\nbuild_dir_path: ' + build_dir_path +

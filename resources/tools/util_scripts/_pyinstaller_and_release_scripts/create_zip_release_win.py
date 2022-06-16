@@ -33,8 +33,7 @@ def zipdir(path, ziph):
 			dirs.remove('icons')
 		if 'tv_frames' in dirs:
 			dirs.remove('tv_frames')
-		if 'work_dir' in dirs:
-			dirs.remove('work_dir')
+		if 'wcm_work_dir' in dirs:
 		if 'xmb_capture' in dirs:
 			dirs.remove('xmb_capture')
 		if 'burnout_3_example' in dirs:
@@ -83,14 +82,14 @@ def zipdir(path, ziph):
 				webman_classics_maker_exist = True
 
 	if((webman_classics_maker_exist) == False):
-		print("Warning: Couldn't find webman-classics-maker.exe")
-		print('Try rebuilding binaries using the included pyinstaller scripts.')
+		print("Couldn't find webman-classics-maker.exe")
+		print('Try rebuilding binary using the included pyinstaller script.')
 		sys.exit()
 
 if __name__ == '__main__':
 
 	# windows release
-	zip_archive_name = 'webman-classics-maker_v2.2.x_win.zip'
+	zip_archive_name = 'webman-classics-maker_v3.x.x_win.zip'
 	zip_dir_path = BuildPaths.zip_dir
 	release_dir = BuildPaths.release
 
@@ -100,6 +99,7 @@ if __name__ == '__main__':
 	zipf = zipfile.ZipFile(os.path.join(release_dir, zip_archive_name), 'w', zipfile.ZIP_DEFLATED)
 	zipdir(zip_dir_path, zipf)
 	zipf.close()
+
 
 	print('The release archive has sucessfully been package and distributed to:\n' + '/release/' + zip_archive_name)
 	# try:
