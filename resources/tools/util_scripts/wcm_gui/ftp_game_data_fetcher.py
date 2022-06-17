@@ -19,11 +19,11 @@ sys.path.append(AppPaths.settings)
 
 
 def __drive_selection_handler__(selected_drive, selected_platform):
-    # drive_str and platforms to fetch
+    # drive and platforms to fetch
     selected_drives = []
     platform_filter = []
 
-    # add all drive_str paths based on choice from drive_str filter
+    # add all drive paths based on choice from drive filter
     if any(x in selected_drive for x in ['ALL']):
         selected_drives.extend(GlobalVar.drive_paths)
         if selected_drives.count(('/dev_usb(*)/', 'USB(*)')) > 0:
@@ -35,11 +35,11 @@ def __drive_selection_handler__(selected_drive, selected_platform):
             selected_drives.remove(('/dev_usb(*)/', 'USB(*)'))
         if selected_drives.count(('/dev_hdd0/', 'HDD0')) > 0:
             selected_drives.remove(('/dev_hdd0/', 'HDD0'))
-    # single drive_str choice, i.e. not 'ALL'
+    # single drive choice, i.e. not 'ALL'
     else:
         selected_drives.extend(list(filter(lambda x: str(selected_drive) == x[1], GlobalVar.drive_paths)))
 
-    # add all drive_str paths based on choice from platform filter
+    # add all drive paths based on choice from platform filter
     if 'ALL' in selected_platform:
         platform_filter.extend(GlobalVar.platform_paths)
     # single platform choice
@@ -97,7 +97,7 @@ class FtpGameList:
                 for a in active_drives_list:
                     ad = '/' + str(a).split(';')[6].strip() + '/'
                     if sd[0] == ad:
-                        print('DEBUG adding drive_str: ' + ad + ' for scanning')
+                        print('DEBUG adding drive: ' + ad + ' for scanning')
                         filtered_drive_list.append(sd)
             if len(filtered_drive_list) < 1:
                 print('''DEBUG: The USB port you're trying to scan is not active''')

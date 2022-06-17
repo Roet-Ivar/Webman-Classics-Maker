@@ -135,7 +135,7 @@ class Gamelist:
                     self.selected_filename = str(list_game['filename'])
                     self.selected_platform = str(list_game['platform'])
 
-                    # parse drive_str and system from json data
+                    # parse drive and system from json data
                     path_array = list(filter(None, self.selected_path.split('/')))
                     self.drive_system_path_array[0] = path_array[0]
                     self.drive_system_path_array[1] = path_array[1]

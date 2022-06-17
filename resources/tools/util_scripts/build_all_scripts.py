@@ -1,4 +1,7 @@
+import os
 import traceback
+from shutil import rmtree
+
 from resources.tools.util_scripts.json_to_param_sfo import Write_param_sfo
 from resources.tools.util_scripts.content_id_elf_replace import Elf_replace
 from resources.tools.util_scripts.edit_launch_txt import Edit_launch_txt
@@ -49,18 +52,17 @@ class Webman_PKG:
 			if repr(e):
 				print('DEBUG ERROR traceback: ' + str(traceback.print_exc()))
 
-		# clean up .pyc-files
-		import os
-		util_scripts = AppPaths.util_scripts
-		util_scripts_items = os.listdir(util_scripts)
-		for item in util_scripts_items:
-			if item.endswith(".pyc"):
-				os.remove(os.path.join(util_scripts, item))
+		# clean up __pycache__ folders and .pyc-files
+		def clean_up(path):
+			items = os.listdir(path)
+			for item in items:
+				if item.endswith(".pyc") or item in ["__pycache__", "build"]:
+					rmtree(os.path.join(path, item))
 
-		wcm_gui = AppPaths.wcm_gui
-		wcm_gui_items = os.listdir(wcm_gui)
-		for item in wcm_gui_items:
-			if item.endswith(".pyc"):
-				os.remove(os.path.join(wcm_gui, item))
+
+		clean_up(AppPaths.util_scripts)
+		clean_up(AppPaths.wcm_gui)
+		clean_up(AppPaths.build_scripts)
+		clean_up(AppPaths.ps3py)
 
 		return pkg_name

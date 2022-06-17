@@ -35,7 +35,7 @@ class AppPaths:
     release = os.path.join(application_path, 'release')
     resources = os.path.join(application_path, 'resources')
     settings = os.path.join(application_path, 'settings')
-    tmp_work_dir = os.path.join(application_path, '_work_dir')
+    tmp_work_dir = os.path.join(application_path, 'work_dir')
     tmp_pkg_dir = os.path.join(tmp_work_dir, 'pkg')
 
     # in resources
@@ -50,11 +50,13 @@ class AppPaths:
     scetool = os.path.join(tools, 'scetool')
     util_resources = os.path.join(tools, 'util_resources')
     util_scripts = os.path.join(tools, 'util_scripts')
+    ps3py = os.path.join(tools, 'ps3py')
 
     # in util_scripts
     games_metadata = os.path.join(util_scripts, 'games_metadata')
     pkgcrypt = os.path.join(util_scripts, 'pkgcrypt')
     wcm_gui = os.path.join(util_scripts, 'wcm_gui')
+    build_scripts = os.path.join(util_scripts, '_pyinstaller_and_release_scripts')
 
     # variable game work dir
     def get_game_build_dir(self, title_id, filename):

@@ -193,7 +193,7 @@ class Main:
 
     def __init_entry_fields__(self):
         self.usb_port_number = 0
-        self.drive_system_path_array = ['drive_str', 'system', 'path']
+        self.drive_system_path_array = ['drive', 'system', 'path']
 
         self.vcmd = self.main.register(self.dynamic_validate_title_id)
         self.vcmd2 = self.main.register(self.dynamic_validate_title_id)
@@ -226,8 +226,8 @@ class Main:
         self.entry_field_ftp_pass.insert(0, get_ftp_pass_from_config())
 
         # system choice buttons
-        self.selection_drive_list = GlobalVar.drive_paths[1]
-        self.selection_system_list = GlobalVar.drive_paths[0]
+        self.selection_drive_list = GlobalVar.drive_paths
+        self.selection_system_list = GlobalVar.platform_paths
         self.drive_path = self.selection_drive_list[0]  # drive should be toggled by buttons
 
         # Entry field placements
@@ -265,40 +265,41 @@ class Main:
                                         width=60)
 
     def __init_buttons__(self):
+        print(self.selection_drive_list[0][0])
         self.hdd_button = Button(self.main,
                                  image=self.hdd_button_image,
                                  borderwidth=1,
-                                 command=lambda: self.on_drive_button(self.selection_drive_list[0]))
+                                 command=lambda: self.on_drive_button(self.selection_drive_list[0][0]))
 
         self.usb_button = Button(self.main,
                                  image=self.usb_button_image,
                                  borderwidth=1,
                                  command=lambda:
-                                 self.on_drive_button(self.selection_drive_list[self.usb_port_number + 1]))
+                                 self.on_drive_button(self.selection_drive_list[self.usb_port_number + 1][0]))
 
         self.psp_button = Button(self.main,
                                  image=self.psp_button_image,
                                  borderwidth=1,
                                  command=lambda:
-                                 self.on_system_button(self.drive_system_path_array[0], self.selection_system_list[0]))
+                                 self.on_system_button(self.drive_system_path_array[0], self.selection_system_list[0][0]))
 
         self.psx_button = Button(self.main,
                                  image=self.psx_button_image,
                                  borderwidth=1,
                                  command=lambda:
-                                 self.on_system_button(self.drive_system_path_array[0], self.selection_system_list[1]))
+                                 self.on_system_button(self.drive_system_path_array[0], self.selection_system_list[1][0]))
 
         self.ps2_button = Button(self.main,
                                  image=self.ps2_button_image,
                                  borderwidth=1,
                                  command=lambda:
-                                 self.on_system_button(self.drive_system_path_array[0], self.selection_system_list[2]))
+                                 self.on_system_button(self.drive_system_path_array[0], self.selection_system_list[2][0]))
 
         self.ps3_button = Button(self.main,
                                  image=self.ps3_button_image,
                                  borderwidth=1,
                                  command=lambda:
-                                 self.on_system_button(self.drive_system_path_array[0], self.selection_system_list[3]))
+                                 self.on_system_button(self.drive_system_path_array[0], self.selection_system_list[3][0]))
 
         self.build_button = Button(self.main,
                                    image=self.build_button_image,
@@ -812,7 +813,7 @@ class Main:
 
     def on_drive_button(self, drive_choice):
         print('DEBUG on_drive_button') if self._verbose else None
-        # Check if same drive_str already set
+        # Check if same drive already set
         if drive_choice in self.entry_field_iso_path.get():
             # print('DEBUG ' + '\'' + drive_choice + '\'' + ' already set') if self._verbose else None
             # if dev_usb### already set -> iterate port (0-3)
@@ -849,7 +850,7 @@ class Main:
 
         self.update_iso_path_entry_field(current_iso_path)
 
-        # Replace current drive_str
+        # Replace current drive
         if drive_choice not in current_iso_path:
             print('DEBUG drive_choice not in current_iso_path') if self._verbose else None
 
@@ -894,15 +895,15 @@ class Main:
         path = ''
         filename = self.entry_field_filename.get().replace('//', '/', )
         # TODO: this section could probably be optimized
-        if self.drive_system_path_array[0] != None:
+        if self.drive_system_path_array[0] is not None:
             drive = '/' + self.drive_system_path_array[0] + '/'
-        if self.drive_system_path_array[1] != None:
+        if self.drive_system_path_array[1] is not None:
             system = '/' + self.drive_system_path_array[1] + '/'
-        if self.drive_system_path_array[2] != None:
-            path = '/' + self.drive_system_path_array[2] + '/'
+        if self.drive_system_path_array[2] is not None:
+            path = '/' + filename
 
-        if '' not in {drive, system, path, filename}:
-            iso_path = drive + system + path + filename
+        if '' not in {drive, system, filename}:
+            iso_path = drive + system + path
             iso_path = iso_path.replace('//', '/', )
 
         self.entry_field_iso_path.xview_moveto(1)
