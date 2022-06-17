@@ -95,42 +95,50 @@ def create_pic1_gui(self, active_pkg_dir):
     pic1_active_path = os.path.join(active_pkg_dir, 'PIC1.PNG')
     if os.path.isfile(pic1_active_path):
         self.pic1_gui = Image.open(pic1_active_path).convert("RGBA")
+        print('use PIC1.PNG from {}'.format(pic1_active_path)) if self._verbose else None
     else:
         self.pic1_gui = Image.open(os.path.join(AppPaths.default_img_path, 'PIC1.PNG')).convert("RGBA")
+        print('use PIC1.PNG from {}'.format(os.path.join(AppPaths.default_img_path, 'PIC1.PNG'))) if self._verbose else None
 
     # draw xmb icons and system logo onto the background
     self.pic1_gui.paste(self.image_xmb_icons, (0, 0), self.image_xmb_icons)
-    self.pic0_gui.paste(self.ps3_gametype_logo, (1180, 525), self.ps3_gametype_logo)
+    self.pic1_gui.paste(self.ps3_gametype_logo, (1180, 525), self.ps3_gametype_logo)
 
     # draw game title text onto the background
     self.pic1_ref = copy.copy(self.pic1_gui)
     self.draw_text_on_image_w_shadow(self.pic1_gui,
-                                     self.entry_field_title.get(),
-                                     745, 457, 32, 2,
+                                     str(self.entry_field_title.get()),
+                                     # 745, 457, 32, 2,
+                                     760, 487, 32, 2,
                                      'white', 'black')
+    # self.draw_text_on_image_w_shadow(self.pic1_gui_w_title, self.entry_field_title.get(), 760, 487, 32, 2, 'white', 'black')
 
     # create photoimage to be used for the button
-    self.pic1_photo_image = PhotoImage(
+    self.pic1_photoimage = PhotoImage(
         self.pic1_gui.resize(
             (int(1280 * self.scaling),
              int(720 * self.scaling)),
             Image.Resampling.LANCZOS))
 
     # set the new background image
-    self.pic1_button.config(image=self.pic1_photo_image)
+    self.pic1_button.config(image=self.pic1_photoimage)
 
 
 
 def create_pic0_gui(self, active_pkg_dir):
     pic0_active_path = os.path.join(active_pkg_dir, 'PIC0.PNG')
+
     if os.path.isfile(pic0_active_path):
         self.pic0_gui = Image.open(pic0_active_path).convert("RGBA")
         pic0_bg = copy.copy(self.pic1_gui)
-    # if no PIC0.PNG present we make a placeholder for the GUI
+        print('use PIC0.PNG from {}'.format(pic0_active_path)) if self._verbose else None
+
     else:
         self.pic0_gui = Image.open(os.path.join(AppPaths.default_img_path, 'PIC0.PNG')).convert("RGBA")
-        # background w/ title
-        pic0_bg = copy.copy(self.image_pic1_w_title)
+        print('use PIC0.PNG from {}'.format(os.path.join(AppPaths.default_img_path, 'PIC0.PNG'))) if self._verbose else None
+        # mask with PIC1 background
+        # pic0_bg = copy.copy(self.pic1_gui_w_title)
+        pic0_bg = copy.copy(self.pic1_gui)
         # add ps3 system logo
         pic0_bg.paste(self.ps3_gametype_logo, (1180, 525), self.ps3_gametype_logo)
         # draw date and time beside ICON0
@@ -154,14 +162,13 @@ def create_pic0_gui(self, active_pkg_dir):
     self.pic0_new_dim = (
         int(pic0_x_scale * tmp_image_pic0.width), int(pic0_y_scale * tmp_image_pic0.height))
 
-    self.image_pic0_resized = copy.copy(tmp_image_pic0)
-    self.image_pic0_resized = self.image_pic0_resized.resize(
+    self.image_pic0_resized = copy.copy(tmp_image_pic0).resize(
         (self.pic0_new_dim[0], self.pic0_new_dim[1]), Image.Resampling.LANCZOS)
 
     # create photoimage for the button
-    self.pic0_photo_image = PhotoImage(self.image_pic0_resized)
+    self.pic0_photoimage = PhotoImage(self.image_pic0_resized)
     # set the new PIC0 button image
-    self.pic0_button.config(image=self.pic0_photo_image)
+    self.pic0_button.config(image=self.pic0_photoimage)
 
 
 def create_icon0_gui(self, active_pkg_dir):
@@ -169,13 +176,13 @@ def create_icon0_gui(self, active_pkg_dir):
     platform = get_platform(self)
 
     if os.path.isfile(icon0_active_path):
-        print('use ICON0.PNG from {}', icon0_active_path)
+        print('use ICON0.PNG from {}'.format(icon0_active_path)) if self._verbose else None
         self.icon0_gui = Image.open(icon0_active_path).convert("RGBA")
     else:
         self.icon0_gui = Image.open(os.path.join(
             AppPaths.default_img_path, platform, 'ICON0.PNG')).convert("RGBA")
-        print('use ICON0.PNG from {}', os.path.join(
-            AppPaths.default_img_path, platform, 'ICON0.PNG'))
+        print('use ICON0.PNG from {}'.format(os.path.join(
+            AppPaths.default_img_path, platform, 'ICON0.PNG')))
 
     # image coordinates for the gui (w/o scaling)
     self.icon0_x_pos = 405
@@ -200,9 +207,9 @@ def create_icon0_gui(self, active_pkg_dir):
         (int(icon0_x_scale * icon0_bg.width), int(icon0_y_scale * icon0_bg.height)), Image.Resampling.LANCZOS)
 
     # create photoimage for the button
-    self.icon0_gui_photo_image = PhotoImage(self.icon0_gui)
+    self.icon0_gui_photoimage = PhotoImage(self.icon0_gui)
     # set the new ICON0 button image
-    self.icon0_button.config(image=self.icon0_gui_photo_image)
+    self.icon0_button.config(image=self.icon0_gui_photoimage)
 
 
 def get_platform(self):
@@ -240,6 +247,7 @@ class Main:
         self.ftp_settings_path = os.path.join(AppPaths.settings, 'ftp_settings.cfg')
         self.fonts_path = AppPaths.fonts
         self.game_pkg_dir = os.path.join(AppPaths.game_work_dir, 'pkg')
+        self.active_pkg_dir = self.game_pkg_dir
 
         # paddings
         self.text_box_x_padding = 20
@@ -304,8 +312,8 @@ class Main:
 
         self.pic1_gui = get_default_image('PIC1.PNG')
         self.pic1_gui_ref = copy.copy(self.pic1_gui)
-        self.image_pic1_w_title = copy.copy(self.pic1_gui)
-        self.photoimage_gui_pic1 = None
+        self.pic1_gui_w_title = copy.copy(self.pic1_gui)
+        self.pic1_gui_photoimage = None
 
         # ui background image
         self.background_images = []
@@ -396,7 +404,7 @@ class Main:
                                         width=60)
 
     def __init_buttons__(self):
-        print(self.selection_drive_list[0][0])
+        print(self.selection_drive_list[0][0]) if self._verbose else None
         self.hdd_button = Button(self.main,
                                  image=self.hdd_button_image,
                                  borderwidth=1,
@@ -463,17 +471,17 @@ class Main:
         self.pic1_button = Button(self.main,
                                   highlightthickness=0,
                                   bd=0,
-                                  command=lambda: self.image_replace_browser(self.main))
+                                  command=lambda: self.image_replace_browser())
 
         self.pic0_button = Button(self.main,
                                   highlightthickness=0,
                                   bd=0,
-                                  command=lambda: self.image_replace_browser(self.main))
+                                  command=lambda: self.image_replace_browser())
 
         self.icon0_button = Button(self.main,
                                    highlightthickness=0,
                                    bd=0,
-                                   command=lambda: self.image_replace_browser(self.main))
+                                   command=lambda: self.image_replace_browser())
 
         # button tooltips
         CreateToolTip(self.usb_button, "Toggle USB port [0-3]")
@@ -727,27 +735,27 @@ class Main:
                             self.background_images.append(tmp_img)
 
     def __draw_pkg_images_on_canvas__(self, **kwargs):
-        tmp_image_icon0 = None
         img_to_be_changed = kwargs.get('img_to_be_changed', '').lower()
-        active_pkg_dir = kwargs.get('game_pkg_dir', AppPaths.tmp_pkg_dir)
+        self.active_pkg_dir = kwargs.get('game_pkg_dir', AppPaths.tmp_pkg_dir)
+        print('active_pkg_dir: {}'.format(self.active_pkg_dir)) if self._verbose else None
 
         if img_to_be_changed == '' or img_to_be_changed == 'pic1':
             # redraw all images
-            print('all - > all pkg images from active dir')
+            print('all - > all pkg images from active dir') if self._verbose else None
 
-            create_pic1_gui(self, active_pkg_dir)
-            create_pic0_gui(self, active_pkg_dir)
-            create_icon0_gui(self, active_pkg_dir)
+            create_pic1_gui(self, self.active_pkg_dir)
+            create_pic0_gui(self, self.active_pkg_dir)
+            create_icon0_gui(self, self.active_pkg_dir)
 
         elif img_to_be_changed == 'pic0':
             # redraw all images
-            print('pic0 -> pic0 and icon0 from active dir')
-            # create_pic0_gui()
+            print('pic0 -> pic0 and icon0 from active dir') if self._verbose else None
+            create_pic0_gui(self, self.active_pkg_dir)
 
         elif img_to_be_changed == 'icon0':
             # redraw all images
-            print('icon0 -> icon0 from active dir')
-            # create_icon0_gui()
+            print('icon0 -> icon0 from active dir') if self._verbose else None
+            create_icon0_gui(self, self.active_pkg_dir)
 
 
     def draw_text_on_image(self, image, text, text_x, text_y, text_size, text_color):
@@ -810,37 +818,29 @@ class Main:
         print('DEBUG on_drive_button') if self._verbose else None
         # Check if same drive already set
         if drive_choice in self.entry_field_iso_path.get():
-            # print('DEBUG ' + '\'' + drive_choice + '\'' + ' already set') if self._verbose else None
             # if dev_usb### already set -> iterate port (0-3)
             if 'dev_usb00' in drive_choice:
                 self.usb_port_number = self.usb_port_number + 1
 
                 if self.usb_port_number > 3:
                     self.usb_port_number = 0
-                # print('DEBUG usb_port_number: ' + str(self.usb_port_number)) if self._verbose else None
                 drive_choice = 'dev_usb00' + str(self.usb_port_number)
 
-        # print('DEBUG drive_choice: ' + drive_choice) if self._verbose else None
+        print('DEBUG drive_choice: ' + drive_choice) if self._verbose else None
         self.drive_system_path_array[0] = drive_choice
 
         current_iso_path = '/' + '/'.join([self.drive_system_path_array[0],
                                            self.drive_system_path_array[1],
-                                           self.drive_system_path_array[2],
                                            self.entry_field_filename.get()]).replace('//', '/')
 
         self.update_iso_path_entry_field(current_iso_path)
 
     def on_system_button(self, drive_choice, system_choice):
-        # print('DEBUG on_system_button') if self._verbose else None
-        # if system_choice in self.entry_field_iso_path.get():
-        # print('DEBUG ' + '\'' + system_choice + '\'' + ' already set') if self._verbose else None
-
-        # print('DEBUG system_choice: ' + system_choice) if self._verbose else None
+        print('DEBUG system_choice: ' + system_choice) if self._verbose else None
         self.drive_system_path_array[1] = system_choice
 
         current_iso_path = '/' + '/'.join([self.drive_system_path_array[0],
                                            self.drive_system_path_array[1],
-                                           self.drive_system_path_array[2],
                                            self.entry_field_filename.get()]).replace('//', '/')
 
         self.update_iso_path_entry_field(current_iso_path)
@@ -880,6 +880,9 @@ class Main:
             AppPaths.game_work_dir = os.path.join(selected_path, 'work_dir')
             self.game_pkg_dir = os.path.join(AppPaths.game_work_dir, 'pkg')
 
+        if self.game_pkg_dir == 'pkg':
+            self.game_pkg_dir = AppPaths.tmp_pkg_dir
+
         self.__draw_pkg_images_on_canvas__(game_pkg_dir=self.game_pkg_dir)
 
     # Dynamic update of the 'entry_field_filename' into the 'entry_field_iso_path'
@@ -896,20 +899,14 @@ class Main:
             system = '/' + self.drive_system_path_array[1] + '/'
         if self.drive_system_path_array[2] is not None:
             path = '/' + filename
+            # path = '/' + self.drive_system_path_array[2] + '/'
 
-        if '' not in {drive, system, filename}:
+        if '' not in [drive, system, filename]:
             iso_path = drive + system + path
             iso_path = iso_path.replace('//', '/', )
 
         self.entry_field_iso_path.xview_moveto(1)
         self.update_iso_path_entry_field(iso_path)
-
-        if iso_path == '':
-            # TODO: make sense if this part, needed?
-            print()
-            # re-draw wcm_work_dir image on canvas
-            # __init_images__(self)
-            # self.draw_background_on_canvas()
 
     def update_iso_path_entry_field(self, iso_path):
         self.entry_field_iso_path.config(state='normal')
@@ -919,55 +916,52 @@ class Main:
 
     # Dynamic update of the game title on to the PIC1 image
     def dynamic_title_to_pic1(self, event):
-        print('dynamic_title_to_pic1')
-        tmp_img = self.pic1_ref
+        print('dynamic_title_to_pic1') if self._verbose else None
+        self.pic1_gui_w_title = self.pic1_gui
         # self, image, text, text_x, text_y, text_size, text_outline, text_color,
-        self.draw_text_on_image_w_shadow(tmp_img, self.entry_field_title.get(), 760, 487, 32, 2, 'white', 'black')
-        self.image_pic1_w_title = copy.copy(tmp_img)
-        tmp_img = tmp_img.resize((int(1280 * self.scaling), int(720 * self.scaling)), Image.Resampling.LANCZOS)
-        self.photoimage_gui_pic1 = PhotoImage(tmp_img)
-        self.pic1_button.config(image=self.photoimage_gui_pic1)
+        self.draw_text_on_image_w_shadow(self.pic1_gui_w_title, self.entry_field_title.get(), 760, 487, 32, 2, 'white', 'black')
+        tmp_img = self.pic1_gui_w_title.resize((int(1280 * self.scaling), int(720 * self.scaling)), Image.Resampling.LANCZOS)
+        self.pic1_gui_photoimage = PhotoImage(tmp_img)
+        self.pic1_button.config(image=self.pic1_gui_photoimage)
         self.update_game_build_path()
 
-    def image_replace_browser(self, main):
+    def image_replace_browser(self):
         image = askopenfile(mode='rb', title='Browse an image', filetypes=[('PNG image', '.PNG')])
         if image is not None:
             img_to_be_changed = None
+            if self.active_pkg_dir in [None, '']:
+                self.active_pkg_dir = AppPaths.tmp_pkg_dir
+
             print('DEBUG image content:' + image.name) if self._verbose else None
 
             # Clear and replace image
             if 'icon0' in image.name.lower():
                 self.image_icon0 = Image.open(image)
-                self.image_icon0_ref = copy.copy(self.image_icon0)
+                # self.image_icon0_ref = copy.copy(self.image_icon0)
                 img_to_be_changed = 'icon0'
 
-                # save new image to both tmp_pkg_dir folders
-                if os.path.exists(self.game_pkg_dir):
-                    self.image_icon0.save(os.path.join(self.game_pkg_dir, 'ICON0.PNG'))
-                self.image_icon0.save(os.path.join(self.tmp_pkg_dir, 'ICON0.PNG'))
+                # save new image to both the active pkg dir folder
+                if os.path.exists(self.active_pkg_dir):
+                    self.image_icon0.save(os.path.join(self.active_pkg_dir, 'ICON0.PNG'))
 
             elif 'pic1' in image.name.lower():
-                self.pic1_gui = Image.open(image)
-                self.pic1_gui_ref = Image.open(image)
+                self.image_pic1 = Image.open(image)
                 img_to_be_changed = 'pic1'
 
-                # save new image to both tmp_pkg_dir folders
-                if os.path.exists(self.game_pkg_dir):
-                    self.pic1_gui.save(os.path.join(self.game_pkg_dir, 'PIC1.PNG'))
-                self.pic1_gui.save(os.path.join(self.tmp_pkg_dir, 'PIC1.PNG'))
+                # save new image to both active pkg dir folder
+                if os.path.exists(self.active_pkg_dir):
+                    self.image_pic1.save(os.path.join(self.active_pkg_dir, 'PIC1.PNG'))
 
             elif 'pic0' in image.name.lower():
                 self.pic0_gui = Image.open(image)
-                self.gui_pic0_ref = Image.open(image)
                 img_to_be_changed = 'pic0'
 
-                # save new image to both tmp_pkg_dir folders
-                if os.path.exists(self.game_pkg_dir):
-                    self.pic0_gui.save(os.path.join(self.game_pkg_dir, 'PIC0.PNG'))
-                self.pic0_gui.save(os.path.join(self.tmp_pkg_dir, 'PIC0.PNG'))
+                # save new image to both active pkg dir folder
+                if os.path.exists(self.active_pkg_dir):
+                    self.pic0_gui.save(os.path.join(self.active_pkg_dir, 'PIC0.PNG'))
 
             # # re-draw wcm_work_dir image on canvas
-            self.__draw_pkg_images_on_canvas__(img_to_be_changed=img_to_be_changed)
+            self.__draw_pkg_images_on_canvas__(game_pkg_dir=self.active_pkg_dir, img_to_be_changed=img_to_be_changed)
 
     def generate_on_change(self, obj):
         obj.tk.eval('''
@@ -1095,30 +1089,20 @@ class Main:
     def save_work_dir(self):
         if self.validate_fields():
             if not os.path.exists(AppPaths.game_work_dir):
+                print('create save_work_dir: {}'.format(AppPaths.game_work_dir)) if self._verbose else None
+
                 if AppPaths.game_work_dir == '':
                     # we need to build the path first
                     selected_path = self.gamelist.get_selected_build_dir_path(str(self.entry_field_filename.get()),
                                                                               str(self.entry_field_title_id.get()))
-                    AppPaths.game_work_dir = os.path.join(selected_path, 'wcm_work_dir')
+                    AppPaths.game_work_dir = os.path.join(selected_path, 'work_dir')
                     self.game_pkg_dir = os.path.join(AppPaths.game_work_dir, 'pkg')
+
                 print('Creating game_work_dir: ' + str(
                     os.path.join(AppPaths.game_work_dir, 'pkg'))) if self._verbose else None
                 os.makedirs(os.path.join(AppPaths.game_work_dir, 'pkg'))
 
-            # make sure we have the mandatory ICON0 in the build_dir
-            if not os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'ICON0.PNG')):
-                # find any donor platforms by using looking the entry field
-                platform = ''
-                if self.entry_field_platform == 'NTFS':
-                    match = re.search('(?<=\[).*?(?=\])', str(self.entry_field_filename.get()))
-                    if match != None:
-                        donor_platform = list(filter(lambda x: match.group() in x[0], GlobalVar.platform_paths))
-                        if donor_platform:
-                            platform = list(donor_platform)[0][1]
-
-                default_img_path = os.path.join(AppPaths.resources, 'images', 'pkg', 'default')
-                icon0 = Image.open(os.path.join(default_img_path, platform, 'ICON0.PNG')).convert("RGBA")
-                icon0.save(os.path.join(AppPaths.game_work_dir, 'pkg', 'ICON0.PNG'))
+                GlobalDef().copytree(self.tmp_work_dir, AppPaths.game_work_dir)
 
             self.save_preview_image()
             self.save_pkg_info_to_json()
@@ -1313,10 +1297,10 @@ class Main:
 
     def save_preview_image(self):
         # making a preview print of the game canvas
-
+        print('saving preview at {}'.format(self.active_pkg_dir)) if self._verbose else None
         # check for PIC1 as background for the preview
-        if os.path.isfile(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC1.PNG')):
-            pic1_img = Image.open(os.path.join(AppPaths.game_work_dir, 'pkg', 'PIC1.PNG')).convert("RGBA")
+        if os.path.isfile(os.path.join(self.active_pkg_dir, 'PIC1.PNG')):
+            pic1_img = Image.open(os.path.join(self.active_pkg_dir, 'PIC1.PNG')).convert("RGBA")
             preview_img = Image.open(os.path.join(AppPaths.resources, 'images', 'pkg', 'default', 'PIC1.PNG')).convert(
                 "RGBA")
             preview_img.paste(pic1_img, (0, 0), pic1_img)
