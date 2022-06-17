@@ -33,7 +33,6 @@ def zipdir(path, ziph):
 			dirs.remove('icons')
 		if 'tv_frames' in dirs:
 			dirs.remove('tv_frames')
-		if 'wcm_work_dir' in dirs:
 		if 'xmb_capture' in dirs:
 			dirs.remove('xmb_capture')
 		if 'burnout_3_example' in dirs:
