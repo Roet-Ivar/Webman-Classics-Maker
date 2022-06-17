@@ -14,3 +14,5 @@ settings/ftp_settings.cfg
 game_list_data.json
 resources/tools/util_scripts/_pyinstaller_and_release_scripts/build/webman-classics-maker.spec
 resources/tools/util_scripts/_pyinstaller_and_release_scripts/build/webman-classics-maker/webman-classics-maker.exe.manifest
+work_dir/
+resources/tools/scetool/EBOOT.*

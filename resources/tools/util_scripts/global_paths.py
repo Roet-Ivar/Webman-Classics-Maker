@@ -37,6 +37,7 @@ class AppPaths:
     settings = os.path.join(application_path, 'settings')
     tmp_work_dir = os.path.join(application_path, 'work_dir')
     tmp_pkg_dir = os.path.join(tmp_work_dir, 'pkg')
+    default_img_path = os.path.join(resources, 'images', 'pkg', 'default')
 
     # in resources
     fonts = os.path.join(resources, 'fonts')
