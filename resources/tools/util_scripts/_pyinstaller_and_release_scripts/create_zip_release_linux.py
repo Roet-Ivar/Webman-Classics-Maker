@@ -1,6 +1,7 @@
-import sys, os, zipfile
-import application_path
-from global_paths import Build as BuildPaths
+import os
+import zipfile
+
+from global_paths import BuildPaths
 
 def zipdir(path, ziph):
 	# ziph is zipfile handle
@@ -27,7 +28,6 @@ def zipdir(path, ziph):
 			dirs.remove('icons')
 		if 'tv_frames' in dirs:
 			dirs.remove('tv_frames')
-		if 'work_dir' in dirs:
 			dirs.remove('work_dir')
 		if 'xmb_capture' in dirs:
 			dirs.remove('xmb_capture')
@@ -66,8 +66,8 @@ def zipdir(path, ziph):
 			files.remove('Edit_Param_SFO.exe')
 		if 'FTP_Game_List.exe' in files:
 			files.remove('FTP_Game_List.exe')
-		if 'Webman_Classics_Maker.exe' in files:
-			files.remove('Webman_Classics_Maker.exe')
+		if 'webman-classics-maker.exe' in files:
+			files.remove('webman-classics-maker.exe')
 
 		for file in files:
 			if file.endswith('.zip') is not True and file.endswith('.pyc') is not True:
@@ -76,7 +76,7 @@ def zipdir(path, ziph):
 if __name__ == '__main__':
 
 	# Linux release
-	zip_archive_name = 'webman_classics_maker_v2.0_linux.zip'
+	zip_archive_name = 'webman-classics-maker_v2.2.x_linux.zip'
 	zip_dir_path = BuildPaths.zip_dir
 	release_dir = BuildPaths.release
 
@@ -87,9 +87,8 @@ if __name__ == '__main__':
 	zipdir(zip_dir_path, zipf)
 	zipf.close()
 
-
 	print('The release archive has sucessfully been package and distributed to:\n' + '/release/' + zip_archive_name)
-	try:
-		input = raw_input
-	except NameError: pass
-	input('\npress ENTER to continue...')
+	# try:
+	# 	input = raw_input
+	# except NameError: pass
+	# input('\npress ENTER to continue...')

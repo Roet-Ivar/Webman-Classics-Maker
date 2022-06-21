@@ -1,0 +1,6 @@
+crypt.c
+setup.py
+pkgcrypt.egg-info/PKG-INFO
+pkgcrypt.egg-info/SOURCES.txt
+pkgcrypt.egg-info/dependency_links.txt
+pkgcrypt.egg-info/top_level.txt
