@@ -1,6 +1,6 @@
 import os
 import json
-from global_paths import App as AppPaths
+from resources.tools.util_scripts.global_paths import AppPaths
 
 class Elf_replace:
 	def execute(self):
@@ -12,7 +12,7 @@ class Elf_replace:
 			eboot_elf_file = f.read()
 			
 			try:
-				eboot_elf_file = eboot_elf_file.replace('PKGLAUNCH', str(json_data['title_id']))
+				eboot_elf_file = eboot_elf_file.replace('PKGLAUNCH'.encode('utf-8'), json_data['title_id'].encode('utf-8'))
 				newFile = open(os.path.join(AppPaths.scetool, 'EBOOT.ELF'), 'wb')
 				newFileByteArray = bytearray(eboot_elf_file)
 				newFile.write(newFileByteArray)
@@ -22,6 +22,6 @@ class Elf_replace:
 				return True
 			except Exception as e:
 				print('[2/5] Execution of \'content_id_elf_replace.py\':  FAILED')
-				print(e.message)
+				print(getattr(e, 'message', repr(e)))
 				print('-----------------------------------------------------')
 				return False

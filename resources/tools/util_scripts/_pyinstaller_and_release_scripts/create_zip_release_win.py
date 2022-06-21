@@ -1,13 +1,15 @@
-import sys, os, zipfile
-import application_path
-from global_paths import Build as BuildPaths
+import os
+import sys
+import zipfile
 
-import pyinstaller_Webman_Classics_Maker_exe
+import add_application_path
+from global_paths import BuildPaths
+
 
 def zipdir(path, ziph):
 	# ziph is zipfile handle
 	webman_classics_maker_exist = False
-	webman_classic_exe = 'Webman_Classics_Maker.exe'
+	webman_classic_exe = 'webman-classics-maker.exe'
 
 	# TODO: No more CHDIR plz!
 	# files folders to exclude
@@ -31,8 +33,6 @@ def zipdir(path, ziph):
 			dirs.remove('icons')
 		if 'tv_frames' in dirs:
 			dirs.remove('tv_frames')
-		if 'work_dir' in dirs:
-			dirs.remove('work_dir')
 		if 'xmb_capture' in dirs:
 			dirs.remove('xmb_capture')
 		if 'burnout_3_example' in dirs:
@@ -61,6 +61,8 @@ def zipdir(path, ziph):
 			files.remove('game_list_data.json')
 		if 'ftp_settings.cfg' in files:
 			files.remove('ftp_settings.cfg')
+		if 'startup.ogg' in files:
+			files.remove('startup.ogg')
 
 
 		# exclude old webMan tools for a slimmer release
@@ -79,14 +81,14 @@ def zipdir(path, ziph):
 				webman_classics_maker_exist = True
 
 	if((webman_classics_maker_exist) == False):
-		print("Warning: Couldn't find Webman_Classics_Maker.exe")
-		print('Try rebuilding binaries using the included pyinstaller scripts.')
+		print("Couldn't find webman-classics-maker.exe")
+		print('Try rebuilding binary using the included pyinstaller script.')
 		sys.exit()
 
 if __name__ == '__main__':
 
 	# windows release
-	zip_archive_name = 'webman_classics_maker_v2.2.x_win.zip'
+	zip_archive_name = 'webman-classics-maker_v3.x.x_win.zip'
 	zip_dir_path = BuildPaths.zip_dir
 	release_dir = BuildPaths.release
 
@@ -97,9 +99,10 @@ if __name__ == '__main__':
 	zipdir(zip_dir_path, zipf)
 	zipf.close()
 
+
 	print('The release archive has sucessfully been package and distributed to:\n' + '/release/' + zip_archive_name)
-	try:
-		# pause
-		input = raw_input
-	except NameError: pass
-	input('\npress ENTER to continue...')
+	# try:
+	# 	# pause
+	# 	input = raw_input
+	# except NameError: pass
+	# input('\npress ENTER to continue...')

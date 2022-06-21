@@ -1,12 +1,18 @@
+import os
 import traceback
+from shutil import rmtree
 
-from write_json_to_param_sfo import Write_param_sfo
-from content_id_elf_replace import Elf_replace
-from edit_launch_txt import Edit_launch_txt
-from resign_eboot import Resign_eboot
-from webman_pkg import Webman_pkg
+from resources.tools.util_scripts.json_to_param_sfo import Write_param_sfo
+from resources.tools.util_scripts.content_id_elf_replace import Elf_replace
+from resources.tools.util_scripts.edit_launch_txt import Edit_launch_txt
 
-from global_paths import App as AppPaths
+# if getattr(sys, 'frozen', False):
+from resources.tools.util_scripts.resign_eboot import Resign_eboot
+# else:
+# 	from resign_eboot_linux import Resign_eboot
+
+from resources.tools.util_scripts.create_pkg import Webman_pkg
+from resources.tools.util_scripts.global_paths import AppPaths
 
 class Webman_PKG:
 	def build(self):
@@ -40,24 +46,23 @@ class Webman_PKG:
 			print('[5/5] Execution of \'webman_pkg.py\':              FAILED')
 			print('-----------------------------------------------------')
 			print('Could not build pkg and/or return pkg_name!')
-			if e.message:
-				print('ERROR: ' + e.message)
+			if getattr(e, 'message', repr(e)):
+				print('ERROR: ' + getattr(e, 'message', repr(e)))
 
 			if repr(e):
 				print('DEBUG ERROR traceback: ' + str(traceback.print_exc()))
 
-		# clean up .pyc-files
-		import os
-		util_scripts = AppPaths.util_scripts
-		util_scripts_items = os.listdir(util_scripts)
-		for item in util_scripts_items:
-			if item.endswith(".pyc"):
-				os.remove(os.path.join(util_scripts, item))
+		# clean up __pycache__ folders and .pyc-files
+		def clean_up(path):
+			items = os.listdir(path)
+			for item in items:
+				if item.endswith(".pyc") or item in ["__pycache__", "build"]:
+					rmtree(os.path.join(path, item))
 
-		wcm_gui = AppPaths.wcm_gui
-		wcm_gui_items = os.listdir(wcm_gui)
-		for item in wcm_gui_items:
-			if item.endswith(".pyc"):
-				os.remove(os.path.join(wcm_gui, item))
+
+		clean_up(AppPaths.util_scripts)
+		clean_up(AppPaths.wcm_gui)
+		clean_up(AppPaths.build_scripts)
+		clean_up(AppPaths.ps3py)
 
 		return pkg_name

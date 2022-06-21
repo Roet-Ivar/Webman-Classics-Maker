@@ -1,6 +1,6 @@
 import os, json
 
-from global_paths import App as AppPaths
+from global_paths import AppPaths
 
 class Param_to_json:
 	def execute(self):

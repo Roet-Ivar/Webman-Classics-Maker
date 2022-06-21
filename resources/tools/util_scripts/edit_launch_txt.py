@@ -1,7 +1,8 @@
 import json
 import os
 import urllib
-from global_paths import App as AppPaths
+import urllib.parse
+from resources.tools.util_scripts.global_paths import AppPaths
 
 class Edit_launch_txt:
 	def execute(self):
@@ -13,8 +14,8 @@ class Edit_launch_txt:
 
 			# init variables
 			web_command_string = ''
-			path = str(json_data['path'])
-			full_path = path + str(json_data['filename'])
+			path = json_data['path']
+			full_path = path + json_data['filename']
 
 			cfg_webcommand = FtpSettings.webcommand
 
@@ -25,15 +26,15 @@ class Edit_launch_txt:
 				folder_path = '/'.join(split_path[0:len(split_path) -1])
 				pre_delay = 'xmb'
 				post_delay = 4
-				pre_cmd = '/wait.ps3?' + str(pre_delay) + ';/mount_ps3'
-				post_cmd = ';/wait.ps3?' + str(post_delay) + ';/play.ps3'
-				web_command_string = pre_cmd + str(full_path) + post_cmd
+				pre_cmd = '/wait.ps3?' + pre_delay + ';/mount_ps3'
+				post_cmd = ';/wait.ps3?' + post_delay + ';/play.ps3'
+				web_command_string = pre_cmd + full_path + post_cmd
 
 			# check if the user has added a custom webcommand in the config file
 			else:
 				if len(cfg_webcommand) > len('[filepath_var]'):
 					if '[filepath_var]' in cfg_webcommand:
-						web_command_string = cfg_webcommand.replace('[filepath_var]', str(full_path))
+						web_command_string = cfg_webcommand.replace('[filepath_var]', full_path)
 						web_command_string = web_command_string.replace('//', '/')
 					else:
 						print("""Error: make sure the string [filepath_var] (including brackets) is present in webcommand of settings.cfg""")
@@ -43,21 +44,21 @@ class Edit_launch_txt:
 				if web_command_string == '':
 					pre_delay = 'xmb'
 					post_delay = 4
-					pre_cmd = '/wait.ps3?' + str(pre_delay) + ';/mount_ps3'
+					pre_cmd = '/wait.ps3?' + pre_delay + ';/mount_ps3'
 					post_cmd = ';/wait.ps3?' + str(post_delay) + ';/play.ps3'
-					web_command_string = pre_cmd + str(full_path + post_cmd)
+					web_command_string = pre_cmd + full_path + post_cmd
 
-			web_url_string = 'GET ' + urllib.quote(web_command_string) + ' HTTP/1.0'
+			web_url_string = 'GET ' + urllib.parse.quote(web_command_string) + ' HTTP/1.0'
 
 			if not os.path.exists(os.path.join(AppPaths.game_work_dir, 'pkg', 'USRDIR')):
 				os.makedirs(os.path.join(AppPaths.game_work_dir, 'pkg', 'USRDIR'))
 
 			launch_txt = open(os.path.join(AppPaths.game_work_dir, 'pkg', 'USRDIR', 'launch.txt'), 'wb')
-			launch_txt_byteArray = bytearray(web_command_string, 'utf8') + os.linesep
+			launch_txt_byteArray = bytearray(web_command_string, 'utf8') + os.linesep.encode('utf-8')
 			launch_txt.write(launch_txt_byteArray)
 
 			url_txt = open(os.path.join(AppPaths.game_work_dir, 'pkg', 'USRDIR', 'url.txt'), 'wb')
-			url_txt_byteArray = bytearray(web_url_string) + os.linesep
+			url_txt_byteArray = bytearray(web_url_string, 'utf8') + os.linesep.encode('utf-8')
 			url_txt.write(url_txt_byteArray)
 
 			print('[3/5] Execution of \'edit_launch_txt.py\':         DONE')
@@ -66,6 +67,6 @@ class Edit_launch_txt:
 
 		except Exception as e:
 			print('[3/5] Execution of \'edit_launch_txt.py\':         FAILED')
-			print('Error: ' + e.message)
+			print(getattr(e, 'message', repr(e)))
 			print('-----------------------------------------------------')
 			return False

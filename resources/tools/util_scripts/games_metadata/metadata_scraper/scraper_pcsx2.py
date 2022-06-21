@@ -1,5 +1,6 @@
-import json, os
-from resources.tools.util_scripts.global_paths import App as AppPaths
+import json
+import os
+from global_paths import AppPaths
 
 # Serial = PBPX-95205
 # Name   = Playstation 2 - Demo Disc 2000
