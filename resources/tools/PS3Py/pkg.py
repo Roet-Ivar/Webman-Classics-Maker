@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-from Struct import Struct
-from fself import SelfHeader, AppInfo
+from resources.tools.ps3py.Struct import Struct
+from resources.tools.ps3py.fself import SelfHeader, AppInfo
 
 import struct
 import sys
@@ -216,7 +216,7 @@ def setContextNum(key, tmpnum):
 	
 	key[0x38:0x40] = tmpchrs[0:8]
 
-import pkgcrypt
+from resources.tools.ps3py import pkgcrypt
 
 def crypt(key, inbuf, length):
 	if not isinstance(key, list):
@@ -552,13 +552,13 @@ def usage():
 def version():
 	print("""pky.py 0.5""")
 
-def main():
+def main(arg1, arg2, arg3, arg4):
 	global debug
 	extract = False
 	list = False
 	contentid = None
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], "hx:dvl:c:", ["help", "extract=", "debug","version", "list=", "contentid="])
+		opts, args = getopt.getopt([arg1, arg2, arg3, arg4], "hx:dvl:c:", ["help", "extract=", "debug","version", "list=", "contentid="])
 	except getopt.GetoptError:
 		usage()
 		sys.exit(2)
@@ -595,4 +595,4 @@ def main():
 			usage()
 			sys.exit(2)
 if __name__ == "__main__":
-	main()
+	main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
