@@ -6,6 +6,7 @@ import sys
 
 from resources.tools.util_scripts.global_paths import GlobalVar
 from resources.tools.util_scripts.global_paths import AppPaths
+from resources.tools.ps3py import pkg as PKG
 
 class Webman_pkg:
     def execute(self):
@@ -35,10 +36,11 @@ class Webman_pkg:
             print('DEBUG build_dir_path: ' + build_dir_path + ' is a path')
 
         print('Create PKG')
-        # check if pkgcrypt built first
-        subprocess.call(['python3', 'resources/tools/ps3py/pkg.py', '-c', content_id, pkg_dir_path, pkg_name])
+        # TODO check if pkgcrypt built first
+        PKG.main('-c', content_id, pkg_dir_path, pkg_name)
+        # subprocess.call(['python3', 'resources/tools/ps3py/pkg.py', '-c', content_id, pkg_dir_path, pkg_name])
 
-        if os.path.isdir(build_dir_path) and os.path.isfile(pkg_name):
+        if os.path.isdir(build_dir_path) and pkg_name:
             if os.path.isfile(os.path.join(build_dir_path, pkg_name)):
                 os.remove(os.path.join(build_dir_path, pkg_name))
             shutil.move(pkg_name, build_dir_path)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from Struct import Struct
+from resources.tools.ps3py.Struct import Struct
 import struct
 import getopt
 import sys
