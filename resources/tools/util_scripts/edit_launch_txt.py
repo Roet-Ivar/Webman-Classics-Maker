@@ -27,7 +27,7 @@ class Edit_launch_txt:
 				pre_delay = 'xmb'
 				post_delay = 4
 				pre_cmd = '/wait.ps3?' + pre_delay + ';/mount_ps3'
-				post_cmd = ';/wait.ps3?' + post_delay + ';/play.ps3'
+				post_cmd = ';/wait.ps3?' + str(post_delay) + ';/play.ps3'
 				web_command_string = pre_cmd + full_path + post_cmd
 
 			# check if the user has added a custom webcommand in the config file
